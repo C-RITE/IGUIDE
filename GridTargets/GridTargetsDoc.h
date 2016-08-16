@@ -4,6 +4,7 @@
 
 
 #pragma once
+#include "Target.h"
 
 
 class CGridTargetsDoc : public CDocument
@@ -14,6 +15,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
+	Target* dlgTarget;
 
 // Operations
 public:

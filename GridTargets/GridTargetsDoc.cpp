@@ -30,7 +30,9 @@ END_MESSAGE_MAP()
 CGridTargetsDoc::CGridTargetsDoc()
 {
 	// TODO: add one-time construction code here
-
+	dlgTarget = new Target();
+	dlgTarget->Create(IDD_TARGET, dlgTarget->GetTopLevelParent());
+	dlgTarget->ShowWindow(SW_SHOW);
 }
 
 CGridTargetsDoc::~CGridTargetsDoc()
