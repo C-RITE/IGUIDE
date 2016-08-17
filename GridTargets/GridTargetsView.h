@@ -41,6 +41,11 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
+
+private:
+	CD2DSolidColorBrush* m_pBrshWhite;
+public:
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in GridTargetsView.cpp

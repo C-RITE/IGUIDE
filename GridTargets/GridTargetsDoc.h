@@ -5,7 +5,11 @@
 
 #pragma once
 #include "Target.h"
+#include "Grid.h"
+#include "afxrendertarget.h"
+#include <vector>
 
+using namespace std;
 
 class CGridTargetsDoc : public CDocument
 {
@@ -15,10 +19,15 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	Target* dlgTarget;
+	Target* m_pDlgTarget;
+	Grid* m_pGrid;
+
+private:
+	vector<CD2DPointF> m_vTargetBoundary;
 
 // Operations
 public:
+	void DrawGrid(CHwndRenderTarget* pRenderTarget);
 
 // Overrides
 public:
@@ -47,4 +56,5 @@ protected:
 	// Helper function that sets search content for a Search Handler
 	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
+
 };

@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &CGridTargetsView::OnDraw2d)
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 // CGridTargetsView construction/destruction
@@ -39,6 +40,7 @@ CGridTargetsView::CGridTargetsView()
 	
 	// Initialize Direct2D
 	EnableD2DSupport();
+	m_pBrshWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 
 }
 
@@ -69,8 +71,17 @@ void CGridTargetsView::OnDraw(CDC* /*pDC*/)
 afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
 
+	CGridTargetsDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return false;
+
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);
+
+	pDoc->m_pGrid->paint(pRenderTarget);
+	Invalidate();
+	pDoc->m_pDlgTarget->Invalidate();
 
 	return true;
 }
@@ -118,3 +129,17 @@ CGridTargetsDoc* CGridTargetsView::GetDocument() const // non-debug version is i
 
 
 // CGridTargetsView message handlers
+
+
+void CGridTargetsView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	CGridTargetsDoc* pDoc = GetDocument();
+	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
+
+	pRenderTarget->AssertValid();
+	pDoc->DrawGrid(pRenderTarget);
+	
+
+	//CView::OnLButtonUp(nFlags, point);
+}

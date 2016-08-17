@@ -17,6 +17,8 @@
 #define new DEBUG_NEW
 #endif
 
+using namespace D2D1;
+
 // CGridTargetsDoc
 
 IMPLEMENT_DYNCREATE(CGridTargetsDoc, CDocument)
@@ -30,13 +32,18 @@ END_MESSAGE_MAP()
 CGridTargetsDoc::CGridTargetsDoc()
 {
 	// TODO: add one-time construction code here
-	dlgTarget = new Target();
-	dlgTarget->Create(IDD_TARGET, dlgTarget->GetTopLevelParent());
-	dlgTarget->ShowWindow(SW_SHOW);
+	m_pDlgTarget = new Target();
+	m_pDlgTarget->Create(IDD_TARGET, m_pDlgTarget->GetTopLevelParent());
+	m_pDlgTarget->ShowWindow(SW_SHOW);
+
+	m_pGrid = new Grid();
+
 }
 
 CGridTargetsDoc::~CGridTargetsDoc()
 {
+	delete m_pDlgTarget;
+	delete m_pGrid;
 }
 
 BOOL CGridTargetsDoc::OnNewDocument()
@@ -137,3 +144,15 @@ void CGridTargetsDoc::Dump(CDumpContext& dc) const
 
 
 // CGridTargetsDoc commands
+
+
+void CGridTargetsDoc::DrawGrid(CHwndRenderTarget* pRenderTarget)
+{
+
+	if (m_vTargetBoundary.empty()) {
+		AfxMessageBox(_T("Please draw FOV in Target View window first!"), MB_OK);
+		return;
+	}
+
+
+}
