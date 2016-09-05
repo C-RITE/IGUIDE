@@ -19,7 +19,6 @@ class CGridTargetsApp : public CWinApp
 public:
 	CGridTargetsApp();
 
-
 // Overrides
 public:
 	virtual BOOL InitInstance();

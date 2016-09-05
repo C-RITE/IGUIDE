@@ -2,7 +2,6 @@
 // GridTargetsDoc.h : interface of the CGridTargetsDoc class
 //
 
-
 #pragma once
 #include "Target.h"
 #include "Grid.h"
@@ -19,20 +18,34 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	Target* m_pDlgTarget;
-	Grid* m_pGrid;
 
-private:
-	vector<CD2DPointF> m_vTargetBoundary;
+	Grid*					m_pGrid;							// grid class
+	struct Raster
+	{
+		vector<CD2DPointF>	boundary;							// raster dimensions as seen by subject
+		int					meanEdge;							// average of 4 raster edges
+		CPoint				mid;								// triangulate mid point of raster
+	};
+	Raster					raster;
+	
+	CPoint					center;								// center of main window
+	CPoint*					mousePos;							// current mouse position
+	CStringW				strFile;							// filename of fundus picture
 
 // Operations
 public:
-	void DrawGrid(CHwndRenderTarget* pRenderTarget);
+	BOOL CheckFOV();
+	static CGridTargetsDoc* GetDoc();
+	HRESULT _ShowWICFileOpenDialog(HWND hWndOwner, CStringW& strFile);
+	HRESULT CGridTargetsDoc::_GetWICFileOpenDialogFilterSpecs(COMDLG_FILTERSPEC*& pFilterSpecArray, UINT& cbFilterSpecCount);
+	BOOL CalcMeanEdge();
+	CPoint compute2DPolygonCentroid(const CPoint* vertices, int vertexCount);
 
 // Overrides
 public:
 	virtual BOOL OnNewDocument();
 	virtual void Serialize(CArchive& ar);
+
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();
 	virtual void OnDrawThumbnail(CDC& dc, LPRECT lprcBounds);
@@ -56,5 +69,8 @@ protected:
 	// Helper function that sets search content for a Search Handler
 	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
+
+public:
+	afx_msg void OnFileImport();
 
 };

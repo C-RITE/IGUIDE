@@ -14,18 +14,23 @@ protected: // create from serialization only
 // Attributes
 public:
 	CGridTargetsDoc* GetDocument() const;
+	Target* m_pDlgTarget;
 
+private:
+
+	CD2DSolidColorBrush* m_pBrushWhite;
+	
 // Operations
 public:
 
 // Overrides
 public:
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 
 // Implementation
 public:
@@ -43,9 +48,16 @@ protected:
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 
 private:
-	CD2DSolidColorBrush* m_pBrshWhite;
+	// brushes, etc..
+
 public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	virtual void OnDraw(CDC* /*pDC*/);
+
 };
 
 #ifndef _DEBUG  // debug version in GridTargetsView.cpp

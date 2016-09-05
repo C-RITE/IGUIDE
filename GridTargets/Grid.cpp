@@ -2,100 +2,160 @@
 #include "Grid.h"
 #include <sstream>
 #include "Target.h"
+#include "GridTargetsDoc.h"
 #include "resource.h"
 
 using namespace std;
 using namespace D2D1;
 
 Grid::Grid()
-
 {
-	taglist.reserve(100);
-	hAxis.reserve(30);
-	vAxis.reserve(30);
+	
+	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
+	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
+	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
+	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
+	
+	m_pGrid_mark = new CD2DBitmap(NULL, IDB_GRIDMARK, L"PNG");
+
+	m_pFundus = NULL;
 
 }
 
 Grid::~Grid() {
+
+	delete m_pDarkRedBrush;
+	delete m_pRedBrush;
+	delete m_pBlueBrush;
+	delete m_pWhiteBrush;
+	delete m_pGrid_mark;
+
 }
 
-void Grid::del_tag(){
+void Grid::DelTag() {
 
-	if (taglist.size() > 0){
+	if (taglist.size() > 0) {
 		taglist.pop_back();
 	}
+
 }
 
-void Grid::clear_taglist(){
+void Grid::ClearTaglist() {
 	taglist.clear();
 }
 
-void Grid::store_click(CPoint loc){
+void Grid::StoreClick(CD2DPointF loc) {
+
+	CGridTargetsDoc* pDoc;
+	pDoc = CGridTargetsDoc::GetDoc();
+
+	int halfMean = pDoc->raster.meanEdge / 2;
 
 	centerOffset.x = center.x - loc.x;
 	centerOffset.y = center.y - loc.y;
-	CRect tag = { loc.x - 36, loc.y - 36, loc.x + 36, loc.y + 36 };
+	CD2DRectF tag = { loc.x - halfMean, loc.y - halfMean, loc.x + halfMean, loc.y + halfMean };
 	taglist.push_back(tag);
 
 }
 
-void Grid::reposition_tags(){
-	for (size_t i = 0; i < taglist.size(); i++){
+void Grid::reposition_tags() {
+	for (size_t i = 0; i < taglist.size(); i++) {
 
 	}
 }
 
 
-void Grid::paint(CHwndRenderTarget* renderTarget){
-	
+void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
+
 	// paint grid
 
-	CD2DSolidColorBrush BlueBrush(renderTarget, ColorF(ColorF::RoyalBlue));
-	CD2DSolidColorBrush WhiteBrush(renderTarget, ColorF(ColorF::White));
-	CD2DLayer Layer(renderTarget, 1);
-	CD2DBitmap Grid_mark(renderTarget, IDB_GRIDMARK, L"PNG");
+	pRenderTarget->Clear(ColorF(ColorF::Black));
 
-	CRect rect;
-	GetClientRect(renderTarget->GetHwnd(), &rect);		// get client area size
-	center = rect.CenterPoint();
-	
-		renderTarget->PushLayer(D2D1::LayerParameters(
-			D2D1::InfiniteRect(),
-			NULL,
-			D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
-			D2D1::IdentityMatrix(),
-			1.0,
-			NULL,
-			D2D1_LAYER_OPTIONS_NONE), Layer);
-	
-	/*if (theTarget->boundary.size() > 3){
-		CD2DRectF gridTarget;
-		CD2DRectF targetRect = { theTarget->boundary[0].x, theTarget->boundary[1].y, 
-								 theTarget->boundary[2].x, theTarget->boundary[3].y };
-		gridTarget.left = center.x - ((targetRect.right - targetRect.left /2) - targetRect.left);
-		gridTarget.top = center.y - ((targetRect.bottom - targetRect.top /2) - targetRect.top);
-		gridTarget.right = center.x + (targetRect.right - (targetRect.right - targetRect.left /2));
-		gridTarget.bottom = center.y + (targetRect.bottom - (targetRect.bottom - targetRect.top /2));
+	m_pLayer_A = new CD2DLayer(pRenderTarget, 1);
 
-		renderTarget->FillRectangle(&gridTarget, &BlueBrush);
+	CGridTargetsDoc* pDoc;
+	pDoc = CGridTargetsDoc::GetDoc();
 
-	}*/
+	CRect mainWnd;
+	AfxGetMainWnd()->GetClientRect(mainWnd);
 
-	renderTarget->DrawBitmap(&Grid_mark, CD2DRectF(30, 30, 750, 750));
-	renderTarget->PopLayer();
+		if (m_pFundus)
+		{
+			CD2DSizeF size = m_pFundus->GetSize();
+			CPoint point = (size.width /2, size.height /2);
+			D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation((float)-point.x, (float)-point.y);
+			D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
+			pRenderTarget->SetTransform(matrix);
+			pRenderTarget->DrawBitmap(m_pFundus, CD2DRectF(0, 0, size.width/2, size.height/2));
+			pRenderTarget->SetTransform(identity);
+		}
 
-}
+	pRenderTarget->PushLayer(D2D1::LayerParameters(
+		D2D1::InfiniteRect(),
+		NULL,
+		D2D1_ANTIALIAS_MODE_ALIASED,
+		D2D1::IdentityMatrix(),
+		1.0,
+		NULL,
+		D2D1_LAYER_OPTIONS_NONE),
+		*m_pLayer_A);
 
-void Grid::tag(CHwndRenderTarget* renderTarget){
-	
-	for (size_t i = 0; i < taglist.size(); i++){
-		CD2DSolidColorBrush BlueBrush(renderTarget, ColorF(ColorF::RoyalBlue));
-		renderTarget->FillRectangle(taglist[i], &BlueBrush);
+	if (m_pGrid_mark->IsValid()) {
+
+		CD2DSizeF size = m_pGrid_mark->GetPixelSize();
+		pRenderTarget->DrawBitmap(m_pGrid_mark, CD2DRectF(
+			mainWnd.CenterPoint().x - size.width / 2, 
+			mainWnd.CenterPoint().y - size.height / 2, 
+			mainWnd.CenterPoint().x + size.width / 2,
+			mainWnd.CenterPoint().y + size.height / 2)
+);
 	}
 	
+	pRenderTarget->PopLayer();
+
 }
 
-bool Grid::saveToFile(){
+void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
+
+	CGridTargetsDoc* pDoc;
+	pDoc = CGridTargetsDoc::GetDoc();
+	
+	CRect intersect;
+
+	pRenderTarget->PushLayer(D2D1::LayerParameters(
+		D2D1::InfiniteRect(),
+		NULL,
+		D2D1_ANTIALIAS_MODE_ALIASED,
+		D2D1::IdentityMatrix(),
+		0.5,
+		NULL,
+		D2D1_LAYER_OPTIONS_NONE),
+		*m_pLayer_A);
+
+	for (size_t i = 0; i < taglist.size(); i++) {
+			pRenderTarget->FillRectangle(taglist[i], m_pDarkRedBrush);
+		for (size_t j = 0; j < taglist.size(); j++) 
+			if (i != j && IntersectRect(&intersect, (CRect)taglist[i], (CRect)taglist[j])) 
+				pRenderTarget->FillRectangle((CD2DRectF)intersect, m_pRedBrush);
+	}
+
+	if (pDoc->mousePos) {
+		pRenderTarget->DrawRectangle(CD2DRectF(
+			pDoc->mousePos->x - pDoc->raster.meanEdge/2,
+			pDoc->mousePos->y - pDoc->raster.meanEdge/2,
+			pDoc->mousePos->x + pDoc->raster.meanEdge/2,
+			pDoc->mousePos->y + pDoc->raster.meanEdge/2),
+			m_pWhiteBrush,
+			1,
+			NULL);
+	}
+
+	pRenderTarget->PopLayer();
+
+
+}
+
+bool Grid::saveToFile() {
 
 	wstringstream sstream;
 
@@ -103,13 +163,16 @@ bool Grid::saveToFile(){
 	{
 		if (i != 0)
 			sstream << "\n";
-		sstream << center.x - (taglist[i].right - taglist[i].left)/2 << ";" << center.y - (taglist[i].bottom -  taglist[i].top)/2;
+		sstream
+			<< center.x - (taglist[i].right - taglist[i].left) / 2
+			<< ";"
+			<< center.y - (taglist[i].bottom - taglist[i].top) / 2;
 
 	}
 
 	CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
-	
-	if (FileDlg.DoModal() == IDOK){
+
+	if (FileDlg.DoModal() == IDOK) {
 		CString pathName = FileDlg.GetPathName();
 		CStdioFile outputFile(pathName, CFile::modeWrite | CFile::modeCreate | CFile::typeUnicode);
 		outputFile.WriteString((sstream.str().c_str()));
@@ -118,5 +181,6 @@ bool Grid::saveToFile(){
 	}
 
 	return FALSE;
-	
+
 }
+

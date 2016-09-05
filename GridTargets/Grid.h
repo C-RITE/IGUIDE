@@ -6,32 +6,32 @@ class Grid{
 
 private:
 
-	std::vector<CD2DRectF>taglist;
-	std::vector<CD2DRectF>hAxis;
-	std::vector<CD2DRectF>vAxis;
+	CD2DSolidColorBrush*	m_pDarkRedBrush;
+	CD2DSolidColorBrush*	m_pRedBrush;
+	CD2DSolidColorBrush*	m_pWhiteBrush;
+	CD2DSolidColorBrush*	m_pBlueBrush;
 
-	CD2DBitmap*				m_pGrid_clean;
-	CD2DBitmap*				m_pGrid_mark;
-
-private:
-
-	CD2DPointF				center;
+	CD2DLayer*				m_pLayer_A;
 
 public:
 
 	Grid();
 	~Grid();
 
-	CPoint centerOffset;
-	float square;						//square size
-	int size;
+	CD2DBitmap*				m_pFundus;						// fundus picture
+	std::vector<CD2DRectF>	taglist;						// storage for all scan rasters
+	CPoint					centerOffset;					// offset from grid's center
 
-	void del_tag();
-	void clear_taglist();
+	CD2DPointF				center;							// center of grid
+	CD2DBitmap*				m_pGrid_clean;					// grid without markings
+	CD2DBitmap*				m_pGrid_mark;					// grid with markings
+
+	void DelTag();
+	void ClearTaglist();
 	void reposition_tags();
-	void store_click(CPoint point);
-	void paint(CHwndRenderTarget* renderTarget);			//paint the grid
-	void tag(CHwndRenderTarget* renderTarget);				//paint scanfield
+	void StoreClick(CD2DPointF point);
+	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
+	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
 	bool saveToFile();
 	
 };

@@ -212,6 +212,7 @@
     <ClCompile Include="Target.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="GridTargets.reg" />
     <None Include="res\GridTargets.rc2" />
   </ItemGroup>
@@ -219,6 +220,7 @@
     <ResourceCompile Include="GridTargets.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\Pictures\Target.ico" />
     <Image Include="res\Grid1.png" />
     <Image Include="res\Grid2.png" />
     <Image Include="res\GridTargets.ico" />

@@ -49,8 +49,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+	m_wndStatusBar.ShowWindow(SW_HIDE);
 
 	return 0;
+	
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -60,9 +62,9 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
 	
-	cs.cx = 800;
-	cs.cy = 842;
-	cs.x = 340;
+	cs.cx = 720 + 50;
+	cs.cy = 720 + 100;
+	cs.x = 320;
 	cs.y = 180;
 
 	return TRUE;

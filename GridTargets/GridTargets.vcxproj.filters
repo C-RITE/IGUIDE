@@ -80,6 +80,7 @@
     <None Include="res\GridTargets.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GridTargets.rc">
@@ -97,6 +98,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Grid2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Pictures\Target.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
