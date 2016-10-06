@@ -252,16 +252,16 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904B0"
+        BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "GridTargets"
-            VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "GridTargets.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "CompanyName", "AG Harmening"
+            VALUE "FileDescription", "RETROFIT"
+            VALUE "FileVersion", "0.0.4.9"
+            VALUE "InternalName", "RETROFIT.exe"
+            VALUE "LegalCopyright", "(C)2016 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "GridTargets.exe"
-            VALUE "ProductName", "TODO: <Product name>"
-            VALUE "ProductVersion", "1.0.0.1"
+            VALUE "ProductName", "RETROFIT"
+            VALUE "ProductVersion", "0.0.4.9"
         END
     END
     BLOCK "VarFileInfo"
@@ -297,13 +297,13 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "GridTargets"
-    IDR_GridTargetsTYPE     "\nGridTargets\nGridTargets\nGridTargets Files (*.grd)\n.grd\nGridTargets.Document\nGridTargets.Document"
+    IDR_MAINFRAME           "RETROFIT"
+    IDR_GridTargetsTYPE     "\nRETROFIT\nRETROFIT\nRETROFIT Files (*.RET)\n.RET\nRETROFIT.Document\nRETROFIT.Document"
 END
 
 STRINGTABLE
 BEGIN
-    AFX_IDS_APP_TITLE       "GridTargets"
+    AFX_IDS_APP_TITLE       "RETROFIT"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 

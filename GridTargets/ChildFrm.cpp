@@ -27,6 +27,7 @@ CChildFrame::CChildFrame()
 
 CChildFrame::~CChildFrame()
 {
+
 }
 
 

@@ -16,8 +16,8 @@ Grid::Grid()
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
 	
-	m_pGrid_mark = new CD2DBitmap(NULL, IDB_GRIDMARK, L"PNG");
-
+	//m_pGrid_mark = new CD2DBitmap(NULL, IDB_GRIDMARK, L"PNG");
+	m_pGrid_mark = NULL;
 	m_pFundus = NULL;
 
 }
@@ -49,9 +49,12 @@ void Grid::StoreClick(CD2DPointF loc) {
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 
+	AfxGetMainWnd()->GetClientRect(mainWnd);
+	center = mainWnd.CenterPoint();
+
 	int halfMean = pDoc->raster.meanEdge / 2;
 
-	centerOffset.x = center.x - loc.x;
+	centerOffset.x = (center.x - loc.x)*-1;
 	centerOffset.y = center.y - loc.y;
 	CD2DRectF tag = { loc.x - halfMean, loc.y - halfMean, loc.x + halfMean, loc.y + halfMean };
 	taglist.push_back(tag);
@@ -76,8 +79,32 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 
-	CRect mainWnd;
 	AfxGetMainWnd()->GetClientRect(mainWnd);
+	center = mainWnd.CenterPoint();
+
+	// for red cross in fovea
+	CD2DRectF fovea(center.x - 4,
+		center.y - 4,
+		center.x + 4,
+		center.y + 4);
+	
+	pRenderTarget->DrawEllipse(fovea, m_pRedBrush);
+	pRenderTarget->DrawLine(CD2DPointF(center.x - 8, center.y), 
+							CD2DPointF(center.x + 8, center.y),
+							m_pRedBrush);
+
+	pRenderTarget->DrawLine(CD2DPointF(center.x, center.y - 8),
+							CD2DPointF(center.x, center.y + 8),
+							m_pRedBrush);
+
+	// for optic nerve as blue circle
+	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2); 
+	nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
+		(float)(center.y - 2.5 / dpp),
+		(float)(center.x + mainWnd.Width() / 2),
+		(float)(center.y + 2.5 / dpp) };
+	
+	pRenderTarget->DrawEllipse(nerve, m_pBlueBrush);
 
 		if (m_pFundus)
 		{
@@ -100,14 +127,14 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 		D2D1_LAYER_OPTIONS_NONE),
 		*m_pLayer_A);
 
-	if (m_pGrid_mark->IsValid()) {
+	if (m_pGrid_mark != NULL && m_pGrid_mark->IsValid()) {
 
 		CD2DSizeF size = m_pGrid_mark->GetPixelSize();
 		pRenderTarget->DrawBitmap(m_pGrid_mark, CD2DRectF(
-			mainWnd.CenterPoint().x - size.width / 2, 
-			mainWnd.CenterPoint().y - size.height / 2, 
-			mainWnd.CenterPoint().x + size.width / 2,
-			mainWnd.CenterPoint().y + size.height / 2)
+			center.x - size.width / 2, 
+			center.y - size.height / 2, 
+			center.x + size.width / 2,
+			center.y + size.height / 2)
 );
 	}
 	
@@ -120,6 +147,9 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 	
+	AfxGetMainWnd()->GetClientRect(mainWnd);
+	center = mainWnd.CenterPoint();
+
 	CRect intersect;
 
 	pRenderTarget->PushLayer(D2D1::LayerParameters(

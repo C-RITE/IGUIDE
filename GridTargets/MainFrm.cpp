@@ -7,6 +7,10 @@
 
 #include "MainFrm.h"
 
+const int WINDOW_WIDTH = 1200;
+const double ASPECT_RATIO = (double)16/9;
+const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / ASPECT_RATIO);
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -62,8 +66,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
 	
-	cs.cx = 720 + 50;
-	cs.cy = 720 + 100;
+	cs.cx = WINDOW_WIDTH;
+	cs.cy = WINDOW_HEIGHT;
 	cs.x = 320;
 	cs.y = 180;
 

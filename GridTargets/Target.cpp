@@ -8,7 +8,6 @@
 #include "afxdialogex.h"
 
 using namespace D2D1;
-
 // Target dialog
 
 IMPLEMENT_DYNAMIC(Target, CDialog);
@@ -51,20 +50,27 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 	pRenderTarget->Clear(ColorF(ColorF::Black));
 
-	if (m_POI)
+	if (m_POI) {
 		pRenderTarget->DrawEllipse(*m_POI, m_pBrushWhite, 1, NULL);
+		pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->top - 4),
+								CD2DPointF(m_POI->right + 4, m_POI->bottom + 4),
+								m_pBrushWhite);
+		pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->bottom + 4),
+								CD2DPointF(m_POI->right + 4, m_POI->top - 4),
+								m_pBrushWhite);
+	}
 
 	else {
 
 		// draw white crosses to user define FOV
-		for (size_t i = 0; i < pDoc->raster.boundary.size(); i++) {
-			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.boundary[i].x - 7, pDoc->raster.boundary[i].y - 7),
-				CD2DPointF(pDoc->raster.boundary[i].x + 7, pDoc->raster.boundary[i].y + 7),
+		for (size_t i = 0; i < pDoc->raster.corner.size(); i++) {
+			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y - 7),
+				CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y + 7),
 				m_pBrushWhite,
 				1,
 				NULL);
-			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.boundary[i].x - 7, pDoc->raster.boundary[i].y + 7),
-				CD2DPointF(pDoc->raster.boundary[i].x + 7, pDoc->raster.boundary[i].y - 7),
+			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y + 7),
+				CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y - 7),
 				m_pBrushWhite,
 				1,
 				NULL);
@@ -79,26 +85,49 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 
-	// create coordinates for fixation target
-	
-	CD2DRectF FOV = {
-		pDoc->raster.boundary[0].x,
-		pDoc->raster.boundary[1].y,
-		pDoc->raster.boundary[2].x,
-		pDoc->raster.boundary[3].y 
-	};
-	
+	// transform coordinates for fixation target (rotate and scale)
+		
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
-	CD2DPointF mid = { (FOV.left + FOV.right) / 2, (FOV.bottom + FOV.top) / 2 };
 	
+	float alpha, beta, gamma;
+	float scale = 1;
+	float pi = atan(1) * 4;
+	float a, b, c, x, y;
+
+	CGridTargetsDoc::Edge k = { {0, 0},
+								{centerOffset_x, centerOffset_y},
+								NULL };
+	
+	alpha = pDoc->raster.meanAlpha;
+	beta = 360 - pDoc->computeDisplacementAngle(k);
+	gamma = alpha + beta;
+	
+	a = (centerOffset_x + pDoc->raster.mid.x) - pDoc->raster.mid.x;
+	b = (centerOffset_y + pDoc->raster.mid.y) - pDoc->raster.mid.y;
+	c = sqrt(pow(a, 2) + pow(b, 2));
+
+	y = sin(gamma * pi / 180) * -c;
+	x = cos(gamma * pi / 180) * c;
+
 	*m_POI = { CD2DRectF(
-		mid.x - centerOffset_x -2,
-		mid.y - centerOffset_y -2,
-		mid.x - centerOffset_x + 2,
-		mid.y - centerOffset_y + 2)
-	};
+			((pDoc->raster.mid.x + x) * scale - 4),
+			((pDoc->raster.mid.y + y) * scale - 4),
+			((pDoc->raster.mid.x + x) * scale + 4),
+			((pDoc->raster.mid.y + y) * scale + 4))
+		};
+	
+	ATLTRACE(_T("alpha is %f\n"), alpha);
+	ATLTRACE(_T("beta is %f\n"), beta);
+	ATLTRACE(_T("gamma is %f\n"), gamma);
+	ATLTRACE(_T("x \t\t%f\n"), x);
+	ATLTRACE(_T("y \t\t%f\n"), y);
+	ATLTRACE(_T("c \t\t%f\n"), c);
+	ATLTRACE(_T("center \tx=%f, y=%f\n"), pDoc->m_pGrid->center.x, pDoc->m_pGrid->center.y);
+	ATLTRACE(_T("offset \tx=%f, y=%f\n"), centerOffset_x, centerOffset_y);
+	ATLTRACE(_T("POI \t %f\n\n"), *m_POI);
+
 }
 
 
@@ -112,13 +141,16 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 
-	if (pDoc->raster.boundary.size() < 4)
-		pDoc->raster.boundary.push_back(d2dpoint);
+	if (pDoc->raster.corner.size() < 4)
+		pDoc->raster.corner.push_back(d2dpoint);
 
 	else {
 		free(m_POI);
 		m_POI = NULL;
-		pDoc->raster.boundary.clear();
+		pDoc->raster.meanEdge = 0;
+		pDoc->raster.meanAlpha = 0;
+		pDoc->raster.corner.clear();
+		pDoc->raster.perimeter.clear();
 		pDoc->m_pGrid->ClearTaglist();
 	}
 

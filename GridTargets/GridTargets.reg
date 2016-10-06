@@ -4,12 +4,12 @@ REGEDIT
 ;   registered in your InitInstance automatically with a call to
 ;   CWinApp::RegisterShellFileTypes and COleObjectFactory::UpdateRegistryAll.
 
-HKEY_CLASSES_ROOT\.grd = GridTargets.Document
-HKEY_CLASSES_ROOT\GridTargets.Document\shell\open\command = GridTargets.EXE %1
-HKEY_CLASSES_ROOT\GridTargets.Document\shell\open\ddeexec = [open("%1")]
-HKEY_CLASSES_ROOT\GridTargets.Document\shell\open\ddeexec\application = GridTargets
+HKEY_CLASSES_ROOT\.grd = RETROFIT.Document
+HKEY_CLASSES_ROOT\RETROFIT.Document\shell\open\command = GridTargets.EXE %1
+HKEY_CLASSES_ROOT\RETROFIT.Document\shell\open\ddeexec = [open("%1")]
+HKEY_CLASSES_ROOT\RETROFIT.Document\shell\open\ddeexec\application = RETROFIT
     ; note: the application is optional
     ;  (it defaults to the app name in "command")
 
-HKEY_CLASSES_ROOT\GridTargets.Document = GridTargets.Document
+HKEY_CLASSES_ROOT\RETROFIT.Document = RETROFIT.Document
 

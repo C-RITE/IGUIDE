@@ -45,13 +45,13 @@ CGridTargetsView::CGridTargetsView()
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, m_pDlgTarget->GetTopLevelParent());
 	m_pDlgTarget->ShowWindow(SW_SHOW);
+	showTrace = TRUE;
 
-	}
+}
 
 CGridTargetsView::~CGridTargetsView()
 {
 	delete m_pDlgTarget;
-	
 
 }
 
@@ -148,7 +148,7 @@ void CGridTargetsView::OnMouseMove(UINT nFlags, CPoint point)
 	CGridTargetsDoc* pDoc = GetDocument();
 
 	if (pDoc->mousePos)
-		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0 & (pDoc->raster.boundary.size() > 3)) {
+		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0 & (pDoc->raster.corner.size() > 3)) {
 			pDoc->mousePos->SetPoint(point.x, point.y);
 		}
 
@@ -177,11 +177,41 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 {
 	CGridTargetsDoc* pDoc = GetDocument();	
 	CHwndRenderTarget* pRenderTarget = this->GetRenderTarget();
+	CD2DPointF* FOV = new CD2DPointF[4];
 	
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
-	pDoc->CalcMeanEdge();
+
+	// derive edges from corners
+	if (pDoc->raster.corner.size() > 3) {
+		for (int i = 0; i < 3; i++) {
+			CGridTargetsDoc::Edge k;
+			k.p = pDoc->raster.corner[i];
+			k.q = pDoc->raster.corner[i + 1];
+			pDoc->raster.perimeter.push_back(k);
+		}
+		for (int i = 0; i < 4; i++)
+			FOV[i] = pDoc->raster.corner[i];
+		pDoc->raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
+		CGridTargetsDoc::Edge k;
+		k.p = pDoc->raster.corner[3];
+		k.q = pDoc->raster.corner[0];
+		pDoc->raster.perimeter.push_back(k);
+	}
+
+	// calculate length of edges, mean edge length and angle
+	if (pDoc->raster.corner.size() > 3) {
+		pDoc->computeDisplacementAngles();
+		for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
+			pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
+			pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
+			pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+		}
+
+		pDoc->raster.meanAlpha /= 4;
+		pDoc->raster.meanEdge /= 4;
+	}
 
 	ASSERT_VALID(pRenderTarget);
 
@@ -202,14 +232,14 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 		}
 	}
 
-	if (!pDoc->m_pGrid->m_pGrid_mark->IsValid())
-	pDoc->m_pGrid->m_pGrid_mark->Create(pRenderTarget);
+	if (pDoc->m_pGrid->m_pGrid_mark != NULL && pDoc->m_pGrid->m_pGrid_mark->IsValid())
+		pDoc->m_pGrid->m_pGrid_mark->Create(pRenderTarget);
 
-	pDoc->m_pGrid->center.x = clientRect.Width() / 2;
-	pDoc->m_pGrid->center.y = clientRect.Height() / 2;
+	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
+	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
 
 	Invalidate();
-
+	delete FOV;
 }
 
 int CGridTargetsView::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -232,7 +262,7 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);
-
+	
 	CGridTargetsDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
@@ -243,9 +273,31 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		pDoc->m_pGrid->Paint(pRenderTarget);
 		pDoc->m_pGrid->Tag(pRenderTarget);
+
+		if (showTrace) {
+			CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+			CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+			CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+				_T("Consolas"),								// font family name
+				sizeDpi.height / 8);						// font size
+
+			CString traceText = pDoc->getTraceInfo();
+			// construct a CD2DTextLayout object which represents a block of formatted text 
+			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+				traceText,									// text to be drawn
+				textFormat,									// text format
+				sizeTarget);								// size of the layout box
+
+			pRenderTarget->DrawTextLayout(CD2DPointF(5, 5),	// top-left corner of the text 
+				&textLayout,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::LightGreen)));
+
+		}
 	}
 
-	return TRUE;
+	return 0;
 
 }
 

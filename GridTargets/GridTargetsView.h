@@ -13,12 +13,12 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	CGridTargetsDoc* GetDocument() const;
-	Target* m_pDlgTarget;
+	CGridTargetsDoc*	GetDocument() const;
+	Target*				m_pDlgTarget;
 
 private:
 
-	CD2DSolidColorBrush* m_pBrushWhite;
+	bool showTrace;
 	
 // Operations
 public:

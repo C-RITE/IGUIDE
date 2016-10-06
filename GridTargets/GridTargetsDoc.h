@@ -20,14 +20,25 @@ protected: // create from serialization only
 public:
 
 	Grid*					m_pGrid;							// grid class
+
+	struct Edge
+	{
+		CD2DPointF p, q;
+		float length;
+		float alpha;
+	};
+
 	struct Raster
 	{
-		vector<CD2DPointF>	boundary;							// raster dimensions as seen by subject
-		int					meanEdge;							// average of 4 raster edges
-		CPoint				mid;								// triangulate mid point of raster
+		vector<CD2DPointF>	corner;								// raster corners as clicked by subject
+		vector<Edge>		perimeter;							// raster perimeter
+		float				meanEdge;							// average of 4 raster edges
+		float				meanAlpha;							// displacement angle
+		CD2DPointF			mid;								// triangulate mid point of raster
 	};
+
 	Raster					raster;
-	
+		
 	CPoint					center;								// center of main window
 	CPoint*					mousePos;							// current mouse position
 	CStringW				strFile;							// filename of fundus picture
@@ -38,8 +49,11 @@ public:
 	static CGridTargetsDoc* GetDoc();
 	HRESULT _ShowWICFileOpenDialog(HWND hWndOwner, CStringW& strFile);
 	HRESULT CGridTargetsDoc::_GetWICFileOpenDialogFilterSpecs(COMDLG_FILTERSPEC*& pFilterSpecArray, UINT& cbFilterSpecCount);
-	BOOL CalcMeanEdge();
-	CPoint compute2DPolygonCentroid(const CPoint* vertices, int vertexCount);
+	float CalcEdgeLength(Edge k);
+	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
+	void computeDisplacementAngles();
+	float computeDisplacementAngle(Edge k);
+	CString getTraceInfo();
 
 // Overrides
 public:
