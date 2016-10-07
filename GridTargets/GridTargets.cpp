@@ -150,6 +150,8 @@ protected:
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnStnClickedAo();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -162,6 +164,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_STN_CLICKED(IDB_AO, &CAboutDlg::OnStnClickedAo)
 END_MESSAGE_MAP()
 
 // App command to run the dialog
@@ -175,3 +178,10 @@ void CGridTargetsApp::OnAppAbout()
 
 
 
+
+
+void CAboutDlg::OnStnClickedAo()
+{
+	// TODO: Add your control notification handler code here
+	(32 >= (int)ShellExecute(NULL, L"open", L"https://www.experimental-ophthalmology.uni-bonn.de/research/group-harmening", NULL, NULL, SW_SHOWNORMAL));
+}

@@ -10,15 +10,16 @@
 #define IDB_GRIDMARK                    314
 #define IDB_GRIDCLEAN                   315
 #define IDI_ICON1                       318
+#define IDB_AO                          327
 #define ID_FILE_IMPORT                  32772
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        319
+#define _APS_NEXT_RESOURCE_VALUE        328
 #define _APS_NEXT_COMMAND_VALUE         32773
-#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           311
 #endif
 #endif
