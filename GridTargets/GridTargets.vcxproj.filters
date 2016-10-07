@@ -103,5 +103,14 @@
     <Image Include="..\..\..\..\..\Pictures\Target.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\crosshair.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\zapp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\raygun.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

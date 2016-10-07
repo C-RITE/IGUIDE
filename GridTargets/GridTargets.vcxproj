@@ -222,10 +222,13 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\Pictures\Target.ico" />
+    <Image Include="res\crosshair.ico" />
     <Image Include="res\Grid1.png" />
     <Image Include="res\Grid2.png" />
     <Image Include="res\GridTargets.ico" />
     <Image Include="res\GridTargetsDoc.ico" />
+    <Image Include="res\raygun.ico" />
+    <Image Include="res\zapp.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
