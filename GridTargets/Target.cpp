@@ -17,6 +17,7 @@ Target::Target(CWnd* pParent /*=NULL*/)
 {
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
+	ppd = (1 / 1.28) * 102;
 	EnableD2DSupport();
 }
 
@@ -92,7 +93,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	
 	float alpha, beta, gamma;
-	float scale = 1;
+	float scale = ppd * pDoc->m_pGrid->dpp;
 	float pi = atan(1) * 4;
 	float a, b, c, x, y;
 
@@ -112,10 +113,10 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	x = cos(gamma * pi / 180) * c;
 
 	*m_POI = { CD2DRectF(
-			((pDoc->raster.mid.x + x) * scale - 4),
-			((pDoc->raster.mid.y + y) * scale - 4),
-			((pDoc->raster.mid.x + x) * scale + 4),
-			((pDoc->raster.mid.y + y) * scale + 4))
+			((pDoc->raster.mid.x + x * scale) - 4),
+			((pDoc->raster.mid.y + y * scale) - 4),
+			((pDoc->raster.mid.x + x * scale) + 4),
+			((pDoc->raster.mid.y + y * scale) + 4))
 		};
 	
 	ATLTRACE(_T("alpha is %f\n"), alpha);

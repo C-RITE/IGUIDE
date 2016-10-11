@@ -10,6 +10,7 @@ class Target : public CDialog
 
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target
+	float					ppd;				// pixel per degree
 
 
 // Operations

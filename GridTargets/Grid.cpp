@@ -82,6 +82,27 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
 
+		if (m_pFundus)
+		{
+			CD2DSizeF size = m_pFundus->GetSize();
+			CPoint point = (size.width /2, size.height /2);
+			D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(-180.f, -418.f);
+			pRenderTarget->SetTransform(matrix);
+			D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
+			pRenderTarget->DrawBitmap(m_pFundus, CD2DRectF(0, 0, size.width *.725, size.height *.725));
+			pRenderTarget->SetTransform(identity);
+		}
+
+	pRenderTarget->PushLayer(D2D1::LayerParameters(
+		D2D1::InfiniteRect(),
+		NULL,
+		D2D1_ANTIALIAS_MODE_ALIASED,
+		D2D1::IdentityMatrix(),
+		1.0,
+		NULL,
+		D2D1_LAYER_OPTIONS_NONE),
+		*m_pLayer_A);
+
 	// for red cross in fovea
 	CD2DRectF fovea(center.x - 4,
 		center.y - 4,
@@ -100,33 +121,12 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 	// for optic nerve as blue circle
 	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2); 
 	nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
-		(float)(center.y - 2.5 / dpp),
+		(float)((center.y - 2.5 / dpp)-86),
 		(float)(center.x + mainWnd.Width() / 2),
-		(float)(center.y + 2.5 / dpp) };
-	
+		(float)((center.y + 2.5 / dpp)-86) };
+
 	pRenderTarget->DrawEllipse(nerve, m_pBlueBrush);
-
-		if (m_pFundus)
-		{
-			CD2DSizeF size = m_pFundus->GetSize();
-			CPoint point = (size.width /2, size.height /2);
-			D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation((float)-point.x, (float)-point.y);
-			D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
-			pRenderTarget->SetTransform(matrix);
-			pRenderTarget->DrawBitmap(m_pFundus, CD2DRectF(0, 0, size.width/2, size.height/2));
-			pRenderTarget->SetTransform(identity);
-		}
-
-	pRenderTarget->PushLayer(D2D1::LayerParameters(
-		D2D1::InfiniteRect(),
-		NULL,
-		D2D1_ANTIALIAS_MODE_ALIASED,
-		D2D1::IdentityMatrix(),
-		1.0,
-		NULL,
-		D2D1_LAYER_OPTIONS_NONE),
-		*m_pLayer_A);
-
+	
 	if (m_pGrid_mark != NULL && m_pGrid_mark->IsValid()) {
 
 		CD2DSizeF size = m_pGrid_mark->GetPixelSize();

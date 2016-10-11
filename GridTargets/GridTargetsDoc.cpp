@@ -312,17 +312,17 @@ void CGridTargetsDoc::computeDisplacementAngles() {
 
 	if (theta >= 0 && theta < 90 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
 		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 270;
+			raster.perimeter[i].alpha += 180;
 		}
 
 	if (theta <= 360 && theta > 270 && raster.perimeter[0].p.x > raster.perimeter[0].q.x)
 		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 180;
+			raster.perimeter[i].alpha += 90;
 		}
 
 	if (theta <= 270 && theta > 180 && raster.perimeter[0].p.y > raster.perimeter[0].q.y)
 		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 90;
+			raster.perimeter[i].alpha += 0;
 		}
 
 

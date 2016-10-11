@@ -211,6 +211,8 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 
 		pDoc->raster.meanAlpha /= 4;
 		pDoc->raster.meanEdge /= 4;
+
+		pDoc->raster.meanEdge *= (1 / pDoc->m_pGrid->dpp / m_pDlgTarget->ppd);
 	}
 
 	ASSERT_VALID(pRenderTarget);
