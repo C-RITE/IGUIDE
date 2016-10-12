@@ -17,8 +17,7 @@ public:
 
 	Grid();
 	~Grid();
-
-	CD2DBitmap*				m_pFundus;						// fundus picture
+	
 	std::vector<CD2DRectF>	taglist;						// storage for all scan rasters
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
@@ -36,8 +35,8 @@ public:
 	void ClearTaglist();
 	void reposition_tags();
 	void StoreClick(CD2DPointF point);
-	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
-	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
+	void paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
+	void tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
 	bool saveToFile();
 	
 };

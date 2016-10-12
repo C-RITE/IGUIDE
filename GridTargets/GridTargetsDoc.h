@@ -5,6 +5,7 @@
 #pragma once
 #include "Target.h"
 #include "Grid.h"
+#include "Fundus.h"
 #include "afxrendertarget.h"
 #include <vector>
 
@@ -20,6 +21,7 @@ protected: // create from serialization only
 public:
 
 	Grid*					m_pGrid;							// grid class
+	Fundus*					m_pFundus;							// fundus class
 
 	struct Edge
 	{
@@ -41,14 +43,11 @@ public:
 		
 	CPoint					center;								// center of main window
 	CPoint*					mousePos;							// current mouse position
-	CStringW				strFile;							// filename of fundus picture
 
 // Operations
 public:
 	BOOL CheckFOV();
 	static CGridTargetsDoc* GetDoc();
-	HRESULT _ShowWICFileOpenDialog(HWND hWndOwner, CStringW& strFile);
-	HRESULT CGridTargetsDoc::_GetWICFileOpenDialogFilterSpecs(COMDLG_FILTERSPEC*& pFilterSpecArray, UINT& cbFilterSpecCount);
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
 	void computeDisplacementAngles();

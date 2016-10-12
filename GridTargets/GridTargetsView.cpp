@@ -211,27 +211,19 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 
 		pDoc->raster.meanAlpha /= 4;
 		pDoc->raster.meanEdge /= 4;
-
-		pDoc->raster.meanEdge *= (1 / pDoc->m_pGrid->dpp / m_pDlgTarget->ppd);
+		pDoc->raster.meanEdge *= (1 / pDoc->m_pGrid->dpp / m_pDlgTarget->ppd); // apply scaling
 	}
 
 	ASSERT_VALID(pRenderTarget);
 
-	if (nullptr != pDoc->m_pGrid->m_pFundus)
+	if (nullptr != pDoc->m_pFundus->picture)
 	{
-		pDoc->m_pGrid->m_pFundus->Destroy();
+		pDoc->m_pFundus->picture->Destroy();
 	}
 
-	if (!pDoc->strFile.IsEmpty())
+	if (!pDoc->m_pFundus->filename.IsEmpty())
 	{
-		pDoc->m_pGrid->m_pFundus = new CD2DBitmap(pRenderTarget, pDoc->strFile);
-		pDoc->m_pGrid->m_pFundus->Create(pRenderTarget);
-
-		if (pDoc->m_pGrid->m_pFundus->IsValid())
-		{
-			CD2DSizeF size = pDoc->m_pGrid->m_pFundus->GetSize();
-			//sizeImage.SetSize(static_cast<int>(size.width), static_cast<int>(size.height));
-		}
+		pDoc->m_pFundus->openFundus(pRenderTarget);
 	}
 
 	if (pDoc->m_pGrid->m_pGrid_mark != NULL && pDoc->m_pGrid->m_pGrid_mark->IsValid())
@@ -273,8 +265,10 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	// TODO: add draw code for native data here
 	if (pRenderTarget->IsValid()) {
 
-		pDoc->m_pGrid->Paint(pRenderTarget);
-		pDoc->m_pGrid->Tag(pRenderTarget);
+		pRenderTarget->Clear(ColorF(ColorF::Black));
+		pDoc->m_pFundus->paint(pRenderTarget);
+		pDoc->m_pGrid->paint(pRenderTarget);
+		pDoc->m_pGrid->tag(pRenderTarget);
 
 		if (showTrace) {
 			CD2DSizeF sizeTarget = pRenderTarget->GetSize();

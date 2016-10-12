@@ -18,7 +18,7 @@ Grid::Grid()
 	
 	//m_pGrid_mark = new CD2DBitmap(NULL, IDB_GRIDMARK, L"PNG");
 	m_pGrid_mark = NULL;
-	m_pFundus = NULL;
+	
 
 }
 
@@ -68,11 +68,7 @@ void Grid::reposition_tags() {
 }
 
 
-void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
-
-	// paint grid
-
-	pRenderTarget->Clear(ColorF(ColorF::Black));
+void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 
 	m_pLayer_A = new CD2DLayer(pRenderTarget, 1);
 
@@ -81,17 +77,6 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-
-		if (m_pFundus)
-		{
-			CD2DSizeF size = m_pFundus->GetSize();
-			CPoint point = (size.width /2, size.height /2);
-			D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(-180.f, -418.f);
-			pRenderTarget->SetTransform(matrix);
-			D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
-			pRenderTarget->DrawBitmap(m_pFundus, CD2DRectF(0, 0, size.width *.725, size.height *.725));
-			pRenderTarget->SetTransform(identity);
-		}
 
 	pRenderTarget->PushLayer(D2D1::LayerParameters(
 		D2D1::InfiniteRect(),
@@ -142,7 +127,7 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
+void Grid::tag(CHwndRenderTarget* pRenderTarget) {
 
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();

@@ -187,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="Fundus.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridTargets.h" />
     <ClInclude Include="GridTargetsDoc.h" />
@@ -199,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="Fundus.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridTargets.cpp" />
     <ClCompile Include="GridTargetsDoc.cpp" />
