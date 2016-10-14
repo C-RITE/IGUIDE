@@ -119,7 +119,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 			((pDoc->raster.mid.y + y * scale) + 4))
 		};
 	
-	ATLTRACE(_T("alpha is %f\n"), alpha);
+	/*ATLTRACE(_T("alpha is %f\n"), alpha);
 	ATLTRACE(_T("beta is %f\n"), beta);
 	ATLTRACE(_T("gamma is %f\n"), gamma);
 	ATLTRACE(_T("x \t\t%f\n"), x);
@@ -128,7 +128,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	ATLTRACE(_T("center \tx=%f, y=%f\n"), pDoc->m_pGrid->center.x, pDoc->m_pGrid->center.y);
 	ATLTRACE(_T("offset \tx=%f, y=%f\n"), centerOffset_x, centerOffset_y);
 	ATLTRACE(_T("POI \t %f\n\n"), *m_POI);
-
+	*/
 }
 
 

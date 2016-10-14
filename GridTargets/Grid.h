@@ -33,7 +33,7 @@ public:
 
 	void DelTag();
 	void ClearTaglist();
-	void reposition_tags();
+	void transformTags(int cx, int cy);
 	void StoreClick(CD2DPointF point);
 	void paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
 	void tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid

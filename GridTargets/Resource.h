@@ -7,8 +7,6 @@
 #define IDR_GridTargetsTYPE             130
 #define ID_WINDOW_MANAGER               131
 #define IDD_TARGET                      310
-#define IDB_GRIDMARK                    314
-#define IDB_GRIDCLEAN                   315
 #define IDI_ICON1                       318
 #define IDB_AO                          327
 #define ID_FILE_IMPORT                  32772

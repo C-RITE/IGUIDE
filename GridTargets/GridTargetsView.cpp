@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CGridTargetsView construction/destruction
@@ -182,7 +183,6 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
-
 	// derive edges from corners
 	if (pDoc->raster.corner.size() > 3) {
 		for (int i = 0; i < 3; i++) {
@@ -225,9 +225,6 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 	{
 		pDoc->m_pFundus->openFundus(pRenderTarget);
 	}
-
-	if (pDoc->m_pGrid->m_pGrid_mark != NULL && pDoc->m_pGrid->m_pGrid_mark->IsValid())
-		pDoc->m_pGrid->m_pGrid_mark->Create(pRenderTarget);
 
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
@@ -303,4 +300,13 @@ void CGridTargetsView::OnDraw(CDC* /*pDC*/)
 	
 	// all the drawing happens in OnDraw2D
 
+}
+
+
+void CGridTargetsView::OnSize(UINT nType, int cx, int cy)
+{
+	CView::OnSize(nType, cx, cy);
+	CGridTargetsDoc* pDoc = GetDocument();
+	//pDoc->m_pGrid->transformTags(cx, cy);
+	// TODO: Add your message handler code here
 }

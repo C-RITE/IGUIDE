@@ -15,10 +15,6 @@ Grid::Grid()
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
-	
-	//m_pGrid_mark = new CD2DBitmap(NULL, IDB_GRIDMARK, L"PNG");
-	m_pGrid_mark = NULL;
-	
 
 }
 
@@ -28,7 +24,6 @@ Grid::~Grid() {
 	delete m_pRedBrush;
 	delete m_pBlueBrush;
 	delete m_pWhiteBrush;
-	delete m_pGrid_mark;
 
 }
 
@@ -61,34 +56,89 @@ void Grid::StoreClick(CD2DPointF loc) {
 
 }
 
-void Grid::reposition_tags() {
-	for (size_t i = 0; i < taglist.size(); i++) {
+void Grid::transformTags(int cx, int cy) {
 
+	// transform and scale
+
+	for (size_t i = 0; i < taglist.size(); i++) {
+			taglist[i].top = 1 / taglist[i].top * cy * 1 / dpp;
+			taglist[i].left = 1 / taglist[i].left * cx * 1 / dpp;
+			taglist[i].bottom = 1 / taglist[i].bottom * cy * 1 / dpp ;
+			taglist[i].right = 1 / taglist[i].right * cx * 1 / dpp;
 	}
+
 }
 
 
 void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 
-	m_pLayer_A = new CD2DLayer(pRenderTarget, 1);
-
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
-
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
+	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2); 
 
-	pRenderTarget->PushLayer(D2D1::LayerParameters(
-		D2D1::InfiniteRect(),
-		NULL,
-		D2D1_ANTIALIAS_MODE_ALIASED,
-		D2D1::IdentityMatrix(),
-		1.0,
-		NULL,
-		D2D1_LAYER_OPTIONS_NONE),
-		*m_pLayer_A);
+	// draw a grid background around the center
+	for (float x = center.x; x > 0; x -= 1/dpp)
+	{
+		pRenderTarget->DrawLine(
+			CD2DPointF(x, 0.0f),
+			CD2DPointF(x, mainWnd.Height()),
+			m_pWhiteBrush,
+			0.5f
+			);
+	}
+	
+	for (float x = center.x + 1 / dpp; x < mainWnd.Width(); x += 1 / dpp)
+	{
+		pRenderTarget->DrawLine(
+			CD2DPointF(x, 0.0f),
+			CD2DPointF(x, mainWnd.Height()),
+			m_pWhiteBrush,
+			0.5f
+			);
+	}
 
-	// for red cross in fovea
+	for (float y = center.y; y > 0; y -= 1/dpp)
+	{
+		pRenderTarget->DrawLine(
+			CD2DPointF(0.0f, y),
+			CD2DPointF(mainWnd.Width(), y),
+			m_pWhiteBrush,
+			0.5f
+			);
+	}
+
+	for (float y = center.y + 1 / dpp; y < mainWnd.Height(); y += 1 / dpp)
+	{
+		pRenderTarget->DrawLine(
+			CD2DPointF(0.0f, y),
+			CD2DPointF(mainWnd.Width(), y),
+			m_pWhiteBrush,
+			0.5f
+			);
+	}
+
+	/* draw circles around the center
+	for (float x = 0; x < 16; x++) {
+		CD2DRectF e = { center.x - 1 / dpp * x,
+			center.y - 1 / dpp * x,
+			center.x + 1 / dpp * x,
+			center.y + 1 / dpp * x};
+		pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .5f);
+	}
+	*/
+	// draw circles around foveola and fovea
+	CD2DRectF e1 = { center.x - 1 / dpp * 1.2f,
+		center.y - 1 / dpp * 1.2f,
+		center.x + 1 / dpp * 1.2f,
+		center.y + 1 / dpp * 1.2f};
+	CD2DRectF e2 = { center.x - 1 / dpp * 6.2f,
+		center.y - 1 / dpp * 6.2f,
+		center.x + 1 / dpp * 6.2f,
+		center.y + 1 / dpp * 6.2f };
+	pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
+	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .5f);
+
+	// draw red cross in fovea
 	CD2DRectF fovea(center.x - 4,
 		center.y - 4,
 		center.x + 4,
@@ -103,8 +153,7 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 							CD2DPointF(center.x, center.y + 8),
 							m_pRedBrush);
 
-	// for optic nerve as blue circle
-	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2); 
+	// draw optic nerve as blue circle
 	nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
 		(float)((center.y - 2.5 / dpp)-86),
 		(float)(center.x + mainWnd.Width() / 2),
@@ -112,19 +161,6 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 
 	pRenderTarget->DrawEllipse(nerve, m_pBlueBrush);
 	
-	if (m_pGrid_mark != NULL && m_pGrid_mark->IsValid()) {
-
-		CD2DSizeF size = m_pGrid_mark->GetPixelSize();
-		pRenderTarget->DrawBitmap(m_pGrid_mark, CD2DRectF(
-			center.x - size.width / 2, 
-			center.y - size.height / 2, 
-			center.x + size.width / 2,
-			center.y + size.height / 2)
-);
-	}
-	
-	pRenderTarget->PopLayer();
-
 }
 
 void Grid::tag(CHwndRenderTarget* pRenderTarget) {
@@ -136,16 +172,6 @@ void Grid::tag(CHwndRenderTarget* pRenderTarget) {
 	center = mainWnd.CenterPoint();
 
 	CRect intersect;
-
-	pRenderTarget->PushLayer(D2D1::LayerParameters(
-		D2D1::InfiniteRect(),
-		NULL,
-		D2D1_ANTIALIAS_MODE_ALIASED,
-		D2D1::IdentityMatrix(),
-		0.5,
-		NULL,
-		D2D1_LAYER_OPTIONS_NONE),
-		*m_pLayer_A);
 
 	for (size_t i = 0; i < taglist.size(); i++) {
 			pRenderTarget->FillRectangle(taglist[i], m_pDarkRedBrush);
@@ -164,9 +190,6 @@ void Grid::tag(CHwndRenderTarget* pRenderTarget) {
 			1,
 			NULL);
 	}
-
-	pRenderTarget->PopLayer();
-
 
 }
 
