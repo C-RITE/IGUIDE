@@ -57,7 +57,6 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual void OnDraw(CDC* /*pDC*/);
-
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 

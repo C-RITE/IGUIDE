@@ -29,10 +29,8 @@ Grid::~Grid() {
 
 void Grid::DelTag() {
 
-	if (taglist.size() > 0) {
+	if (taglist.size() > 0)
 		taglist.pop_back();
-	}
-
 }
 
 void Grid::ClearTaglist() {
@@ -47,34 +45,18 @@ void Grid::StoreClick(CD2DPointF loc) {
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
 
-	int halfMean = pDoc->raster.meanEdge / 2;
-
-	centerOffset.x = (center.x - loc.x)*-1;
-	centerOffset.y = center.y - loc.y;
-	CD2DRectF tag = { loc.x - halfMean, loc.y - halfMean, loc.x + halfMean, loc.y + halfMean };
-	taglist.push_back(tag);
-
-}
-
-void Grid::transformTags(int cx, int cy) {
-
-	// transform and scale
-
-	for (size_t i = 0; i < taglist.size(); i++) {
-			taglist[i].top = 1 / taglist[i].top * cy * 1 / dpp;
-			taglist[i].left = 1 / taglist[i].left * cx * 1 / dpp;
-			taglist[i].bottom = 1 / taglist[i].bottom * cy * 1 / dpp ;
-			taglist[i].right = 1 / taglist[i].right * cx * 1 / dpp;
-	}
+	centerOffset.x = (center.x - loc.x)*-1 * dpp;
+	centerOffset.y = (center.y - loc.y)* dpp;
+	taglist.push_back(centerOffset);
 
 }
 
 
-void Grid::paint(CHwndRenderTarget* pRenderTarget) {
+void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2); 
+	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2);
 
 	// draw a grid background around the center
 	for (float x = center.x; x > 0; x -= 1/dpp)
@@ -83,7 +65,7 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 			CD2DPointF(x, 0.0f),
 			CD2DPointF(x, mainWnd.Height()),
 			m_pWhiteBrush,
-			0.5f
+			0.1f
 			);
 	}
 	
@@ -93,7 +75,7 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 			CD2DPointF(x, 0.0f),
 			CD2DPointF(x, mainWnd.Height()),
 			m_pWhiteBrush,
-			0.5f
+			0.1f
 			);
 	}
 
@@ -103,7 +85,7 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 			CD2DPointF(0.0f, y),
 			CD2DPointF(mainWnd.Width(), y),
 			m_pWhiteBrush,
-			0.5f
+			0.1f
 			);
 	}
 
@@ -113,19 +95,20 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 			CD2DPointF(0.0f, y),
 			CD2DPointF(mainWnd.Width(), y),
 			m_pWhiteBrush,
-			0.5f
+			0.1f
 			);
 	}
 
-	/* draw circles around the center
-	for (float x = 0; x < 16; x++) {
-		CD2DRectF e = { center.x - 1 / dpp * x,
-			center.y - 1 / dpp * x,
-			center.x + 1 / dpp * x,
-			center.y + 1 / dpp * x};
-		pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .5f);
-	}
-	*/
+	// //draw circles around the center
+	//for (float x = 0; x < 16; x++) {
+	//	CD2DRectF e = { center.x - 1 / dpp * x,
+	//		center.y - 1 / dpp * x,
+	//		center.x + 1 / dpp * x,
+	//		center.y + 1 / dpp * x};
+	//	pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .5f);
+	//}
+	//
+	
 	// draw circles around foveola and fovea
 	CD2DRectF e1 = { center.x - 1 / dpp * 1.2f,
 		center.y - 1 / dpp * 1.2f,
@@ -163,37 +146,47 @@ void Grid::paint(CHwndRenderTarget* pRenderTarget) {
 	
 }
 
-void Grid::tag(CHwndRenderTarget* pRenderTarget) {
+void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 	CGridTargetsDoc* pDoc;
 	pDoc = CGridTargetsDoc::GetDoc();
 	
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-
+	CD2DRectF rect1, rect2;
 	CRect intersect;
 
 	for (size_t i = 0; i < taglist.size(); i++) {
-			pRenderTarget->FillRectangle(taglist[i], m_pDarkRedBrush);
-		for (size_t j = 0; j < taglist.size(); j++) 
-			if (i != j && IntersectRect(&intersect, (CRect)taglist[i], (CRect)taglist[j])) 
+		rect1 = { center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
+			center.y - taglist[i].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
+			center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
+			center.y - taglist[i].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
+		pRenderTarget->FillRectangle(rect1, m_pDarkRedBrush);
+
+		for (size_t j = 0; j < taglist.size(); j++) {
+			rect2 = { center.x + taglist[j].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
+				center.y - taglist[j].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
+				center.x + taglist[j].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
+				center.y - taglist[j].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
+			if (i != j && IntersectRect(&intersect, (CRect)rect1, (CRect)rect2))
 				pRenderTarget->FillRectangle((CD2DRectF)intersect, m_pRedBrush);
+		}
 	}
 
 	if (pDoc->mousePos) {
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->mousePos->x - pDoc->raster.meanEdge/2,
-			pDoc->mousePos->y - pDoc->raster.meanEdge/2,
-			pDoc->mousePos->x + pDoc->raster.meanEdge/2,
-			pDoc->mousePos->y + pDoc->raster.meanEdge/2),
+			pDoc->mousePos->x - pDoc->raster.size / 2 / dpp,
+			pDoc->mousePos->y - pDoc->raster.size / 2 / dpp,
+			pDoc->mousePos->x + pDoc->raster.size / 2 / dpp,
+			pDoc->mousePos->y + pDoc->raster.size / 2 / dpp),
 			m_pWhiteBrush,
-			1,
+			.5f,
 			NULL);
 	}
 
 }
 
-bool Grid::saveToFile() {
+bool Grid::SaveToFile() {
 
 	wstringstream sstream;
 
@@ -202,9 +195,9 @@ bool Grid::saveToFile() {
 		if (i != 0)
 			sstream << "\n";
 		sstream
-			<< center.x - (taglist[i].right - taglist[i].left) / 2
+			<< center.x - taglist[i].x
 			<< ";"
-			<< center.y - (taglist[i].bottom - taglist[i].top) / 2;
+			<< center.y - taglist[i].y;
 
 	}
 

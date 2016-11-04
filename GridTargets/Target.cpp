@@ -148,7 +148,6 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	else {
 		free(m_POI);
 		m_POI = NULL;
-		pDoc->raster.meanEdge = 0;
 		pDoc->raster.meanAlpha = 0;
 		pDoc->raster.corner.clear();
 		pDoc->raster.perimeter.clear();

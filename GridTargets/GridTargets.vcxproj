@@ -223,20 +223,9 @@
     <ResourceCompile Include="GridTargets.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\Pictures\Target.ico" />
     <Image Include="res\ao.bmp" />
-    <Image Include="res\bitmap1.bmp" />
-    <Image Include="res\bitmap2.bmp" />
-    <Image Include="res\crosshair.ico" />
-    <Image Include="res\Grid1.png" />
-    <Image Include="res\Grid2.png" />
-    <Image Include="res\GridTargets.ico" />
     <Image Include="res\GridTargetsDoc.ico" />
-    <Image Include="res\institutelogo.bmp" />
-    <Image Include="res\institutelogo.ico" />
-    <Image Include="res\institutelogo.png" />
     <Image Include="res\raygun.ico" />
-    <Image Include="res\zapp.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

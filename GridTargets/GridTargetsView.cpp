@@ -11,6 +11,7 @@
 
 #include "GridTargetsDoc.h"
 #include "GridTargetsView.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +36,8 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
+	ON_WM_SIZE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
@@ -205,13 +208,11 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 		pDoc->computeDisplacementAngles();
 		for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
 			pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
-			pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
 			pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
 		}
 
 		pDoc->raster.meanAlpha /= 4;
-		pDoc->raster.meanEdge /= 4;
-		pDoc->raster.meanEdge *= (1 / pDoc->m_pGrid->dpp / m_pDlgTarget->ppd); // apply scaling
+	
 	}
 
 	ASSERT_VALID(pRenderTarget);
@@ -264,8 +265,8 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 		pDoc->m_pFundus->paint(pRenderTarget);
-		pDoc->m_pGrid->paint(pRenderTarget);
-		pDoc->m_pGrid->tag(pRenderTarget);
+		pDoc->m_pGrid->Paint(pRenderTarget);
+		pDoc->m_pGrid->Tag(pRenderTarget);
 
 		if (showTrace) {
 			CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -307,6 +308,10 @@ void CGridTargetsView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 	CGridTargetsDoc* pDoc = GetDocument();
-	//pDoc->m_pGrid->transformTags(cx, cy);
+	CRect rect;
+	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
+	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
+	pDoc->raster.scale.y = (float)cy / (pMainWnd->WINDOW_HEIGHT - 62);
 	// TODO: Add your message handler code here
+
 }

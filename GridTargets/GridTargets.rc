@@ -237,7 +237,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About GridTargets...",       ID_APP_ABOUT
+        MENUITEM "&About RETROFIT...",          ID_APP_ABOUT
     END
 END
 

@@ -32,9 +32,10 @@ public:
 
 	struct Raster
 	{
-		vector<CD2DPointF>	corner;								// raster corners as clicked by subject
+		vector<CD2DPointF>	corner;								// raster corners from subject view
 		vector<Edge>		perimeter;							// raster perimeter
-		float				meanEdge;							// average of 4 raster edges
+		float				size;								// raster size
+		CD2DPointF			scale;								// for resizing operator's view
 		float				meanAlpha;							// displacement angle
 		CD2DPointF			mid;								// triangulate mid point of raster
 	};

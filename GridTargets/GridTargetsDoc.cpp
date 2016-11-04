@@ -40,7 +40,7 @@ CGridTargetsDoc::CGridTargetsDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	mousePos = NULL;
-	raster.meanEdge = 0;
+	raster.size = 1.28;
 	raster.meanAlpha = 0;
 
 }
@@ -50,7 +50,7 @@ CGridTargetsDoc::~CGridTargetsDoc()
 	delete m_pGrid;
 	delete m_pFundus;
 	delete mousePos;
-	
+
 }
 
 // Get Doc, made for other classes that need access to attributes
@@ -209,11 +209,13 @@ CString CGridTargetsDoc::getTraceInfo() {
 	float beta = 360 - computeDisplacementAngle(k);
 	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
-	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nmean edge:\t%f (px)\nfov2disc:\t%f (px)",
+	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)",
 		raster.meanAlpha,
 		beta,
 		raster.meanAlpha + beta,
-		raster.meanEdge,
+		raster.size,
+		raster.scale.x,
+		raster.scale.y,
 		dist);
 	return trace;
 

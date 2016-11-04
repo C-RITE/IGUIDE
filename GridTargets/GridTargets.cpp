@@ -165,6 +165,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 	ON_STN_CLICKED(IDB_AO, &CAboutDlg::OnStnClickedAo)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // App command to run the dialog
@@ -177,11 +178,9 @@ void CGridTargetsApp::OnAppAbout()
 // CGridTargetsApp message handlers
 
 
-
-
-
 void CAboutDlg::OnStnClickedAo()
 {
 	// TODO: Add your control notification handler code here
 	(32 >= (int)ShellExecute(NULL, L"open", L"https://www.experimental-ophthalmology.uni-bonn.de/research/group-harmening", NULL, NULL, SW_SHOWNORMAL));
 }
+

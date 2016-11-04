@@ -97,40 +97,7 @@
     <Image Include="res\GridTargetsDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\GridTargets.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Grid1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Grid2.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\..\..\Pictures\Target.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\crosshair.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\zapp.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\raygun.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\institutelogo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\bitmap1.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\bitmap2.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\institutelogo.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\institutelogo.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\ao.bmp">

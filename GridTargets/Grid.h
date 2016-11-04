@@ -18,11 +18,11 @@ public:
 	Grid();
 	~Grid();
 	
-	std::vector<CD2DRectF>	taglist;						// storage for all scan rasters
+	std::vector<CD2DPointF>	taglist;						// storage for all scan rasters
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
 	CRect					mainWnd;
-	CPoint					centerOffset;					// offset from grid's center
+	CD2DPointF				centerOffset;					// offset from grid's center
 	CD2DBitmap*				m_pGrid_clean;					// grid without markings
 	CD2DBitmap*				m_pGrid_mark;					// grid with markings
 
@@ -33,10 +33,9 @@ public:
 
 	void DelTag();
 	void ClearTaglist();
-	void transformTags(int cx, int cy);
 	void StoreClick(CD2DPointF point);
-	void paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
-	void tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
-	bool saveToFile();
+	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
+	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
+	bool SaveToFile();
 	
 };

@@ -12,6 +12,9 @@ public:
 
 // Attributes
 public:
+	const int WINDOW_WIDTH = 1200;
+	const double ASPECT_RATIO = (double)16 / 9;
+	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / ASPECT_RATIO);
 
 // Operations
 public:
