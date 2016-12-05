@@ -1,45 +1,54 @@
 #include "stdafx.h"
+#include "GridTargets.h"
+#include "GridTargetsDoc.h"
 #include "Fundus.h"
 
 
-Fundus::Fundus()
+Fundus::Fundus() :
+	picture(NULL),
+	calibration(FALSE),
+	filename(NULL)
 {
-	picture = NULL;
 }
 
 
 Fundus::~Fundus()
 {
+	delete filename;
 }
 
 
-void Fundus::paint(CHwndRenderTarget* pRenderTarget)
+void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
-	if (picture)
+
+	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
+		float ppd = 1/pDoc->m_pGrid->dpp;
+		float ppdimage =  pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor / 15;
+		float factor = ppd / ppdimage;
+
 		CD2DSizeF size = picture->GetSize();
-		CPoint point = (size.width / 2, size.height / 2);
-		D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(-180.f, -418.f);
-		pRenderTarget->SetTransform(matrix);
+
 		D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
-		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width *.725, size.height *.725));
+		D2D1_MATRIX_3X2_F scale = D2D1::Matrix3x2F::Scale(
+			D2D1::Size(factor,factor),
+			D2D1::Point2F(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor,
+				pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor));
+		D2D1_MATRIX_3X2_F translate = D2D1::Matrix3x2F::Translation(
+			pDoc->m_pGrid->center.x - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor,
+			pDoc->m_pGrid->center.y - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor);
+		pRenderTarget->SetTransform(scale * translate);
+		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width, size.height));
 		pRenderTarget->SetTransform(identity);
 	}
+
 }
-
-
-BOOL Fundus::openFundus(CHwndRenderTarget* pRenderTarget)
-{
-	picture = new CD2DBitmap(pRenderTarget, filename);
-	picture->Create(pRenderTarget);
-	return 0;
-}
-
 
 
 HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 {
-
+	filename = new CStringW();
 	// create IFileOpenDialog instance.
 	CComPtr<IFileOpenDialog> pIFileOpenDialog;
 	HRESULT hr = pIFileOpenDialog.CoCreateInstance(CLSID_FileOpenDialog);
@@ -58,6 +67,9 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 	{
 		hr = pIFileOpenDialog->SetFileTypes(cbFilterSpecCount, pFilterSpecArray);
 	}
+	// Set the default extension to be ".jpg" file.
+	if (SUCCEEDED(hr))
+		hr = pIFileOpenDialog->SetFileTypeIndex(cbFilterSpecCount);
 
 	// show the file open dialog, and get the chosen file
 	if (SUCCEEDED(hr))
@@ -74,7 +86,7 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 		{
 			LPWSTR pszName = NULL;
 			hr = pIShellItem->GetDisplayName(SIGDN_FILESYSPATH, &pszName);
-			filename = pszName;
+			*filename = pszName;
 			CoTaskMemFree(pszName);
 		}
 	}
@@ -86,8 +98,6 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 		delete[]pFilterSpecArray[nIndex].pszSpec;
 	}
 	delete[]pFilterSpecArray;
-
-	//UpdateAllViews(NULL);
 
 	return hr;
 }
@@ -164,5 +174,7 @@ HRESULT Fundus::_GetWICFileOpenDialogFilterSpecs(COMDLG_FILTERSPEC*& pFilterSpec
 		(*pFilterSpec).pszSpec = new WCHAR[strAllSpecs.GetLength() + 1];
 		wcscpy_s((wchar_t*)(*pFilterSpec).pszSpec, strAllSpecs.GetLength() + 1, strAllSpecs.GetString());
 	}
+
 	return S_OK;
+
 }

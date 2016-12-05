@@ -23,7 +23,7 @@
     <RootNamespace>GridTargets</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
-    <ProjectName>RETROFIT</ProjectName>
+    <ProjectName>IGUIDE</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -186,26 +186,49 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Calibration.h" />
     <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="CustomItem.h" />
+    <ClInclude Include="DynDialogEx.h" />
+    <ClInclude Include="DynDialogItemEx.h" />
+    <ClInclude Include="Edge.h" />
     <ClInclude Include="Fundus.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GridTargets.h" />
     <ClInclude Include="GridTargetsDoc.h" />
     <ClInclude Include="GridTargetsView.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="Properties.h" />
+    <ClInclude Include="PropertyGrid.h" />
+    <ClInclude Include="PropertyGridCombo.h" />
+    <ClInclude Include="PropertyGridDirectoryPicker.h" />
+    <ClInclude Include="PropertyGridInPlaceEdit.h" />
+    <ClInclude Include="PropertyGridMonthCalCtrl.h" />
+    <ClInclude Include="Raster.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Target.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="DynDialogEx.cpp" />
+    <ClCompile Include="DynDialogItemEx.cpp" />
+    <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Fundus.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="GridTargets.cpp" />
     <ClCompile Include="GridTargetsDoc.cpp" />
     <ClCompile Include="GridTargetsView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="Properties.cpp" />
+    <ClCompile Include="PropertyGrid.cpp" />
+    <ClCompile Include="PropertyGridCombo.cpp" />
+    <ClCompile Include="PropertyGridDirectoryPicker.cpp" />
+    <ClCompile Include="PropertyGridInPlaceEdit.cpp" />
+    <ClCompile Include="PropertyGridMonthCalCtrl.cpp" />
+    <ClCompile Include="Raster.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -216,7 +239,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
-    <None Include="GridTargets.reg" />
+    <None Include="IGUIDE.reg" />
     <None Include="res\GridTargets.rc2" />
   </ItemGroup>
   <ItemGroup>

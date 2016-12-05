@@ -7,7 +7,6 @@
 #include "afxdialogex.h"
 #include "GridTargets.h"
 #include "MainFrm.h"
-
 #include "ChildFrm.h"
 #include "GridTargetsDoc.h"
 #include "GridTargetsView.h"
@@ -60,8 +59,6 @@ CGridTargetsApp theApp;
 BOOL CGridTargetsApp::InitInstance()
 {
 	CWinApp::InitInstance();
-
-
 	EnableTaskbarInteraction(FALSE);
 
 	// AfxInitRichEdit2() is required to use RichEdit control	
@@ -110,7 +107,6 @@ BOOL CGridTargetsApp::InitInstance()
 	// Enable DDE Execute open
 	EnableShellOpen();
 	RegisterShellFileTypes(TRUE);
-
 
 	// Dispatch commands specified on the command line.  Will return FALSE if
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.

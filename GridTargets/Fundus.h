@@ -1,13 +1,15 @@
 #pragma once
+#include "Calibration.h"
 class Fundus
 {
+
 public:
 	Fundus();
 	~Fundus();
-	void paint(CHwndRenderTarget* pRenderTarget);
-	BOOL openFundus(CHwndRenderTarget* pRenderTarget);
+	void Paint(CHwndRenderTarget* pRenderTarget);
 	CD2DBitmap*		picture;
-	CStringW		filename;
+	CStringW*		filename;
+	BOOL			calibration;
 
 	HRESULT _ShowWICFileOpenDialog(HWND hWndOwner);
 	HRESULT _GetWICFileOpenDialogFilterSpecs(COMDLG_FILTERSPEC*& pFilterSpecArray, UINT& cbFilterSpecCount);

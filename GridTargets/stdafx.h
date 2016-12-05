@@ -44,5 +44,3 @@
 
 void CustomTrace(const wchar_t* format, ...);
 void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
-
-

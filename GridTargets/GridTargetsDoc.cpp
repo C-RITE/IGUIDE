@@ -11,6 +11,7 @@
 #endif
 
 #include "GridTargetsDoc.h"
+#include "Grid.h"
 #include <math.h>
 
 #include <propkey.h>
@@ -28,6 +29,21 @@ IMPLEMENT_DYNCREATE(CGridTargetsDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CGridTargetsDoc, CDocument)
 	ON_COMMAND(ID_FILE_IMPORT, &CGridTargetsDoc::OnFileImport)
+	ON_COMMAND(ID_EDIT_PROPERTIES, &CGridTargetsDoc::OnEditProperties)
+	ON_COMMAND(ID_OVERLAY_GRID, &CGridTargetsDoc::OnOverlayGrid)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CGridTargetsDoc::OnUpdateOverlayGrid)
+	ON_COMMAND(ID_OVERLAY_RADIUS, &CGridTargetsDoc::OnOverlayRadius)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CGridTargetsDoc::OnUpdateOverlayRadius)
+	ON_COMMAND(ID_OVERLAY_FOVEA, &CGridTargetsDoc::OnOverlayFovea)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FOVEA, &CGridTargetsDoc::OnUpdateOverlayFovea)
+	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CGridTargetsDoc::OnOverlayOpticdisc)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_OPTICDISC, &CGridTargetsDoc::OnUpdateOverlayOpticdisc)
+	ON_COMMAND(ID_OVERLAY_CROSSHAIR, &CGridTargetsDoc::OnOverlayCrosshair)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_CROSSHAIR, &CGridTargetsDoc::OnUpdateOverlayCrosshair)
+	ON_COMMAND(ID_OVERLAY_FUNDUS, &CGridTargetsDoc::OnOverlayFundus)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FUNDUS, &CGridTargetsDoc::OnUpdateOverlayFundus)
+	ON_COMMAND(ID_OVERLAY_TRACEINFO, &CGridTargetsDoc::OnOverlayTraceinfo)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TRACEINFO, &CGridTargetsDoc::OnUpdateOverlayTraceinfo)
 END_MESSAGE_MAP()
 
 
@@ -39,9 +55,11 @@ CGridTargetsDoc::CGridTargetsDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
+	m_pDlgProperties = new Properties();
 	mousePos = NULL;
 	raster.size = 1.28;
 	raster.meanAlpha = 0;
+	m_pDlgCalibration = new Calibration();
 
 }
 
@@ -50,6 +68,8 @@ CGridTargetsDoc::~CGridTargetsDoc()
 	delete m_pGrid;
 	delete m_pFundus;
 	delete mousePos;
+	delete m_pDlgCalibration;
+	delete m_pDlgProperties;
 
 }
 
@@ -87,8 +107,6 @@ BOOL CGridTargetsDoc::OnNewDocument()
 	return TRUE;
 
 }
-
-
 
 
 // CGridTargetsDoc serialization
@@ -182,9 +200,9 @@ BOOL CGridTargetsDoc::CheckFOV()
 
 	if (raster.corner.size() < 4) {
 		AfxMessageBox(_T("Please draw raster corners (clockwise) in Target View window first!"), MB_OK);
+		ShowCursor(TRUE);
 		return FALSE;
 	}
-
 	return TRUE;
 
 }
@@ -204,23 +222,31 @@ float CGridTargetsDoc::CalcEdgeLength(Edge k) {
 
 CString CGridTargetsDoc::getTraceInfo() {
 
+	POSITION pos = GetFirstViewPosition();
+	CWnd* target = GetNextView(pos);
 	CString trace;
-	Edge k = { { 0.f, 0.f }, { (float)m_pGrid->centerOffset.x, (float)m_pGrid->centerOffset.y }, NULL };
+	Edge k;
+	k.q.x = (float)m_pGrid->centerOffset.x;
+	k.q.y = (float)m_pGrid->centerOffset.y;
+
 	float beta = 360 - computeDisplacementAngle(k);
 	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
-
-	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)",
+	
+	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
 		raster.meanAlpha,
 		beta,
 		raster.meanAlpha + beta,
 		raster.size,
 		raster.scale.x,
 		raster.scale.y,
-		dist);
+		dist,
+		1 / m_pGrid->dpp,
+		raster.meanEdge/1.28);
+	if (m_pGrid->overlay & TRACEINFO)
 	return trace;
+	return NULL;
 
 }
-
 
 CD2DPointF CGridTargetsDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount)
 {
@@ -296,45 +322,50 @@ void CGridTargetsDoc::computeDisplacementAngles() {
 	for (int i = 0; i < raster.perimeter.size(); i++) {
 		raster.perimeter[i].alpha = computeDisplacementAngle(raster.perimeter[i]);
 	
-		if (raster.perimeter[i].alpha >= 270)
-			raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 90);
-		else if (raster.perimeter[i].alpha >= 180 && raster.perimeter[i].alpha < 270)
-			raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 0);
-		else if (raster.perimeter[i].alpha >= 90 && raster.perimeter[i].alpha < 180)
-			raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 270);
-		else if (raster.perimeter[i].alpha >= 0 && raster.perimeter[i].alpha < 90)
-			raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 180);
+		//if (raster.perimeter[i].alpha >= 270)
+		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 90);
+		//else if (raster.perimeter[i].alpha >= 180 && raster.perimeter[i].alpha < 270)
+		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 0);
+		//else if (raster.perimeter[i].alpha >= 90 && raster.perimeter[i].alpha < 180)
+		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 270);
+		//else if (raster.perimeter[i].alpha >= 0 && raster.perimeter[i].alpha < 90)
+		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 180);
 	}
 
-	Edge k = { { raster.mid.x, raster.mid.y },{ raster.perimeter[0].p.x, raster.perimeter[0].p.y}, NULL };
-	float theta = computeDisplacementAngle(k);
-	ATLTRACE(_T("theta is %f\n"), theta);
+	//Edge k;
+	//k.p.x = raster.mid.x;
+	//k.p.y = raster.mid.y;
+	//k.q.x = raster.perimeter[0].p.x,
+	//k.q.y = raster.perimeter[0].p.y;
 
-	if (theta >= 90 && theta < 180 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
-		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 270;
-		}
+	//float theta = computeDisplacementAngle(k);
+	//ATLTRACE(_T("theta is %f\n"), theta);
 
-	if (theta >= 0 && theta < 90 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
-		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 180;
-		}
+	//if (theta >= 90 && theta < 180 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
+	//	for (int i = 0; i < raster.perimeter.size(); i++) {
+	//		raster.perimeter[i].alpha += 270;
+	//	}
 
-	if (theta <= 360 && theta > 270 && raster.perimeter[0].p.x > raster.perimeter[0].q.x)
-		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 90;
-		}
+	//if (theta >= 0 && theta < 90 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
+	//	for (int i = 0; i < raster.perimeter.size(); i++) {
+	//		raster.perimeter[i].alpha += 180;
+	//	}
 
-	if (theta <= 270 && theta > 180 && raster.perimeter[0].p.y > raster.perimeter[0].q.y)
-		for (int i = 0; i < raster.perimeter.size(); i++) {
-			raster.perimeter[i].alpha += 0;
-		}
+	//if (theta <= 360 && theta > 270 && raster.perimeter[0].p.x > raster.perimeter[0].q.x)
+	//	for (int i = 0; i < raster.perimeter.size(); i++) {
+	//		raster.perimeter[i].alpha += 90;
+	//	}
+
+	//if (theta <= 270 && theta > 180 && raster.perimeter[0].p.y > raster.perimeter[0].q.y)
+	//	for (int i = 0; i < raster.perimeter.size(); i++) {
+	//		raster.perimeter[i].alpha += 0;
+	//	}
 
 
-	for (int i = 0; i < raster.perimeter.size(); i++) {
-		ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
-	}
-	
+	//for (int i = 0; i < raster.perimeter.size(); i++) {
+	//	ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
+	//}
+	//
 }
 
 
@@ -343,6 +374,150 @@ void CGridTargetsDoc::OnFileImport()
 {
 	// TODO: Add your command handler code here
 
+	m_pFundus->calibration = FALSE;
+
+	if (nullptr != m_pFundus->picture)
+	{
+		m_pFundus->picture->Destroy();
+	}
+
 	HRESULT hr = m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
+	if (hr != S_OK)
+		return;
+
 	UpdateAllViews(NULL);
+	m_pDlgCalibration->DoModal();
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnEditProperties()
+{
+	m_pDlgProperties->DoModal();
+	// TODO: Add your command handler code here
+}
+
+void CGridTargetsDoc::OnOverlayGrid()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & GRID)
+		m_pGrid->overlay = m_pGrid->overlay & (~GRID);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | GRID;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayGrid(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & GRID);
+}
+
+
+void CGridTargetsDoc::OnOverlayRadius()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & DEGRAD)
+		m_pGrid->overlay = m_pGrid->overlay & (~DEGRAD);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | DEGRAD;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
+}
+
+
+void CGridTargetsDoc::OnOverlayFovea()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & FOVEA)
+		m_pGrid->overlay = m_pGrid->overlay & ~FOVEA & ~FOVEOLA;
+	else
+		m_pGrid->overlay = m_pGrid->overlay | FOVEA | FOVEOLA;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & FOVEA);
+}
+
+
+void CGridTargetsDoc::OnOverlayOpticdisc()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & OPTICDISC)
+		m_pGrid->overlay = m_pGrid->overlay & (~OPTICDISC);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | OPTICDISC;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & OPTICDISC);
+}
+
+
+void CGridTargetsDoc::OnOverlayCrosshair()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & CROSSHAIR)
+		m_pGrid->overlay = m_pGrid->overlay & (~CROSSHAIR);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | CROSSHAIR;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayCrosshair(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & CROSSHAIR);
+}
+
+
+void CGridTargetsDoc::OnOverlayFundus()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & FUNDUS)
+		m_pGrid->overlay = m_pGrid->overlay & (~FUNDUS);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | FUNDUS;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayFundus(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & FUNDUS);
+}
+
+
+void CGridTargetsDoc::OnOverlayTraceinfo()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & TRACEINFO)
+		m_pGrid->overlay = m_pGrid->overlay & (~TRACEINFO);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | TRACEINFO;
+	UpdateAllViews(NULL);
+}
+
+
+void CGridTargetsDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & TRACEINFO);
 }

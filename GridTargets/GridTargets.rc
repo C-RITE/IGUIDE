@@ -17,11 +17,129 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral (Default) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROPERTIES DIALOGEX 0, 0, 273, 278
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Properties"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "OK",IDOK,159,255,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,216,255,50,14
+    CONTROL         "",IDC_GRID,"Static",SS_BLACKFRAME | SS_NOTIFY,7,7,259,242,WS_EX_TRANSPARENT | WS_EX_CLIENTEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 266
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 271
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_PROPERTIES AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TARGET DIALOGEX 600, 150, 320, 200
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Target View"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+END
+
+IDD_CALIBRATION DIALOGEX 0, 0, 320, 200
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Fundus Calibration"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Done",IDOK,141,179,50,14
+    CONTROL         "",IDC_STATIC_CAL,"Static",SS_ETCHEDFRAME | SS_NOTIFY,18,14,286,155,WS_EX_CLIENTEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TARGET, DIALOG
+    BEGIN
+    END
+
+    IDD_CALIBRATION, DIALOG
+    BEGIN
+        MOCKUP, 0, 50, 0, 0, "..\..\..\..\Pictures\ukb.jpg"
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TARGET AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CALIBRATION AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -74,45 +192,6 @@ IDR_MAINFRAME           ICON                    "res\\raygun.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Dialog
-//
-
-IDD_TARGET DIALOGEX 600, 150, 320, 200
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Target View"
-FONT 8, "MS Shell Dlg", 0, 0, 0x0
-BEGIN
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TARGET, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_TARGET AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Bitmap
 //
 
@@ -131,30 +210,20 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDR_GridTargetsTYPE     ICON                    "res\\GridTargetsDoc.ico"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
 //
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 265, 138
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About RETROFIT"
+CAPTION "About IGUIDE"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "RETROFIT",IDC_STATIC,42,18,65,8,SS_NOPREFIX
+    LTEXT           "IGUIDE",IDC_STATIC,42,18,65,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2016",IDC_STATIC,88,62,114,8
     DEFPUSHBUTTON   "OK",IDOK,205,115,50,14,WS_GROUP
-    LTEXT           "Retinotopic Projection and Fixation Tool",IDC_STATIC,42,30,144,8
-    LTEXT           "Version 0.4.9",IDC_STATIC,42,42,44,8
+    LTEXT           "Image Guided User Interface Directing Eyes",IDC_STATIC,42,30,144,8
+    LTEXT           "Version 0.5.0",IDC_STATIC,42,42,44,8
     LTEXT           "AG Harmening",IDC_STATIC,88,75,46,8
     CONTROL         IDB_AO,IDB_AO,"Static",SS_BITMAP | SS_NOTIFY,41,63,43,39
     LTEXT           "University Eye Hospital Bonn",IDC_STATIC,88,94,92,8
@@ -194,6 +263,16 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_GridTargetsTYPE     ICON                    "res\\GridTargetsDoc.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Menu
 //
 
@@ -223,9 +302,21 @@ BEGIN
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "P&roperties\tCtrl+P",         ID_EDIT_PROPERTIES
     END
     POPUP "&View"
     BEGIN
+        POPUP "Overlay"
+        BEGIN
+            MENUITEM "Grid",                        ID_OVERLAY_GRID, CHECKED
+            MENUITEM "Radius",                      ID_OVERLAY_RADIUS
+            MENUITEM "Fovea / Foveola",             ID_OVERLAY_FOVEA
+            MENUITEM "Optic Disc",                  ID_OVERLAY_OPTICDISC
+            MENUITEM "Crosshair",                   ID_OVERLAY_CROSSHAIR
+            MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
+            MENUITEM "Trace Info",                  ID_OVERLAY_TRACEINFO
+        END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
     POPUP "&Window"
@@ -237,7 +328,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About RETROFIT...",          ID_APP_ABOUT
+        MENUITEM "&About IGUIDE...",            ID_APP_ABOUT
     END
 END
 
@@ -272,8 +363,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,49,0,0
- PRODUCTVERSION 0,49,0,0
+ FILEVERSION 0,5,0,0
+ PRODUCTVERSION 0,5,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -289,13 +380,13 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "AG Harmening"
-            VALUE "FileDescription", "RETROFIT"
-            VALUE "FileVersion", "0.49.0.0"
-            VALUE "InternalName", "RETROFIT.exe"
+            VALUE "FileDescription", "IGUIDE"
+            VALUE "FileVersion", "0.5.0.0"
+            VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2016 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "GridTargets.exe"
-            VALUE "ProductName", "RETROFIT"
-            VALUE "ProductVersion", "0.49.0.0"
+            VALUE "ProductName", "IGUIDE"
+            VALUE "ProductVersion", "0.5.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -312,13 +403,13 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "RETROFIT"
-    IDR_GridTargetsTYPE     "\nRETROFIT\nRETROFIT\nRETROFIT Files (*.RET)\n.RET\nRETROFIT.Document\nRETROFIT.Document"
+    IDR_MAINFRAME           "IGUIDE"
+    IDR_GridTargetsTYPE     "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
 END
 
 STRINGTABLE
 BEGIN
-    AFX_IDS_APP_TITLE       "RETROFIT"
+    AFX_IDS_APP_TITLE       "IGUIDE"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
@@ -434,6 +525,7 @@ END
 STRINGTABLE
 BEGIN
     ID_FILE_IMPORT          "Import Fundus View"
+    ID_EDIT_PROPERTIES      "Edit Properties of program behavior\nProperties"
 END
 
 #endif    // English (United States) resources

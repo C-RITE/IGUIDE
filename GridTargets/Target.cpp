@@ -17,7 +17,6 @@ Target::Target(CWnd* pParent /*=NULL*/)
 {
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
-	ppd = (1 / 1.28) * 102;
 	EnableD2DSupport();
 }
 
@@ -43,8 +42,7 @@ END_MESSAGE_MAP()
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
 
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);
@@ -91,32 +89,31 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
-	
 	float alpha, beta, gamma;
-	float scale = ppd * pDoc->m_pGrid->dpp;
 	float pi = atan(1) * 4;
 	float a, b, c, x, y;
+	ppd_client = (1 / 1.28) * pDoc->raster.meanEdge;
 
-	CGridTargetsDoc::Edge k = { {0, 0},
-								{centerOffset_x, centerOffset_y},
-								NULL };
+	Edge k;
+	k.q.x = centerOffset_x *(-1);
+	k.q.y = centerOffset_y *(-1);
 	
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->computeDisplacementAngle(k);
 	gamma = alpha + beta;
 	
-	a = (centerOffset_x + pDoc->raster.mid.x) - pDoc->raster.mid.x;
-	b = (centerOffset_y + pDoc->raster.mid.y) - pDoc->raster.mid.y;
+	a = centerOffset_x ;
+	b = centerOffset_y ;
 	c = sqrt(pow(a, 2) + pow(b, 2));
 
-	y = sin(gamma * pi / 180) * -c;
-	x = cos(gamma * pi / 180) * c;
+	y = sin(gamma * pi / 180) * -c * ppd_client; // calc. x shift and scale to client ppd
+	x = cos(gamma * pi / 180) *  c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
-			((pDoc->raster.mid.x + x * scale) - 4),
-			((pDoc->raster.mid.y + y * scale) - 4),
-			((pDoc->raster.mid.x + x * scale) + 4),
-			((pDoc->raster.mid.y + y * scale) + 4))
+			((pDoc->raster.mid.x + x ) - 4),
+			((pDoc->raster.mid.y + y ) - 4),
+			((pDoc->raster.mid.x + x ) + 4),
+			((pDoc->raster.mid.y + y ) + 4))
 		};
 	
 	/*ATLTRACE(_T("alpha is %f\n"), alpha);
@@ -149,6 +146,7 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 		free(m_POI);
 		m_POI = NULL;
 		pDoc->raster.meanAlpha = 0;
+		pDoc->raster.meanEdge = 0;
 		pDoc->raster.corner.clear();
 		pDoc->raster.perimeter.clear();
 		pDoc->m_pGrid->ClearTaglist();

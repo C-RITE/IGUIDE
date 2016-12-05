@@ -6,10 +6,9 @@
 #include "Target.h"
 #include "Grid.h"
 #include "Fundus.h"
+#include "Raster.h"
+#include "Properties.h"
 #include "afxrendertarget.h"
-#include <vector>
-
-using namespace std;
 
 class CGridTargetsDoc : public CDocument
 {
@@ -17,32 +16,14 @@ protected: // create from serialization only
 	CGridTargetsDoc();
 	DECLARE_DYNCREATE(CGridTargetsDoc)
 
-// Attributes
+	// Attributes
 public:
 
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
-
-	struct Edge
-	{
-		CD2DPointF p, q;
-		float length;
-		float alpha;
-	};
-
-	struct Raster
-	{
-		vector<CD2DPointF>	corner;								// raster corners from subject view
-		vector<Edge>		perimeter;							// raster perimeter
-		float				size;								// raster size
-		CD2DPointF			scale;								// for resizing operator's view
-		float				meanAlpha;							// displacement angle
-		CD2DPointF			mid;								// triangulate mid point of raster
-	};
-
+	Calibration*			m_pDlgCalibration;					// calibration class
+	Properties*				m_pDlgProperties;					// properties class
 	Raster					raster;
-		
-	CPoint					center;								// center of main window
 	CPoint*					mousePos;							// current mouse position
 
 // Operations
@@ -55,7 +36,7 @@ public:
 	float computeDisplacementAngle(Edge k);
 	CString getTraceInfo();
 
-// Overrides
+	// Overrides
 public:
 	virtual BOOL OnNewDocument();
 	virtual void Serialize(CArchive& ar);
@@ -65,7 +46,7 @@ public:
 	virtual void OnDrawThumbnail(CDC& dc, LPRECT lprcBounds);
 #endif // SHARED_HANDLERS
 
-// Implementation
+	// Implementation
 public:
 	virtual ~CGridTargetsDoc();
 #ifdef _DEBUG
@@ -75,7 +56,7 @@ public:
 
 protected:
 
-// Generated message map functions
+	// Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
 
@@ -86,5 +67,19 @@ protected:
 
 public:
 	afx_msg void OnFileImport();
-
+	afx_msg void OnEditProperties();
+	afx_msg void OnOverlayGrid();
+	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayRadius();
+	afx_msg void OnUpdateOverlayRadius(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayFovea();
+	afx_msg void OnUpdateOverlayFovea(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayOpticdisc();
+	afx_msg void OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayCrosshair();
+	afx_msg void OnUpdateOverlayCrosshair(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayFundus();
+	afx_msg void OnUpdateOverlayFundus(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayTraceinfo();
+	afx_msg void OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI);
 };

@@ -17,6 +17,7 @@ IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -36,6 +37,7 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+	
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -83,7 +85,3 @@ void CMainFrame::Dump(CDumpContext& dc) const
 	CMDIFrameWnd::Dump(dc);
 }
 #endif //_DEBUG
-
-
-// CMainFrame message handlers
-

@@ -15,8 +15,23 @@ Grid::Grid()
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
+	m_pGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Green));
+	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
+	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
+	
+	lpHi = { D2D1::InfiniteRect(),
+		NULL,
+		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
+		D2D1::IdentityMatrix(),
+		.4f,
+		NULL,
+		D2D1_LAYER_OPTIONS_NONE };
+	pLayer = new CD2DLayer(NULL);
+
+	overlay = GRID | CROSSHAIR | FUNDUS;
 
 }
+	
 
 Grid::~Grid() {
 
@@ -24,7 +39,10 @@ Grid::~Grid() {
 	delete m_pRedBrush;
 	delete m_pBlueBrush;
 	delete m_pWhiteBrush;
-
+	delete m_pGreenBrush;
+	delete m_pDarkGreenBrush;
+	delete m_pMagentaBrush;;
+	delete pLayer;
 }
 
 void Grid::DelTag() {
@@ -51,7 +69,6 @@ void Grid::StoreClick(CD2DPointF loc) {
 
 }
 
-
 void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
@@ -59,121 +76,148 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2);
 
 	// draw a grid background around the center
-	for (float x = center.x; x > 0; x -= 1/dpp)
-	{
-		pRenderTarget->DrawLine(
-			CD2DPointF(x, 0.0f),
-			CD2DPointF(x, mainWnd.Height()),
-			m_pWhiteBrush,
-			0.1f
-			);
-	}
-	
-	for (float x = center.x + 1 / dpp; x < mainWnd.Width(); x += 1 / dpp)
-	{
-		pRenderTarget->DrawLine(
-			CD2DPointF(x, 0.0f),
-			CD2DPointF(x, mainWnd.Height()),
-			m_pWhiteBrush,
-			0.1f
-			);
+	if (overlay & GRID) {
+		for (float x = center.x; x > 0; x -= 1 / dpp)
+		{
+			pRenderTarget->DrawLine(
+				CD2DPointF(x, 0.0f),
+				CD2DPointF(x, mainWnd.Height()),
+				m_pWhiteBrush,
+				0.1f
+				);
+		}
+
+		for (float x = center.x + 1 / dpp; x < mainWnd.Width(); x += 1 / dpp)
+		{
+			pRenderTarget->DrawLine(
+				CD2DPointF(x, 0.0f),
+				CD2DPointF(x, mainWnd.Height()),
+				m_pWhiteBrush,
+				0.1f
+				);
+		}
+
+		for (float y = center.y; y > 0; y -= 1 / dpp)
+		{
+			pRenderTarget->DrawLine(
+				CD2DPointF(0.0f, y),
+				CD2DPointF(mainWnd.Width(), y),
+				m_pWhiteBrush,
+				0.1f
+				);
+		}
+
+		for (float y = center.y + 1 / dpp; y < mainWnd.Height(); y += 1 / dpp)
+		{
+			pRenderTarget->DrawLine(
+				CD2DPointF(0.0f, y),
+				CD2DPointF(mainWnd.Width(), y),
+				m_pWhiteBrush,
+				0.1f
+				);
+		}
 	}
 
-	for (float y = center.y; y > 0; y -= 1/dpp)
-	{
-		pRenderTarget->DrawLine(
-			CD2DPointF(0.0f, y),
-			CD2DPointF(mainWnd.Width(), y),
-			m_pWhiteBrush,
-			0.1f
-			);
+}
+
+void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
+
+	//draw circles around the center
+	if (overlay & DEGRAD) {
+		for (float x = 0; x < 16; x++) {
+			CD2DRectF e = { center.x - 1 / dpp * x,
+				center.y - 1 / dpp * x,
+				center.x + 1 / dpp * x,
+				center.y + 1 / dpp * x };
+			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f);
+		}
 	}
 
-	for (float y = center.y + 1 / dpp; y < mainWnd.Height(); y += 1 / dpp)
-	{
-		pRenderTarget->DrawLine(
-			CD2DPointF(0.0f, y),
-			CD2DPointF(mainWnd.Width(), y),
-			m_pWhiteBrush,
-			0.1f
-			);
-	}
-
-	// //draw circles around the center
-	//for (float x = 0; x < 16; x++) {
-	//	CD2DRectF e = { center.x - 1 / dpp * x,
-	//		center.y - 1 / dpp * x,
-	//		center.x + 1 / dpp * x,
-	//		center.y + 1 / dpp * x};
-	//	pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .5f);
-	//}
-	//
-	
 	// draw circles around foveola and fovea
-	CD2DRectF e1 = { center.x - 1 / dpp * 1.2f,
+	if (overlay & FOVEOLA) {
+		CD2DRectF e1 = { center.x - 1 / dpp * 1.2f,
 		center.y - 1 / dpp * 1.2f,
 		center.x + 1 / dpp * 1.2f,
-		center.y + 1 / dpp * 1.2f};
-	CD2DRectF e2 = { center.x - 1 / dpp * 6.2f,
+		center.y + 1 / dpp * 1.2f };
+		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .3f);
+	}
+
+	if (overlay & FOVEA){
+		CD2DRectF e2 = { center.x - 1 / dpp * 6.2f,
 		center.y - 1 / dpp * 6.2f,
 		center.x + 1 / dpp * 6.2f,
 		center.y + 1 / dpp * 6.2f };
-	pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
-	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .5f);
-
-	// draw red cross in fovea
-	CD2DRectF fovea(center.x - 4,
-		center.y - 4,
-		center.x + 4,
-		center.y + 4);
-	
-	pRenderTarget->DrawEllipse(fovea, m_pRedBrush);
-	pRenderTarget->DrawLine(CD2DPointF(center.x - 8, center.y), 
-							CD2DPointF(center.x + 8, center.y),
-							m_pRedBrush);
-
-	pRenderTarget->DrawLine(CD2DPointF(center.x, center.y - 8),
-							CD2DPointF(center.x, center.y + 8),
-							m_pRedBrush);
+	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
+	}
 
 	// draw optic nerve as blue circle
-	nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
-		(float)((center.y - 2.5 / dpp)-86),
+	if (overlay & OPTICDISC) {
+		nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
+		(float)((center.y - 2.5 / dpp) - 86),
 		(float)(center.x + mainWnd.Width() / 2),
-		(float)((center.y + 2.5 / dpp)-86) };
+		(float)((center.y + 2.5 / dpp) - 86) };
+		pRenderTarget->DrawEllipse(nerve, m_pBlueBrush, .3f);
+	}
 
-	pRenderTarget->DrawEllipse(nerve, m_pBlueBrush);
-	
+	// draw cross in fovea
+	if (overlay & CROSSHAIR) {
+		CD2DRectF fovea(center.x - 4,
+			center.y - 4,
+			center.x + 4,
+			center.y + 4);
+
+		pRenderTarget->DrawEllipse(fovea, m_pWhiteBrush);
+		pRenderTarget->DrawLine(CD2DPointF(center.x - 8, center.y),
+			CD2DPointF(center.x + 8, center.y),
+			m_pWhiteBrush);
+	pRenderTarget->DrawLine(CD2DPointF(center.x, center.y - 8),
+		CD2DPointF(center.x, center.y + 8),
+		m_pWhiteBrush);
+	}
+
 }
 
 void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
 	
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	CD2DRectF rect1, rect2;
+	CD2DRectF rect1;
 	CRect intersect;
-
+	
 	for (size_t i = 0; i < taglist.size(); i++) {
+
+		pRenderTarget->PushLayer(lpHi, *pLayer);
+
 		rect1 = { center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
 			center.y - taglist[i].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
 			center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
 			center.y - taglist[i].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
-		pRenderTarget->FillRectangle(rect1, m_pDarkRedBrush);
+		pRenderTarget->FillRectangle(rect1, m_pGreenBrush);
 
-		for (size_t j = 0; j < taglist.size(); j++) {
-			rect2 = { center.x + taglist[j].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
-				center.y - taglist[j].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
-				center.x + taglist[j].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
-				center.y - taglist[j].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
-			if (i != j && IntersectRect(&intersect, (CRect)rect1, (CRect)rect2))
-				pRenderTarget->FillRectangle((CD2DRectF)intersect, m_pRedBrush);
-		}
+		pRenderTarget->PopLayer();
+
+	}
+
+	if (taglist.size() > 0) {
+
+		pRenderTarget->PushLayer(lpHi, *pLayer);
+
+		rect1 = { center.x + taglist[taglist.size()-1].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
+			center.y - taglist[taglist.size()-1].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
+			center.x + taglist[taglist.size()-1].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
+			center.y - taglist[taglist.size()-1].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
+		pRenderTarget->FillRectangle(rect1, m_pGreenBrush);
+		pRenderTarget->PopLayer();
+
+		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
+		ShowCoordinates(pRenderTarget, taglist[taglist.size() - 1].x, taglist[taglist.size() - 1].y);
+
 	}
 
 	if (pDoc->mousePos) {
+
 		pRenderTarget->DrawRectangle(CD2DRectF(
 			pDoc->mousePos->x - pDoc->raster.size / 2 / dpp,
 			pDoc->mousePos->y - pDoc->raster.size / 2 / dpp,
@@ -182,6 +226,8 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 			m_pWhiteBrush,
 			.5f,
 			NULL);
+		ShowCoordinates(pRenderTarget, (center.x - pDoc->mousePos->x) *-1 * dpp,
+			(center.y - pDoc->mousePos->y) * dpp);
 	}
 
 }
@@ -215,3 +261,27 @@ bool Grid::SaveToFile() {
 
 }
 
+
+
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos)
+{
+	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+
+	CString traceText;
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
+
+	traceText.Format(L"%.1f,%.1f", xPos, yPos);
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		traceText,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF((xPos * 1 / dpp + center.x ) - (pDoc->raster.size / 2 * 1 / dpp), (yPos * - 1 / dpp + center.y) - (pDoc->raster.size / 2 * 1 / dpp + 12)),
+		&textLayout,
+		m_pWhiteBrush);
+
+}

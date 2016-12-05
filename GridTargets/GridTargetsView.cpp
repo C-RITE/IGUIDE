@@ -31,14 +31,12 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &CGridTargetsView::OnDraw2d)
 	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
-	ON_WM_SIZE()
-	ON_WM_SIZE()
+	ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CGridTargetsView construction/destruction
@@ -126,22 +124,10 @@ void CGridTargetsView::OnLButtonUp(UINT nFlags, CPoint point)
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->centerOffset.x, pDoc->m_pGrid->centerOffset.y);
 	free(pDoc->mousePos);
 	pDoc->mousePos = NULL;
+	ShowCursor(TRUE);
 
 	m_pDlgTarget->Invalidate();
-	RedrawWindow();
-
-}
-
-
-
-void CGridTargetsView::OnRButtonDown(UINT nFlags, CPoint point)
-{
-	// TODO: Add your message handler code here and/or call default
-	CGridTargetsDoc* pDoc = GetDocument();
-
-	pDoc->m_pGrid->DelTag();
-	RedrawWindow();
-
+	Invalidate();
 }
 
 
@@ -152,11 +138,11 @@ void CGridTargetsView::OnMouseMove(UINT nFlags, CPoint point)
 	CGridTargetsDoc* pDoc = GetDocument();
 
 	if (pDoc->mousePos)
-		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0 & (pDoc->raster.corner.size() > 3)) {
+		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
 			pDoc->mousePos->SetPoint(point.x, point.y);
-		}
+		RedrawWindow();
 
-	RedrawWindow();
+		}
 
 }
 
@@ -171,8 +157,17 @@ void CGridTargetsView::OnLButtonDown(UINT nFlags, CPoint point)
 		pDoc->mousePos = (CPoint*)malloc(sizeof(CPoint));
 		pDoc->mousePos->SetPoint(point.x, point.y);
 	}
+	ShowCursor(FALSE);
 
 	RedrawWindow();
+}
+
+
+void CGridTargetsView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	
+	CGridTargetsDoc* pDoc = GetDocument();
 
 }
 
@@ -180,16 +175,16 @@ void CGridTargetsView::OnLButtonDown(UINT nFlags, CPoint point)
 void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
 	CGridTargetsDoc* pDoc = GetDocument();	
-	CHwndRenderTarget* pRenderTarget = this->GetRenderTarget();
+	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 	CD2DPointF* FOV = new CD2DPointF[4];
 	
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
 	// derive edges from corners
-	if (pDoc->raster.corner.size() > 3) {
+	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		for (int i = 0; i < 3; i++) {
-			CGridTargetsDoc::Edge k;
+			Edge k;
 			k.p = pDoc->raster.corner[i];
 			k.q = pDoc->raster.corner[i + 1];
 			pDoc->raster.perimeter.push_back(k);
@@ -197,34 +192,40 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 		for (int i = 0; i < 4; i++)
 			FOV[i] = pDoc->raster.corner[i];
 		pDoc->raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
-		CGridTargetsDoc::Edge k;
+		Edge k;
 		k.p = pDoc->raster.corner[3];
 		k.q = pDoc->raster.corner[0];
 		pDoc->raster.perimeter.push_back(k);
 	}
 
 	// calculate length of edges, mean edge length and angle
-	if (pDoc->raster.corner.size() > 3) {
+	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		pDoc->computeDisplacementAngles();
+		pDoc->raster.meanEdge = 0;
 		for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
 			pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
-			pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+			pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
+			//pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
 		}
 
-		pDoc->raster.meanAlpha /= 4;
+		pDoc->raster.meanEdge /= 4;
+		// ATTENTION: DEBUG CODE
+		pDoc->raster.meanAlpha = pDoc->raster.perimeter[0].alpha;
 	
 	}
 
 	ASSERT_VALID(pRenderTarget);
 
-	if (nullptr != pDoc->m_pFundus->picture)
-	{
-		pDoc->m_pFundus->picture->Destroy();
-	}
-
-	if (!pDoc->m_pFundus->filename.IsEmpty())
-	{
-		pDoc->m_pFundus->openFundus(pRenderTarget);
+	if (!pDoc->m_pFundus->calibration) {
+		if (nullptr != pDoc->m_pFundus->picture)
+		{
+			pDoc->m_pFundus->picture->Destroy();
+		}
+		if (pDoc->m_pFundus->filename) {
+			pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, *pDoc->m_pFundus->filename);
+			pDoc->m_pFundus->picture->Create(pRenderTarget);
+		}
+		
 	}
 
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
@@ -261,12 +262,13 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		return FALSE;
 
 	// TODO: add draw code for native data here
-	if (pRenderTarget->IsValid()) {
+	if (pRenderTarget) {
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
-		pDoc->m_pFundus->paint(pRenderTarget);
+		pDoc->m_pFundus->Paint(pRenderTarget);
 		pDoc->m_pGrid->Paint(pRenderTarget);
 		pDoc->m_pGrid->Tag(pRenderTarget);
+		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
 		if (showTrace) {
 			CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -289,6 +291,7 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 					D2D1::ColorF(D2D1::ColorF::LightGreen)));
 
 		}
+		
 	}
 
 	return 0;
@@ -312,6 +315,58 @@ void CGridTargetsView::OnSize(UINT nType, int cx, int cy)
 	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
 	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
 	pDoc->raster.scale.y = (float)cy / (pMainWnd->WINDOW_HEIGHT - 62);
+	
+	if (nType == SIZE_RESTORED)
+		Invalidate();
+
 	// TODO: Add your message handler code here
 
+
+}
+
+
+BOOL CGridTargetsView::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	
+	CGridTargetsDoc* pDoc = GetDocument();
+
+	if (pDoc->m_pGrid->taglist.size() > 0) {
+		if (pMsg->message == WM_KEYDOWN) {
+			switch (pMsg->wParam) {
+			case VK_UP:
+				pDoc->m_pGrid->taglist.back().y += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				break;
+			case VK_DOWN:
+				pDoc->m_pGrid->taglist.back().y -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				break;
+			case VK_LEFT:
+				pDoc->m_pGrid->taglist.back().x -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				break;
+			case VK_RIGHT:
+				pDoc->m_pGrid->taglist.back().x += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				break;
+			}
+
+		}
+		if (pMsg->wParam == VK_RBUTTON) {
+			if (pMsg->message == WM_MOUSEMOVE)
+				return false;
+			pDoc->m_pGrid->DelTag();
+		}
+
+		if (pDoc->m_pGrid->taglist.size() > 0)
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+		else
+			m_pDlgTarget->m_POI = NULL;
+		m_pDlgTarget->Invalidate();
+		this->Invalidate();
+
+	}
+
+		return CView::PreTranslateMessage(pMsg);
 }
