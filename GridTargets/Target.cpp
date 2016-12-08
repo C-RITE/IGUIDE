@@ -53,7 +53,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	c = sqrt(pow(a, 2) + pow(b, 2));
 
 	y = sin(gamma * pi / 180) * c * ppd_client; // calc. x shift and scale to client ppd
-	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
+	x = cos(gamma * pi / 180) * -c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
 		((pDoc->raster.mid.x + x) - 4),
