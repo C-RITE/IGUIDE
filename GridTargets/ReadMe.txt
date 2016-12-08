@@ -1,52 +1,52 @@
 ================================================================================
-    MICROSOFT FOUNDATION CLASS LIBRARY : GridTargets Project Overview
+    MICROSOFT FOUNDATION CLASS LIBRARY : IGUIDE Project Overview
 ===============================================================================
 
-The application wizard has created this GridTargets application for
+The application wizard has created this IGUIDE application for
 you.  This application not only demonstrates the basics of using the Microsoft
 Foundation Classes but is also a starting point for writing your application.
 
 This file contains a summary of what you will find in each of the files that
-make up your GridTargets application.
+make up your IGUIDE application.
 
-GridTargets.vcxproj
+IGUIDE.vcxproj
     This is the main project file for VC++ projects generated using an application wizard.
     It contains information about the version of Visual C++ that generated the file, and
     information about the platforms, configurations, and project features selected with the
     application wizard.
 
-GridTargets.vcxproj.filters
+IGUIDE.vcxproj.filters
     This is the filters file for VC++ projects generated using an Application Wizard. 
     It contains information about the assciation between the files in your project 
     and the filters. This association is used in the IDE to show grouping of files with
     similar extensions under a specific node (for e.g. ".cpp" files are associated with the
     "Source Files" filter).
 
-GridTargets.h
+IGUIDE.h
     This is the main header file for the application.  It includes other
     project specific headers (including Resource.h) and declares the
-    CGridTargetsApp application class.
+    CIGUIDEApp application class.
 
-GridTargets.cpp
+IGUIDE.cpp
     This is the main application source file that contains the application
-    class CGridTargetsApp.
+    class CIGUIDEApp.
 
-GridTargets.rc
+IGUIDE.rc
     This is a listing of all of the Microsoft Windows resources that the
     program uses.  It includes the icons, bitmaps, and cursors that are stored
     in the RES subdirectory.  This file can be directly edited in Microsoft
     Visual C++. Your project resources are in 1033.
 
-res\GridTargets.ico
+res\IGUIDE.ico
     This is an icon file, which is used as the application's icon.  This
-    icon is included by the main resource file GridTargets.rc.
+    icon is included by the main resource file IGUIDE.rc.
 
-res\GridTargets.rc2
+res\IGUIDE.rc2
     This file contains resources that are not edited by Microsoft
     Visual C++. You should place all resources not editable by
     the resource editor in this file.
 
-GridTargets.reg
+IGUIDE.reg
     This is an example .reg file that shows you the kind of registration
     settings the framework will set for you.  You can use this as a .reg
     file to go along with your application or just delete it and rely
@@ -74,27 +74,27 @@ ChildFrm.h, ChildFrm.cpp
 
 The application wizard creates one document type and one view:
 
-GridTargetsDoc.h, GridTargetsDoc.cpp - the document
-    These files contain your CGridTargetsDoc class.  Edit these files to
+IGUIDEDoc.h, IGUIDEDoc.cpp - the document
+    These files contain your CIGUIDEDoc class.  Edit these files to
     add your special document data and to implement file saving and loading
-    (via CGridTargetsDoc::Serialize).
+    (via CIGUIDEDoc::Serialize).
     The Document will have the following strings:
         File extension:      grd
-        File type ID:        GridTargets.Document
-        Main frame caption:  GridTargets
-        Doc type name:       GridTargets
-        Filter name:         GridTargets Files (*.grd)
-        File new short name: GridTargets
-        File type long name: GridTargets.Document
+        File type ID:        IGUIDE.Document
+        Main frame caption:  IGUIDE
+        Doc type name:       IGUIDE
+        Filter name:         IGUIDE Files (*.grd)
+        File new short name: IGUIDE
+        File type long name: IGUIDE.Document
 
-GridTargetsView.h, GridTargetsView.cpp - the view of the document
-    These files contain your CGridTargetsView class.
-    CGridTargetsView objects are used to view CGridTargetsDoc objects.
+IGUIDEView.h, IGUIDEView.cpp - the view of the document
+    These files contain your CIGUIDEView class.
+    CIGUIDEView objects are used to view CIGUIDEDoc objects.
 
-res\GridTargetsDoc.ico
+res\IGUIDEDoc.ico
     This is an icon file, which is used as the icon for MDI child windows
-    for the CGridTargetsDoc class.  This icon is included by the main
-    resource file GridTargets.rc.
+    for the CIGUIDEDoc class.  This icon is included by the main
+    resource file IGUIDE.rc.
 
 
 
@@ -102,14 +102,14 @@ res\GridTargetsDoc.ico
 
 Help Support:
 
-hlp\GridTargets.hhp
+hlp\IGUIDE.hhp
     This file is a help project file. It contains the data needed to
     compile the help files into a .chm file.
 
-hlp\GridTargets.hhc
+hlp\IGUIDE.hhc
     This file lists the contents of the help project.
 
-hlp\GridTargets.hhk
+hlp\IGUIDE.hhk
     This file contains an index of the help topics.
 
 hlp\afxcore.htm
@@ -141,7 +141,7 @@ Other standard files:
 
 StdAfx.h, StdAfx.cpp
     These files are used to build a precompiled header (PCH) file
-    named GridTargets.pch and a precompiled types file named StdAfx.obj.
+    named IGUIDE.pch and a precompiled types file named StdAfx.obj.
 
 Resource.h
     This is the standard header file, which defines new resource IDs.

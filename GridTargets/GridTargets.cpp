@@ -71,7 +71,7 @@ BOOL CGridTargetsApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(_T("AG Harmening"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 
 
@@ -129,7 +129,6 @@ int CGridTargetsApp::ExitInstance()
 
 
 // CAboutDlg dialog used for App About
-
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -148,6 +147,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnStnClickedAo();
+	virtual BOOL OnInitDialog();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -180,3 +180,46 @@ void CAboutDlg::OnStnClickedAo()
 	(32 >= (int)ShellExecute(NULL, L"open", L"https://www.experimental-ophthalmology.uni-bonn.de/research/group-harmening", NULL, NULL, SW_SHOWNORMAL));
 }
 
+
+
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  Add extra initialization here
+	wchar_t filename[130];
+	GetModuleFileName(NULL, filename, 128);
+
+	DWORD dwDummy;
+	DWORD dwFVISize = GetFileVersionInfoSize(filename, &dwDummy);
+
+	LPBYTE lpVersionInfo = new BYTE[dwFVISize];
+
+	GetFileVersionInfo(filename, 0, dwFVISize, lpVersionInfo);
+
+	UINT uLen;
+	VS_FIXEDFILEINFO *lpFfi;
+
+	VerQueryValue(lpVersionInfo, _T("\\"), (LPVOID *)&lpFfi, &uLen);
+
+	DWORD dwFileVersionMS = lpFfi->dwFileVersionMS;
+	DWORD dwFileVersionLS = lpFfi->dwFileVersionLS;
+
+	delete[] lpVersionInfo;
+
+	DWORD dwLeftMost = HIWORD(dwFileVersionMS);
+	DWORD dwSecondLeft = LOWORD(dwFileVersionMS);
+	DWORD dwSecondRight = HIWORD(dwFileVersionLS);
+	DWORD dwRightMost = LOWORD(dwFileVersionLS);
+
+	CStringW str;
+
+	str.Format(L"Version: %d.%d.%d.%d\n", dwLeftMost, dwSecondLeft,
+		dwSecondRight, dwRightMost);
+
+	CWnd *label = GetDlgItem(IDC_VERSION);
+	label->SetWindowTextW(str);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}

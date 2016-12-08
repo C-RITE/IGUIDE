@@ -36,7 +36,7 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
-	ON_WM_RBUTTONDOWN()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 // CGridTargetsView construction/destruction
@@ -162,16 +162,6 @@ void CGridTargetsView::OnLButtonDown(UINT nFlags, CPoint point)
 	RedrawWindow();
 }
 
-
-void CGridTargetsView::OnRButtonDown(UINT nFlags, CPoint point)
-{
-	// TODO: Add your message handler code here and/or call default
-	
-	CGridTargetsDoc* pDoc = GetDocument();
-
-}
-
-
 void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
 	CGridTargetsDoc* pDoc = GetDocument();	
@@ -200,17 +190,15 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 
 	// calculate length of edges, mean edge length and angle
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
-		pDoc->computeDisplacementAngles();
-		pDoc->raster.meanEdge = 0;
+		pDoc->ComputeDisplacementAngles();
 		for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
 			pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
 			pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
-			//pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+			pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
 		}
 
 		pDoc->raster.meanEdge /= 4;
-		// ATTENTION: DEBUG CODE
-		pDoc->raster.meanAlpha = pDoc->raster.perimeter[0].alpha;
+		pDoc->raster.meanAlpha /= 4;
 	
 	}
 
@@ -246,7 +234,7 @@ int CGridTargetsView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// TODO:  Add your specialized creation code here
 
 	return 0;
-
+	Invalidate();
 }
 
 // CGridTargetsView drawing
@@ -369,4 +357,13 @@ BOOL CGridTargetsView::PreTranslateMessage(MSG* pMsg)
 	}
 
 		return CView::PreTranslateMessage(pMsg);
+}
+
+
+void CGridTargetsView::OnDestroy()
+{
+	CView::OnDestroy();
+	
+	// TODO: Add your message handler code here
+	m_pDlgTarget->OnClose();
 }

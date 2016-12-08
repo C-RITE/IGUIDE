@@ -187,7 +187,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\raygun.ico"
+IDR_MAINFRAME           ICON                    "res\\IGUIDE.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -218,16 +218,16 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About IGUIDE"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,13,21,20
     LTEXT           "IGUIDE",IDC_STATIC,42,18,65,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2016",IDC_STATIC,88,62,114,8
     DEFPUSHBUTTON   "OK",IDOK,205,115,50,14,WS_GROUP
     LTEXT           "Image Guided User Interface Directing Eyes",IDC_STATIC,42,30,144,8
-    LTEXT           "Version 0.5.0",IDC_STATIC,42,42,44,8
     LTEXT           "AG Harmening",IDC_STATIC,88,75,46,8
     CONTROL         IDB_AO,IDB_AO,"Static",SS_BITMAP | SS_NOTIFY,41,63,43,39
     LTEXT           "University Eye Hospital Bonn",IDC_STATIC,88,94,92,8
     LTEXT           "Experimental Ophthalmology",IDC_STATIC,88,86,92,8
+    LTEXT           "Static",IDC_VERSION,42,42,105,8
 END
 
 
@@ -363,8 +363,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,0,0
- PRODUCTVERSION 0,5,0,0
+ FILEVERSION 0,5,1,0
+ PRODUCTVERSION 0,5,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -381,12 +381,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.5.0.0"
+            VALUE "FileVersion", "0.5.1.0"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2016 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "GridTargets.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.5.0.0"
+            VALUE "ProductVersion", "0.5.1.0"
         END
     END
     BLOCK "VarFileInfo"

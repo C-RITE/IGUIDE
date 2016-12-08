@@ -1,4 +1,5 @@
 #pragma once
+class Edge;
 
 // Target dialog
 
@@ -19,7 +20,6 @@ public:
 	virtual ~Target();
 	void Pinpoint(float x, float y);
 
-
 private:
 
 // Dialog Data
@@ -35,4 +35,6 @@ protected:
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 
+	afx_msg void OnClose();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 };

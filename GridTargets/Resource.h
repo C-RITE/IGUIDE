@@ -15,6 +15,7 @@
 #define IDD_PROPERTIES                  334
 #define IDC_STATIC_CAL                  1002
 #define IDC_GRID                        1003
+#define IDC_VERSION                     1004
 #define ID_FILE_IMPORT                  32772
 #define ID_EDIT_PROPERTIES              32775
 #define ID_FILE_TEST                    32778
@@ -33,7 +34,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        336
 #define _APS_NEXT_COMMAND_VALUE         32787
-#define _APS_NEXT_CONTROL_VALUE         1004
+#define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           312
 #endif
 #endif

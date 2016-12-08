@@ -26,6 +26,54 @@ Target::~Target()
 	delete m_POI;
 }
 
+void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
+{
+	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+
+	// transform coordinates for fixation target (rotate and scale)
+
+	if (!m_POI)
+		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
+
+	float alpha, beta, gamma, theta;
+	float pi = atan(1) * 4;
+	float a, b, c, x, y;
+	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;
+
+	Edge k;
+	k.q.x = centerOffset_x;
+	k.q.y = centerOffset_y;
+
+	alpha = pDoc->raster.meanAlpha;
+	beta = 360 - pDoc->ComputeOrientationAngle(k);
+	gamma = alpha + beta;
+
+	a = centerOffset_x;
+	b = centerOffset_y;
+	c = sqrt(pow(a, 2) + pow(b, 2));
+
+	y = sin(gamma * pi / 180) * c * ppd_client; // calc. x shift and scale to client ppd
+	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
+
+	*m_POI = { CD2DRectF(
+		((pDoc->raster.mid.x + x) - 4),
+		((pDoc->raster.mid.y + y) - 4),
+		((pDoc->raster.mid.x + x) + 4),
+		((pDoc->raster.mid.y + y) + 4))
+	};
+
+	/*ATLTRACE(_T("alpha is %f\n"), alpha);
+	ATLTRACE(_T("beta is %f\n"), beta);
+	ATLTRACE(_T("gamma is %f\n"), gamma);
+	ATLTRACE(_T("x \t\t%f\n"), x);
+	ATLTRACE(_T("y \t\t%f\n"), y);
+	ATLTRACE(_T("c \t\t%f\n"), c);
+	ATLTRACE(_T("center \tx=%f, y=%f\n"), pDoc->m_pGrid->center.x, pDoc->m_pGrid->center.y);
+	ATLTRACE(_T("offset \tx=%f, y=%f\n"), centerOffset_x, centerOffset_y);
+	ATLTRACE(_T("POI \t %f\n\n"), *m_POI);
+	*/
+}
+
 void Target::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -35,6 +83,8 @@ void Target::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(Target, CDialog)
 	ON_WM_LBUTTONDOWN()
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
+	ON_WM_CLOSE()
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 
@@ -79,56 +129,6 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	return true;
 }
 
-void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
-{
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
-
-	// transform coordinates for fixation target (rotate and scale)
-		
-	if (!m_POI)
-		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
-
-	float alpha, beta, gamma;
-	float pi = atan(1) * 4;
-	float a, b, c, x, y;
-	ppd_client = (1 / 1.28) * pDoc->raster.meanEdge;
-
-	Edge k;
-	k.q.x = centerOffset_x *(-1);
-	k.q.y = centerOffset_y *(-1);
-	
-	alpha = pDoc->raster.meanAlpha;
-	beta = 360 - pDoc->computeDisplacementAngle(k);
-	gamma = alpha + beta;
-	
-	a = centerOffset_x ;
-	b = centerOffset_y ;
-	c = sqrt(pow(a, 2) + pow(b, 2));
-
-	y = sin(gamma * pi / 180) * -c * ppd_client; // calc. x shift and scale to client ppd
-	x = cos(gamma * pi / 180) *  c * ppd_client; // calc. y shift and scale to client ppd
-
-	*m_POI = { CD2DRectF(
-			((pDoc->raster.mid.x + x ) - 4),
-			((pDoc->raster.mid.y + y ) - 4),
-			((pDoc->raster.mid.x + x ) + 4),
-			((pDoc->raster.mid.y + y ) + 4))
-		};
-	
-	/*ATLTRACE(_T("alpha is %f\n"), alpha);
-	ATLTRACE(_T("beta is %f\n"), beta);
-	ATLTRACE(_T("gamma is %f\n"), gamma);
-	ATLTRACE(_T("x \t\t%f\n"), x);
-	ATLTRACE(_T("y \t\t%f\n"), y);
-	ATLTRACE(_T("c \t\t%f\n"), c);
-	ATLTRACE(_T("center \tx=%f, y=%f\n"), pDoc->m_pGrid->center.x, pDoc->m_pGrid->center.y);
-	ATLTRACE(_T("offset \tx=%f, y=%f\n"), centerOffset_x, centerOffset_y);
-	ATLTRACE(_T("POI \t %f\n\n"), *m_POI);
-	*/
-}
-
-
 void Target::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -157,4 +157,38 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 
 	// call default
 	// CDialog::OnLButtonUp(nFlags, point);
+}
+
+
+void Target::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CDialog::OnClose();
+
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement(&wp);
+	AfxGetApp()->WriteProfileBinary(L"IGUIDE", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
+}
+
+
+void Target::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialog::OnShowWindow(bShow, nStatus);
+	// TODO: Add your message handler code here
+	static bool bOnce = true;
+
+	if (bShow && !IsWindowVisible()
+		&& bOnce)
+	{
+		bOnce = false;
+		WINDOWPLACEMENT *lwp;
+		UINT nl;
+
+		if (AfxGetApp()->GetProfileBinary(L"IGUIDE", L"WP_Target", (LPBYTE*)&lwp, &nl))
+		{
+			SetWindowPlacement(lwp);
+			delete[] lwp;
+		}
+	}
 }

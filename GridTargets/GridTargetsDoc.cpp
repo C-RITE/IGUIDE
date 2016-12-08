@@ -77,22 +77,34 @@ CGridTargetsDoc::~CGridTargetsDoc()
 
 CGridTargetsDoc* CGridTargetsDoc::GetDoc()
 {
+	CWinApp* pApp = AfxGetApp();
+	ASSERT_VALID(pApp);
+
 	CMDIChildWnd * pChild =
 		((CMDIFrameWnd*)(AfxGetApp()->m_pMainWnd))->MDIGetActive();
 
-	if (!pChild)
-		return NULL;
+	ASSERT_VALID(pChild);
 
 	CDocument * pDoc = pChild->GetActiveDocument();
 
-	if (!pDoc)
-		return NULL;
+	if (!pDoc) {
 
-	// Fail if doc is of wrong kind
-	if (!pDoc->IsKindOf(RUNTIME_CLASS(CGridTargetsDoc)))
-		return NULL;
+		POSITION posTemplate = pApp->GetFirstDocTemplatePosition();
 
-	return (CGridTargetsDoc *)pDoc;
+		while (posTemplate != NULL) {
+			CDocTemplate* pTemplate = pApp->GetNextDocTemplate(posTemplate);
+			ASSERT_VALID(pTemplate);
+			ASSERT_KINDOF(CDocTemplate, pTemplate);
+			POSITION posDocument = pTemplate->GetFirstDocPosition();
+			while (posDocument != NULL) {
+				CDocument* pDoc = pTemplate->GetNextDoc(posDocument);
+				ASSERT_VALID(pDoc);
+				ASSERT_KINDOF(CDocument, pDoc);
+				return (CGridTargetsDoc *)pDoc;
+			}
+		}
+	}
+
 }
 
 
@@ -229,7 +241,7 @@ CString CGridTargetsDoc::getTraceInfo() {
 	k.q.x = (float)m_pGrid->centerOffset.x;
 	k.q.y = (float)m_pGrid->centerOffset.y;
 
-	float beta = 360 - computeDisplacementAngle(k);
+	float beta = 360 - ComputeOrientationAngle(k);
 	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 	
 	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
@@ -241,7 +253,7 @@ CString CGridTargetsDoc::getTraceInfo() {
 		raster.scale.y,
 		dist,
 		1 / m_pGrid->dpp,
-		raster.meanEdge/1.28);
+		raster.meanEdge/raster.size);
 	if (m_pGrid->overlay & TRACEINFO)
 	return trace;
 	return NULL;
@@ -280,7 +292,44 @@ CD2DPointF CGridTargetsDoc::compute2DPolygonCentroid(const CD2DPointF* vertices,
 
 }
 
-float CGridTargetsDoc::computeDisplacementAngle(Edge k) {
+
+float CGridTargetsDoc::ComputeDisplacementAngle(Edge k) {
+
+	float a, b;
+	float alpha;
+	float pi = atan(1) * 4;
+
+
+
+	if (k.q.x >= k.p.x && k.q.y <= k.p.y) {
+		a = abs(k.q.x - k.p.x);
+		b = abs(k.q.y - k.p.y);
+		alpha = (atan(b / a)) * 180 / pi;
+	}
+
+	else if (k.q.x <= k.p.x && k.q.y <= k.p.y) {
+		a = abs(k.p.x - k.q.x);
+		b = abs(k.q.y - k.p.y);
+		alpha = (atan(a / b)) * 180 / pi;
+	}
+
+	else if (k.q.x <= k.p.x && k.q.y >= k.p.y) {
+		a = abs(k.p.x - k.q.x);
+		b = abs(k.p.y - k.q.y);
+		alpha = (atan(b / a)) * 180 / pi;
+	}
+
+	else if (k.q.x >= k.p.x && k.q.y >= k.p.y) {
+		a = abs(k.q.x - k.p.x);
+		b = abs(k.p.y - k.q.y);
+		alpha = (atan(a / b)) * 180 / pi;
+	}
+
+	return alpha;
+
+}
+
+float CGridTargetsDoc::ComputeOrientationAngle(Edge k) {
 
 	float a, b;
 	float alpha;
@@ -314,60 +363,26 @@ float CGridTargetsDoc::computeDisplacementAngle(Edge k) {
 
 }
 
-void CGridTargetsDoc::computeDisplacementAngles() {
+void CGridTargetsDoc::ComputeDisplacementAngles() {
 
 
 	ATLTRACE(_T("\n"));
+	Edge k = raster.perimeter[0];
+	float theta = ComputeOrientationAngle(k);
 
 	for (int i = 0; i < raster.perimeter.size(); i++) {
-		raster.perimeter[i].alpha = computeDisplacementAngle(raster.perimeter[i]);
-	
-		//if (raster.perimeter[i].alpha >= 270)
-		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 90);
-		//else if (raster.perimeter[i].alpha >= 180 && raster.perimeter[i].alpha < 270)
-		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 0);
-		//else if (raster.perimeter[i].alpha >= 90 && raster.perimeter[i].alpha < 180)
-		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 270);
-		//else if (raster.perimeter[i].alpha >= 0 && raster.perimeter[i].alpha < 90)
-		//	raster.perimeter[i].alpha = abs(raster.perimeter[i].alpha - 180);
+		raster.perimeter[i].alpha = ComputeDisplacementAngle(raster.perimeter[i]);
+		if (theta > 90 && theta <= 180)
+			raster.perimeter[i].alpha += 90;
+		if (theta > 180 && theta <= 270)
+			raster.perimeter[i].alpha += 180;
+		if (theta > 270 && theta <= 360)
+			raster.perimeter[i].alpha += 270;
 	}
+		for (int i = 0; i < raster.perimeter.size(); i++)
+			ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
 
-	//Edge k;
-	//k.p.x = raster.mid.x;
-	//k.p.y = raster.mid.y;
-	//k.q.x = raster.perimeter[0].p.x,
-	//k.q.y = raster.perimeter[0].p.y;
-
-	//float theta = computeDisplacementAngle(k);
-	//ATLTRACE(_T("theta is %f\n"), theta);
-
-	//if (theta >= 90 && theta < 180 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
-	//	for (int i = 0; i < raster.perimeter.size(); i++) {
-	//		raster.perimeter[i].alpha += 270;
-	//	}
-
-	//if (theta >= 0 && theta < 90 && raster.perimeter[0].q.y > raster.perimeter[0].p.y)
-	//	for (int i = 0; i < raster.perimeter.size(); i++) {
-	//		raster.perimeter[i].alpha += 180;
-	//	}
-
-	//if (theta <= 360 && theta > 270 && raster.perimeter[0].p.x > raster.perimeter[0].q.x)
-	//	for (int i = 0; i < raster.perimeter.size(); i++) {
-	//		raster.perimeter[i].alpha += 90;
-	//	}
-
-	//if (theta <= 270 && theta > 180 && raster.perimeter[0].p.y > raster.perimeter[0].q.y)
-	//	for (int i = 0; i < raster.perimeter.size(); i++) {
-	//		raster.perimeter[i].alpha += 0;
-	//	}
-
-
-	//for (int i = 0; i < raster.perimeter.size(); i++) {
-	//	ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
-	//}
-	//
 }
-
 
 
 void CGridTargetsDoc::OnFileImport()

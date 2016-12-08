@@ -189,7 +189,7 @@ void Calibration::OnBnClickedOk()
 			pDoc->m_pFundus->calibration = TRUE;
 			m_D2DStatic.m_clicked = 0;
 			m_D2DStatic.k.length = pDoc->CalcEdgeLength(m_D2DStatic.k);
-			m_D2DStatic.k.alpha = pDoc->computeDisplacementAngle(m_D2DStatic.k);
+			m_D2DStatic.k.alpha = pDoc->ComputeDisplacementAngle(m_D2DStatic.k);
 			CDialog::OnOK();
 			break;
 		default:

@@ -18,6 +18,7 @@ IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -85,3 +86,37 @@ void CMainFrame::Dump(CDumpContext& dc) const
 	CMDIFrameWnd::Dump(dc);
 }
 #endif //_DEBUG
+
+
+BOOL CMainFrame::DestroyWindow()
+{
+	// TODO: Add your specialized code here and/or call the base class
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement(&wp);
+	AfxGetApp()->WriteProfileBinary(L"IGUIDE", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
+
+	return CMDIFrameWnd::DestroyWindow();
+}
+
+
+void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	
+	// TODO: Add your message handler code here
+	CMDIFrameWnd::OnShowWindow(bShow, nStatus);
+	static bool bOnce = true;
+
+	if (bShow && !IsWindowVisible()
+		&& bOnce)
+	{
+		bOnce = false;
+		WINDOWPLACEMENT *lwp;
+		UINT nl;
+
+		if (AfxGetApp()->GetProfileBinary(L"IGUIDE", L"WP_Main", (LPBYTE*)&lwp, &nl))
+		{
+			SetWindowPlacement(lwp);
+			delete[] lwp;
+		}
+	}
+}

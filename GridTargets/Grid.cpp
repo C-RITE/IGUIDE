@@ -3,6 +3,7 @@
 #include <sstream>
 #include "Target.h"
 #include "GridTargetsDoc.h"
+#include "GridTargetsView.h"
 #include "resource.h"
 
 using namespace std;
@@ -178,6 +179,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 }
 
 void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
+
 
 	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
 	

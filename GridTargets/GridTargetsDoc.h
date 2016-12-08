@@ -32,8 +32,9 @@ public:
 	static CGridTargetsDoc* GetDoc();
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
-	void computeDisplacementAngles();
-	float computeDisplacementAngle(Edge k);
+	void ComputeDisplacementAngles();
+	float ComputeDisplacementAngle(Edge k);
+	float ComputeOrientationAngle(Edge k);
 	CString getTraceInfo();
 
 	// Overrides
