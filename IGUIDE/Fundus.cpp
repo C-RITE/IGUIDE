@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "GridTargets.h"
-#include "GridTargetsDoc.h"
+#include "IGUIDE.h"
+#include "IGUIDEDoc.h"
 #include "Fundus.h"
 
 
@@ -21,7 +21,7 @@ Fundus::~Fundus()
 void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
 
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
 		float ppd = 1/pDoc->m_pGrid->dpp;

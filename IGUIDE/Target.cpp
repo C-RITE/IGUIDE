@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "GridTargets.h"
-#include "GridTargetsDoc.h"
+#include "IGUIDE.h"
+#include "IGUIDEDoc.h"
 #include "Target.h"
 #include "afxdialogex.h"
 
@@ -28,7 +28,7 @@ Target::~Target()
 
 void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 {
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	// transform coordinates for fixation target (rotate and scale)
 
@@ -92,7 +92,7 @@ END_MESSAGE_MAP()
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);
@@ -136,8 +136,8 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 	
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc;
+	pDoc = CIGUIDEDoc::GetDoc();
 
 	if (pDoc->raster.corner.size() < 4)
 		pDoc->raster.corner.push_back(d2dpoint);

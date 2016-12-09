@@ -1,16 +1,16 @@
 
-// GridTargetsDoc.cpp : implementation of the CGridTargetsDoc class
+// IGUIDEDoc.cpp : implementation of the CIGUIDEDoc class
 //
 
 #include "stdafx.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "GridTargets.h"
+#include "IGUIDE.h"
 #include "Fundus.h"
 #endif
 
-#include "GridTargetsDoc.h"
+#include "IGUIDEDoc.h"
 #include "Grid.h"
 #include <math.h>
 
@@ -23,33 +23,33 @@
 
 using namespace D2D1;
 
-// CGridTargetsDoc
+// CIGUIDEDoc
 
-IMPLEMENT_DYNCREATE(CGridTargetsDoc, CDocument)
+IMPLEMENT_DYNCREATE(CIGUIDEDoc, CDocument)
 
-BEGIN_MESSAGE_MAP(CGridTargetsDoc, CDocument)
-	ON_COMMAND(ID_FILE_IMPORT, &CGridTargetsDoc::OnFileImport)
-	ON_COMMAND(ID_EDIT_PROPERTIES, &CGridTargetsDoc::OnEditProperties)
-	ON_COMMAND(ID_OVERLAY_GRID, &CGridTargetsDoc::OnOverlayGrid)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CGridTargetsDoc::OnUpdateOverlayGrid)
-	ON_COMMAND(ID_OVERLAY_RADIUS, &CGridTargetsDoc::OnOverlayRadius)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CGridTargetsDoc::OnUpdateOverlayRadius)
-	ON_COMMAND(ID_OVERLAY_FOVEA, &CGridTargetsDoc::OnOverlayFovea)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FOVEA, &CGridTargetsDoc::OnUpdateOverlayFovea)
-	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CGridTargetsDoc::OnOverlayOpticdisc)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_OPTICDISC, &CGridTargetsDoc::OnUpdateOverlayOpticdisc)
-	ON_COMMAND(ID_OVERLAY_CROSSHAIR, &CGridTargetsDoc::OnOverlayCrosshair)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_CROSSHAIR, &CGridTargetsDoc::OnUpdateOverlayCrosshair)
-	ON_COMMAND(ID_OVERLAY_FUNDUS, &CGridTargetsDoc::OnOverlayFundus)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FUNDUS, &CGridTargetsDoc::OnUpdateOverlayFundus)
-	ON_COMMAND(ID_OVERLAY_TRACEINFO, &CGridTargetsDoc::OnOverlayTraceinfo)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TRACEINFO, &CGridTargetsDoc::OnUpdateOverlayTraceinfo)
+BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
+	ON_COMMAND(ID_FILE_IMPORT, &CIGUIDEDoc::OnFileImport)
+	ON_COMMAND(ID_EDIT_PROPERTIES, &CIGUIDEDoc::OnEditProperties)
+	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
+	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnUpdateOverlayRadius)
+	ON_COMMAND(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnOverlayFovea)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnUpdateOverlayFovea)
+	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnOverlayOpticdisc)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnUpdateOverlayOpticdisc)
+	ON_COMMAND(ID_OVERLAY_CROSSHAIR, &CIGUIDEDoc::OnOverlayCrosshair)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_CROSSHAIR, &CIGUIDEDoc::OnUpdateOverlayCrosshair)
+	ON_COMMAND(ID_OVERLAY_FUNDUS, &CIGUIDEDoc::OnOverlayFundus)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FUNDUS, &CIGUIDEDoc::OnUpdateOverlayFundus)
+	ON_COMMAND(ID_OVERLAY_TRACEINFO, &CIGUIDEDoc::OnOverlayTraceinfo)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TRACEINFO, &CIGUIDEDoc::OnUpdateOverlayTraceinfo)
 END_MESSAGE_MAP()
 
 
-// CGridTargetsDoc construction/destruction
+// CIGUIDEDoc construction/destruction
 
-CGridTargetsDoc::CGridTargetsDoc()
+CIGUIDEDoc::CIGUIDEDoc()
 {
 	// TODO: add one-time construction code here
 
@@ -63,7 +63,7 @@ CGridTargetsDoc::CGridTargetsDoc()
 
 }
 
-CGridTargetsDoc::~CGridTargetsDoc()
+CIGUIDEDoc::~CIGUIDEDoc()
 {
 	delete m_pGrid;
 	delete m_pFundus;
@@ -75,7 +75,7 @@ CGridTargetsDoc::~CGridTargetsDoc()
 
 // Get Doc, made for other classes that need access to attributes
 
-CGridTargetsDoc* CGridTargetsDoc::GetDoc()
+CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 {
 	CWinApp* pApp = AfxGetApp();
 	ASSERT_VALID(pApp);
@@ -100,7 +100,7 @@ CGridTargetsDoc* CGridTargetsDoc::GetDoc()
 				CDocument* pDoc = pTemplate->GetNextDoc(posDocument);
 				ASSERT_VALID(pDoc);
 				ASSERT_KINDOF(CDocument, pDoc);
-				return (CGridTargetsDoc *)pDoc;
+				return (CIGUIDEDoc *)pDoc;
 			}
 		}
 	}
@@ -108,7 +108,7 @@ CGridTargetsDoc* CGridTargetsDoc::GetDoc()
 }
 
 
-BOOL CGridTargetsDoc::OnNewDocument()
+BOOL CIGUIDEDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
 		return FALSE;
@@ -121,9 +121,9 @@ BOOL CGridTargetsDoc::OnNewDocument()
 }
 
 
-// CGridTargetsDoc serialization
+// CIGUIDEDoc serialization
 
-void CGridTargetsDoc::Serialize(CArchive& ar)
+void CIGUIDEDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
@@ -138,7 +138,7 @@ void CGridTargetsDoc::Serialize(CArchive& ar)
 #ifdef SHARED_HANDLERS
 
 // Support for thumbnails
-void CGridTargetsDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
+void CIGUIDEDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 {
 	// Modify this code to draw the document's data
 	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
@@ -159,7 +159,7 @@ void CGridTargetsDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 }
 
 // Support for Search Handlers
-void CGridTargetsDoc::InitializeSearchContent()
+void CIGUIDEDoc::InitializeSearchContent()
 {
 	CString strSearchContent;
 	// Set search contents from document's data. 
@@ -169,7 +169,7 @@ void CGridTargetsDoc::InitializeSearchContent()
 	SetSearchContent(strSearchContent);
 }
 
-void CGridTargetsDoc::SetSearchContent(const CString& value)
+void CIGUIDEDoc::SetSearchContent(const CString& value)
 {
 	if (value.IsEmpty())
 	{
@@ -189,25 +189,25 @@ void CGridTargetsDoc::SetSearchContent(const CString& value)
 
 #endif // SHARED_HANDLERS
 
-// CGridTargetsDoc diagnostics
+// CIGUIDEDoc diagnostics
 
 #ifdef _DEBUG
-void CGridTargetsDoc::AssertValid() const
+void CIGUIDEDoc::AssertValid() const
 {
 	CDocument::AssertValid();
 }
 
-void CGridTargetsDoc::Dump(CDumpContext& dc) const
+void CIGUIDEDoc::Dump(CDumpContext& dc) const
 {
 	CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
 
-// CGridTargetsDoc commands
+// CIGUIDEDoc commands
 
 
-BOOL CGridTargetsDoc::CheckFOV()
+BOOL CIGUIDEDoc::CheckFOV()
 {
 
 	if (raster.corner.size() < 4) {
@@ -219,7 +219,7 @@ BOOL CGridTargetsDoc::CheckFOV()
 
 }
 
-float CGridTargetsDoc::CalcEdgeLength(Edge k) {
+float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 	
 	float a, b, c;
 
@@ -232,7 +232,7 @@ float CGridTargetsDoc::CalcEdgeLength(Edge k) {
 
 }
 
-CString CGridTargetsDoc::getTraceInfo() {
+CString CIGUIDEDoc::getTraceInfo() {
 
 	POSITION pos = GetFirstViewPosition();
 	CWnd* target = GetNextView(pos);
@@ -260,7 +260,7 @@ CString CGridTargetsDoc::getTraceInfo() {
 
 }
 
-CD2DPointF CGridTargetsDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount)
+CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount)
 {
 	CD2DPointF centroid = { 0, 0 };
 	float signedArea = 0.0;
@@ -293,7 +293,7 @@ CD2DPointF CGridTargetsDoc::compute2DPolygonCentroid(const CD2DPointF* vertices,
 }
 
 
-float CGridTargetsDoc::ComputeDisplacementAngle(Edge k) {
+float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 
 	float a, b;
 	float alpha;
@@ -329,7 +329,7 @@ float CGridTargetsDoc::ComputeDisplacementAngle(Edge k) {
 
 }
 
-float CGridTargetsDoc::ComputeOrientationAngle(Edge k) {
+float CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 
 	float a, b;
 	float alpha;
@@ -363,7 +363,7 @@ float CGridTargetsDoc::ComputeOrientationAngle(Edge k) {
 
 }
 
-void CGridTargetsDoc::ComputeDisplacementAngles() {
+void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 
 	ATLTRACE(_T("\n"));
@@ -385,7 +385,7 @@ void CGridTargetsDoc::ComputeDisplacementAngles() {
 }
 
 
-void CGridTargetsDoc::OnFileImport()
+void CIGUIDEDoc::OnFileImport()
 {
 	// TODO: Add your command handler code here
 
@@ -406,13 +406,13 @@ void CGridTargetsDoc::OnFileImport()
 }
 
 
-void CGridTargetsDoc::OnEditProperties()
+void CIGUIDEDoc::OnEditProperties()
 {
 	m_pDlgProperties->DoModal();
 	// TODO: Add your command handler code here
 }
 
-void CGridTargetsDoc::OnOverlayGrid()
+void CIGUIDEDoc::OnOverlayGrid()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & GRID)
@@ -423,14 +423,14 @@ void CGridTargetsDoc::OnOverlayGrid()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayGrid(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayGrid(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & GRID);
 }
 
 
-void CGridTargetsDoc::OnOverlayRadius()
+void CIGUIDEDoc::OnOverlayRadius()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & DEGRAD)
@@ -441,14 +441,14 @@ void CGridTargetsDoc::OnOverlayRadius()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
 }
 
 
-void CGridTargetsDoc::OnOverlayFovea()
+void CIGUIDEDoc::OnOverlayFovea()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & FOVEA)
@@ -459,14 +459,14 @@ void CGridTargetsDoc::OnOverlayFovea()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & FOVEA);
 }
 
 
-void CGridTargetsDoc::OnOverlayOpticdisc()
+void CIGUIDEDoc::OnOverlayOpticdisc()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & OPTICDISC)
@@ -477,14 +477,14 @@ void CGridTargetsDoc::OnOverlayOpticdisc()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & OPTICDISC);
 }
 
 
-void CGridTargetsDoc::OnOverlayCrosshair()
+void CIGUIDEDoc::OnOverlayCrosshair()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & CROSSHAIR)
@@ -495,14 +495,14 @@ void CGridTargetsDoc::OnOverlayCrosshair()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayCrosshair(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayCrosshair(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & CROSSHAIR);
 }
 
 
-void CGridTargetsDoc::OnOverlayFundus()
+void CIGUIDEDoc::OnOverlayFundus()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & FUNDUS)
@@ -513,14 +513,14 @@ void CGridTargetsDoc::OnOverlayFundus()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayFundus(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayFundus(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & FUNDUS);
 }
 
 
-void CGridTargetsDoc::OnOverlayTraceinfo()
+void CIGUIDEDoc::OnOverlayTraceinfo()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & TRACEINFO)
@@ -531,7 +531,7 @@ void CGridTargetsDoc::OnOverlayTraceinfo()
 }
 
 
-void CGridTargetsDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & TRACEINFO);

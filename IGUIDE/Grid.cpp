@@ -2,8 +2,8 @@
 #include "Grid.h"
 #include <sstream>
 #include "Target.h"
-#include "GridTargetsDoc.h"
-#include "GridTargetsView.h"
+#include "IGUIDEDoc.h"
+#include "IGUIDEView.h"
 #include "resource.h"
 
 using namespace std;
@@ -58,8 +58,8 @@ void Grid::ClearTaglist() {
 
 void Grid::StoreClick(CD2DPointF loc) {
 
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc;
+	pDoc = CIGUIDEDoc::GetDoc();
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
@@ -181,7 +181,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
@@ -267,7 +267,7 @@ bool Grid::SaveToFile() {
 
 void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos)
 {
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	CString traceText;
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();

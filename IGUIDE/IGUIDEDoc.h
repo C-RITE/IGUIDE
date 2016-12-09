@@ -1,5 +1,5 @@
 
-// GridTargetsDoc.h : interface of the CGridTargetsDoc class
+// IGUIDEDoc.h : interface of the CIGUIDEDoc class
 //
 
 #pragma once
@@ -10,11 +10,11 @@
 #include "Properties.h"
 #include "afxrendertarget.h"
 
-class CGridTargetsDoc : public CDocument
+class CIGUIDEDoc : public CDocument
 {
 protected: // create from serialization only
-	CGridTargetsDoc();
-	DECLARE_DYNCREATE(CGridTargetsDoc)
+	CIGUIDEDoc();
+	DECLARE_DYNCREATE(CIGUIDEDoc)
 
 	// Attributes
 public:
@@ -29,7 +29,7 @@ public:
 // Operations
 public:
 	BOOL CheckFOV();
-	static CGridTargetsDoc* GetDoc();
+	static CIGUIDEDoc* GetDoc();
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
 	void ComputeDisplacementAngles();
@@ -49,7 +49,7 @@ public:
 
 	// Implementation
 public:
-	virtual ~CGridTargetsDoc();
+	virtual ~CIGUIDEDoc();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

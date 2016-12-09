@@ -1,5 +1,5 @@
 
-// GridTargets.h : main header file for the GridTargets application
+// IGUIDE.h : main header file for the IGUIDE application
 //
 #pragma once
 
@@ -10,14 +10,14 @@
 #include "resource.h"       // main symbols
 
 
-// CGridTargetsApp:
-// See GridTargets.cpp for the implementation of this class
+// CIGUIDEApp:
+// See IGUIDE.cpp for the implementation of this class
 //
 
-class CGridTargetsApp : public CWinApp
+class CIGUIDEApp : public CWinApp
 {
 public:
-	CGridTargetsApp();
+	CIGUIDEApp();
 
 // Overrides
 public:
@@ -29,4 +29,4 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-extern CGridTargetsApp theApp;
+extern CIGUIDEApp theApp;

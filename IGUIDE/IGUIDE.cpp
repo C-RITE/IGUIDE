@@ -1,25 +1,25 @@
 
-// GridTargets.cpp : Defines the class behaviors for the application.
+// IGUIDE.cpp : Defines the class behaviors for the application.
 //
 
 #include "stdafx.h"
 #include "afxwinappex.h"
 #include "afxdialogex.h"
-#include "GridTargets.h"
+#include "IGUIDE.h"
 #include "MainFrm.h"
 #include "ChildFrm.h"
-#include "GridTargetsDoc.h"
-#include "GridTargetsView.h"
+#include "IGUIDEDoc.h"
+#include "IGUIDEView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CGridTargetsApp
+// CIGUIDEApp
 
-BEGIN_MESSAGE_MAP(CGridTargetsApp, CWinApp)
-	ON_COMMAND(ID_APP_ABOUT, &CGridTargetsApp::OnAppAbout)
+BEGIN_MESSAGE_MAP(CIGUIDEApp, CWinApp)
+	ON_COMMAND(ID_APP_ABOUT, &CIGUIDEApp::OnAppAbout)
 	// Standard file based document commands
 	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
@@ -28,9 +28,9 @@ BEGIN_MESSAGE_MAP(CGridTargetsApp, CWinApp)
 END_MESSAGE_MAP()
 
 
-// CGridTargetsApp construction
+// CIGUIDEApp construction
 
-CGridTargetsApp::CGridTargetsApp()
+CIGUIDEApp::CIGUIDEApp()
 {
 	// support Restart Manager
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART_ASPECTS;
@@ -43,20 +43,20 @@ CGridTargetsApp::CGridTargetsApp()
 
 	// TODO: replace application ID string below with unique ID string; recommended
 	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
-	SetAppID(_T("GridTargets.AppID.NoVersion"));
+	SetAppID(_T("IGUIDE.AppID.NoVersion"));
 
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
 }
 
-// The one and only CGridTargetsApp object
+// The one and only CIGUIDEApp object
 
-CGridTargetsApp theApp;
+CIGUIDEApp theApp;
 
 
-// CGridTargetsApp initialization
+// CIGUIDEApp initialization
 
-BOOL CGridTargetsApp::InitInstance()
+BOOL CIGUIDEApp::InitInstance()
 {
 	CWinApp::InitInstance();
 	EnableTaskbarInteraction(FALSE);
@@ -78,10 +78,10 @@ BOOL CGridTargetsApp::InitInstance()
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	CMultiDocTemplate* pDocTemplate;
-	pDocTemplate = new CMultiDocTemplate(IDR_GridTargetsTYPE,
-		RUNTIME_CLASS(CGridTargetsDoc),
+	pDocTemplate = new CMultiDocTemplate(IDR_IGUIDETYPE,
+		RUNTIME_CLASS(CIGUIDEDoc),
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
-		RUNTIME_CLASS(CGridTargetsView));
+		RUNTIME_CLASS(CIGUIDEView));
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
@@ -119,13 +119,13 @@ BOOL CGridTargetsApp::InitInstance()
 	return TRUE;
 }
 
-int CGridTargetsApp::ExitInstance()
+int CIGUIDEApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
 	return CWinApp::ExitInstance();
 }
 
-// CGridTargetsApp message handlers
+// CIGUIDEApp message handlers
 
 
 // CAboutDlg dialog used for App About
@@ -165,13 +165,13 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 // App command to run the dialog
-void CGridTargetsApp::OnAppAbout()
+void CIGUIDEApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
 }
 
-// CGridTargetsApp message handlers
+// CIGUIDEApp message handlers
 
 
 void CAboutDlg::OnStnClickedAo()

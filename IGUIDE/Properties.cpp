@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "Properties.h"
-#include "GridTargetsDoc.h"
+#include "IGUIDEDoc.h"
 #include "afxdialogex.h"
 
 // Properties dialog
@@ -36,7 +36,7 @@ BOOL Properties::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	HSECTION hs = m_ctrlGrid.AddSection(L"Raster");
 	m_ctrlGrid.AddDoubleItem(hs, L"Field Size", pDoc->raster.size, L"%g deg");

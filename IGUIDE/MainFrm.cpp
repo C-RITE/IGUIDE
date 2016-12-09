@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "GridTargets.h"
+#include "IGUIDE.h"
 
 #include "MainFrm.h"
 

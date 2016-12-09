@@ -1,19 +1,19 @@
 
-// GridTargetsView.h : interface of the CGridTargetsView class
+// IGUIDEView.h : interface of the CIGUIDEView class
 //
 
 #pragma once
 
 
-class CGridTargetsView : public CView
+class CIGUIDEView : public CView
 {
 protected: // create from serialization only
-	CGridTargetsView();
-	DECLARE_DYNCREATE(CGridTargetsView)
+	CIGUIDEView();
+	DECLARE_DYNCREATE(CIGUIDEView)
 
 // Attributes
 public:
-	CGridTargetsDoc*	GetDocument() const;
+	CIGUIDEDoc*	GetDocument() const;
 	Target*				m_pDlgTarget;
 
 private:
@@ -34,7 +34,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CGridTargetsView();
+	virtual ~CIGUIDEView();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -61,8 +61,8 @@ public:
 	afx_msg void OnDestroy();
 };
 
-#ifndef _DEBUG  // debug version in GridTargetsView.cpp
-inline CGridTargetsDoc* CGridTargetsView::GetDocument() const
-   { return reinterpret_cast<CGridTargetsDoc*>(m_pDocument); }
+#ifndef _DEBUG  // debug version in IGUIDEView.cpp
+inline CIGUIDEDoc* CIGUIDEView::GetDocument() const
+   { return reinterpret_cast<CIGUIDEDoc*>(m_pDocument); }
 #endif
 

@@ -21,7 +21,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GridTargets.h">
+    <ClInclude Include="IGUIDE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -36,10 +36,10 @@
     <ClInclude Include="ChildFrm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GridTargetsDoc.h">
+    <ClInclude Include="IGUIDEDoc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GridTargetsView.h">
+    <ClInclude Include="IGUIDEView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
@@ -92,7 +92,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GridTargets.cpp">
+    <ClCompile Include="IGUIDE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -104,10 +104,10 @@
     <ClCompile Include="ChildFrm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GridTargetsDoc.cpp">
+    <ClCompile Include="IGUIDEDoc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GridTargetsView.cpp">
+    <ClCompile Include="IGUIDEView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Target.cpp">
@@ -154,19 +154,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\GridTargets.rc2">
+    <None Include="res\IGUIDE.rc2">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GridTargets.rc">
+    <ResourceCompile Include="IGUIDE.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\GridTargetsDoc.ico">
+    <Image Include="res\IGUIDEDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\raygun.ico">

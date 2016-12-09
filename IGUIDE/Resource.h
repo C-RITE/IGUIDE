@@ -1,10 +1,10 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by GridTargets.rc
+// Used by IGUIDE.rc
 //
 #define IDD_ABOUTBOX                    100
 #define IDR_MAINFRAME                   128
-#define IDR_GridTargetsTYPE             130
+#define IDR_IGUIDETYPE             130
 #define ID_WINDOW_MANAGER               131
 #define IDD_TARGET                      310
 #define IDD_CALIBRATION                 311

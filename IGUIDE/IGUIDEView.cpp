@@ -1,16 +1,16 @@
 
-// GridTargetsView.cpp : implementation of the CGridTargetsView class
+// IGUIDEView.cpp : implementation of the CIGUIDEView class
 //
 
 #include "stdafx.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "GridTargets.h"
+#include "IGUIDE.h"
 #endif
 
-#include "GridTargetsDoc.h"
-#include "GridTargetsView.h"
+#include "IGUIDEDoc.h"
+#include "IGUIDEView.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
@@ -20,16 +20,16 @@
 using namespace D2D1;
 
 
-// CGridTargetsView
+// CIGUIDEView
 
-IMPLEMENT_DYNCREATE(CGridTargetsView, CView)
+IMPLEMENT_DYNCREATE(CIGUIDEView, CView)
 
-BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
+BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
-	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &CGridTargetsView::OnDraw2d)
+	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &CIGUIDEView::OnDraw2d)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
@@ -39,9 +39,9 @@ BEGIN_MESSAGE_MAP(CGridTargetsView, CView)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
-// CGridTargetsView construction/destruction
+// CIGUIDEView construction/destruction
 
-CGridTargetsView::CGridTargetsView()
+CIGUIDEView::CIGUIDEView()
 {
 	// Draw the Target View as a new Target Dialog
 	m_pDlgTarget = new Target();
@@ -51,13 +51,13 @@ CGridTargetsView::CGridTargetsView()
 
 }
 
-CGridTargetsView::~CGridTargetsView()
+CIGUIDEView::~CIGUIDEView()
 {
 	delete m_pDlgTarget;
 
 }
 
-BOOL CGridTargetsView::PreCreateWindow(CREATESTRUCT& cs)
+BOOL CIGUIDEView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
@@ -66,54 +66,54 @@ BOOL CGridTargetsView::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 
-// CGridTargetsView printing
+// CIGUIDEView printing
 
-BOOL CGridTargetsView::OnPreparePrinting(CPrintInfo* pInfo)
+BOOL CIGUIDEView::OnPreparePrinting(CPrintInfo* pInfo)
 {
 	// default preparation
 	return DoPreparePrinting(pInfo);
 }
 
-void CGridTargetsView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void CIGUIDEView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add extra initialization before printing
 }
 
-void CGridTargetsView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add cleanup after printing
 }
 
 
-// CGridTargetsView diagnostics
+// CIGUIDEView diagnostics
 
 #ifdef _DEBUG
-void CGridTargetsView::AssertValid() const
+void CIGUIDEView::AssertValid() const
 {
 	CView::AssertValid();
 }
 
-void CGridTargetsView::Dump(CDumpContext& dc) const
+void CIGUIDEView::Dump(CDumpContext& dc) const
 {
 	CView::Dump(dc);
 }
 
-CGridTargetsDoc* CGridTargetsView::GetDocument() const // non-debug version is inline
+CIGUIDEDoc* CIGUIDEView::GetDocument() const // non-debug version is inline
 {
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CGridTargetsDoc)));
-	return (CGridTargetsDoc*)m_pDocument;
+	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CIGUIDEDoc)));
+	return (CIGUIDEDoc*)m_pDocument;
 }
 #endif //_DEBUG
 
 
-// CGridTargetsView message handlers
+// CIGUIDEView message handlers
 
 
-void CGridTargetsView::OnLButtonUp(UINT nFlags, CPoint point)
+void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 
 	if (pDoc->CheckFOV()) {
 		pDoc->m_pGrid->StoreClick(static_cast<CD2DPointF>(point));
@@ -131,11 +131,11 @@ void CGridTargetsView::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CGridTargetsView::OnMouseMove(UINT nFlags, CPoint point)
+void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 
 	if (pDoc->mousePos)
 		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
@@ -147,11 +147,11 @@ void CGridTargetsView::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 
-void CGridTargetsView::OnLButtonDown(UINT nFlags, CPoint point)
+void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 
 	if (!pDoc->mousePos && pDoc->CheckFOV()) {
 		pDoc->mousePos = (CPoint*)malloc(sizeof(CPoint));
@@ -162,9 +162,9 @@ void CGridTargetsView::OnLButtonDown(UINT nFlags, CPoint point)
 	RedrawWindow();
 }
 
-void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
+void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
-	CGridTargetsDoc* pDoc = GetDocument();	
+	CIGUIDEDoc* pDoc = GetDocument();	
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 	CD2DPointF* FOV = new CD2DPointF[4];
 	
@@ -223,7 +223,7 @@ void CGridTargetsView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /
 	delete FOV;
 }
 
-int CGridTargetsView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -237,14 +237,14 @@ int CGridTargetsView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Invalidate();
 }
 
-// CGridTargetsView drawing
+// CIGUIDEView drawing
 
-afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);
 	
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return FALSE;
@@ -286,7 +286,7 @@ afx_msg LRESULT CGridTargetsView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 }
 
-void CGridTargetsView::OnDraw(CDC* /*pDC*/)
+void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	
@@ -295,10 +295,10 @@ void CGridTargetsView::OnDraw(CDC* /*pDC*/)
 }
 
 
-void CGridTargetsView::OnSize(UINT nType, int cx, int cy)
+void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 	CRect rect;
 	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
 	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
@@ -313,11 +313,11 @@ void CGridTargetsView::OnSize(UINT nType, int cx, int cy)
 }
 
 
-BOOL CGridTargetsView::PreTranslateMessage(MSG* pMsg)
+BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	
-	CGridTargetsDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = GetDocument();
 
 	if (pDoc->m_pGrid->taglist.size() > 0) {
 		if (pMsg->message == WM_KEYDOWN) {
@@ -360,7 +360,7 @@ BOOL CGridTargetsView::PreTranslateMessage(MSG* pMsg)
 }
 
 
-void CGridTargetsView::OnDestroy()
+void CIGUIDEView::OnDestroy()
 {
 	CView::OnDestroy();
 	

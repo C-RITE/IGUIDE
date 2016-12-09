@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81A6AFD9-6CC5-4032-AF8D-226FA32F1C62}</ProjectGuid>
-    <RootNamespace>GridTargets</RootNamespace>
+    <RootNamespace>IGUIDE</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
     <ProjectName>IGUIDE</ProjectName>
@@ -196,9 +196,9 @@
     <ClInclude Include="Edge.h" />
     <ClInclude Include="Fundus.h" />
     <ClInclude Include="Grid.h" />
-    <ClInclude Include="GridTargets.h" />
-    <ClInclude Include="GridTargetsDoc.h" />
-    <ClInclude Include="GridTargetsView.h" />
+    <ClInclude Include="IGUIDE.h" />
+    <ClInclude Include="IGUIDEDoc.h" />
+    <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="PropertyGrid.h" />
@@ -220,9 +220,9 @@
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Fundus.cpp" />
     <ClCompile Include="Grid.cpp" />
-    <ClCompile Include="GridTargets.cpp" />
-    <ClCompile Include="GridTargetsDoc.cpp" />
-    <ClCompile Include="GridTargetsView.cpp" />
+    <ClCompile Include="IGUIDE.cpp" />
+    <ClCompile Include="IGUIDEDoc.cpp" />
+    <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="PropertyGrid.cpp" />
@@ -242,23 +242,22 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
-    <None Include="res\GridTargets.rc2" />
+    <None Include="res\IGUIDE.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GridTargets.rc" />
+    <ResourceCompile Include="IGUIDE.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ao.bmp" />
-    <Image Include="res\GridTargetsDoc.ico" />
+    <Image Include="res\IGUIDEDoc.ico" />
     <Image Include="res\IGUIDE.ico" />
-    <Image Include="res\raygun.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="GridTargets.rc" />
+      <UserProperties RESOURCE_FILE="IGUIDE.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include "Calibration.h"
 #include "afxdialogex.h"
-#include "GridTargets.h"
-#include "GridTargetsDoc.h"
+#include "IGUIDE.h"
+#include "IGUIDEDoc.h"
 #include "Resource.h"
 using namespace D2D1;
 
@@ -17,7 +17,7 @@ IMPLEMENT_DYNAMIC(D2DStatic, CStatic)
 void D2DStatic::PreSubclassWindow()
 {
 	EnableD2DSupport();
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	fundus = new CD2DBitmap(GetRenderTarget(), *pDoc->m_pFundus->filename);
 	fundus->Create(GetRenderTarget());
 
@@ -87,7 +87,7 @@ afx_msg LRESULT D2DStatic::OnDraw2d(WPARAM wParam, LPARAM lParam) {
 
 void D2DStatic::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CRect rect;
 	CD2DSizeF size = fundus->GetSize();
 	GetWindowRect(&rect);
@@ -160,8 +160,8 @@ void Calibration::DoDataExchange(CDataExchange* pDX)
 
 void Calibration::ClientResize(int nWidth, int nHeight)
 {
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc;
+	pDoc = CIGUIDEDoc::GetDoc();
 	CD2DSizeF size = pDoc->m_pFundus->picture->GetSize();
 	RECT rcClient, rcWind;
 	POINT ptDiff;
@@ -183,7 +183,7 @@ END_MESSAGE_MAP()
 void Calibration::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
-	CGridTargetsDoc* pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	switch (m_D2DStatic.m_clicked) {
 		case (3) :
 			pDoc->m_pFundus->calibration = TRUE;
@@ -201,8 +201,8 @@ BOOL Calibration::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	// TODO: Add your specialized code here and/or call the base class
-	CGridTargetsDoc* pDoc;
-	pDoc = CGridTargetsDoc::GetDoc();
+	CIGUIDEDoc* pDoc;
+	pDoc = CIGUIDEDoc::GetDoc();
 
 	// Get the current work area
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);
