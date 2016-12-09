@@ -46,7 +46,10 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
-	gamma = alpha + beta;
+	if (alpha + beta > 360)
+		gamma = beta - alpha;
+	else
+		gamma = alpha + beta;
 
 	a = centerOffset_x;
 	b = centerOffset_y;

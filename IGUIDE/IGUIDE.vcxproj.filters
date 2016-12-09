@@ -169,9 +169,6 @@
     <Image Include="res\IGUIDEDoc.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\raygun.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\ao.bmp">
       <Filter>Resource Files</Filter>
     </Image>

@@ -29,8 +29,12 @@ Grid::Grid()
 		D2D1_LAYER_OPTIONS_NONE };
 	pLayer = new CD2DLayer(NULL);
 
-	overlay = GRID | CROSSHAIR | FUNDUS;
-
+	HKEY hKey;
+	RegOpenKeyEx(HKEY_CURRENT_USER, L"AG Harmening\\IGUIDE", 0, KEY_ALL_ACCESS, &hKey);
+	DWORD length = sizeof(DWORD);
+	DWORD type = REG_BINARY;
+	RegQueryValueEx(HKEY_LOCAL_MACHINE, L"Overlays", 0, (LPDWORD)&type, (LPBYTE)&overlay, &length);
+	RegCloseKey(hKey);
 }
 	
 

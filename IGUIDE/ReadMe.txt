@@ -83,7 +83,7 @@ IGUIDEDoc.h, IGUIDEDoc.cpp - the document
         File type ID:        IGUIDE.Document
         Main frame caption:  IGUIDE
         Doc type name:       IGUIDE
-        Filter name:         IGUIDE Files (*.grd)
+        Filter name:         IGUIDE Files (*.igd)
         File new short name: IGUIDE
         File type long name: IGUIDE.Document
 
