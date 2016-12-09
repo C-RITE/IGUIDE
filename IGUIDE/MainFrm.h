@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "IGUIDEDoc.h"
 
 class CMainFrame : public CMDIFrameWnd
 {

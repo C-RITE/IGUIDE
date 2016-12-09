@@ -233,8 +233,8 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TODO:  Add your specialized creation code here
 
-	return 0;
 	Invalidate();
+	return 0;
 }
 
 // CIGUIDEView drawing
@@ -363,7 +363,11 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 void CIGUIDEView::OnDestroy()
 {
 	CView::OnDestroy();
-	
+	CIGUIDEDoc* pDoc = GetDocument();
 	// TODO: Add your message handler code here
 	m_pDlgTarget->OnClose();
+	HKEY hKey;
+	RegOpenKeyEx(HKEY_CURRENT_USER, L"AG Harmening\\IGUIDE", 0, KEY_ALL_ACCESS, &hKey);
+	RegSetValueEx(hKey, TEXT("Overlays"), 0, REG_DWORD, (const BYTE*)&pDoc->m_pGrid->overlay, sizeof(DWORD));
+	RegCloseKey(hKey);
 }
