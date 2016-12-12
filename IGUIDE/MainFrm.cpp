@@ -113,7 +113,7 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 		WINDOWPLACEMENT *lwp;
 		UINT nl;
 
-		if (AfxGetApp()->GetProfileBinary(L"IGUIDE", L"WP_Main", (LPBYTE*)&lwp, &nl))
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Main", (LPBYTE*)&lwp, &nl))
 		{
 			SetWindowPlacement(lwp);
 			delete[] lwp;

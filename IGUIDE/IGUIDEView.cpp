@@ -351,9 +351,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
 		else
 			m_pDlgTarget->m_POI = NULL;
+
 		m_pDlgTarget->Invalidate();
 		this->Invalidate();
-
+		
 	}
 
 		return CView::PreTranslateMessage(pMsg);

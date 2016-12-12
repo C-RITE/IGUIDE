@@ -28,8 +28,8 @@ Grid::Grid()
 		NULL,
 		D2D1_LAYER_OPTIONS_NONE };
 	pLayer = new CD2DLayer(NULL);
+	overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", GRID | CROSSHAIR | FUNDUS);
 
-	(DWORD)overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", NULL);
 }
 	
 

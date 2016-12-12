@@ -238,8 +238,11 @@ CString CIGUIDEDoc::getTraceInfo() {
 	CWnd* target = GetNextView(pos);
 	CString trace;
 	Edge k;
-	k.q.x = (float)m_pGrid->centerOffset.x;
-	k.q.y = (float)m_pGrid->centerOffset.y;
+
+	if (!m_pGrid->taglist.empty()) {
+		k.q.x = m_pGrid->taglist.back().x;
+		k.q.y = m_pGrid->taglist.back().y;
+	}
 
 	float beta = 360 - ComputeOrientationAngle(k);
 	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
