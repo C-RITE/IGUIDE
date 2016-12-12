@@ -366,8 +366,6 @@ void CIGUIDEView::OnDestroy()
 	CIGUIDEDoc* pDoc = GetDocument();
 	// TODO: Add your message handler code here
 	m_pDlgTarget->OnClose();
-	HKEY hKey;
-	RegOpenKeyEx(HKEY_CURRENT_USER, L"AG Harmening\\IGUIDE", 0, KEY_ALL_ACCESS, &hKey);
-	RegSetValueEx(hKey, TEXT("Overlays"), 0, REG_DWORD, (const BYTE*)&pDoc->m_pGrid->overlay, sizeof(DWORD));
-	RegCloseKey(hKey);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(pDoc->m_pGrid->overlay));
+	
 }

@@ -93,7 +93,7 @@ BOOL CMainFrame::DestroyWindow()
 	// TODO: Add your specialized code here and/or call the base class
 	WINDOWPLACEMENT wp;
 	GetWindowPlacement(&wp);
-	AfxGetApp()->WriteProfileBinary(L"IGUIDE", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
 
 	return CMDIFrameWnd::DestroyWindow();
 }

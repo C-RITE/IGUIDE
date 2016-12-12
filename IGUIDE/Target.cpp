@@ -171,7 +171,7 @@ void Target::OnClose()
 
 	WINDOWPLACEMENT wp;
 	GetWindowPlacement(&wp);
-	AfxGetApp()->WriteProfileBinary(L"IGUIDE", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
 }
 
 
@@ -188,7 +188,7 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 		WINDOWPLACEMENT *lwp;
 		UINT nl;
 
-		if (AfxGetApp()->GetProfileBinary(L"IGUIDE", L"WP_Target", (LPBYTE*)&lwp, &nl))
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
 		{
 			SetWindowPlacement(lwp);
 			delete[] lwp;
