@@ -20,6 +20,7 @@ Grid::Grid()
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
 	
+	locked = 0;
 	lpHi = { D2D1::InfiniteRect(),
 		NULL,
 		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,

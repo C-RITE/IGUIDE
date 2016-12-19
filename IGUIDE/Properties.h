@@ -1,6 +1,6 @@
 #pragma once
-#include "resource.h"
-#include "PropertyGrid.h"
+#include "afxpropertygridctrl.h"
+
 
 // Properties dialog
 
@@ -9,19 +9,27 @@ class Properties : public CDialogEx
 	DECLARE_DYNAMIC(Properties)
 
 public:
-	Properties(CWnd* pParent = NULL);   // standard constructor
+	Properties();   // standard constructor
 	virtual ~Properties();
-	CPropertyGrid m_ctrlGrid;
+	CMFCPropertyGridCtrl		GridCtrl;
+	CMFCPropertyGridProperty*	Raster;
+	CMFCPropertyGridProperty*	Size;
+
+	_variant_t* m_RasterSize;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_PROPERTIES };
 #endif
 
-	DECLARE_MESSAGE_MAP()
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
+
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };

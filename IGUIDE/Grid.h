@@ -38,13 +38,12 @@ public:
 
 	DWORD overlay;											// for different view styles
 	std::vector<CD2DPointF>	taglist;						// storage for all rasters
+	int						locked;							// number of locked tags
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
 	CRect					mainWnd;
 	CD2DPointF				centerOffset;					// offset from grid's center
-	CD2DBitmap*				m_pGrid_clean;					// grid without markings
-	CD2DBitmap*				m_pGrid_mark;					// grid with markings
-
+	
 	D2D1_LAYER_PARAMETERS	lpHi;
 
 	const int				m_pDeltaFOD = 15;				/* distance between foveal and 

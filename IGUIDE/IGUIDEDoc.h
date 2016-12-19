@@ -22,7 +22,7 @@ public:
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Calibration*			m_pDlgCalibration;					// calibration class
-	Properties*				m_pDlgProperties;					// properties class
+	Properties*				m_pDlgProperties;					// properties dialog
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
 
@@ -35,6 +35,7 @@ public:
 	void ComputeDisplacementAngles();
 	float ComputeDisplacementAngle(Edge k);
 	float ComputeOrientationAngle(Edge k);
+	bool CheckCalibrationValidity();
 	CString getTraceInfo();
 
 	// Overrides

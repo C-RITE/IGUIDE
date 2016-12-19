@@ -46,17 +46,15 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
-	if (alpha + beta > 360)
-		gamma = beta - alpha;
-	else
-		gamma = alpha + beta;
+	gamma = beta - alpha;
+	
 
 	a = centerOffset_x;
 	b = centerOffset_y;
 	c = sqrt(pow(a, 2) + pow(b, 2));
 
 	y = sin(gamma * pi / 180) * c * ppd_client; // calc. x shift and scale to client ppd
-	x = cos(gamma * pi / 180) * -c * ppd_client; // calc. y shift and scale to client ppd
+	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
 		((pDoc->raster.mid.x + x) - 4),

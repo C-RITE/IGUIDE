@@ -74,7 +74,6 @@ BOOL CIGUIDEApp::InitInstance()
 	SetRegistryKey(_T("AG Harmening"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 
-
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	CMultiDocTemplate* pDocTemplate;

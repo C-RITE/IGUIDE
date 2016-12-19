@@ -17,62 +17,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
-LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
-#pragma code_page(1252)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_PROPERTIES DIALOGEX 0, 0, 273, 278
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Properties"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    PUSHBUTTON      "OK",IDOK,159,255,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,216,255,50,14
-    CONTROL         "",IDC_GRID,"Static",SS_BLACKFRAME | SS_NOTIFY,7,7,259,242,WS_EX_TRANSPARENT | WS_EX_CLIENTEDGE
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_PROPERTIES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 266
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 271
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_PROPERTIES AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-#endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
@@ -100,6 +44,13 @@ BEGIN
     CONTROL         "",IDC_STATIC_CAL,"Static",SS_ETCHEDFRAME | SS_NOTIFY,18,14,286,155,WS_EX_CLIENTEDGE
 END
 
+IDD_PROPERTIES DIALOGEX 0, 0, 347, 281
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -115,11 +66,18 @@ BEGIN
 
     IDD_CALIBRATION, DIALOG
     BEGIN
-        MOCKUP, 0, 50, 0, 0, "..\..\..\..\Pictures\ukb.jpg"
         LEFTMARGIN, 7
         RIGHTMARGIN, 313
         TOPMARGIN, 7
         BOTTOMMARGIN, 193
+    END
+
+    IDD_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 340
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 274
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -136,6 +94,11 @@ BEGIN
 END
 
 IDD_CALIBRATION AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROPERTIES AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -268,7 +231,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_IGUIDETYPE     ICON                    "res\\IGUIDEDoc.ico"
+IDR_IGUIDETYPE          ICON                    "res\\IGUIDEDoc.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -404,7 +367,7 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "IGUIDE"
-    IDR_IGUIDETYPE     "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
+    IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
 END
 
 STRINGTABLE

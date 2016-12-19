@@ -190,9 +190,6 @@
   <ItemGroup>
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="ChildFrm.h" />
-    <ClInclude Include="CustomItem.h" />
-    <ClInclude Include="DynDialogEx.h" />
-    <ClInclude Include="DynDialogItemEx.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="Fundus.h" />
     <ClInclude Include="Grid.h" />
@@ -201,11 +198,6 @@
     <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Properties.h" />
-    <ClInclude Include="PropertyGrid.h" />
-    <ClInclude Include="PropertyGridCombo.h" />
-    <ClInclude Include="PropertyGridDirectoryPicker.h" />
-    <ClInclude Include="PropertyGridInPlaceEdit.h" />
-    <ClInclude Include="PropertyGridMonthCalCtrl.h" />
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -215,8 +207,6 @@
   <ItemGroup>
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
-    <ClCompile Include="DynDialogEx.cpp" />
-    <ClCompile Include="DynDialogItemEx.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Fundus.cpp" />
     <ClCompile Include="Grid.cpp" />
@@ -225,11 +215,6 @@
     <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Properties.cpp" />
-    <ClCompile Include="PropertyGrid.cpp" />
-    <ClCompile Include="PropertyGridCombo.cpp" />
-    <ClCompile Include="PropertyGridDirectoryPicker.cpp" />
-    <ClCompile Include="PropertyGridInPlaceEdit.cpp" />
-    <ClCompile Include="PropertyGridMonthCalCtrl.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

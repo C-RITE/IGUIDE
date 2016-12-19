@@ -55,11 +55,12 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
-	m_pDlgProperties = new Properties();
 	mousePos = NULL;
 	raster.size = 1.28;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
+	m_pDlgProperties = new Properties();
+	m_pDlgProperties->Create(IDD_PROPERTIES, m_pDlgProperties->GetTopLevelParent());
 
 }
 
@@ -258,7 +259,7 @@ CString CIGUIDEDoc::getTraceInfo() {
 		1 / m_pGrid->dpp,
 		raster.meanEdge/raster.size);
 	if (m_pGrid->overlay & TRACEINFO)
-	return trace;
+		return trace;
 	return NULL;
 
 }
@@ -303,28 +304,15 @@ float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 	float pi = atan(1) * 4;
 
 
-
-	if (k.q.x >= k.p.x && k.q.y <= k.p.y) {
+	if (abs(k.p.y - k.q.y) < abs(k.p.x - k.q.x)) {
 		a = abs(k.q.x - k.p.x);
 		b = abs(k.q.y - k.p.y);
 		alpha = (atan(b / a)) * 180 / pi;
 	}
 
-	else if (k.q.x <= k.p.x && k.q.y <= k.p.y) {
+	else if (abs(k.p.y - k.q.y) > abs(k.p.x - k.q.x)) {
 		a = abs(k.p.x - k.q.x);
 		b = abs(k.q.y - k.p.y);
-		alpha = (atan(a / b)) * 180 / pi;
-	}
-
-	else if (k.q.x <= k.p.x && k.q.y >= k.p.y) {
-		a = abs(k.p.x - k.q.x);
-		b = abs(k.p.y - k.q.y);
-		alpha = (atan(b / a)) * 180 / pi;
-	}
-
-	else if (k.q.x >= k.p.x && k.q.y >= k.p.y) {
-		a = abs(k.q.x - k.p.x);
-		b = abs(k.p.y - k.q.y);
 		alpha = (atan(a / b)) * 180 / pi;
 	}
 
@@ -366,8 +354,9 @@ float CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 
 }
 
-void CIGUIDEDoc::ComputeDisplacementAngles() {
 
+
+void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 	ATLTRACE(_T("\n"));
 	Edge k = raster.perimeter[0];
@@ -376,17 +365,39 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 	for (int i = 0; i < raster.perimeter.size(); i++) {
 		raster.perimeter[i].alpha = ComputeDisplacementAngle(raster.perimeter[i]);
 		if (theta > 90 && theta <= 180)
-			raster.perimeter[i].alpha += 90;
+			raster.perimeter[i].alpha = 180 - raster.perimeter[i].alpha;
 		if (theta > 180 && theta <= 270)
-			raster.perimeter[i].alpha += 180;
+			raster.perimeter[i].alpha = 270 - raster.perimeter[i].alpha;
 		if (theta > 270 && theta <= 360)
-			raster.perimeter[i].alpha += 270;
+			raster.perimeter[i].alpha = 360 - raster.perimeter[i].alpha;
 	}
 		for (int i = 0; i < raster.perimeter.size(); i++)
 			ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
 
 }
 
+bool CIGUIDEDoc::CheckCalibrationValidity()
+{
+
+	//calc mean of all angles
+	double sum = 0;
+	for (int i = 0; i < raster.perimeter.size(); i++)
+		sum += raster.perimeter[i].alpha;
+	double mean = sum / raster.perimeter.size();
+	
+	//calc variance
+	double temp = 0;
+	for (int i = 0; i < raster.perimeter.size(); i++)
+		temp += (raster.perimeter[i].alpha - mean)*(raster.perimeter[i].alpha - mean);
+	double var = temp / raster.perimeter.size();
+
+	//calc standard deviation
+	double stddev = sqrt(var);
+
+	if (stddev > 5)
+		return false;
+	return true;
+}
 
 void CIGUIDEDoc::OnFileImport()
 {
@@ -411,7 +422,7 @@ void CIGUIDEDoc::OnFileImport()
 
 void CIGUIDEDoc::OnEditProperties()
 {
-	m_pDlgProperties->DoModal();
+	m_pDlgProperties->ShowWindow(SW_SHOW);
 	// TODO: Add your command handler code here
 }
 
@@ -539,3 +550,4 @@ void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & TRACEINFO);
 }
+

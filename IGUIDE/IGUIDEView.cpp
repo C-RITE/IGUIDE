@@ -168,8 +168,9 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 	CD2DPointF* FOV = new CD2DPointF[4];
 	
+
 	CRect clientRect;
-	GetClientRect(&clientRect);
+	AfxGetMainWnd()->GetClientRect(&clientRect);
 
 	// derive edges from corners
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
@@ -191,14 +192,20 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	// calculate length of edges, mean edge length and angle
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		pDoc->ComputeDisplacementAngles();
-		for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
-			pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
-			pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
-			pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
-		}
+		if (pDoc->CheckCalibrationValidity()) {
+			for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
+				pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
+				pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
+				pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+			}
 
-		pDoc->raster.meanEdge /= 4;
-		pDoc->raster.meanAlpha /= 4;
+			pDoc->raster.meanEdge /= 4;
+			pDoc->raster.meanAlpha /= 4;
+		}
+		else {
+			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
+			m_pDlgTarget->OnLButtonDown(NULL, NULL);
+		}
 	
 	}
 
@@ -338,6 +345,13 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				pDoc->m_pGrid->taglist.back().x += .1f;
 				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
 				break;
+			case VK_SPACE:
+				vector<CD2DPointF>::iterator from = pDoc->m_pGrid->taglist.begin() + pDoc->m_pGrid->locked;
+				vector<CD2DPointF>::iterator to = pDoc->m_pGrid->taglist.end();
+				pDoc->m_pGrid->taglist.erase(from , --to);
+				pDoc->m_pGrid->locked += 1;
+				break;
+
 			}
 
 		}

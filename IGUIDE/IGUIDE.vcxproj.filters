@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\PropertyGrid">
-      <UniqueIdentifier>{acca5269-8b91-4f85-860e-6cece260f5b5}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -66,30 +63,6 @@
     <ClInclude Include="Properties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PropertyGrid.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="CustomItem.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="DynDialogEx.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyGridDirectoryPicker.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyGridMonthCalCtrl.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="DynDialogItemEx.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyGridCombo.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyGridInPlaceEdit.h">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IGUIDE.cpp">
@@ -130,27 +103,6 @@
     </ClCompile>
     <ClCompile Include="Properties.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyGrid.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyGridCombo.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyGridDirectoryPicker.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyGridInPlaceEdit.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyGridMonthCalCtrl.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="DynDialogEx.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
-    </ClCompile>
-    <ClCompile Include="DynDialogItemEx.cpp">
-      <Filter>Header Files\PropertyGrid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
