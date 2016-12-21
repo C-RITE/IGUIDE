@@ -241,8 +241,8 @@ CString CIGUIDEDoc::getTraceInfo() {
 	Edge k;
 
 	if (!m_pGrid->taglist.empty()) {
-		k.q.x = m_pGrid->taglist.back().x;
-		k.q.y = m_pGrid->taglist.back().y;
+		k.q.x = m_pGrid->taglist.back().coords.x;
+		k.q.y = m_pGrid->taglist.back().coords.y;
 	}
 
 	float beta = 360 - ComputeOrientationAngle(k);

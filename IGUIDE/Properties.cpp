@@ -16,11 +16,17 @@ Properties::Properties()
 
 {
 	m_RasterSize = new _variant_t((float)0);
+	Raster = new CMFCPropertyGridProperty(L"Raster");
+	Size = new CMFCPropertyGridProperty(L"Size", m_RasterSize, NULL, NULL, NULL, NULL);
+	COLORREF col = D2D1::ColorF::DarkGreen;
+	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Specifies the default tag color"));
+	Color->EnableOtherButton(L"Other..");
 }
 
 Properties::~Properties()
 {
-
+	delete m_RasterSize;
+	delete Raster;
 }
 
 void Properties::DoDataExchange(CDataExchange* pDX)
@@ -55,11 +61,20 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
-	switch (gridctrl->GetPropertyCount()) {
-		case 1:
-			pDoc->raster.size = vt;
-			break;
-}
+	CString propName = prop->GetName();
+	if (propName == L"Size") {
+		pDoc->raster.size = vt;
+	}
+	if (propName == L"Color") {
+		D2D1_COLOR_F color;
+		BYTE* col = &vt.bVal;
+		color.r = (float)*col; col++;
+		color.g = (float)*col; col++;
+		color.b = (float)*col;
+		color.a = 1.0f;
+		pDoc->raster.color = color;
+	}
+
 	return 0;
 }
 
@@ -83,10 +98,10 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	GetClientRect(&Rect);
 	MapWindowPoints(this, &Rect);
 	GridCtrl.Create(WS_CHILD | WS_BORDER | WS_VISIBLE | WS_TABSTOP, Rect, this, NULL);
-	Raster = new CMFCPropertyGridProperty(L"Raster");
-	Size = new CMFCPropertyGridProperty(L"Field Size", m_RasterSize, NULL, NULL, NULL, NULL);
+
 	GridCtrl.AddProperty(Raster);
 	Raster->AddSubItem(Size);
+	Raster->AddSubItem(Color);
 
 	// TODO:  Add your specialized creation code here
 

@@ -47,7 +47,6 @@ CIGUIDEView::CIGUIDEView()
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, m_pDlgTarget->GetTopLevelParent());
 	m_pDlgTarget->ShowWindow(SW_SHOW);
-	showTrace = TRUE;
 
 }
 
@@ -121,7 +120,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	else
 		return;
 
-	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->centerOffset.x, pDoc->m_pGrid->centerOffset.y);
+	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 	free(pDoc->mousePos);
 	pDoc->mousePos = NULL;
 	ShowCursor(TRUE);
@@ -140,8 +139,7 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	if (pDoc->mousePos)
 		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
 			pDoc->mousePos->SetPoint(point.x, point.y);
-		RedrawWindow();
-
+			RedrawWindow();
 		}
 
 }
@@ -265,7 +263,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->Tag(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
-		if (showTrace) {
+		if (pDoc->m_pGrid->overlay & TRACEINFO) {
 			CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 			CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 			CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
@@ -330,26 +328,28 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
 			case VK_UP:
-				pDoc->m_pGrid->taglist.back().y += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				pDoc->m_pGrid->taglist.back().coords.y += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 				break;
 			case VK_DOWN:
-				pDoc->m_pGrid->taglist.back().y -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				pDoc->m_pGrid->taglist.back().coords.y -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 				break;
 			case VK_LEFT:
-				pDoc->m_pGrid->taglist.back().x -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				pDoc->m_pGrid->taglist.back().coords.x -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 				break;
 			case VK_RIGHT:
-				pDoc->m_pGrid->taglist.back().x += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+				pDoc->m_pGrid->taglist.back().coords.x += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 				break;
 			case VK_SPACE:
-				vector<CD2DPointF>::iterator from = pDoc->m_pGrid->taglist.begin() + pDoc->m_pGrid->locked;
-				vector<CD2DPointF>::iterator to = pDoc->m_pGrid->taglist.end();
-				pDoc->m_pGrid->taglist.erase(from , --to);
-				pDoc->m_pGrid->locked += 1;
+				vector<Tags>::iterator from = pDoc->m_pGrid->taglist.begin() + pDoc->m_pGrid->locked;
+				vector<Tags>::iterator to = pDoc->m_pGrid->taglist.end();
+				if (to - from > 0) {
+					pDoc->m_pGrid->taglist.erase(from, --to);
+					pDoc->m_pGrid->locked += 1;
+				}
 				break;
 
 			}
@@ -362,7 +362,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		}
 
 		if (pDoc->m_pGrid->taglist.size() > 0)
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().x, pDoc->m_pGrid->taglist.back().y);
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 		else
 			m_pDlgTarget->m_POI = NULL;
 

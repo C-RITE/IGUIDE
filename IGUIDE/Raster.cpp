@@ -8,7 +8,8 @@ perimeter(),
 scale(0, 0),
 meanAlpha(0),
 meanEdge(0),
-mid(0, 0)
+mid(0, 0),
+color(D2D1::ColorF(D2D1::ColorF::DarkGreen))
 {
 }
 

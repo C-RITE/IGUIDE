@@ -5,18 +5,18 @@
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 #include "resource.h"
+#include "Tags.h"
 
 using namespace std;
 using namespace D2D1;
 
 Grid::Grid()
 {
-	
+	m_pTagBrush = new CD2DSolidColorBrush(NULL, NULL);
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
-	m_pGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Green));
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
 	
@@ -30,7 +30,7 @@ Grid::Grid()
 		D2D1_LAYER_OPTIONS_NONE };
 	pLayer = new CD2DLayer(NULL);
 	overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", GRID | CROSSHAIR | FUNDUS);
-
+	taglist;
 }
 	
 
@@ -40,7 +40,7 @@ Grid::~Grid() {
 	delete m_pRedBrush;
 	delete m_pBlueBrush;
 	delete m_pWhiteBrush;
-	delete m_pGreenBrush;
+	delete m_pTagBrush;
 	delete m_pDarkGreenBrush;
 	delete m_pMagentaBrush;;
 	delete pLayer;
@@ -60,13 +60,15 @@ void Grid::StoreClick(CD2DPointF loc) {
 
 	CIGUIDEDoc* pDoc;
 	pDoc = CIGUIDEDoc::GetDoc();
+	Tags tag;
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-
-	centerOffset.x = (center.x - loc.x)*-1 * dpp;
-	centerOffset.y = (center.y - loc.y)* dpp;
-	taglist.push_back(centerOffset);
+	tag.coords.x = (center.x - loc.x)*-1 * dpp;
+	tag.coords.y = (center.y - loc.y)* dpp;
+	tag.color = pDoc->raster.color;
+	tag.rastersize = pDoc->raster.size;
+	taglist.push_back(tag);
 
 }
 
@@ -192,11 +194,12 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
-			center.y - taglist[i].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
-			center.x + taglist[i].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
-			center.y - taglist[i].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
-		pRenderTarget->FillRectangle(rect1, m_pGreenBrush);
+		rect1 = { center.x + taglist[i].coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - taglist[i].rastersize / 2 / dpp,
+			center.y - taglist[i].coords.y * 1 / dpp - taglist[i].rastersize / 2 / dpp,
+			center.x + taglist[i].coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + taglist[i].rastersize / 2 / dpp,
+			center.y - taglist[i].coords.y * 1 / dpp + taglist[i].rastersize / 2 / dpp };
+		m_pTagBrush->SetColor(taglist[i].color);
+		pRenderTarget->FillRectangle(rect1, m_pTagBrush);
 
 		pRenderTarget->PopLayer();
 
@@ -206,15 +209,15 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + taglist[taglist.size()-1].x * 1 / dpp + dpp * pDoc->raster.scale.x - pDoc->raster.size / 2 / dpp,
-			center.y - taglist[taglist.size()-1].y * 1 / dpp - pDoc->raster.size / 2 / dpp,
-			center.x + taglist[taglist.size()-1].x * 1 / dpp + dpp * pDoc->raster.scale.x + pDoc->raster.size / 2 / dpp,
-			center.y - taglist[taglist.size()-1].y * 1 / dpp + pDoc->raster.size / 2 / dpp };
-		pRenderTarget->FillRectangle(rect1, m_pGreenBrush);
+		rect1 = { center.x + taglist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - taglist.back().rastersize / 2 / dpp,
+			center.y - taglist.back().coords.y * 1 / dpp - taglist.back().rastersize / 2 / dpp,
+			center.x + taglist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + taglist.back().rastersize / 2 / dpp,
+			center.y - taglist.back().coords.y * 1 / dpp + taglist.back().rastersize / 2 / dpp };
+		pRenderTarget->FillRectangle(rect1, m_pTagBrush);
 		pRenderTarget->PopLayer();
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, taglist[taglist.size() - 1].x, taglist[taglist.size() - 1].y);
+		ShowCoordinates(pRenderTarget, taglist.back().coords.x, taglist.back().coords.y, taglist.back().rastersize);
 
 	}
 
@@ -229,7 +232,7 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 			.5f,
 			NULL);
 		ShowCoordinates(pRenderTarget, (center.x - pDoc->mousePos->x) *-1 * dpp,
-			(center.y - pDoc->mousePos->y) * dpp);
+			(center.y - pDoc->mousePos->y) * dpp, pDoc->raster.size );
 	}
 
 }
@@ -243,9 +246,9 @@ bool Grid::SaveToFile() {
 		if (i != 0)
 			sstream << "\n";
 		sstream
-			<< center.x - taglist[i].x
+			<< center.x - taglist[i].coords.x
 			<< ";"
-			<< center.y - taglist[i].y;
+			<< center.y - taglist[i].coords.y;
 
 	}
 
@@ -265,7 +268,7 @@ bool Grid::SaveToFile() {
 
 
 
-void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos)
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
@@ -282,7 +285,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / dpp + center.x ) - (pDoc->raster.size / 2 * 1 / dpp), (yPos * - 1 / dpp + center.y) - (pDoc->raster.size / 2 * 1 / dpp + 12)),
+		CD2DPointF((xPos * 1 / dpp + center.x ) - (rastersize / 2 * 1 / dpp), (yPos * - 1 / dpp + center.y) - (rastersize / 2 * 1 / dpp + 12)),
 		&textLayout,
 		m_pWhiteBrush);
 

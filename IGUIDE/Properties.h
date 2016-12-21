@@ -11,11 +11,12 @@ class Properties : public CDialogEx
 public:
 	Properties();   // standard constructor
 	virtual ~Properties();
-	CMFCPropertyGridCtrl		GridCtrl;
-	CMFCPropertyGridProperty*	Raster;
-	CMFCPropertyGridProperty*	Size;
+	CMFCPropertyGridCtrl			GridCtrl;
+	CMFCPropertyGridProperty*		Raster;
+	CMFCPropertyGridProperty*		Size;
+	CMFCPropertyGridColorProperty*	Color;
 
-	_variant_t* m_RasterSize;
+	_variant_t*					m_RasterSize;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

@@ -13,7 +13,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	CIGUIDEDoc*	GetDocument() const;
+	CIGUIDEDoc*			GetDocument() const;
 	Target*				m_pDlgTarget;
 
 private:

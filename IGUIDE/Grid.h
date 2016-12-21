@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <vector>
+#include "Tags.h"
 
 enum Overlay
 {
@@ -24,25 +25,24 @@ private:
 		*m_pRedBrush,
 		*m_pWhiteBrush,
 		*m_pBlueBrush,
-		*m_pGreenBrush,
 		*m_pDarkGreenBrush,
-		*m_pMagentaBrush;
+		*m_pMagentaBrush,
+		*m_pTagBrush;
 
 	CD2DLayer*				pLayer;
-	
 
 public:
+
 
 	Grid();
 	~Grid();
 
-	DWORD overlay;											// for different view styles
-	std::vector<CD2DPointF>	taglist;						// storage for all rasters
+	DWORD					overlay;						// for different view styles
+	Tags					taglist;						// storage for all rasters
 	int						locked;							// number of locked tags
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
 	CRect					mainWnd;
-	CD2DPointF				centerOffset;					// offset from grid's center
 	
 	D2D1_LAYER_PARAMETERS	lpHi;
 
@@ -59,5 +59,5 @@ public:
 	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
 	bool SaveToFile();
 	
-	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos);
+	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize);
 };
