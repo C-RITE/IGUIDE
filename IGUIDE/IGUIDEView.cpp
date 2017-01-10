@@ -344,11 +344,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
 				break;
 			case VK_SPACE:
-				vector<Tags>::iterator from = pDoc->m_pGrid->taglist.begin() + pDoc->m_pGrid->locked;
-				vector<Tags>::iterator to = pDoc->m_pGrid->taglist.end();
-				if (to - from > 0) {
-					pDoc->m_pGrid->taglist.erase(from, --to);
-					pDoc->m_pGrid->locked += 1;
+				pDoc->m_pGrid->taglist.back().locked = true;
+ 				for(auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end(); ++it) {
+					while (it._Ptr->locked == false)
+						pDoc->m_pGrid->taglist.erase(it);
 				}
 				break;
 

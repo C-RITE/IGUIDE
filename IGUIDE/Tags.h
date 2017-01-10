@@ -10,4 +10,5 @@ public:
 	CD2DPointF		coords;
 	D2D1_COLOR_F	color;
 	float			rastersize;
+	bool			locked;
 };

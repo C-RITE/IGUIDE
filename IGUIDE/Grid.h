@@ -39,7 +39,6 @@ public:
 
 	DWORD					overlay;						// for different view styles
 	Tags					taglist;						// storage for all rasters
-	int						locked;							// number of locked tags
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
 	CRect					mainWnd;

@@ -19,8 +19,7 @@ Grid::Grid()
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
-	
-	locked = 0;
+
 	lpHi = { D2D1::InfiniteRect(),
 		NULL,
 		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
@@ -68,6 +67,7 @@ void Grid::StoreClick(CD2DPointF loc) {
 	tag.coords.y = (center.y - loc.y)* dpp;
 	tag.color = pDoc->raster.color;
 	tag.rastersize = pDoc->raster.size;
+	tag.locked = false;
 	taglist.push_back(tag);
 
 }
@@ -189,7 +189,7 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 	center = mainWnd.CenterPoint();
 	CD2DRectF rect1;
 	CRect intersect;
-	
+
 	for (size_t i = 0; i < taglist.size(); i++) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);

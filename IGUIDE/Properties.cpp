@@ -7,7 +7,6 @@
 #include "IGUIDEDoc.h"
 #include "afxdialogex.h"
 
-
 // Properties dialog
 
 IMPLEMENT_DYNAMIC(Properties, CDialogEx)
@@ -66,13 +65,8 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		pDoc->raster.size = vt;
 	}
 	if (propName == L"Color") {
-		D2D1_COLOR_F color;
-		BYTE* col = &vt.bVal;
-		color.r = (float)*col; col++;
-		color.g = (float)*col; col++;
-		color.b = (float)*col;
-		color.a = 1.0f;
-		pDoc->raster.color = color;
+		COLORREF ref = vt;
+		pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
 	}
 
 	return 0;
