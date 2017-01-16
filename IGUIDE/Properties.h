@@ -15,8 +15,10 @@ public:
 	CMFCPropertyGridProperty*		Raster;
 	CMFCPropertyGridProperty*		Size;
 	CMFCPropertyGridColorProperty*	Color;
+	CMFCPropertyGridProperty*		ICANDI;
+	CMFCPropertyGridProperty*		VideoFolder;
 
-	_variant_t*					m_RasterSize;
+	_variant_t*						m_RasterSize;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

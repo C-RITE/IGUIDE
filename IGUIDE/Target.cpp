@@ -35,7 +35,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
-	float alpha, beta, gamma, theta;
+	float alpha, beta, gamma;
 	float pi = atan(1) * 4;
 	float a, b, c, x, y;
 	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;

@@ -56,7 +56,7 @@ public:
 	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
 	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
-	bool SaveToFile();
 	
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize);
+	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);
 };

@@ -1,13 +1,11 @@
 #include "stdafx.h"
 #include "Grid.h"
-#include <sstream>
 #include "Target.h"
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 #include "resource.h"
 #include "Tags.h"
 
-using namespace std;
 using namespace D2D1;
 
 Grid::Grid()
@@ -190,15 +188,15 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 	CD2DRectF rect1;
 	CRect intersect;
 
-	for (size_t i = 0; i < taglist.size(); i++) {
+	for (auto it = taglist.begin(); it != taglist.end(); it++) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + taglist[i].coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - taglist[i].rastersize / 2 / dpp,
-			center.y - taglist[i].coords.y * 1 / dpp - taglist[i].rastersize / 2 / dpp,
-			center.x + taglist[i].coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + taglist[i].rastersize / 2 / dpp,
-			center.y - taglist[i].coords.y * 1 / dpp + taglist[i].rastersize / 2 / dpp };
-		m_pTagBrush->SetColor(taglist[i].color);
+		rect1 = { center.x + it._Ptr->_Myval.coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - it._Ptr->_Myval.rastersize / 2 / dpp,
+			center.y - it._Ptr->_Myval.coords.y * 1 / dpp - it._Ptr->_Myval.rastersize / 2 / dpp,
+			center.x + it._Ptr->_Myval.coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + it._Ptr->_Myval.rastersize / 2 / dpp,
+			center.y - it._Ptr->_Myval.coords.y * 1 / dpp + it._Ptr->_Myval.rastersize / 2 / dpp };
+		m_pTagBrush->SetColor(it._Ptr->_Myval.color);
 		pRenderTarget->FillRectangle(rect1, m_pTagBrush);
 
 		pRenderTarget->PopLayer();
@@ -218,6 +216,14 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
 		ShowCoordinates(pRenderTarget, taglist.back().coords.x, taglist.back().coords.y, taglist.back().rastersize);
+		
+		int number = 0;
+		for (auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end(); it++) {
+			if (it._Ptr->_Myval.locked == true) {
+				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, it._Ptr->_Myval.rastersize, number);
+				number++;
+			}
+		}
 
 	}
 
@@ -237,34 +243,7 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-bool Grid::SaveToFile() {
 
-	wstringstream sstream;
-
-	for (size_t i = 0; i < taglist.size(); ++i)
-	{
-		if (i != 0)
-			sstream << "\n";
-		sstream
-			<< center.x - taglist[i].coords.x
-			<< ";"
-			<< center.y - taglist[i].coords.y;
-
-	}
-
-	CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
-
-	if (FileDlg.DoModal() == IDOK) {
-		CString pathName = FileDlg.GetPathName();
-		CStdioFile outputFile(pathName, CFile::modeWrite | CFile::modeCreate | CFile::typeUnicode);
-		outputFile.WriteString((sstream.str().c_str()));
-		outputFile.Close();
-		return TRUE;
-	}
-
-	return FALSE;
-
-}
 
 
 
@@ -284,8 +263,33 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 		traceText,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
+
 	pRenderTarget->DrawTextLayout(
 		CD2DPointF((xPos * 1 / dpp + center.x ) - (rastersize / 2 * 1 / dpp), (yPos * - 1 / dpp + center.y) - (rastersize / 2 * 1 / dpp + 12)),
+		&textLayout,
+		m_pWhiteBrush);
+
+}
+
+void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number) {
+	
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CString vidText;
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
+
+	vidText.Format(L"v%d", number);
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		vidText,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF((xPos * 1 / dpp + center.x) - (rastersize / 2 * 1 / dpp), (yPos * -1 / dpp + center.y) - (rastersize / 2 * 1 / dpp)),
 		&textLayout,
 		m_pWhiteBrush);
 

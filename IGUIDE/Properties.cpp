@@ -14,18 +14,21 @@ IMPLEMENT_DYNAMIC(Properties, CDialogEx)
 Properties::Properties()
 
 {
-	m_RasterSize = new _variant_t((float)0);
+	m_RasterSize = new _variant_t(0.f);
 	Raster = new CMFCPropertyGridProperty(L"Raster");
 	Size = new CMFCPropertyGridProperty(L"Size", m_RasterSize, NULL, NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
 	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Specifies the default tag color"));
 	Color->EnableOtherButton(L"Other..");
+	ICANDI = new CMFCPropertyGridProperty(L"ICANDI");
+	VideoFolder = new CMFCPropertyGridProperty(L"Video Folder",)
 }
 
 Properties::~Properties()
 {
 	delete m_RasterSize;
 	delete Raster;
+	delete ICANDI;
 }
 
 void Properties::DoDataExchange(CDataExchange* pDX)
@@ -61,13 +64,13 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
 	CString propName = prop->GetName();
-	if (propName == L"Size") {
-		pDoc->raster.size = vt;
-	}
-	if (propName == L"Color") {
-		COLORREF ref = vt;
-		pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
-	}
+		if (propName == L"Size") {
+			pDoc->raster.size = vt;
+		}
+		if (propName == L"Color") {
+			COLORREF ref = vt;
+			pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
+		}
 
 	return 0;
 }
@@ -87,7 +90,6 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CDialogEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-
 	RECT Rect;
 	GetClientRect(&Rect);
 	MapWindowPoints(this, &Rect);
@@ -96,6 +98,8 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	GridCtrl.AddProperty(Raster);
 	Raster->AddSubItem(Size);
 	Raster->AddSubItem(Color);
+	GridCtrl.AddProperty(ICANDI);
+	ICANDI->AddSubItem(VideoFolder);
 
 	// TODO:  Add your specialized creation code here
 

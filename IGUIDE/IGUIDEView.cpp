@@ -345,14 +345,14 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 			case VK_SPACE:
 				pDoc->m_pGrid->taglist.back().locked = true;
- 				for(auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end(); ++it) {
-					while (it._Ptr->locked == false)
-						pDoc->m_pGrid->taglist.erase(it);
+				for (auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end();) {
+					if (it._Ptr->_Myval.locked == false)
+						it = pDoc->m_pGrid->taglist.erase(it);
+					else ++it;
+					pDoc->m_pGrid->taglist.SaveToFile();
 				}
 				break;
-
 			}
-
 		}
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
