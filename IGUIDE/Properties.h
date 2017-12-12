@@ -1,5 +1,5 @@
 #pragma once
-#include "afxpropertygridctrl.h"
+//#include "afxpropertygridctrl.h"
 
 
 // Properties dialog
@@ -8,17 +8,30 @@ class Properties : public CDialogEx
 {
 	DECLARE_DYNAMIC(Properties)
 
+	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
+	public:
+		void setLabelWidth(int width) {
+			m_nLeftColumnWidth = width;
+			AdjustLayout();
+		}
+	};
+
 public:
 	Properties();   // standard constructor
 	virtual ~Properties();
-	CMFCPropertyGridCtrl			GridCtrl;
+
+	MyCMFCPropertyGridCtrl			GridCtrl;
 	CMFCPropertyGridProperty*		Raster;
-	CMFCPropertyGridProperty*		Size;
+	CMFCPropertyGridProperty*		RasterSize;
+	CMFCPropertyGridProperty*		FixationTargetSize;
 	CMFCPropertyGridColorProperty*	Color;
 	CMFCPropertyGridProperty*		ICANDI;
-	CMFCPropertyGridProperty*		VideoFolder;
+	CMFCPropertyGridProperty*		FixationTarget;
+	CMFCPropertyGridFileProperty	VideoFolder;
+	CMFCPropertyGridFileProperty	FixationFile;
 
-	_variant_t*						m_RasterSize;
+	_variant_t*						m_pRasterSize;
+	_variant_t*						m_pFixationTargetSize;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -32,7 +45,6 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
-
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };

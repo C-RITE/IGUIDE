@@ -1,11 +1,11 @@
 #pragma once
 #include <list>
-class Tags :
-	public std::list<Tags>
+class Patches :
+	public std::list<Patches>
 {
 public:
-	Tags();
-	~Tags();
+	Patches();
+	~Patches();
 
 	CD2DPointF		coords;
 	D2D1_COLOR_F	color;

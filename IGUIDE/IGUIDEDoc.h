@@ -1,6 +1,5 @@
 
 // IGUIDEDoc.h : interface of the CIGUIDEDoc class
-//
 
 #pragma once
 #include "Target.h"
@@ -18,17 +17,18 @@ protected: // create from serialization only
 
 	// Attributes
 public:
-
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Calibration*			m_pDlgCalibration;					// calibration class
 	Properties*				m_pDlgProperties;					// properties dialog
+	CString					m_FixationTarget;					// fixation target filename
+	int						m_FixationTargetSize;				// fixation target size in percent
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
 
 // Operations
 public:
-	BOOL CheckFOV();
+	bool CheckFOV();
 	static CIGUIDEDoc* GetDoc();
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);

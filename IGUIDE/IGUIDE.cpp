@@ -3,8 +3,8 @@
 //
 
 #include "stdafx.h"
-#include "afxwinappex.h"
-#include "afxdialogex.h"
+//#include "afxwinappex.h"
+//#include "afxdialogex.h"
 #include "IGUIDE.h"
 #include "MainFrm.h"
 #include "ChildFrm.h"

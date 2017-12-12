@@ -218,7 +218,7 @@ BOOL Calibration::OnInitDialog()
 	ry = size.height / m_WorkArea.bottom;
 	rx = size.width / m_WorkArea.right;
 
-	if (size.width + 20 > m_WorkArea.right | size.height + 50 > m_WorkArea.bottom) {
+	if ((size.width + 20 > m_WorkArea.right) | (size.height + 50 > m_WorkArea.bottom)) {
 
 		m_D2DStatic.MoveWindow(10,
 			10,

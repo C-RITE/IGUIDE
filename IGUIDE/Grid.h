@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <vector>
-#include "Tags.h"
+#include "Patches.h"
 
 enum Overlay
 {
@@ -27,7 +27,7 @@ private:
 		*m_pBlueBrush,
 		*m_pDarkGreenBrush,
 		*m_pMagentaBrush,
-		*m_pTagBrush;
+		*m_pPatchBrush;
 
 	CD2DLayer*				pLayer;
 
@@ -38,7 +38,7 @@ public:
 	~Grid();
 
 	DWORD					overlay;						// for different view styles
-	Tags					taglist;						// storage for all rasters
+	Patches					patchlist;						// storage for all rasters
 	CD2DRectF				nerve;							// optic disc
 	CD2DPointF				center;
 	CRect					mainWnd;
@@ -50,12 +50,12 @@ public:
 	const float				m_pRadNerve = 2.5;				// radius of optic nerve head
 	float					dpp;							// degree per pixel
 
-	void DelTag();
-	void ClearTaglist();
+	void DelPatch();
+	void ClearPatchlist();
 	void StoreClick(CD2DPointF point);
 	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
-	void Tag(CHwndRenderTarget* pRenderTarget);				// user tag the grid
+	void Patch(CHwndRenderTarget* pRenderTarget);				// user tag the grid
 	
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);

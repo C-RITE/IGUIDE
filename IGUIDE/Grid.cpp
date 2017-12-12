@@ -4,13 +4,13 @@
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 #include "resource.h"
-#include "Tags.h"
+#include "Patches.h"
 
 using namespace D2D1;
 
 Grid::Grid()
 {
-	m_pTagBrush = new CD2DSolidColorBrush(NULL, NULL);
+	m_pPatchBrush = new CD2DSolidColorBrush(NULL, NULL);
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
@@ -27,7 +27,7 @@ Grid::Grid()
 		D2D1_LAYER_OPTIONS_NONE };
 	pLayer = new CD2DLayer(NULL);
 	overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", GRID | CROSSHAIR | FUNDUS);
-	taglist;
+	
 }
 	
 
@@ -37,36 +37,36 @@ Grid::~Grid() {
 	delete m_pRedBrush;
 	delete m_pBlueBrush;
 	delete m_pWhiteBrush;
-	delete m_pTagBrush;
+	delete m_pPatchBrush;
 	delete m_pDarkGreenBrush;
 	delete m_pMagentaBrush;;
 	delete pLayer;
 }
 
-void Grid::DelTag() {
+void Grid::DelPatch() {
 
-	if (taglist.size() > 0)
-		taglist.pop_back();
+	if (patchlist.size() > 0)
+		patchlist.pop_back();
 }
 
-void Grid::ClearTaglist() {
-	taglist.clear();
+void Grid::ClearPatchlist() {
+	patchlist.clear();
 }
 
 void Grid::StoreClick(CD2DPointF loc) {
 
 	CIGUIDEDoc* pDoc;
 	pDoc = CIGUIDEDoc::GetDoc();
-	Tags tag;
+	Patches patch;
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	tag.coords.x = (center.x - loc.x)*-1 * dpp;
-	tag.coords.y = (center.y - loc.y)* dpp;
-	tag.color = pDoc->raster.color;
-	tag.rastersize = pDoc->raster.size;
-	tag.locked = false;
-	taglist.push_back(tag);
+	patch.coords.x = (center.x - loc.x)*-1 * dpp;
+	patch.coords.y = (center.y - loc.y)* dpp;
+	patch.color = pDoc->raster.color;
+	patch.rastersize = pDoc->raster.size;
+	patch.locked = false;
+	patchlist.push_back(patch);
 
 }
 
@@ -178,7 +178,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
+void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
@@ -188,7 +188,7 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 	CD2DRectF rect1;
 	CRect intersect;
 
-	for (auto it = taglist.begin(); it != taglist.end(); it++) {
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
@@ -196,29 +196,29 @@ void Grid::Tag(CHwndRenderTarget* pRenderTarget) {
 			center.y - it._Ptr->_Myval.coords.y * 1 / dpp - it._Ptr->_Myval.rastersize / 2 / dpp,
 			center.x + it._Ptr->_Myval.coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + it._Ptr->_Myval.rastersize / 2 / dpp,
 			center.y - it._Ptr->_Myval.coords.y * 1 / dpp + it._Ptr->_Myval.rastersize / 2 / dpp };
-		m_pTagBrush->SetColor(it._Ptr->_Myval.color);
-		pRenderTarget->FillRectangle(rect1, m_pTagBrush);
+		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
+		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 
 		pRenderTarget->PopLayer();
 
 	}
 
-	if (taglist.size() > 0) {
+	if (patchlist.size() > 0) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + taglist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - taglist.back().rastersize / 2 / dpp,
-			center.y - taglist.back().coords.y * 1 / dpp - taglist.back().rastersize / 2 / dpp,
-			center.x + taglist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + taglist.back().rastersize / 2 / dpp,
-			center.y - taglist.back().coords.y * 1 / dpp + taglist.back().rastersize / 2 / dpp };
-		pRenderTarget->FillRectangle(rect1, m_pTagBrush);
+		rect1 = { center.x + patchlist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - patchlist.back().rastersize / 2 / dpp,
+			center.y - patchlist.back().coords.y * 1 / dpp - patchlist.back().rastersize / 2 / dpp,
+			center.x + patchlist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + patchlist.back().rastersize / 2 / dpp,
+			center.y - patchlist.back().coords.y * 1 / dpp + patchlist.back().rastersize / 2 / dpp };
+		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, taglist.back().coords.x, taglist.back().coords.y, taglist.back().rastersize);
+		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, patchlist.back().rastersize);
 		
-		int number = 0;
-		for (auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end(); it++) {
+		int number = 1;
+		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 			if (it._Ptr->_Myval.locked == true) {
 				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, it._Ptr->_Myval.rastersize, number);
 				number++;

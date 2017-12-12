@@ -46,8 +46,6 @@ CIGUIDEView::CIGUIDEView()
 	// Draw the Target View as a new Target Dialog
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, m_pDlgTarget->GetTopLevelParent());
-	m_pDlgTarget->ShowWindow(SW_SHOW);
-
 }
 
 CIGUIDEView::~CIGUIDEView()
@@ -120,7 +118,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	else
 		return;
 
-	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 	free(pDoc->mousePos);
 	pDoc->mousePos = NULL;
 	ShowCursor(TRUE);
@@ -165,12 +163,11 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	CIGUIDEDoc* pDoc = GetDocument();	
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 	CD2DPointF* FOV = new CD2DPointF[4];
-	
 
 	CRect clientRect;
 	AfxGetMainWnd()->GetClientRect(&clientRect);
 
-	// derive edges from corners
+	// deduce edges from corners
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		for (int i = 0; i < 3; i++) {
 			Edge k;
@@ -224,6 +221,8 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
 
+	m_pDlgTarget->getFixationTarget();
+
 	Invalidate();
 	delete FOV;
 }
@@ -237,8 +236,8 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableD2DSupport();
 
 	// TODO:  Add your specialized creation code here
-
 	Invalidate();
+
 	return 0;
 }
 
@@ -260,7 +259,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 		pDoc->m_pFundus->Paint(pRenderTarget);
 		pDoc->m_pGrid->Paint(pRenderTarget);
-		pDoc->m_pGrid->Tag(pRenderTarget);
+		pDoc->m_pGrid->Patch(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
@@ -324,32 +323,32 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	
 	CIGUIDEDoc* pDoc = GetDocument();
 
-	if (pDoc->m_pGrid->taglist.size() > 0) {
+	if (pDoc->m_pGrid->patchlist.size() > 0) {
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
 			case VK_UP:
-				pDoc->m_pGrid->taglist.back().coords.y += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+				pDoc->m_pGrid->patchlist.back().coords.y += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 				break;
 			case VK_DOWN:
-				pDoc->m_pGrid->taglist.back().coords.y -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+				pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 				break;
 			case VK_LEFT:
-				pDoc->m_pGrid->taglist.back().coords.x -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+				pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 				break;
 			case VK_RIGHT:
-				pDoc->m_pGrid->taglist.back().coords.x += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+				pDoc->m_pGrid->patchlist.back().coords.x += .1f;
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 				break;
 			case VK_SPACE:
-				pDoc->m_pGrid->taglist.back().locked = true;
-				for (auto it = pDoc->m_pGrid->taglist.begin(); it != pDoc->m_pGrid->taglist.end();) {
+				pDoc->m_pGrid->patchlist.back().locked = true;
+				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end();) {
 					if (it._Ptr->_Myval.locked == false)
-						it = pDoc->m_pGrid->taglist.erase(it);
+						it = pDoc->m_pGrid->patchlist.erase(it);
 					else ++it;
-					pDoc->m_pGrid->taglist.SaveToFile();
+					if (pDoc->m_pGrid->patchlist.SaveToFile() == FALSE) break;
 				}
 				break;
 			}
@@ -357,11 +356,11 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
 				return false;
-			pDoc->m_pGrid->DelTag();
+			pDoc->m_pGrid->DelPatch();
 		}
 
-		if (pDoc->m_pGrid->taglist.size() > 0)
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->taglist.back().coords.x, pDoc->m_pGrid->taglist.back().coords.y);
+		if (pDoc->m_pGrid->patchlist.size() > 0)
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 		else
 			m_pDlgTarget->m_POI = NULL;
 
@@ -377,9 +376,25 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 void CIGUIDEView::OnDestroy()
 {
 	CView::OnDestroy();
-	CIGUIDEDoc* pDoc = GetDocument();
+
 	// TODO: Add your message handler code here
+	CIGUIDEDoc* pDoc = GetDocument();
 	m_pDlgTarget->OnClose();
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(pDoc->m_pGrid->overlay));
-	
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(pDoc->m_pGrid->overlay));	
+	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", pDoc->m_FixationTarget);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", pDoc->m_FixationTargetSize);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&pDoc->raster.size, sizeof(float));
+	D2D1_COLOR_F rcol = pDoc->raster.color;
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
+
+}
+
+
+void CIGUIDEView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+	m_pDlgTarget->ShowWindow(SW_SHOW);
+
 }

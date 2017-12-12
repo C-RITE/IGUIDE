@@ -13,7 +13,6 @@
 #include "IGUIDEDoc.h"
 #include "Grid.h"
 #include <math.h>
-
 #include <propkey.h>
 
 
@@ -60,7 +59,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
 	m_pDlgProperties = new Properties();
-	m_pDlgProperties->Create(IDD_PROPERTIES, m_pDlgProperties->GetTopLevelParent());
+	m_pDlgProperties->Create(IDD_PROPERTIES);
 
 }
 
@@ -71,7 +70,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete mousePos;
 	delete m_pDlgCalibration;
 	delete m_pDlgProperties;
-
 }
 
 // Get Doc, made for other classes that need access to attributes
@@ -116,11 +114,37 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
+	CString path;
+	int FTS;
+
+	path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
+	if (path.IsEmpty()) {
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			path = homedir;
+			path.Append(_T("\\Pictures\\"));
+		}
+	}
+	m_FixationTarget = path;
+
+	FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
+	if (FTS == 0) FTS = 100;
+	m_FixationTargetSize = FTS;
+
+	LPBYTE rcol;
+	UINT nl;
+	AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl);
+	memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+
+	LPBYTE rsize;
+	AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl);
+	memcpy(&raster.size, rsize, sizeof(float));
+
+	delete rcol;
 
 	return TRUE;
 
 }
-
 
 // CIGUIDEDoc serialization
 
@@ -208,7 +232,7 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 // CIGUIDEDoc commands
 
 
-BOOL CIGUIDEDoc::CheckFOV()
+bool CIGUIDEDoc::CheckFOV()
 {
 
 	if (raster.corner.size() < 4) {
@@ -240,9 +264,9 @@ CString CIGUIDEDoc::getTraceInfo() {
 	CString trace;
 	Edge k;
 
-	if (!m_pGrid->taglist.empty()) {
-		k.q.x = m_pGrid->taglist.back().coords.x;
-		k.q.y = m_pGrid->taglist.back().coords.y;
+	if (!m_pGrid->patchlist.empty()) {
+		k.q.x = m_pGrid->patchlist.back().coords.x;
+		k.q.y = m_pGrid->patchlist.back().coords.y;
 	}
 
 	float beta = 360 - ComputeOrientationAngle(k);
