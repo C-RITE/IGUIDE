@@ -19,6 +19,8 @@ todo
 [Dd]ebugPublic/
 #[Rr]elease/
 [Rr]eleases/
+[Rr]elease/IGUIDE.tlog
+[Dd]ebug/IGUIDE.tlog
 x64/
 x86/
 bld/
