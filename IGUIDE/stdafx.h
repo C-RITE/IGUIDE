@@ -16,6 +16,10 @@
 // turns off MFC's hiding of some common and often safely ignored warning messages
 #define _AFX_ALL_WARNINGS
 
+#ifdef _DEBUG
+#include "vld.h"			// visual leak detector
+#endif
+
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 
@@ -29,6 +33,7 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 #include <afxdlgs.h>
+
 
 #ifdef _DEBUG
 #ifdef ATLTRACE 

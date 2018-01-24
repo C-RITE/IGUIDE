@@ -18,9 +18,9 @@ Patches::~Patches()
 bool Patches::SaveToFile() {
 
 	wstringstream sstream;
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 	int number = 1;
-	CString path = pDoc->m_pDlgProperties->VideoFolder.GetValue();
+	CString path = pDoc->m_pDlgProperties->VideoFolder->GetValue();
 	filepath.Format(_T("%s\\"), path);
 	CString strNumber, strDegX, strDegY;	
 	CString header("Video number,deg(x),deg(y)");

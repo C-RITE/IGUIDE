@@ -11,10 +11,11 @@
 // Properties dialog
 IMPLEMENT_DYNAMIC(Properties, CDialogEx)
 
-Properties::Properties() :	VideoFolder(L"Folder", L"D:\\Videos"),
-							FixationFile(L"File", true, NULL, _T("Select custom graphics file"))
+Properties::Properties()
 
 {
+	VideoFolder = new CMFCPropertyGridFileProperty(L"Folder", L"D:\\Videos"),
+	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, _T("Select custom graphics file"));
 	m_pRasterSize = new _variant_t(0.f);
 	m_pFixationTargetSize = new _variant_t(0);
 	Raster = new CMFCPropertyGridProperty(L"Raster");
@@ -29,9 +30,13 @@ Properties::Properties() :	VideoFolder(L"Folder", L"D:\\Videos"),
 
 Properties::~Properties()
 {
-	delete Color;
-	delete m_pRasterSize;
+	
+	delete FixationTarget;
 	delete m_pFixationTargetSize;
+	delete Raster;
+	delete m_pRasterSize;
+	delete ICANDI;
+
 }
 
 void Properties::DoDataExchange(CDataExchange* pDX)
@@ -57,7 +62,7 @@ BOOL Properties::OnInitDialog()
 
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
@@ -86,13 +91,13 @@ void Properties::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 		CDialogEx::OnShowWindow(bShow, nStatus);
 	// TODO: Add your message handler code here
-		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+		CIGUIDEDoc* pDoc = GetDoc();
 		_variant_t rs(pDoc->raster.size);
 		_variant_t fts(pDoc->m_FixationTargetSize);
 		_variant_t ft(pDoc->m_FixationTarget);
 		RasterSize->SetValue(rs);
 		FixationTargetSize->SetValue(fts);
-		FixationFile.SetValue(ft);
+		FixationFile->SetValue(ft);
 		COLORREF col = RGB( (int)(pDoc->raster.color.r / (1/255.0)),
 							(int)(pDoc->raster.color.g / (1/255.0)),
 							(int)(pDoc->raster.color.b / (1/255.0)));
@@ -114,9 +119,9 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Raster->AddSubItem(RasterSize);
 	Raster->AddSubItem(Color);
 	GridCtrl.AddProperty(ICANDI);
-	ICANDI->AddSubItem(&VideoFolder);
+	ICANDI->AddSubItem(VideoFolder);
 	GridCtrl.AddProperty(FixationTarget);
-	FixationTarget->AddSubItem(&FixationFile);
+	FixationTarget->AddSubItem(FixationFile);
 	FixationTarget->AddSubItem(FixationTargetSize);
 	GridCtrl.setLabelWidth(100);
 	// TODO:  Add your specialized creation code here

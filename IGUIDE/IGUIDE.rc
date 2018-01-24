@@ -183,7 +183,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,13,21,20
     LTEXT           "IGUIDE",IDC_STATIC,42,18,65,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2016",IDC_STATIC,88,62,114,8
+    LTEXT           "Copyright (C) 2018",IDC_STATIC,88,62,114,8
     DEFPUSHBUTTON   "OK",IDOK,205,115,50,14,WS_GROUP
     LTEXT           "Image Guided User Interface Directing Eyes",IDC_STATIC,42,30,144,8
     LTEXT           "AG Harmening",IDC_STATIC,88,75,46,8

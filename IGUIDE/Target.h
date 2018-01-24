@@ -1,12 +1,13 @@
 #pragma once
-#include "CXBOXController.h"
+#include "CXBoxController.h"
 class Edge;
+class CIGUIDEDoc;
 
 // Target dialog
 
-struct xboxcontrolstate {
-	float LX;	// left thumbstick x pos
-	float LY;	// left thumbstick y pos
+struct XboxControlState {
+	float LX;	// DPAD x pos
+	float LY;	// DPAD y pos
 };
 
 struct cursorposition {
@@ -14,42 +15,45 @@ struct cursorposition {
 	float y;
 };
 
+UINT ThreadDraw(PVOID pParam);
+
 class Target : public CDialog
 {
 	DECLARE_DYNAMIC(Target)
 
 // Attributes
 
+	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
+
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
 	
-	CXBOXController*		Player1;			// for target calibration process
-	CWinThread*				xboxThread;			// controller's very own thread
-	xboxcontrolstate		xbox_state;			// store controller states
-	
+	static XboxControlState	xbox_state;			// store controller states
+	CPoint					xbox_cross;			// controller's cursor location
+	static bool				show_cross;			// cross visibility
+	static bool				m_bPushed;			// for input delay
+	static bool				m_bFireDown;		// for fire signal
+	static bool				m_bFireUp;			// for fire signal
+	int						m_fired;			// times hit
 	float					ppd_client;			// pixel per degree on client screen
-	
+	double					fieldsize;			// fieldsize in pixel on client screen
 
-
-
-//structure for passing to the controlling function
-typedef struct THREADSTRUCT
-{
-	Target*    _this;
-	//you can add here other parameters you might be interested on
-} THREADSTRUCT;
+private:
+	bool					m_bRunning;
+	CWinThread*				m_pThread;
 
 // Operations
 public:
 	Target(CWnd* pParent = NULL);   // standard constructor
-	virtual ~Target();
+	~Target();
 	void Pinpoint(float x, float y);
 	void getFixationTarget();
-
-private:
-
-static UINT StartThread(LPVOID param);
+	void calcFieldSize();
+	void setCross();
+	static UINT InputControllerThread(LPVOID pParam);
+	
+	
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

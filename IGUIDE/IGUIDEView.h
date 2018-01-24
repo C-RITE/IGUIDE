@@ -14,7 +14,7 @@ protected: // create from serialization only
 // Attributes
 public:
 	CIGUIDEDoc*			GetDocument() const;
-	Target*				m_pDlgTarget;
+	Target*				m_pDlgTarget;						// target dialog
 
 private:
 
@@ -58,8 +58,8 @@ public:
 	virtual void OnDraw(CDC* /*pDC*/);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	afx_msg void OnDestroy();
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
 };
 
 #ifndef _DEBUG  // debug version in IGUIDEView.cpp

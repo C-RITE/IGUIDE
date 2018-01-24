@@ -19,7 +19,6 @@
 
 using namespace D2D1;
 
-
 // CIGUIDEView
 
 IMPLEMENT_DYNCREATE(CIGUIDEView, CView)
@@ -43,15 +42,12 @@ END_MESSAGE_MAP()
 
 CIGUIDEView::CIGUIDEView()
 {
-	// Draw the Target View as a new Target Dialog
-	m_pDlgTarget = new Target();
-	m_pDlgTarget->Create(IDD_TARGET, m_pDlgTarget->GetTopLevelParent());
+	m_pDlgTarget = NULL;
 }
 
 CIGUIDEView::~CIGUIDEView()
 {
 	delete m_pDlgTarget;
-
 }
 
 BOOL CIGUIDEView::PreCreateWindow(CREATESTRUCT& cs)
@@ -119,8 +115,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-	free(pDoc->mousePos);
-	pDoc->mousePos = NULL;
+	/*free(pDoc->mousePos);
+	pDoc->mousePos = NULL;*/
 	ShowCursor(TRUE);
 
 	m_pDlgTarget->Invalidate();
@@ -162,6 +158,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 {
 	CIGUIDEDoc* pDoc = GetDocument();	
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
+
 	CD2DPointF* FOV = new CD2DPointF[4];
 
 	CRect clientRect;
@@ -188,7 +185,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		pDoc->ComputeDisplacementAngles();
 		if (pDoc->CheckCalibrationValidity()) {
-			for (int i = 0; i < pDoc->raster.perimeter.size(); i++) {
+			for (size_t i = 0; i < pDoc->raster.perimeter.size(); i++) {
 				pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
 				pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
 				pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
@@ -221,7 +218,11 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
 
-	m_pDlgTarget->getFixationTarget();
+	// do this only once (in the beginning)
+	m_pDlgTarget->pDoc==NULL? m_pDlgTarget->pDoc = GetDoc():0;
+	m_pDlgTarget->fieldsize==0? m_pDlgTarget->calcFieldSize():0;
+	m_pDlgTarget->xbox_cross.x == 0? m_pDlgTarget->setCross():0;
+	m_pDlgTarget->m_pFixationTarget == NULL? m_pDlgTarget->getFixationTarget(): 0;	
 
 	Invalidate();
 	delete FOV;
@@ -233,7 +234,7 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// Enable D2D support for this window:
-	EnableD2DSupport();
+	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
 
 	// TODO:  Add your specialized creation code here
 	Invalidate();
@@ -370,31 +371,26 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	}
 
 		return CView::PreTranslateMessage(pMsg);
+
+}
+
+
+
+BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+{
+	m_pDlgTarget = new Target();
+	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);
+	m_pDlgTarget->ShowWindow(TRUE);
+	return CView::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
+	// TODO: Add your specialized code here and/or call the base class
 }
 
 
 void CIGUIDEView::OnDestroy()
 {
+	m_pDlgTarget->OnClose();
+	m_pDlgTarget->DestroyWindow();
 	CView::OnDestroy();
 
 	// TODO: Add your message handler code here
-	CIGUIDEDoc* pDoc = GetDocument();
-	m_pDlgTarget->OnClose();
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(pDoc->m_pGrid->overlay));	
-	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", pDoc->m_FixationTarget);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", pDoc->m_FixationTargetSize);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&pDoc->raster.size, sizeof(float));
-	D2D1_COLOR_F rcol = pDoc->raster.color;
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
-
-}
-
-
-void CIGUIDEView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView)
-{
-	// TODO: Add your specialized code here and/or call the base class
-
-	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-	m_pDlgTarget->ShowWindow(SW_SHOW);
-
 }

@@ -27,8 +27,8 @@ public:
 	CMFCPropertyGridColorProperty*	Color;
 	CMFCPropertyGridProperty*		ICANDI;
 	CMFCPropertyGridProperty*		FixationTarget;
-	CMFCPropertyGridFileProperty	VideoFolder;
-	CMFCPropertyGridFileProperty	FixationFile;
+	CMFCPropertyGridFileProperty*	VideoFolder;
+	CMFCPropertyGridFileProperty*	FixationFile;
 
 	_variant_t*						m_pRasterSize;
 	_variant_t*						m_pFixationTargetSize;

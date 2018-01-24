@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "IGUIDEDoc.h"
 
 class CMainFrame : public CMDIFrameWnd
@@ -41,8 +42,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	virtual BOOL DestroyWindow();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnClose();
 };
 
 

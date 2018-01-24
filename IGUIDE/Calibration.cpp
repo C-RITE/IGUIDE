@@ -16,11 +16,10 @@ IMPLEMENT_DYNAMIC(D2DStatic, CStatic)
 
 void D2DStatic::PreSubclassWindow()
 {
-	EnableD2DSupport();
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
+	CIGUIDEDoc* pDoc = GetDoc();
 	fundus = new CD2DBitmap(GetRenderTarget(), *pDoc->m_pFundus->filename);
 	fundus->Create(GetRenderTarget());
-
 }
 
 D2DStatic::D2DStatic(Calibration* Dialog) :
@@ -34,7 +33,7 @@ D2DStatic::D2DStatic(Calibration* Dialog) :
 D2DStatic::~D2DStatic(){
 
 	delete m_pBrushWhite;
-	
+
 }
 
 
@@ -87,7 +86,7 @@ afx_msg LRESULT D2DStatic::OnDraw2d(WPARAM wParam, LPARAM lParam) {
 
 void D2DStatic::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 	CRect rect;
 	CD2DSizeF size = fundus->GetSize();
 	GetWindowRect(&rect);
@@ -161,7 +160,7 @@ void Calibration::DoDataExchange(CDataExchange* pDX)
 void Calibration::ClientResize(int nWidth, int nHeight)
 {
 	CIGUIDEDoc* pDoc;
-	pDoc = CIGUIDEDoc::GetDoc();
+	pDoc = GetDoc();
 	CD2DSizeF size = pDoc->m_pFundus->picture->GetSize();
 	RECT rcClient, rcWind;
 	POINT ptDiff;
@@ -183,7 +182,7 @@ END_MESSAGE_MAP()
 void Calibration::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 	switch (m_D2DStatic.m_clicked) {
 		case (3) :
 			pDoc->m_pFundus->calibration = TRUE;
@@ -201,8 +200,7 @@ BOOL Calibration::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	// TODO: Add your specialized code here and/or call the base class
-	CIGUIDEDoc* pDoc;
-	pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 
 	// Get the current work area
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &m_WorkArea, 0);

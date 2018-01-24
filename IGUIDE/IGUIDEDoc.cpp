@@ -65,44 +65,65 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 CIGUIDEDoc::~CIGUIDEDoc()
 {
+	
 	delete m_pGrid;
 	delete m_pFundus;
 	delete mousePos;
 	delete m_pDlgCalibration;
 	delete m_pDlgProperties;
+	
 }
 
 // Get Doc, made for other classes that need access to attributes
 
-CIGUIDEDoc* CIGUIDEDoc::GetDoc()
+CIGUIDEDoc* GetDoc()
 {
-	CWinApp* pApp = AfxGetApp();
-	ASSERT_VALID(pApp);
 
-	CMDIChildWnd * pChild =
-		((CMDIFrameWnd*)(AfxGetApp()->m_pMainWnd))->MDIGetActive();
+	//CWinApp* pApp = AfxGetApp();
+	//ASSERT_VALID(pApp);
 
-	ASSERT_VALID(pChild);
+	//CMDIChildWnd * pChild = NULL;
 
-	CDocument * pDoc = pChild->GetActiveDocument();
+	//pChild = ((CMDIFrameWnd*)(AfxGetApp()->m_pMainWnd))->MDIGetActive();
 
-	if (!pDoc) {
+	//ASSERT_VALID(pChild);
+	////if (pChild == nullptr) return NULL;
+	//
+	//CDocument * pDoc = NULL;
 
-		POSITION posTemplate = pApp->GetFirstDocTemplatePosition();
+	//if (pChild) pDoc = pChild->GetActiveDocument();
 
-		while (posTemplate != NULL) {
-			CDocTemplate* pTemplate = pApp->GetNextDocTemplate(posTemplate);
-			ASSERT_VALID(pTemplate);
-			ASSERT_KINDOF(CDocTemplate, pTemplate);
-			POSITION posDocument = pTemplate->GetFirstDocPosition();
-			while (posDocument != NULL) {
-				CDocument* pDoc = pTemplate->GetNextDoc(posDocument);
-				ASSERT_VALID(pDoc);
-				ASSERT_KINDOF(CDocument, pDoc);
-				return (CIGUIDEDoc *)pDoc;
-			}
-		}
-	}
+	//if (!pDoc) {
+
+	//	POSITION posTemplate = pApp->GetFirstDocTemplatePosition();
+
+	//	while (posTemplate != NULL) {
+	//		CDocTemplate* pTemplate = pApp->GetNextDocTemplate(posTemplate);
+	//		ASSERT_VALID(pTemplate);
+	//		ASSERT_KINDOF(CDocTemplate, pTemplate);
+	//		POSITION posDocument = pTemplate->GetFirstDocPosition();
+	//		while (posDocument != NULL) {
+	//			CDocument* pDoc = pTemplate->GetNextDoc(posDocument);
+	//			ASSERT_VALID(pDoc);
+	//			ASSERT_KINDOF(CDocument, pDoc);
+	//			return (CIGUIDEDoc *)pDoc;
+	//		}
+	//	}
+	//}
+
+	//return (CIGUIDEDoc *)pDoc;
+
+	CWnd* pWnd = AfxGetMainWnd();
+	ASSERT_VALID(pWnd);
+	ASSERT_KINDOF(CFrameWnd, pWnd);
+	CFrameWnd* pMainFrame = static_cast<CFrameWnd*>(pWnd);
+	CFrameWnd* pActiveFrame = pMainFrame->GetActiveFrame();
+	CDocument* pDoc = pActiveFrame->GetActiveDocument();
+	if (pDoc == NULL) return NULL;
+	ASSERT_KINDOF(CIGUIDEDoc, pDoc);
+	CIGUIDEDoc* pIGDoc = static_cast<CIGUIDEDoc*>(pDoc);
+	
+	return pIGDoc;
 
 }
 
@@ -141,6 +162,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	memcpy(&raster.size, rsize, sizeof(float));
 
 	delete rcol;
+	delete rsize;
 
 	return TRUE;
 
@@ -324,7 +346,7 @@ CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int 
 float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 
 	float a, b;
-	float alpha;
+	float alpha = 0;
 	float pi = atan(1) * 4;
 
 
@@ -575,3 +597,18 @@ void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(m_pGrid->overlay & TRACEINFO);
 }
 
+
+
+void CIGUIDEDoc::OnCloseDocument()
+{
+	// TODO: Add your specialized code here and/or call the base class
+	// TODO: Add your message handler code here
+
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
+	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(float));
+	D2D1_COLOR_F rcol = raster.color;
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
+	CDocument::OnCloseDocument();
+}

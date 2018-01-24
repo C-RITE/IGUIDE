@@ -19,6 +19,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -87,18 +88,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 }
 #endif //_DEBUG
 
-
-BOOL CMainFrame::DestroyWindow()
-{
-	// TODO: Add your specialized code here and/or call the base class
-	WINDOWPLACEMENT wp;
-	GetWindowPlacement(&wp);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
-
-	return CMDIFrameWnd::DestroyWindow();
-}
-
-
 void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	
@@ -116,7 +105,18 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Main", (LPBYTE*)&lwp, &nl))
 		{
 			SetWindowPlacement(lwp);
-			delete[] lwp;
 		}
+		delete[] lwp;
 	}
+}
+
+
+void CMainFrame::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement(&wp);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
+	CMDIFrameWnd::OnClose();
+
 }

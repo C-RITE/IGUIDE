@@ -1,56 +1,85 @@
 // Target.cpp : implementation file
-//
 
 #include "stdafx.h"
 #include "resource.h"
 #include "IGUIDE.h"
 #include "IGUIDEDoc.h"
 #include "Target.h"
-#include "afxdialogex.h"
+
 
 using namespace D2D1;
 // Target dialog
 
+XboxControlState Target::xbox_state;
+bool Target::m_bPushed = false;
+bool Target::show_cross = false;
+bool Target::m_bFireDown = false;
+bool Target::m_bFireUp = true;
+
 IMPLEMENT_DYNAMIC(Target, CDialog);
+CCriticalSection m_CritSection;
 
 Target::Target(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_TARGET, pParent)
 {
-	EnableD2DSupport();
+	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	Player1 = new CXBOXController(1);
-	THREADSTRUCT *_param = new THREADSTRUCT;
-	_param->_this = this;
-	xboxThread = AfxBeginThread(StartThread, _param);
-
+	m_fired = 0;
+	m_bRunning = false;
+	fieldsize = 0;
+	pDoc = NULL;
+	
 }
+
 
 Target::~Target()
 {
-	delete m_pBrushWhite;
-	delete m_pFixationTarget;
+	//delete m_pBrushWhite;
+	//delete m_pFixationTarget;
+	//delete m_pThread;
 	delete m_POI;
-	delete Player1;
+	//delete Player1;
+}
+
+BEGIN_MESSAGE_MAP(Target, CDialog)
+	ON_WM_LBUTTONDOWN()
+	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
+	ON_WM_CLOSE()
+	ON_WM_SHOWWINDOW()
+END_MESSAGE_MAP()
+
+void Target::calcFieldSize() {
+
+
+	double pi = atan(1) * 4;			// just pi
+	double pixelpitch = 0.13725;		// pixel pitch of screen
+	double d = 55;						// distance between beam splitter and screen
+	fieldsize = 2 * d * (atan(pDoc->raster.size / 2) * (180 / pi) * pixelpitch);
+
+}
+
+void Target::setCross() {
+
+	CRect rect;
+	GetWindowRect(&rect);
+	xbox_cross = CD2DPointF(rect.Width() / 2 - fieldsize / 2, rect.Height() / 2 - fieldsize / 2);
 
 }
 
 void Target::getFixationTarget() {
-	
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CString file = pDoc->m_FixationTarget;
+
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
-		m_pFixationTarget->~CD2DBitmap();
-	
-	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), file);
+		delete m_pFixationTarget;
+
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0,	0), TRUE);
 
 }
 
 void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	
+
 	// transform coordinates for fixation target (rotate and scale)
 	// current calculation assumes that target view is counter-rotating
 	// flip signs of Edge 'k' to customize
@@ -70,7 +99,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
-	
+
 
 	a = centerOffset_x;
 	b = centerOffset_y;
@@ -103,115 +132,180 @@ void Target::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
-
-BEGIN_MESSAGE_MAP(Target, CDialog)
-	ON_WM_LBUTTONDOWN()
-	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
-	ON_WM_CLOSE()
-	ON_WM_SHOWWINDOW()
-END_MESSAGE_MAP()
-
-
 // Target message handlers
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
+	CSingleLock singleLock(&m_CritSection);
+	singleLock.Lock();
+	ThreadDraw(this);
+	singleLock.Unlock();
+	return (LRESULT)TRUE;
 
-	ASSERT_VALID(pRenderTarget);
+}
+
+UINT ThreadDraw(PVOID pParam) {
+
+	Target* pTarget = (Target*)pParam;
+
+	CHwndRenderTarget* pRenderTarget = NULL;
+	pRenderTarget = pTarget->GetRenderTarget();
+
+	if (!pRenderTarget->IsValid())
+		return -1;
 
 	pRenderTarget->Clear(ColorF(ColorF::Black));
 
-	float scalingFactor = (float)pDoc->m_FixationTargetSize / 100;
+	float scalingFactor = (float)pTarget->pDoc->m_FixationTargetSize / 100;
+
+	// trace text
+
+	CString traceText;
+	CD2DSolidColorBrush WhiteBrush(NULL, ColorF(ColorF::White));
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
+
+	traceText.Format(L"%.1f : %.1f :%d", pTarget->xbox_state.LX, pTarget->xbox_state.LY, pTarget->m_fired);
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		traceText,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(0, 0),
+		&textLayout,
+		&WhiteBrush);
+
 
 	// custom fixation target
-	if (m_POI && m_pFixationTarget) {
-		CD2DSizeF size = m_pFixationTarget->GetSize();
-		pRenderTarget->DrawBitmap(m_pFixationTarget, CD2DRectF(
-			m_POI->left - (size.width/2) * scalingFactor,
-			m_POI->top - (size.height/2) * scalingFactor,
-			m_POI->left + (size.width/2) * scalingFactor,
-			m_POI->top + (size.height/2) * scalingFactor)
+	if (pTarget->m_POI && pTarget->m_pFixationTarget) {
+		CD2DSizeF size = pTarget->m_pFixationTarget->GetSize();
+		pRenderTarget->DrawBitmap(pTarget->m_pFixationTarget, CD2DRectF(
+			pTarget->m_POI->left - (size.width / 2) * scalingFactor,
+			pTarget->m_POI->top - (size.height / 2) * scalingFactor,
+			pTarget->m_POI->left + (size.width / 2) * scalingFactor,
+			pTarget->m_POI->top + (size.height / 2) * scalingFactor)
 		);
 	}
-	
+
 	// default fixation target
-	else if (m_POI) {
-		pRenderTarget->DrawEllipse(*m_POI, m_pBrushWhite, 1, NULL);
-		pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->top - 4),
-			CD2DPointF(m_POI->right + 4, m_POI->bottom + 4),
-			m_pBrushWhite);
-		pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->bottom + 4),
-			CD2DPointF(m_POI->right + 4, m_POI->top - 4),
-			m_pBrushWhite);
+	else if (pTarget->m_POI) {
+		pRenderTarget->DrawEllipse(*pTarget->m_POI, pTarget->m_pBrushWhite, 1, NULL);
+		pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->top - 4),
+			CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->bottom + 4),
+			pTarget->m_pBrushWhite);
+		pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->bottom + 4),
+			CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->top - 4),
+			pTarget->m_pBrushWhite);
 	}
 
 	else {
 
 		// draw white crosses to user define FOV
-		for (size_t i = 0; i < pDoc->raster.corner.size(); i++) {
-			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y - 7),
-				CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y + 7),
-				m_pBrushWhite,
+		for (size_t i = 0; i < pTarget->pDoc->raster.corner.size(); i++) {
+			pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y - 7),
+				CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y + 7),
+				pTarget->m_pBrushWhite,
 				1,
 				NULL);
-			pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y + 7),
-				CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y - 7),
-				m_pBrushWhite,
+			pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y + 7),
+				CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y - 7),
+				pTarget->m_pBrushWhite,
 				1,
 				NULL);
 		}
 
+
 	}
 
-	if (xbox_state.LX !=0 || xbox_state.LY !=0) {
+	// catch pushing A button
 
-		pRenderTarget->DrawLine(CD2DPointF(25, 25),
-			CD2DPointF(50, 50),
-			m_pBrushWhite,
-			1,
-			NULL);
-		pRenderTarget->DrawLine(CD2DPointF(50, 25),
-			CD2DPointF(25, 50),
-			m_pBrushWhite,
-			1,
-			NULL);
+	if (pTarget->m_bFireUp && pTarget->m_bFireDown) {
 
-		CString traceText;
-		CD2DSolidColorBrush WhiteBrush(NULL, ColorF(ColorF::White));
+		pTarget->m_bFireDown = false;
 
-		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+		switch (pTarget->m_fired % 6) {
 
-		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
-			sizeDpi.height / 9);						// font size
+		case 0:
+			pTarget->m_fired++;
+			break;
+		case 1:
+			pTarget->OnLButtonDown(0, CPoint(pTarget->xbox_cross.x +
+				pTarget->xbox_state.LX,
+				pTarget->xbox_cross.y +
+				pTarget->xbox_state.LY));
+			pTarget->xbox_cross.x += pTarget->fieldsize;
+			pTarget->m_fired++;
+			break;
+		case 2:
+			pTarget->OnLButtonDown(0, CPoint(pTarget->xbox_cross.x +
+				pTarget->xbox_state.LX,
+				pTarget->xbox_cross.y +
+				pTarget->xbox_state.LY));
+			pTarget->xbox_cross.y += pTarget->fieldsize;
+			pTarget->m_fired++;
+			break;
+		case 3:
+			pTarget->OnLButtonDown(0, CPoint(pTarget->xbox_cross.x +
+				pTarget->xbox_state.LX,
+				pTarget->xbox_cross.y +
+				pTarget->xbox_state.LY));
+			pTarget->xbox_cross.x -= pTarget->fieldsize;
+			pTarget->m_fired++;
+			break;
+		case 4:
+			pTarget->OnLButtonDown(0, CPoint(pTarget->xbox_cross.x +
+				pTarget->xbox_state.LX,
+				pTarget->xbox_cross.y +
+				pTarget->xbox_state.LY));
+			pTarget->show_cross = false;
+			pTarget->m_fired++;
+			break;
 
-		traceText.Format(L"%.1f : %.1f", xbox_state.LX, xbox_state.LY);
-		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			traceText,									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
+		case 5:
+			pTarget->setCross();
+			pTarget->OnLButtonDown(0, CPoint(0, 0));
+			pTarget->m_fired+=2;
+			break;
 
-		pRenderTarget->DrawTextLayout(
-			CD2DPointF(0, 0),
-			&textLayout,
-			&WhiteBrush);
+		}
+
 	}
 
-	return true;
+
+	// draw cross while moving around with pov hat
+
+	if (pTarget->show_cross) {
+		// points outlining the cross
+		CD2DPointF a(pTarget->xbox_cross.x - 7, pTarget->xbox_cross.y - 7);
+		CD2DPointF b(pTarget->xbox_cross.x + 7, pTarget->xbox_cross.y + 7);
+		CD2DPointF c(pTarget->xbox_cross.x + 7, pTarget->xbox_cross.y - 7);
+		CD2DPointF d(pTarget->xbox_cross.x - 7, pTarget->xbox_cross.y + 7);
+
+		pRenderTarget->DrawLine(CD2DPointF(a.x + pTarget->xbox_state.LX, a.y + pTarget->xbox_state.LY),
+			CD2DPointF(b.x + pTarget->xbox_state.LX, b.y + pTarget->xbox_state.LY),
+			pTarget->m_pBrushWhite, 1, NULL);
+
+		pRenderTarget->DrawLine(CD2DPointF(c.x + pTarget->xbox_state.LX, c.y + pTarget->xbox_state.LY),
+			CD2DPointF(d.x + pTarget->xbox_state.LX, d.y + pTarget->xbox_state.LY),
+			pTarget->m_pBrushWhite, 1, NULL);
+	}
+
+	return 0;
+
 }
 
 void Target::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	
+
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
-	
-	CIGUIDEDoc* pDoc;
-	pDoc = CIGUIDEDoc::GetDoc();
 
 	if (pDoc->raster.corner.size() < 4)
 		pDoc->raster.corner.push_back(d2dpoint);
@@ -226,8 +320,14 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 		pDoc->m_pGrid->ClearPatchlist();
 	}
 
+	pDoc->IsModified();
 	pDoc->UpdateAllViews(NULL);
+	
+	CSingleLock singleLock(&m_CritSection);
+	singleLock.Lock();
 	RedrawWindow();
+	singleLock.Unlock();
+
 
 	// call default
 	// CDialog::OnLButtonUp(nFlags, point);
@@ -236,21 +336,24 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 
 void Target::OnClose()
 {
+
 	// TODO: Add your message handler code here and/or call default
 
-	xboxThread->SuspendThread();
-	CDialog::OnClose();
-
+	m_bRunning = false;
+	WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+	m_pThread->Delete();
+	delete m_pThread;
 	WINDOWPLACEMENT wp;
 	GetWindowPlacement(&wp);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
+	CDialog::OnClose();
+
 }
 
 
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 
-	CDialog::OnShowWindow(bShow, nStatus);
 	// TODO: Add your message handler code here
 	static bool bOnce = true;
 
@@ -264,73 +367,103 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
 		{
 			SetWindowPlacement(lwp);
-			delete[] lwp;
 		}
-	}
 	
-	getFixationTarget();
+		delete[] lwp;
+	}
+
+	if (!m_bRunning) {
+		
+		m_pThread = AfxBeginThread(InputControllerThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
+		m_pThread->m_bAutoDelete = FALSE;
+		m_bRunning = true;
+		m_pThread->ResumeThread();
+
+	}
 
 }
 
-UINT Target::StartThread(LPVOID param)
+UINT Target::InputControllerThread(LPVOID pParam)
 {
+	CXBOXController* Player1 = new CXBOXController(1);
+	Target* pTarget = (Target*)pParam;
 
-	// XBOX Gamepad Controller Thread
+	while (pTarget->m_bRunning){
 
-	THREADSTRUCT* ts = (THREADSTRUCT*)param;
-	
-	while(true)
-	{
-		
-			if (ts->_this->Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
-			{
-				ts->_this->Player1->Vibrate(65535, 0);
-			}
-			if (ts->_this->Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y)
-			{
-				ts->_this->Player1->Vibrate(0,0);
-			}
-			
-			float LX = ts->_this->Player1->GetState().Gamepad.sThumbLX;
-			float LY = ts->_this->Player1->GetState().Gamepad.sThumbLY;
+		if (Player1->GetState().Gamepad.wButtons == 0) {
 
-			//determine how far the controller is pushed
-			float magnitude = sqrt(LX*LX + LY*LY);
+			m_bPushed = false;
+			m_bFireUp = true;
 
-			float normalizedMagnitude = 0;
+		}
 
-			//check if the controller is outside a circular dead zone
-			if (magnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-			{
-				//clip the magnitude at its expected maximum value
-				if (magnitude > 32767) magnitude = 32767;
+		else
 
-				//adjust magnitude relative to the end of the dead zone
-				magnitude -= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+			show_cross = true;
 
-				//optionally normalize the magnitude with respect to its expected range
-				//giving a magnitude value of 0.0 to 1.0
-				normalizedMagnitude = magnitude / (32767 - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
-			}
-			else //if the controller is in the deadzone zero out the magnitude
-			{
-				magnitude = 0.0;
-				normalizedMagnitude = 0.0;
+		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
+
+		{
+
+			m_bFireUp = false;
+			m_bFireDown = true;
+
+		}
+
+		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
+
+			if (!m_bPushed) {
+				xbox_state.LY -= 1;
+				m_bPushed = true;
+				Sleep(100);
 			}
 
-			//determine the direction the controller is pushed
-			float normalizedLX = LX / normalizedMagnitude;
-			float normalizedLY = LY / normalizedMagnitude;
+			else
+				xbox_state.LY -= 1;
 
-			ts->_this->xbox_state.LX = normalizedLX;
- 			ts->_this->xbox_state.LY = normalizedLY;
-			
-			if(ts)ts->_this->RedrawWindow();
+		}
+
+		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
+			if (!m_bPushed) {
+				xbox_state.LY += 1;
+				m_bPushed = true;
+				Sleep(100);
+			}
+
+			else
+				xbox_state.LY += 1;
+
+		}
+
+		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
+			if (!m_bPushed) {
+				xbox_state.LX -= 1;
+				m_bPushed = true;
+				Sleep(100);
+			}
+
+			else
+				xbox_state.LX -= 1;
+		}
+
+		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
+			if (!m_bPushed) {
+				xbox_state.LX += 1;
+				m_bPushed = true;
+				Sleep(100);
+			}
+
+			else
+				xbox_state.LX += 1;
+		}
+
+		Sleep(50);
+		pTarget->Invalidate();
+
 	}
-
-
-	//you can also call AfxEndThread() here
 	
-	return 1;
+	delete Player1;
+
+	return 0;
 
 }

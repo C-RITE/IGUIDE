@@ -21,7 +21,7 @@ Fundus::~Fundus()
 void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
 		float ppd = 1/pDoc->m_pGrid->dpp;

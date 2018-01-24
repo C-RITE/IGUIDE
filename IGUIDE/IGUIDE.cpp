@@ -60,6 +60,7 @@ BOOL CIGUIDEApp::InitInstance()
 {
 	CWinApp::InitInstance();
 	EnableTaskbarInteraction(FALSE);
+	VERIFY(EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED));
 
 	// AfxInitRichEdit2() is required to use RichEdit control	
 	// AfxInitRichEdit2();
@@ -176,7 +177,7 @@ void CIGUIDEApp::OnAppAbout()
 void CAboutDlg::OnStnClickedAo()
 {
 	// TODO: Add your control notification handler code here
-	(32 >= (int)ShellExecute(NULL, L"open", L"https://www.experimental-ophthalmology.uni-bonn.de/research/group-harmening", NULL, NULL, SW_SHOWNORMAL));
+	(32 >= (int)ShellExecute(NULL, L"open", L"http://ao.ukbonn.de", NULL, NULL, SW_SHOWNORMAL));
 }
 
 

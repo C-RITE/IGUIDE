@@ -9,6 +9,8 @@
 #include "Properties.h"
 #include "afxrendertarget.h"
 
+CIGUIDEDoc* GetDoc();
+
 class CIGUIDEDoc : public CDocument
 {
 protected: // create from serialization only
@@ -29,7 +31,6 @@ public:
 // Operations
 public:
 	bool CheckFOV();
-	static CIGUIDEDoc* GetDoc();
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
 	void ComputeDisplacementAngles();
@@ -84,4 +85,5 @@ public:
 	afx_msg void OnUpdateOverlayFundus(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayTraceinfo();
 	afx_msg void OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI);
+	virtual void OnCloseDocument();
 };
