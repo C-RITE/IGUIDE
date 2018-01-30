@@ -1,5 +1,8 @@
 #pragma once
 #include "CXBoxController.h"
+#include "Monitors.h"
+#include "MultiMonitor.h"
+
 class Edge;
 class CIGUIDEDoc;
 
@@ -24,7 +27,7 @@ class Target : public CDialog
 // Attributes
 
 	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
-
+	CMonitors				mons;				// multi monitor support
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target

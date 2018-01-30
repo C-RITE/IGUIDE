@@ -201,6 +201,8 @@
     <ClInclude Include="IGUIDEDoc.h" />
     <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="Monitors.h" />
+    <ClInclude Include="MultiMonitor.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Resource.h" />
@@ -223,6 +225,8 @@
     <ClCompile Include="IGUIDEDoc.cpp" />
     <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="Monitors.cpp" />
+    <ClCompile Include="MultiMonitor.cpp" />
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="stdafx.cpp">

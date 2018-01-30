@@ -154,12 +154,12 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	LPBYTE rcol;
 	UINT nl;
-	AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl);
-	memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
+		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
 
 	LPBYTE rsize;
-	AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl);
-	memcpy(&raster.size, rsize, sizeof(float));
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl)> 0)
+		memcpy(&raster.size, rsize, sizeof(float));
 
 	delete rcol;
 	delete rsize;

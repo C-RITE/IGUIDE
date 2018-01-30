@@ -30,6 +30,7 @@ Target::Target(CWnd* pParent /*=NULL*/)
 	m_bRunning = false;
 	fieldsize = 0;
 	pDoc = NULL;
+	CMonitors mons;
 	
 }
 
@@ -56,15 +57,18 @@ void Target::calcFieldSize() {
 	double pi = atan(1) * 4;			// just pi
 	double pixelpitch = 0.13725;		// pixel pitch of screen
 	double d = 55;						// distance between beam splitter and screen
-	fieldsize = 2 * d * (atan(pDoc->raster.size / 2) * (180 / pi) * pixelpitch);
+	fieldsize = 2 * d * (atan((pDoc->raster.size / 2) * (180 / pi)) * pixelpitch);
 
 }
 
 void Target::setCross() {
 
-	CRect rect;
-	GetWindowRect(&rect);
-	xbox_cross = CD2DPointF(rect.Width() / 2 - fieldsize / 2, rect.Height() / 2 - fieldsize / 2);
+	LPRECT wRect = new CRect;
+	CMonitor secondary = mons.GetMonitor(0);
+	secondary.GetMonitorRect(wRect);
+	CRect cRect = (CRect)wRect;
+	xbox_cross = CD2DPointF(cRect.Width() / 2 - fieldsize / 2, cRect.Height() / 2 - fieldsize / 2);
+	delete wRect;
 
 }
 
@@ -247,7 +251,7 @@ UINT ThreadDraw(PVOID pParam) {
 				pTarget->xbox_state.LX,
 				pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
-			pTarget->xbox_cross.y += pTarget->fieldsize;
+			pTarget->xbox_cross.y -= pTarget->fieldsize;
 			pTarget->m_fired++;
 			break;
 		case 3:
