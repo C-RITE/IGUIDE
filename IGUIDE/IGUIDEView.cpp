@@ -115,8 +115,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-	/*free(pDoc->mousePos);
-	pDoc->mousePos = NULL;*/
+	free(pDoc->mousePos);
+	pDoc->mousePos = NULL;
 	ShowCursor(TRUE);
 
 	m_pDlgTarget->Invalidate();
@@ -218,11 +218,10 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
 
-	// do this only once (in the beginning)
-	m_pDlgTarget->pDoc==NULL? m_pDlgTarget->pDoc = GetDoc():0;
-	m_pDlgTarget->fieldsize==0? m_pDlgTarget->calcFieldSize():0;
-	m_pDlgTarget->xbox_cross.x == 0? m_pDlgTarget->setCross():0;
-	m_pDlgTarget->m_pFixationTarget == NULL? m_pDlgTarget->getFixationTarget(): 0;	
+	m_pDlgTarget->pDoc = GetDoc();
+	m_pDlgTarget->calcFieldSize();
+	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
+	m_pDlgTarget->getFixationTarget();	
 
 	Invalidate();
 	delete FOV;

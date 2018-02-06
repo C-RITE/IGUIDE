@@ -16,8 +16,8 @@ Properties::Properties()
 {
 	VideoFolder = new CMFCPropertyGridFileProperty(L"Folder", L"D:\\Videos"),
 	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, _T("Select custom graphics file"));
-	m_pRasterSize = new _variant_t(0.f);
-	m_pFixationTargetSize = new _variant_t(0);
+	m_pRasterSize = new _variant_t();
+	m_pFixationTargetSize = new _variant_t();
 	Raster = new CMFCPropertyGridProperty(L"Raster");
 	RasterSize = new CMFCPropertyGridProperty(L"Size", m_pRasterSize, NULL, NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
@@ -89,8 +89,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 void Properties::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-		CDialogEx::OnShowWindow(bShow, nStatus);
-	// TODO: Add your message handler code here
+		// TODO: Add your message handler code here
 		CIGUIDEDoc* pDoc = GetDoc();
 		_variant_t rs(pDoc->raster.size);
 		_variant_t fts(pDoc->m_FixationTargetSize);
@@ -98,13 +97,14 @@ void Properties::OnShowWindow(BOOL bShow, UINT nStatus)
 		RasterSize->SetValue(rs);
 		FixationTargetSize->SetValue(fts);
 		FixationFile->SetValue(ft);
-		COLORREF col = RGB( (int)(pDoc->raster.color.r / (1/255.0)),
-							(int)(pDoc->raster.color.g / (1/255.0)),
-							(int)(pDoc->raster.color.b / (1/255.0)));
+		COLORREF col = RGB(
+			(int)(pDoc->raster.color.r / (1 / 255.0)),
+			(int)(pDoc->raster.color.g / (1 / 255.0)),
+			(int)(pDoc->raster.color.b / (1 / 255.0))
+		);
 		Color->SetColor(col);
 	
 }
-
 
 int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {

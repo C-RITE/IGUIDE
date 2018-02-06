@@ -9,8 +9,8 @@ class CIGUIDEDoc;
 // Target dialog
 
 struct XboxControlState {
-	float LX;	// DPAD x pos
-	float LY;	// DPAD y pos
+	int LX;	// DPAD x pos
+	int LY;	// DPAD y pos
 };
 
 struct cursorposition {
@@ -28,6 +28,8 @@ class Target : public CDialog
 
 	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
 	CMonitors				mons;				// multi monitor support
+	CAnimationController	m_animCtrl;			// some animation for better user experience
+	CAnimationRect			animationRect;
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
@@ -40,7 +42,7 @@ class Target : public CDialog
 	static bool				m_bFireUp;			// for fire signal
 	int						m_fired;			// times hit
 	float					ppd_client;			// pixel per degree on client screen
-	double					fieldsize;			// fieldsize in pixel on client screen
+	int						fieldsize;			// fieldsize in pixel on client screen
 
 private:
 	bool					m_bRunning;
@@ -54,6 +56,8 @@ public:
 	void getFixationTarget();
 	void calcFieldSize();
 	void setCross();
+	void zoomIn();
+	void finish();
 	static UINT InputControllerThread(LPVOID pParam);
 	
 	

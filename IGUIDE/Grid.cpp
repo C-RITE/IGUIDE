@@ -29,7 +29,6 @@ Grid::Grid()
 	overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", GRID | CROSSHAIR | FUNDUS);
 	
 }
-	
 
 Grid::~Grid() {
 
@@ -50,7 +49,9 @@ void Grid::DelPatch() {
 }
 
 void Grid::ClearPatchlist() {
+
 	patchlist.clear();
+
 }
 
 void Grid::StoreClick(CD2DPointF loc) {

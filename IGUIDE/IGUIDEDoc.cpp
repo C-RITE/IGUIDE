@@ -281,8 +281,8 @@ float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 
 CString CIGUIDEDoc::getTraceInfo() {
 
-	POSITION pos = GetFirstViewPosition();
-	CWnd* target = GetNextView(pos);
+//	POSITION pos = GetFirstViewPosition();
+//	CWnd* target = GetNextView(pos);
 	CString trace;
 	Edge k;
 
@@ -294,6 +294,9 @@ CString CIGUIDEDoc::getTraceInfo() {
 	float beta = 360 - ComputeOrientationAngle(k);
 	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 	
+
+
+
 	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
 		raster.meanAlpha,
 		beta,
@@ -303,7 +306,9 @@ CString CIGUIDEDoc::getTraceInfo() {
 		raster.scale.y,
 		dist,
 		1 / m_pGrid->dpp,
-		raster.meanEdge/raster.size);
+		raster.meanEdge/raster.size
+	);
+
 	if (m_pGrid->overlay & TRACEINFO)
 		return trace;
 	return NULL;
@@ -367,6 +372,9 @@ float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 }
 
 float CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
+
+	if (k.q.x == 0 && k.q.y == 0)
+		return 0;
 
 	float a, b;
 	float alpha;
