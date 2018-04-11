@@ -3,9 +3,9 @@
 //
 
 #include "stdafx.h"
-#include "IGUIDE.h"
-
+#include "resource.h"
 #include "MainFrm.h"
+#include "IGUIDE.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,13 +13,15 @@
 
 // CMainFrame
 
-IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWnd)
+IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
-BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
+BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
+	ON_MESSAGE(DOC_IS_READY, PopulateProperties)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
 	ON_WM_CLOSE()
+	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -35,6 +37,7 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
+
 }
 
 CMainFrame::~CMainFrame()
@@ -42,9 +45,30 @@ CMainFrame::~CMainFrame()
 	
 }
 
+LRESULT CMainFrame::PopulateProperties(WPARAM w, LPARAM l) {
+
+	m_DlgProperties.fillProperties();
+	return 0L;
+
+}
+
+// CMainFrame diagnostics
+
+#ifdef _DEBUG
+void CMainFrame::AssertValid() const
+{
+	CFrameWndEx::AssertValid();
+}
+
+void CMainFrame::Dump(CDumpContext& dc) const
+{
+	CFrameWndEx::Dump(dc);
+}
+#endif //_DEBUG
+
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1)
+	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	if (!m_wndStatusBar.Create(this))
@@ -55,13 +79,44 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	m_wndStatusBar.ShowWindow(SW_HIDE);
 
-	return 0;
+	// enable Visual Studio 2005 style docking window behavior
+	CDockingManager::SetDockingMode(DT_SMART);
+	// enable Visual Studio 2005 style docking window auto-hide behavior
+	EnableAutoHidePanes(CBRS_ALIGN_ANY);
+
+	// create docking windows
+	if (!CreateDockingWindows())
+	{
+		TRACE0("Failed to create docking windows\n");
+		return -1;
+	}
+
+	m_DlgProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_DlgProperties);
 	
+	return 0;
+
+}
+
+BOOL CMainFrame::CreateDockingWindows()
+{
+	BOOL bNameValid;
+	// Create properties window
+	CString strPropertiesWnd;
+	bNameValid = strPropertiesWnd.LoadString(IDS_PROPERTIES_WND);
+	ASSERT(bNameValid);
+	if (!m_DlgProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), FALSE, ID_VIEW_PROPERTIESWND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Properties window\n");
+		return FALSE; // failed to create
+	}
+
+	return TRUE;
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	if( !CMDIFrameWnd::PreCreateWindow(cs) )
+	if( !CFrameWndEx::PreCreateWindow(cs) )
 		return FALSE;
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
@@ -74,25 +129,12 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
-// CMainFrame diagnostics
-
-#ifdef _DEBUG
-void CMainFrame::AssertValid() const
-{
-	CMDIFrameWnd::AssertValid();
-}
-
-void CMainFrame::Dump(CDumpContext& dc) const
-{
-	CMDIFrameWnd::Dump(dc);
-}
-#endif //_DEBUG
 
 void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	
 	// TODO: Add your message handler code here
-	CMDIFrameWnd::OnShowWindow(bShow, nStatus);
+	CFrameWndEx::OnShowWindow(bShow, nStatus);
 	static bool bOnce = true;
 
 	if (bShow && !IsWindowVisible()
@@ -108,15 +150,28 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 		}
 		delete[] lwp;
 	}
+
 }
 
 
 void CMainFrame::OnClose()
 {
+
+	GetActiveView()->SendMessage(WM_CLOSE);
 	// TODO: Add your message handler code here and/or call default
 	WINDOWPLACEMENT wp;
 	GetWindowPlacement(&wp);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
-	CMDIFrameWnd::OnClose();
+	CFrameWndEx::OnClose();
 
+}
+
+
+void CMainFrame::OnEditProperties()
+{
+	if (m_DlgProperties.IsVisible())
+		m_DlgProperties.ShowPane(FALSE,FALSE,TRUE);
+	else
+		m_DlgProperties.ShowPane(TRUE, FALSE, TRUE);
+	// TODO: Add your command handler code here
 }

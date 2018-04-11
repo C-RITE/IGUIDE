@@ -1,7 +1,6 @@
 #pragma once
 #include "CXBoxController.h"
-#include "Monitors.h"
-#include "MultiMonitor.h"
+#include "IGUIDEView.h"
 
 class Edge;
 class CIGUIDEDoc;
@@ -27,9 +26,6 @@ class Target : public CDialog
 // Attributes
 
 	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
-	CMonitors				mons;				// multi monitor support
-	CAnimationController	m_animCtrl;			// some animation for better user experience
-	CAnimationRect			animationRect;
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
@@ -50,13 +46,12 @@ private:
 
 // Operations
 public:
-	Target(CWnd* pParent = NULL);   // standard constructor
+	Target(CIGUIDEView* pParent = NULL);   // standard constructor
 	~Target();
 	void Pinpoint(float x, float y);
 	void getFixationTarget();
 	void calcFieldSize();
 	void setCross();
-	void zoomIn();
 	void finish();
 	static UINT InputControllerThread(LPVOID pParam);
 	
@@ -76,4 +71,5 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnClose();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+
 };

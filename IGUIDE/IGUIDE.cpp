@@ -1,13 +1,9 @@
-
 // IGUIDE.cpp : Defines the class behaviors for the application.
 //
 
 #include "stdafx.h"
-//#include "afxwinappex.h"
-//#include "afxdialogex.h"
 #include "IGUIDE.h"
 #include "MainFrm.h"
-#include "ChildFrm.h"
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 
@@ -18,13 +14,13 @@
 
 // CIGUIDEApp
 
-BEGIN_MESSAGE_MAP(CIGUIDEApp, CWinApp)
+BEGIN_MESSAGE_MAP(CIGUIDEApp, CWinAppEx)
 	ON_COMMAND(ID_APP_ABOUT, &CIGUIDEApp::OnAppAbout)
 	// Standard file based document commands
-	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
+	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
+	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
 	// Standard print setup command
-	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinApp::OnFilePrintSetup)
+	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
 
@@ -77,28 +73,19 @@ BOOL CIGUIDEApp::InitInstance()
 
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
-	CMultiDocTemplate* pDocTemplate;
-	pDocTemplate = new CMultiDocTemplate(IDR_IGUIDETYPE,
+	CSingleDocTemplate* pDocTemplate;
+	pDocTemplate = new CSingleDocTemplate(
+		IDR_MAINFRAME,
 		RUNTIME_CLASS(CIGUIDEDoc),
-		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
+		RUNTIME_CLASS(CMainFrame), // custom child frame
 		RUNTIME_CLASS(CIGUIDEView));
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
 
-	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame;
-	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME))
-	{
-		delete pMainFrame;
-		return FALSE;
-	}
-	m_pMainWnd = pMainFrame;
-
 	// call DragAcceptFiles only if there's a suffix
 	//  In an MDI app, this should occur immediately after setting m_pMainWnd
 	// Enable drag/drop open
-	m_pMainWnd->DragAcceptFiles();
 
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
@@ -112,10 +99,14 @@ BOOL CIGUIDEApp::InitInstance()
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
-	// The main window has been initialized, so show and update it
-	pMainFrame->ShowWindow(m_nCmdShow);
-	pMainFrame->UpdateWindow();
-
+	// The one and only window has been initialized, so show and update it
+	m_pMainWnd->ShowWindow(SW_SHOW);
+	m_pMainWnd->UpdateWindow();
+	// call DragAcceptFiles only if there's a suffix
+	//  In an SDI app, this should occur after ProcessShellCommand
+	// Enable drag/drop open
+	m_pMainWnd->DragAcceptFiles();
+	
 	return TRUE;
 }
 

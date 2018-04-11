@@ -1,9 +1,9 @@
 
 // IGUIDEView.h : interface of the CIGUIDEView class
-//
 
 #pragma once
-
+class Target;
+const DWORD MainThreadId_G = ::GetCurrentThreadId();
 
 class CIGUIDEView : public CView
 {
@@ -13,12 +13,10 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	CIGUIDEDoc*			GetDocument() const;
 	Target*				m_pDlgTarget;						// target dialog
 
 private:
-
-	bool showTrace;
+	bool		showTrace;
 	
 // Operations
 public:
@@ -35,10 +33,6 @@ protected:
 // Implementation
 public:
 	virtual ~CIGUIDEView();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
 
 protected:
 
@@ -59,7 +53,11 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-	afx_msg void OnDestroy();
+	virtual void OnInitialUpdate();
+
+	afx_msg void OnClose();
+protected:
+	afx_msg LRESULT OnDisplaychange(WPARAM wParam, LPARAM lParam);
 };
 
 #ifndef _DEBUG  // debug version in IGUIDEView.cpp

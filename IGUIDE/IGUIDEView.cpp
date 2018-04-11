@@ -8,10 +8,9 @@
 #ifndef SHARED_HANDLERS
 #include "IGUIDE.h"
 #endif
-
-#include "IGUIDEDoc.h"
-#include "IGUIDEView.h"
 #include "MainFrm.h"
+#include "IGUIDEView.h"
+#include "IGUIDEDoc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,7 +34,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
-	ON_WM_DESTROY()
+	ON_WM_CLOSE()
+	ON_MESSAGE(WM_DISPLAYCHANGE, &CIGUIDEView::OnDisplaychange)
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -43,6 +43,7 @@ END_MESSAGE_MAP()
 CIGUIDEView::CIGUIDEView()
 {
 	m_pDlgTarget = NULL;
+	
 }
 
 CIGUIDEView::~CIGUIDEView()
@@ -78,35 +79,13 @@ void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 }
 
 
-// CIGUIDEView diagnostics
-
-#ifdef _DEBUG
-void CIGUIDEView::AssertValid() const
-{
-	CView::AssertValid();
-}
-
-void CIGUIDEView::Dump(CDumpContext& dc) const
-{
-	CView::Dump(dc);
-}
-
-CIGUIDEDoc* CIGUIDEView::GetDocument() const // non-debug version is inline
-{
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CIGUIDEDoc)));
-	return (CIGUIDEDoc*)m_pDocument;
-}
-#endif //_DEBUG
-
-
 // CIGUIDEView message handlers
-
 
 void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	
-	CIGUIDEDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (pDoc->CheckFOV()) {
 		pDoc->m_pGrid->StoreClick(static_cast<CD2DPointF>(point));
@@ -128,7 +107,7 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	
-	CIGUIDEDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (pDoc->mousePos)
 		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
@@ -142,21 +121,36 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-
-	CIGUIDEDoc* pDoc = GetDocument();
+	
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (!pDoc->mousePos && pDoc->CheckFOV()) {
 		pDoc->mousePos = (CPoint*)malloc(sizeof(CPoint));
 		pDoc->mousePos->SetPoint(point.x, point.y);
 	}
+
 	ShowCursor(FALSE);
 
 	RedrawWindow();
 }
 
+
+void CIGUIDEView::OnInitialUpdate()
+{
+	CView::OnInitialUpdate();
+	
+
+	// TODO: Add your specialized code here and/or call the base class
+	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
+	
+}
+
+
 void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
-	CIGUIDEDoc* pDoc = GetDocument();	
+
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 
 	CD2DPointF* FOV = new CD2DPointF[4];
@@ -218,7 +212,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
 
-	m_pDlgTarget->pDoc = GetDoc();
+	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
 	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
 	m_pDlgTarget->getFixationTarget();	
@@ -236,7 +230,7 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
 
 	// TODO:  Add your specialized creation code here
-	Invalidate();
+	//Invalidate();
 
 	return 0;
 }
@@ -246,10 +240,9 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
-	ASSERT_VALID(pRenderTarget);
-	
-	CIGUIDEDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	ASSERT_VALID(pRenderTarget);	
+
 	if (!pDoc)
 		return FALSE;
 
@@ -301,8 +294,9 @@ void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 
 void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 {
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
 	CView::OnSize(nType, cx, cy);
-	CIGUIDEDoc* pDoc = GetDocument();
 	CRect rect;
 	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
 	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
@@ -320,8 +314,7 @@ void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	
-	CIGUIDEDoc* pDoc = GetDocument();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (pDoc->m_pGrid->patchlist.size() > 0) {
 		if (pMsg->message == WM_KEYDOWN) {
@@ -373,8 +366,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 }
 
-
-
 BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 	m_pDlgTarget = new Target();
@@ -385,11 +376,23 @@ BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 }
 
 
-void CIGUIDEView::OnDestroy()
-{
-	m_pDlgTarget->OnClose();
-	m_pDlgTarget->DestroyWindow();
-	CView::OnDestroy();
 
-	// TODO: Add your message handler code here
+void CIGUIDEView::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+
+	m_pDlgTarget->SendMessage(WM_CLOSE);
+	CView::OnClose();
+}
+
+
+afx_msg LRESULT CIGUIDEView::OnDisplaychange(WPARAM wParam, LPARAM lParam)
+{
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	m_pDlgTarget->ShowWindow(SW_HIDE);
+	AfxMessageBox(L"Monitor configuration change detected.\n\nSelect a screen in Properties/Target View now!", MB_ICONWARNING);
+	pDoc->getScreens();
+	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
+	return 0;
 }

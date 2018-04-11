@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Patches.h"
 #include "IGUIDEDoc.h"
+#include "MainFrm.h"
 #include <sstream>
 
 using namespace std;
@@ -18,10 +19,10 @@ Patches::~Patches()
 bool Patches::SaveToFile() {
 
 	wstringstream sstream;
-	CIGUIDEDoc* pDoc = GetDoc();
 	int number = 1;
-	CString path = pDoc->m_pDlgProperties->VideoFolder->GetValue();
-	filepath.Format(_T("%s\\"), path);
+	AfxMessageBox(L"Please implement!", MB_OK);
+	//CString path = pMainWnd->m_dl.m_DlgProperties.VideoFolder->GetValue();
+	//filepath.Format(_T("%s\\"), path);
 	CString strNumber, strDegX, strDegY;	
 	CString header("Video number,deg(x),deg(y)");
 

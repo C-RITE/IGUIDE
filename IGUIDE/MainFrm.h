@@ -3,14 +3,14 @@
 //
 
 #pragma once
+#include "Properties.h"
 
-#include "IGUIDEDoc.h"
-
-class CMainFrame : public CMDIFrameWnd
+class CMainFrame : public CFrameWndEx
 {
-	DECLARE_DYNAMIC(CMainFrame)
-public:
+
+protected:
 	CMainFrame();
+	DECLARE_DYNCREATE(CMainFrame)
 
 // Attributes
 public:
@@ -34,16 +34,20 @@ public:
 #endif
 
 protected:  // control bar embedded members
-	CStatusBar        m_wndStatusBar;
+	CStatusBar      m_wndStatusBar;
+	Properties		m_DlgProperties;					// properties dialog
 
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	BOOL CreateDockingWindows();
 	DECLARE_MESSAGE_MAP()
-
-public:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnClose();
+	afx_msg LRESULT PopulateProperties(WPARAM w, LPARAM l);
+
+public:
+	afx_msg void OnEditProperties();
 };
 
 

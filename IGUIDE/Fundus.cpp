@@ -15,13 +15,14 @@ Fundus::Fundus() :
 Fundus::~Fundus()
 {
 	delete filename;
+	delete picture;
 }
 
 
 void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
 
-	CIGUIDEDoc* pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
 		float ppd = 1/pDoc->m_pGrid->dpp;

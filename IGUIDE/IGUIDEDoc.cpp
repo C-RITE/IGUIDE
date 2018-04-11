@@ -28,7 +28,7 @@ IMPLEMENT_DYNCREATE(CIGUIDEDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_COMMAND(ID_FILE_IMPORT, &CIGUIDEDoc::OnFileImport)
-	ON_COMMAND(ID_EDIT_PROPERTIES, &CIGUIDEDoc::OnEditProperties)
+	
 	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
 	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
@@ -58,8 +58,21 @@ CIGUIDEDoc::CIGUIDEDoc()
 	raster.size = 1.28;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
-	m_pDlgProperties = new Properties();
-	m_pDlgProperties->Create(IDD_PROPERTIES);
+	m_ScreenPixelPitch = 96;
+	m_ScreenDistance = 100;
+	m_FixationTargetSize = 100;
+	getScreens();
+
+}
+
+
+bool CIGUIDEDoc::getScreens() {
+
+	Monitors monitors;
+	if (m_Screens.size() > 0)	// change in display configuration requires empty vector
+		m_Screens.clear();
+	m_Screens = monitors.getScreens();
+	return true;
 
 }
 
@@ -70,63 +83,18 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pFundus;
 	delete mousePos;
 	delete m_pDlgCalibration;
-	delete m_pDlgProperties;
-	
+		
 }
 
 // Get Doc, made for other classes that need access to attributes
 
-CIGUIDEDoc* GetDoc()
+CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 {
 
-	//CWinApp* pApp = AfxGetApp();
-	//ASSERT_VALID(pApp);
-
-	//CMDIChildWnd * pChild = NULL;
-
-	//pChild = ((CMDIFrameWnd*)(AfxGetApp()->m_pMainWnd))->MDIGetActive();
-
-	//ASSERT_VALID(pChild);
-	////if (pChild == nullptr) return NULL;
-	//
-	//CDocument * pDoc = NULL;
-
-	//if (pChild) pDoc = pChild->GetActiveDocument();
-
-	//if (!pDoc) {
-
-	//	POSITION posTemplate = pApp->GetFirstDocTemplatePosition();
-
-	//	while (posTemplate != NULL) {
-	//		CDocTemplate* pTemplate = pApp->GetNextDocTemplate(posTemplate);
-	//		ASSERT_VALID(pTemplate);
-	//		ASSERT_KINDOF(CDocTemplate, pTemplate);
-	//		POSITION posDocument = pTemplate->GetFirstDocPosition();
-	//		while (posDocument != NULL) {
-	//			CDocument* pDoc = pTemplate->GetNextDoc(posDocument);
-	//			ASSERT_VALID(pDoc);
-	//			ASSERT_KINDOF(CDocument, pDoc);
-	//			return (CIGUIDEDoc *)pDoc;
-	//		}
-	//	}
-	//}
-
-	//return (CIGUIDEDoc *)pDoc;
-
-	CWnd* pWnd = AfxGetMainWnd();
-	ASSERT_VALID(pWnd);
-	ASSERT_KINDOF(CFrameWnd, pWnd);
-	CFrameWnd* pMainFrame = static_cast<CFrameWnd*>(pWnd);
-	CFrameWnd* pActiveFrame = pMainFrame->GetActiveFrame();
-	CDocument* pDoc = pActiveFrame->GetActiveDocument();
-	if (pDoc == NULL) return NULL;
-	ASSERT_KINDOF(CIGUIDEDoc, pDoc);
-	CIGUIDEDoc* pIGDoc = static_cast<CIGUIDEDoc*>(pDoc);
+	CFrameWndEx * pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
+	return (CIGUIDEDoc *)pFrame->GetActiveDocument();
 	
-	return pIGDoc;
-
 }
-
 
 BOOL CIGUIDEDoc::OnNewDocument()
 {
@@ -136,7 +104,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
 	CString path;
-	int FTS;
+	int FTS, SCR;
 
 	path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
 	if (path.IsEmpty()) {
@@ -149,8 +117,12 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	m_FixationTarget = path;
 
 	FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
-	if (FTS == 0) FTS = 100;
+	if (!FTS) FTS = 100;
 	m_FixationTargetSize = FTS;
+
+	SCR = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
+	if (!SCR) SCR = 1;
+	m_FixationTargetScreen = SCR;
 
 	LPBYTE rcol;
 	UINT nl;
@@ -473,13 +445,6 @@ void CIGUIDEDoc::OnFileImport()
 	UpdateAllViews(NULL);
 }
 
-
-void CIGUIDEDoc::OnEditProperties()
-{
-	m_pDlgProperties->ShowWindow(SW_SHOW);
-	// TODO: Add your command handler code here
-}
-
 void CIGUIDEDoc::OnOverlayGrid()
 {
 	// TODO: Add your command handler code here
@@ -611,12 +576,14 @@ void CIGUIDEDoc::OnCloseDocument()
 {
 	// TODO: Add your specialized code here and/or call the base class
 	// TODO: Add your message handler code here
-
+	
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(float));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_FixationTargetScreen);
 	D2D1_COLOR_F rcol = raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
 	CDocument::OnCloseDocument();
+
 }

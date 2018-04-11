@@ -192,7 +192,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Calibration.h" />
-    <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="CXBOXController.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="Fundus.h" />
@@ -202,7 +201,6 @@
     <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Monitors.h" />
-    <ClInclude Include="MultiMonitor.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Resource.h" />
@@ -213,7 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Calibration.cpp" />
-    <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="CXBOXController.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -226,7 +223,6 @@
     <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Monitors.cpp" />
-    <ClCompile Include="MultiMonitor.cpp" />
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -251,6 +247,7 @@
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\IGUIDEDoc.ico" />
     <Image Include="res\IGUIDE.ico" />
+    <Image Include="res\toolbar1.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

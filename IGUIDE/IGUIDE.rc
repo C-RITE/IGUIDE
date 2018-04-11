@@ -29,9 +29,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 IDD_TARGET DIALOGEX 600, 150, 320, 200
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Target View"
-FONT 8, "MS Shell Dlg", 0, 0, 0x0
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_DLGFRAME
 BEGIN
 END
 
@@ -42,13 +40,6 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Done",IDOK,141,179,50,14
     CONTROL         "",IDC_STATIC_CAL,"Static",SS_ETCHEDFRAME | SS_NOTIFY,18,14,286,155,WS_EX_CLIENTEDGE
-END
-
-IDD_PROPERTIES DIALOGEX 0, 0, 207, 175
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Properties"
-FONT 8, "MS Shell Dlg", 0, 0, 0x0
-BEGIN
 END
 
 
@@ -71,14 +62,6 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 193
     END
-
-    IDD_PROPERTIES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 200
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 168
-    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -94,11 +77,6 @@ BEGIN
 END
 
 IDD_CALIBRATION AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_PROPERTIES AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -159,6 +137,19 @@ IDR_MAINFRAME           ICON                    "res\\IGUIDE.ico"
 //
 
 IDB_AO                  BITMAP                  "res\\ao.bmp"
+
+IDRETRY                 BITMAP                  "res\\toolbar1.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDRETRY TOOLBAR 16, 15
+BEGIN
+    BUTTON      IDR_PROPERTIES
+END
 
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
@@ -374,6 +365,7 @@ STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "IGUIDE"
     AFX_IDS_IDLEMESSAGE     "Ready"
+    IDS_PROPERTIES_WND      "Properties"
 END
 
 STRINGTABLE

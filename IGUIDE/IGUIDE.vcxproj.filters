@@ -30,9 +30,6 @@
     <ClInclude Include="MainFrm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ChildFrm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IGUIDEDoc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,9 +69,6 @@
     <ClInclude Include="Monitors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MultiMonitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IGUIDE.cpp">
@@ -84,9 +78,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainFrm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChildFrm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IGUIDEDoc.cpp">
@@ -125,9 +116,6 @@
     <ClCompile Include="Monitors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MultiMonitor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\IGUIDE.rc2">
@@ -152,6 +140,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\toolbar1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

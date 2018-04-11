@@ -14,7 +14,7 @@
 // See IGUIDE.cpp for the implementation of this class
 //
 
-class CIGUIDEApp : public CWinApp
+class CIGUIDEApp : public CWinAppEx
 {
 public:
 	CIGUIDEApp();

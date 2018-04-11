@@ -1,50 +1,68 @@
 #pragma once
-//#include "afxpropertygridctrl.h"
-
-
 // Properties dialog
 
-class Properties : public CDialogEx
+class CPropertiesToolBar : public CMFCToolBar
 {
-	DECLARE_DYNAMIC(Properties)
+public:
+	virtual void OnUpdateCmdUI(CFrameWndEx* /*pTarget*/, BOOL bDisableIfNoHndler)
+	{
+		CMFCToolBar::OnUpdateCmdUI((CFrameWndEx*)GetOwner(), bDisableIfNoHndler);
+	}
 
-	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
-	public:
-		void setLabelWidth(int width) {
-			m_nLeftColumnWidth = width;
-			AdjustLayout();
-		}
-	};
+	virtual BOOL AllowShowOnList() const { return FALSE; }
+};
+
+class Properties : public CDockablePane
+{
+
+	////customize label width to match entries
+	//class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
+	//public:
+	//	void setLabelWidth(int width) {
+	//		m_nLeftColumnWidth = width;
+	//		AdjustLayout();
+	//	}
+	//};
 
 public:
 	Properties();   // standard constructor
-	virtual ~Properties();
+	~Properties();
 
-	MyCMFCPropertyGridCtrl			GridCtrl;
+	void AdjustLayout();
+	void fillProperties();
+
 	CMFCPropertyGridProperty*		Raster;
 	CMFCPropertyGridProperty*		RasterSize;
 	CMFCPropertyGridProperty*		FixationTargetSize;
+	CMFCPropertyGridProperty*		FixationTargetScreen;
+	CMFCPropertyGridProperty*		ScreenDistance;
+	CMFCPropertyGridProperty*		PixelDensity;
 	CMFCPropertyGridColorProperty*	Color;
 	CMFCPropertyGridProperty*		ICANDI;
-	CMFCPropertyGridProperty*		FixationTarget;
+	CMFCPropertyGridProperty*		TargetView;
 	CMFCPropertyGridFileProperty*	VideoFolder;
 	CMFCPropertyGridFileProperty*	FixationFile;
 
-	_variant_t*						m_pRasterSize;
-	_variant_t*						m_pFixationTargetSize;
-
-// Dialog Data
-#ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_PROPERTIES };
-#endif
+private:
+	_variant_t * m_pFixationTarget;
+	_variant_t * m_pRasterSize;
+	_variant_t * m_pScreen;
+	_variant_t * m_pPixelPitch;
+	_variant_t * m_pDistance;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	CFont m_fntPropList;
+	CMFCPropertyGridCtrl m_wndPropList;
 
-	DECLARE_MESSAGE_MAP()
-public:
-	virtual BOOL OnInitDialog();
-	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	void InitPropList();
+
+protected:
+
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
+DECLARE_MESSAGE_MAP()
+
+
+public:
 };

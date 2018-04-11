@@ -8,61 +8,41 @@
 #include "afxdialogex.h"
 #include <Shlobj.h>
 
-// Properties dialog
-IMPLEMENT_DYNAMIC(Properties, CDialogEx)
 
 Properties::Properties()
-
 {
-	VideoFolder = new CMFCPropertyGridFileProperty(L"Folder", L"D:\\Videos"),
-	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, _T("Select custom graphics file"));
-	m_pRasterSize = new _variant_t();
-	m_pFixationTargetSize = new _variant_t();
-	Raster = new CMFCPropertyGridProperty(L"Raster");
-	RasterSize = new CMFCPropertyGridProperty(L"Size", m_pRasterSize, NULL, NULL, NULL, NULL);
-	COLORREF col = D2D1::ColorF::DarkGreen;
-	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
-	Color->EnableOtherButton(L"Other..");
-	ICANDI = new CMFCPropertyGridProperty(L"ICANDI");
-	FixationTarget = new CMFCPropertyGridProperty(L"Fixation Target");
-	FixationTargetSize = new CMFCPropertyGridProperty(L"Size", m_pFixationTargetSize, _T("Scale the size of the fixation target (%)"), NULL, NULL, NULL);
+
+	m_pRasterSize = new _variant_t;
+	m_pFixationTarget = new _variant_t;
+	m_pScreen = new _variant_t;
+	m_pPixelPitch = new _variant_t;
+	m_pDistance = new _variant_t;
+	
 }
 
 Properties::~Properties()
 {
-	
-	delete FixationTarget;
-	delete m_pFixationTargetSize;
-	delete Raster;
+
+	delete m_pFixationTarget;
 	delete m_pRasterSize;
-	delete ICANDI;
+	delete m_pScreen;
+	delete m_pPixelPitch;
+	delete m_pDistance;
 
 }
 
-void Properties::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-}
 
-BEGIN_MESSAGE_MAP(Properties, CDialogEx)
-	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
-	ON_WM_SHOWWINDOW()
+BEGIN_MESSAGE_MAP(Properties, CDockablePane)
 	ON_WM_CREATE()
+	ON_WM_SIZE()
+	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 END_MESSAGE_MAP()
 
-// Properties message handlers
-
-BOOL Properties::OnInitDialog()
-{
-	CDialogEx::OnInitDialog();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
+// Properties message handler
 
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
-	CIGUIDEDoc* pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
@@ -70,7 +50,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		if (propName == L"Size") {
 			if (prop->GetParent() == Raster)
 				pDoc->raster.size = vt;
-			if (prop->GetParent() == FixationTarget)
+			if (prop->GetParent() == TargetView)
 				pDoc->m_FixationTargetSize = vt;
 		}
 		if (propName == L"Color") {
@@ -87,45 +67,127 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void Properties::OnShowWindow(BOOL bShow, UINT nStatus)
+void Properties::OnSize(UINT nType, int cx, int cy)
 {
-		// TODO: Add your message handler code here
-		CIGUIDEDoc* pDoc = GetDoc();
-		_variant_t rs(pDoc->raster.size);
-		_variant_t fts(pDoc->m_FixationTargetSize);
-		_variant_t ft(pDoc->m_FixationTarget);
-		RasterSize->SetValue(rs);
-		FixationTargetSize->SetValue(fts);
-		FixationFile->SetValue(ft);
-		COLORREF col = RGB(
-			(int)(pDoc->raster.color.r / (1 / 255.0)),
-			(int)(pDoc->raster.color.g / (1 / 255.0)),
-			(int)(pDoc->raster.color.b / (1 / 255.0))
-		);
-		Color->SetColor(col);
+	CDockablePane::OnSize(nType, cx, cy);
+	AdjustLayout();
+}
+
+void Properties::AdjustLayout()
+{
+	if (GetSafeHwnd() == NULL)
+	{
+		return;
+	}
+
+	CRect rectClient, rectCombo;
+	GetClientRect(rectClient);
+
+	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+}
+
+void Properties::InitPropList()
+{
+	
+	m_wndPropList.SetCustomColors(	RGB(0, 0, 0),		// Background
+									RGB(255, 255, 255),	// Text
+									RGB(50, 50, 50),	// GroupBackground
+									RGB(255, 255, 255), // GroupText
+									RGB(50, 50, 50),	// DescriptionBackground
+									RGB(100, 200, 100),	// DescriptionText
+									RGB(150, 150, 150));// Line
+
+	m_wndPropList.EnableHeaderCtrl(TRUE);
+	m_wndPropList.EnableDescriptionArea();
+	m_wndPropList.MarkModifiedProperties();
+
+	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"D:\\", NULL, _T("Choose output directory of captured video files"));
+	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
+	Raster = new CMFCPropertyGridProperty(L"Raster");
+	RasterSize = new CMFCPropertyGridProperty(L"Size", m_pRasterSize, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
+	COLORREF col = D2D1::ColorF::DarkGreen;
+	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
+	Color->EnableOtherButton(L"Other..");
+	ICANDI = new CMFCPropertyGridProperty(L"ICANDI");
+	TargetView = new CMFCPropertyGridProperty(L"Target View");
+	PixelDensity = new CMFCPropertyGridProperty(L"Pixel Pitch", m_pPixelPitch, _T("Distance between pixel centers. Check for specifications in monitor manual!"), NULL, NULL, NULL);
+	ScreenDistance = new CMFCPropertyGridProperty(L"Distance", m_pDistance, _T("Distance between subject's pupil and screen surface in mm"), NULL, NULL, NULL);
+	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", m_pScreen, _T("Pick the display for target screen. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
+	FixationTargetSize = new CMFCPropertyGridProperty(L"Size", m_pFixationTarget , _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
+
+	RECT Rect;
+	GetClientRect(&Rect);
+	MapWindowPoints(this, &Rect);
+	m_wndPropList.AddProperty(Raster);
+	Raster->AddSubItem(RasterSize);
+	Raster->AddSubItem(Color);
+	m_wndPropList.AddProperty(ICANDI);
+	ICANDI->AddSubItem(VideoFolder);
+	m_wndPropList.AddProperty(TargetView);
+	TargetView->AddSubItem(FixationTargetScreen);
+	TargetView->AddSubItem(ScreenDistance);
+	TargetView->AddSubItem(PixelDensity);
+	TargetView->AddSubItem(FixationFile);
+	TargetView->AddSubItem(FixationTargetSize);
 	
 }
 
 int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CDialogEx::OnCreate(lpCreateStruct) == -1)
+
+	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	RECT Rect;
-	GetClientRect(&Rect);
-	MapWindowPoints(this, &Rect);
-	GridCtrl.Create(WS_CHILD | WS_BORDER | WS_VISIBLE | WS_TABSTOP, Rect, this, NULL);
-	GridCtrl.AddProperty(Raster);
-	Raster->AddSubItem(RasterSize);
-	Raster->AddSubItem(Color);
-	GridCtrl.AddProperty(ICANDI);
-	ICANDI->AddSubItem(VideoFolder);
-	GridCtrl.AddProperty(FixationTarget);
-	FixationTarget->AddSubItem(FixationFile);
-	FixationTarget->AddSubItem(FixationTargetSize);
-	GridCtrl.setLabelWidth(100);
-	// TODO:  Add your specialized creation code here
+	CRect rectDummy;
+	rectDummy.SetRectEmpty();
+
+
+	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
+	{
+		TRACE0("Failed to create Properties Grid \n");
+		return -1;      // fail to create
+	}
+
+	InitPropList();
+	AdjustLayout();
 
 	return 0;
+
+}
+
+void Properties::fillProperties() {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+	_variant_t rs(pDoc->raster.size);
+	_variant_t fts(pDoc->m_FixationTargetSize);
+	_variant_t ft(pDoc->m_FixationTarget);
+	_variant_t scr(pDoc->m_Screens[pDoc->m_FixationTargetScreen - 1].name);
+	_variant_t dens(pDoc->m_ScreenPixelPitch);
+	_variant_t dist(pDoc->m_ScreenDistance);
+
+	RasterSize->SetValue(rs);
+	FixationTargetSize->SetValue(fts);
+	FixationFile->SetValue(ft);
+	FixationTargetScreen->SetValue(scr);
+	PixelDensity->SetValue(dens);
+	ScreenDistance->SetValue(dist);
+
+	COLORREF col = RGB(
+		(int)(pDoc->raster.color.r / (1 / 255.0)),
+		(int)(pDoc->raster.color.g / (1 / 255.0)),
+		(int)(pDoc->raster.color.b / (1 / 255.0))
+	);
+	
+	Color->SetColor(col);
+	 
+	CString option;
+
+	FixationTargetScreen->RemoveAllOptions(); // need for removal if fillProperties() is called more than once
+
+	for (auto& it : pDoc->m_Screens) {
+		option.Format(L"%s (%ix%i)", it.name, it.resolution.x, it.resolution.y);
+		FixationTargetScreen->AddOption(option);
+	}
 
 }

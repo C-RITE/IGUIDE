@@ -56,8 +56,7 @@ void Grid::ClearPatchlist() {
 
 void Grid::StoreClick(CD2DPointF loc) {
 
-	CIGUIDEDoc* pDoc;
-	pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	Patches patch;
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
@@ -182,7 +181,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 
-	CIGUIDEDoc* pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
@@ -228,7 +227,7 @@ void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	if (pDoc->mousePos) {
+	if (pDoc && pDoc->mousePos) {
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
 			pDoc->mousePos->x - pDoc->raster.size / 2 / dpp,
@@ -250,7 +249,7 @@ void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize)
 {
-	CIGUIDEDoc* pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	CString traceText;
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -274,7 +273,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 
 void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number) {
 	
-	CIGUIDEDoc* pDoc = GetDoc();
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CString vidText;
 
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();

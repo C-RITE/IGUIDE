@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define DOC_IS_READY (WM_USER + 100)
+
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
 #endif
