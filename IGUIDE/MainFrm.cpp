@@ -7,6 +7,7 @@
 #include "MainFrm.h"
 #include "IGUIDE.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -37,6 +38,27 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
+
+
+	if (CSockClient::SocketInit() != 0)
+	{
+		AfxMessageBox(L"Unable to initialize Windows Sockets", MB_OK | MB_ICONERROR, 0);
+		return;
+	}
+
+	if (!m_sock.Create() ||
+		!m_sock.Connect(_T("127.0.0.1"), 1300))
+	{
+		TCHAR szErrorMsg[WSA_ERROR_LEN];
+		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
+
+		CString error;
+		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
+		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
+		//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
+		return;
+	}
+
 
 }
 
@@ -76,8 +98,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
 	}
+
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
-	m_wndStatusBar.ShowWindow(SW_HIDE);
+	m_wndStatusBar.ShowWindow(SW_SHOW);
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
@@ -174,4 +197,18 @@ void CMainFrame::OnEditProperties()
 	else
 		m_DlgProperties.ShowPane(TRUE, FALSE, TRUE);
 	// TODO: Add your command handler code here
+}
+
+
+BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (pMsg->message == WM_KEYDOWN) {
+		switch (pMsg->wParam) {
+		case 'S':
+			char r = 'G';
+			m_sock.Send(&r, 1, 0);
+		}
+	}
+	return CFrameWndEx::PreTranslateMessage(pMsg);
 }

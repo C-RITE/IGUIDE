@@ -15,7 +15,6 @@
 #include <math.h>
 #include <propkey.h>
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -116,6 +115,13 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	}
 	m_FixationTarget = path;
 
+	path = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
+	if (path.IsEmpty()) {
+			path.Append(_T("C:\\"));
+		}
+
+	m_OutputDir = path;
+
 	FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
 	if (!FTS) FTS = 100;
 	m_FixationTargetSize = FTS;
@@ -124,15 +130,29 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (!SCR) SCR = 1;
 	m_FixationTargetScreen = SCR;
 
-	LPBYTE rcol;
 	UINT nl;
+	LPBYTE calib, ptr;
+	DWORD sz = sizeof(CD2DPointF);
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"Calibration", &calib, &nl) > 0) {
+		CD2DPointF data;
+		ptr = calib;
+		for (size_t t = 0; t < nl / sz; t++) {
+			data = (CD2DPointF*)calib;
+			raster.corner.push_back(data);
+			calib += sz;
+		}
+	calib = ptr;
+	}
+
+	LPBYTE rcol;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
 
 	LPBYTE rsize;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl)> 0)
-		memcpy(&raster.size, rsize, sizeof(float));
+		memcpy(&raster.size, rsize, sizeof(double));
 
+	delete calib,ptr;
 	delete rcol;
 	delete rsize;
 
@@ -263,13 +283,10 @@ CString CIGUIDEDoc::getTraceInfo() {
 		k.q.y = m_pGrid->patchlist.back().coords.y;
 	}
 
-	float beta = 360 - ComputeOrientationAngle(k);
-	float dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
-	
+	double beta = 360 - ComputeOrientationAngle(k);
+	double dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
-
-
-	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t\%f (deg)\ngamma:\t\t\%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
+	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
 		raster.meanAlpha,
 		beta,
 		raster.meanAlpha + beta,
@@ -312,19 +329,19 @@ CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int 
 	}
 
 	signedArea *= 0.5;
-	centroid.x /= (6.0*signedArea);
-	centroid.y /= (6.0*signedArea);
+	centroid.x /= (6.0f*signedArea);
+	centroid.y /= (6.0f*signedArea);
 
 	return centroid;
 
 }
 
 
-float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
+double CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 
-	float a, b;
-	float alpha = 0;
-	float pi = atan(1) * 4;
+	double a, b;
+	double alpha = 0;
+	double pi = atan(1) * 4;
 
 
 	if (abs(k.p.y - k.q.y) < abs(k.p.x - k.q.x)) {
@@ -343,14 +360,14 @@ float CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 
 }
 
-float CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
+double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 
 	if (k.q.x == 0 && k.q.y == 0)
 		return 0;
 
-	float a, b;
-	float alpha;
-	float pi = atan(1) * 4;
+	double a, b;
+	double alpha;
+	double pi = atan(1) * 4;
 
 	if (k.q.x >= k.p.x && k.q.y <= k.p.y) {
 		a = abs(k.q.x - k.p.x);
@@ -386,9 +403,9 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 	ATLTRACE(_T("\n"));
 	Edge k = raster.perimeter[0];
-	float theta = ComputeOrientationAngle(k);
+	double theta = ComputeOrientationAngle(k);
 
-	for (int i = 0; i < raster.perimeter.size(); i++) {
+	for (size_t i = 0; i < raster.perimeter.size(); i++) {
 		raster.perimeter[i].alpha = ComputeDisplacementAngle(raster.perimeter[i]);
 		if (theta > 90 && theta <= 180)
 			raster.perimeter[i].alpha = 180 - raster.perimeter[i].alpha;
@@ -397,7 +414,7 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 		if (theta > 270 && theta <= 360)
 			raster.perimeter[i].alpha = 360 - raster.perimeter[i].alpha;
 	}
-		for (int i = 0; i < raster.perimeter.size(); i++)
+		for (size_t i = 0; i < raster.perimeter.size(); i++)
 			ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
 
 }
@@ -407,13 +424,13 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 
 	//calc mean of all angles
 	double sum = 0;
-	for (int i = 0; i < raster.perimeter.size(); i++)
+	for (size_t i = 0; i < raster.perimeter.size(); i++)
 		sum += raster.perimeter[i].alpha;
 	double mean = sum / raster.perimeter.size();
 	
 	//calc variance
 	double temp = 0;
-	for (int i = 0; i < raster.perimeter.size(); i++)
+	for (size_t i = 0; i < raster.perimeter.size(); i++)
 		temp += (raster.perimeter[i].alpha - mean)*(raster.perimeter[i].alpha - mean);
 	double var = temp / raster.perimeter.size();
 
@@ -423,6 +440,7 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 	if (stddev > 5)
 		return false;
 	return true;
+
 }
 
 void CIGUIDEDoc::OnFileImport()
@@ -437,12 +455,18 @@ void CIGUIDEDoc::OnFileImport()
 	}
 
 	HRESULT hr = m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
-	if (hr != S_OK)
-		return;
 
 	UpdateAllViews(NULL);
+	if (!m_pFundus->picture->IsValid()) {
+		CStringW message;
+		message.Format(L"Failed to load image!\n%s", *m_pFundus->filename);
+		AfxMessageBox(message, MB_OK);
+		delete m_pFundus->filename;
+		return;
+	}
 	m_pDlgCalibration->DoModal();
 	UpdateAllViews(NULL);
+	
 }
 
 void CIGUIDEDoc::OnOverlayGrid()
@@ -579,8 +603,11 @@ void CIGUIDEDoc::OnCloseDocument()
 	
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
+	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(float));
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
+	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
+	if (raster.corner.size() == 4) AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_FixationTargetScreen);
 	D2D1_COLOR_F rcol = raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));

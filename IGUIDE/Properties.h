@@ -15,14 +15,14 @@ public:
 class Properties : public CDockablePane
 {
 
-	////customize label width to match entries
-	//class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
-	//public:
-	//	void setLabelWidth(int width) {
-	//		m_nLeftColumnWidth = width;
-	//		AdjustLayout();
-	//	}
-	//};
+	//customize label width to match entries
+	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
+	public:
+		virtual void AdjustLayout() {
+			m_nLeftColumnWidth = 85;
+			CMFCPropertyGridCtrl::AdjustLayout();
+		}
+	};
 
 public:
 	Properties();   // standard constructor
@@ -52,7 +52,7 @@ private:
 
 protected:
 	CFont m_fntPropList;
-	CMFCPropertyGridCtrl m_wndPropList;
+	MyCMFCPropertyGridCtrl m_wndPropList;
 
 	void InitPropList();
 

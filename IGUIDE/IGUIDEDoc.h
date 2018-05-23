@@ -20,17 +20,18 @@ protected: // create from serialization only
 
 public:
 	vector<Screen>			m_Screens;							// all connected monitors
+	Screen*					m_selectedScreen;					// target monitor
 	int						m_ScreenPixelPitch;					// pixel pitch of target monitor
 	int						m_ScreenDistance;					// distance between eye and screen
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Calibration*			m_pDlgCalibration;					// calibration class
 	CString					m_FixationTarget;					// fixation target filename
+	CString					m_OutputDir;						// .csv output directory
 	int						m_FixationTargetSize;				// fixation target size in percent
 	int						m_FixationTargetScreen;				// fixation target screen
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
-
 
 // Operations
 public:
@@ -39,8 +40,8 @@ public:
 	float CalcEdgeLength(Edge k);
 	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
 	void ComputeDisplacementAngles();
-	float ComputeDisplacementAngle(Edge k);
-	float ComputeOrientationAngle(Edge k);
+	double ComputeDisplacementAngle(Edge k);
+	double ComputeOrientationAngle(Edge k);
 	bool CheckCalibrationValidity();
 	bool getScreens();
 	CString getTraceInfo();

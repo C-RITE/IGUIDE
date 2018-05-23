@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
 	ON_MESSAGE(WM_DISPLAYCHANGE, &CIGUIDEView::OnDisplaychange)
+	ON_MESSAGE(SCREEN_SELECTED, &CIGUIDEView::ChangeTargetDisplay)
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -43,7 +44,6 @@ END_MESSAGE_MAP()
 CIGUIDEView::CIGUIDEView()
 {
 	m_pDlgTarget = NULL;
-	
 }
 
 CIGUIDEView::~CIGUIDEView()
@@ -57,6 +57,25 @@ BOOL CIGUIDEView::PreCreateWindow(CREATESTRUCT& cs)
 	//  the CREATESTRUCT cs
 	
 	return CView::PreCreateWindow(cs);
+}
+
+CIGUIDEView * CIGUIDEView::GetView()
+{
+	CFrameWndEx * pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
+
+	CView * pView = pFrame->GetActiveView();
+
+	if (!pView)
+		return NULL;
+
+	// Fail if view is of wrong kind
+	// (this could occur with splitter windows, or additional
+	// views on a single document
+
+	if (!pView->IsKindOf(RUNTIME_CLASS(CIGUIDEView)))
+		return NULL;
+
+	return (CIGUIDEView*)pView;
 }
 
 
@@ -145,6 +164,25 @@ void CIGUIDEView::OnInitialUpdate()
 	
 }
 
+LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
+
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	CRect area = (CRect)pDoc->m_selectedScreen->area;
+	CRect wRect;
+
+	m_pDlgTarget->GetClientRect(wRect);
+	m_pDlgTarget->ClientToScreen(wRect);
+	
+	m_pDlgTarget->SetWindowPos(&this->wndBottom,
+		area.left - wRect.left ,
+		area.top - wRect.top,
+		area.Width(),
+		area.Height(),
+		NULL);
+	return 0;
+
+}
+
 
 void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
@@ -209,8 +247,8 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		
 	}
 
-	pDoc->m_pGrid->center.x = clientRect.CenterPoint().x;
-	pDoc->m_pGrid->center.y = clientRect.CenterPoint().y;
+	pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;
+	pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
 
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
@@ -252,7 +290,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 		pDoc->m_pFundus->Paint(pRenderTarget);
 		pDoc->m_pGrid->Paint(pRenderTarget);
-		pDoc->m_pGrid->Patch(pRenderTarget);
+		pDoc->m_pGrid->Mark(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
@@ -286,7 +324,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	
 	// all the drawing happens in OnDraw2D
 
 }
@@ -317,6 +354,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (pDoc->m_pGrid->patchlist.size() > 0) {
+		
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
 			case VK_UP:
@@ -336,20 +374,16 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 				break;
 			case VK_SPACE:
-				pDoc->m_pGrid->patchlist.back().locked = true;
-				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end();) {
-					if (it._Ptr->_Myval.locked == false)
-						it = pDoc->m_pGrid->patchlist.erase(it);
-					else ++it;
-					if (pDoc->m_pGrid->patchlist.SaveToFile() == FALSE) break;
-				}
+				pDoc->m_pGrid->patchlist.lockIn();
 				break;
 			}
 		}
+
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
 				return false;
 			pDoc->m_pGrid->DelPatch();
+			pDoc->m_pGrid->patchlist.SaveToFile();
 		}
 
 		if (pDoc->m_pGrid->patchlist.size() > 0)
@@ -358,6 +392,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			m_pDlgTarget->m_POI = NULL;
 
 		m_pDlgTarget->Invalidate();
+
 		this->Invalidate();
 		
 	}
@@ -368,11 +403,13 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
+
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);
 	m_pDlgTarget->ShowWindow(TRUE);
 	return CView::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 	// TODO: Add your specialized code here and/or call the base class
+
 }
 
 
@@ -383,6 +420,7 @@ void CIGUIDEView::OnClose()
 
 	m_pDlgTarget->SendMessage(WM_CLOSE);
 	CView::OnClose();
+
 }
 
 
@@ -395,4 +433,5 @@ afx_msg LRESULT CIGUIDEView::OnDisplaychange(WPARAM wParam, LPARAM lParam)
 	pDoc->getScreens();
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 	return 0;
+
 }

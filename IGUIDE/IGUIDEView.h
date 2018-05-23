@@ -3,7 +3,6 @@
 
 #pragma once
 class Target;
-const DWORD MainThreadId_G = ::GetCurrentThreadId();
 
 class CIGUIDEView : public CView
 {
@@ -14,13 +13,11 @@ protected: // create from serialization only
 // Attributes
 public:
 	Target*				m_pDlgTarget;						// target dialog
+	static CIGUIDEView * GetView();
 
 private:
 	bool		showTrace;
 	
-// Operations
-public:
-
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -58,10 +55,5 @@ public:
 	afx_msg void OnClose();
 protected:
 	afx_msg LRESULT OnDisplaychange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT ChangeTargetDisplay(WPARAM w, LPARAM l);
 };
-
-#ifndef _DEBUG  // debug version in IGUIDEView.cpp
-inline CIGUIDEDoc* CIGUIDEView::GetDocument() const
-   { return reinterpret_cast<CIGUIDEDoc*>(m_pDocument); }
-#endif
-

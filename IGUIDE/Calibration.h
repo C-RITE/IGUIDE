@@ -20,6 +20,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+
 private:
 	CD2DSolidColorBrush*	m_pBrushWhite;
 	Calibration*			m_pDlg;
@@ -30,6 +31,7 @@ public:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+
 };
 
 

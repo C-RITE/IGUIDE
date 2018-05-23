@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Properties.h"
+#include "netcomm\sockclient.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -16,7 +17,7 @@ protected:
 public:
 	const int WINDOW_WIDTH = 1200;
 	const double ASPECT_RATIO = (double)16 / 9;
-	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / ASPECT_RATIO);
+	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / (int)ASPECT_RATIO);
 
 // Operations
 public:
@@ -37,6 +38,10 @@ protected:  // control bar embedded members
 	CStatusBar      m_wndStatusBar;
 	Properties		m_DlgProperties;					// properties dialog
 
+private:
+
+	CSockClient				m_sock;						// for communication with ICANDI
+
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -48,6 +53,7 @@ protected:
 
 public:
 	afx_msg void OnEditProperties();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 

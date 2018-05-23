@@ -31,13 +31,13 @@ class Target : public CDialog
 	CD2DBitmap*				m_pFixationTarget;	// custom target
 	
 	static XboxControlState	xbox_state;			// store controller states
-	CPoint					xbox_cross;			// controller's cursor location
+	CD2DPointF				xbox_cross;			// controller's cursor location
 	static bool				show_cross;			// cross visibility
 	static bool				m_bPushed;			// for input delay
 	static bool				m_bFireDown;		// for fire signal
 	static bool				m_bFireUp;			// for fire signal
 	int						m_fired;			// times hit
-	float					ppd_client;			// pixel per degree on client screen
+	double					ppd_client;			// pixel per degree on client screen
 	int						fieldsize;			// fieldsize in pixel on client screen
 
 private:
@@ -52,7 +52,7 @@ public:
 	void getFixationTarget();
 	void calcFieldSize();
 	void setCross();
-	void finish();
+	void finishCalibration();
 	static UINT InputControllerThread(LPVOID pParam);
 	
 	

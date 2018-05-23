@@ -4,9 +4,9 @@
 #include "resource.h"
 #include "IGUIDE.h"
 #include "IGUIDEDoc.h"
+#include "IGUIDEView.h"
 #include "Target.h"
 #include "MainFrm.h"
-
 
 using namespace D2D1;
 // Target dialog
@@ -23,6 +23,7 @@ CCriticalSection m_CritSection;
 Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	: CDialog(IDD_TARGET, pParent)
 {
+
 	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
@@ -34,14 +35,13 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 
 }
 
-
 Target::~Target()
 {
 	delete m_POI;
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialog)
-	ON_WM_LBUTTONDOWN()
+	//ON_WM_LBUTTONDOWN()
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
 	ON_WM_CLOSE()
 	ON_WM_SHOWWINDOW()
@@ -63,8 +63,8 @@ void Target::calcFieldSize() {
 void Target::setCross() {
 
 	if (pDoc->m_Screens.size() > 0) {
-		CRect cRect = (CRect)pDoc->m_Screens[0].area;;
-		xbox_cross = CD2DPointF(cRect.Width() / 2 - fieldsize / 2, cRect.Height() / 2 - fieldsize / 2);
+		CRect cRect = (CRect)pDoc->m_Screens[1].area;;
+		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
 
 }
@@ -88,9 +88,9 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
-	float alpha, beta, gamma;
-	float pi = atan(1) * 4;
-	float a, b, c, x, y;
+	double alpha, beta, gamma;
+	double pi = atan(1) * 4;
+	double a, b, c, x, y;
 	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;
 
 	Edge k;
@@ -110,10 +110,10 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
-		((pDoc->raster.mid.x + x) - 10),
-		((pDoc->raster.mid.y + y) - 10),
-		((pDoc->raster.mid.x + x) + 10),
-		((pDoc->raster.mid.y + y) + 10))
+		(pDoc->raster.mid.x + (float)x - 10),
+		(pDoc->raster.mid.y + (float)y - 10),
+		(pDoc->raster.mid.x + (float)x + 10),
+		(pDoc->raster.mid.y + (float)y + 10))
 	};
 
 	/*ATLTRACE(_T("alpha is %f\n"), alpha);
@@ -165,14 +165,14 @@ UINT ThreadDraw(PVOID pParam) {
 	// custom fixation target
 	if (pTarget->m_POI && pTarget->m_pFixationTarget->IsValid()) {
 		CD2DSizeF size = pTarget->m_pFixationTarget->GetSize();
-		CD2DPointF center{ (pTarget->m_POI->left / 2 + pTarget->m_POI->right / 2),
-			(pTarget->m_POI->bottom / 2 + pTarget->m_POI->top / 2),
+		CD2DPointF center{ (pTarget->m_POI->left + pTarget->m_POI->right) / 2,
+			(pTarget->m_POI->bottom + pTarget->m_POI->top) / 2,
 		};
 		pRenderTarget->DrawBitmap(pTarget->m_pFixationTarget, CD2DRectF(
-			(center.x - size.width / 2) * scalingFactor,
-			(center.y - size.height / 2) * scalingFactor,
-			(center.x + size.width / 2) * scalingFactor,
-			(center.y + size.height / 2) * scalingFactor),
+			center.x - (size.width / 2 * scalingFactor),
+			center.y - (size.height / 2 * scalingFactor),
+			center.x + (size.width / 2 * scalingFactor),
+			center.y + (size.height / 2 * scalingFactor)),
 			1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
 			);
@@ -222,39 +222,39 @@ UINT ThreadDraw(PVOID pParam) {
 			break;
 		case 1:
 			pTarget->OnLButtonDown(0, CPoint(
-				pTarget->xbox_cross.x +
+				(int)pTarget->xbox_cross.x +
 				pTarget->xbox_state.LX,
-				pTarget->xbox_cross.y +
+				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
 			pTarget->xbox_cross.x += pTarget->fieldsize;
 			pTarget->m_fired++;
 			break;
 		case 2:
 			pTarget->OnLButtonDown(0, CPoint(
-				pTarget->xbox_cross.x +
+				(int)pTarget->xbox_cross.x +
 				pTarget->xbox_state.LX,
-				pTarget->xbox_cross.y +
+				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
 			pTarget->xbox_cross.y -= pTarget->fieldsize;
 			pTarget->m_fired++;
 			break;
 		case 3:
 			pTarget->OnLButtonDown(0, CPoint(
-				pTarget->xbox_cross.x +
+				(int)pTarget->xbox_cross.x +
 				pTarget->xbox_state.LX,
-				pTarget->xbox_cross.y +
+				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
 			pTarget->xbox_cross.x -= pTarget->fieldsize;
 			pTarget->m_fired++;
 			break;
 		case 4:
 			pTarget->OnLButtonDown(0, CPoint(
-				pTarget->xbox_cross.x +
+				(int)pTarget->xbox_cross.x +
 				pTarget->xbox_state.LX,
-				pTarget->xbox_cross.y +
+				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
 			pTarget->show_cross = false;
-			pTarget->finish();
+			pTarget->finishCalibration();
 			pTarget->setCross();
 			pTarget->m_fired++;
 			
@@ -287,14 +287,15 @@ UINT ThreadDraw(PVOID pParam) {
 
 }
 
-void Target::finish() {
+void Target::finishCalibration() {
 
 	CRect mainWnd;
 	CPoint center;
+	CIGUIDEView* pView = CIGUIDEView::GetView();
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	CIGUIDEView* view = (CIGUIDEView*)GetParentFrame();
-	PostThreadMessage(MainThreadId_G, WM_LBUTTONUP, 0, (DWORD)&center);
+	pView->OnLButtonUp(0, center);
+	pView->SetFocus();
 
 }
 
@@ -377,7 +378,6 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 		m_pThread->ResumeThread();
 
 	}
-
 
 }
 

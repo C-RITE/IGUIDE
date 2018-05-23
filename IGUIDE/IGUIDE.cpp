@@ -54,7 +54,7 @@ CIGUIDEApp theApp;
 
 BOOL CIGUIDEApp::InitInstance()
 {
-	CWinApp::InitInstance();
+	CWinAppEx::InitInstance();
 	EnableTaskbarInteraction(FALSE);
 	VERIFY(EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED));
 

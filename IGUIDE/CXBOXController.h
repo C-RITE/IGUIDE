@@ -1,5 +1,5 @@
 // We need the Windows Header and the XInput Header
-#include <Windows.h>
+#include "windows.h"
 #include <XInput.h>
 
 // XBOX Controller Class Definition

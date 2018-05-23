@@ -57,7 +57,7 @@ afx_msg LRESULT D2DStatic::OnDraw2d(WPARAM wParam, LPARAM lParam) {
 		GetWindowRect(&rect);
 		//float r = (float)rect.Height() / (float)rect.Width();
 
-		pRenderTarget->DrawBitmap(fundus, CD2DRectF(0, 0, rect.Width(), rect.Height()));
+		pRenderTarget->DrawBitmap(fundus, CD2DRectF(0, 0, (float)rect.Width(), (float)rect.Height()));
 
 		switch (m_clicked){
 			case 2:
@@ -167,8 +167,8 @@ void Calibration::ClientResize(int nWidth, int nHeight)
 	GetWindowRect(&rcWind);
 	ptDiff.x = (rcWind.right - rcWind.left) - rcClient.right;
 	ptDiff.y = (rcWind.bottom - rcWind.top) - rcClient.bottom;
-	MoveWindow(m_WorkArea.right / 2 - size.width / 2,
-		(m_WorkArea.bottom - 75) / 2 - size.height / 2,
+	MoveWindow(m_WorkArea.right / 2 - (int)size.width / 2,
+		(m_WorkArea.bottom - 75) / 2 - (int)size.height / 2,
 		nWidth + ptDiff.x,
 		nHeight + ptDiff.y,
 		TRUE);
@@ -219,8 +219,8 @@ BOOL Calibration::OnInitDialog()
 
 		m_D2DStatic.MoveWindow(10,
 			10,
-			size.width / max(rx, ry) * Shrink2Fit,
-			size.height / max(rx, ry) * Shrink2Fit);
+			(int)(size.width / max(rx, ry) * Shrink2Fit),
+			(int)(size.height / max(rx, ry) * Shrink2Fit));
 
 		m_D2DStatic.GetClientRect(m_ClientRect);
 		m_sFactor = size.width / m_ClientRect.Width();
@@ -238,16 +238,16 @@ BOOL Calibration::OnInitDialog()
 
 	else {
 
-		ClientResize(size.width + 20, size.height + 60);
+		ClientResize((int)size.width + 20, (int)size.height + 60);
 		GetClientRect(m_ClientRect);
 
 		m_D2DStatic.MoveWindow(10,
 			10,
-			size.width,
-			size.height);
+			(int)size.width,
+			(int)size.height);
 
 		OK->MoveWindow(m_ClientRect.Width() / 2 - OKRect.Width() / 2,
-			size.height + 23,
+			(int)size.height + 23,
 			OKRect.Width(),
 			OKRect.Height());
 	}

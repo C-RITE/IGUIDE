@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="NetComm">
+      <UniqueIdentifier>{9f0a6174-753d-4257-b621-66c4a99d8467}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -69,6 +72,15 @@
     <ClInclude Include="Monitors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="netcomm\SockListener.h">
+      <Filter>NetComm</Filter>
+    </ClInclude>
+    <ClInclude Include="netcomm\WinSock2Async.h">
+      <Filter>NetComm</Filter>
+    </ClInclude>
+    <ClInclude Include="netcomm\SockClient.h">
+      <Filter>NetComm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IGUIDE.cpp">
@@ -115,6 +127,15 @@
     </ClCompile>
     <ClCompile Include="Monitors.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="netcomm\SockListener.cpp">
+      <Filter>NetComm</Filter>
+    </ClCompile>
+    <ClCompile Include="netcomm\WinSock2Async.cpp">
+      <Filter>NetComm</Filter>
+    </ClCompile>
+    <ClCompile Include="netcomm\SockClient.cpp">
+      <Filter>NetComm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

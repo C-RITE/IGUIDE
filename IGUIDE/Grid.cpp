@@ -57,12 +57,12 @@ void Grid::ClearPatchlist() {
 void Grid::StoreClick(CD2DPointF loc) {
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	Patches patch;
+	Patch patch;
 
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	patch.coords.x = (center.x - loc.x)*-1 * dpp;
-	patch.coords.y = (center.y - loc.y)* dpp;
+	patch.coords.x = (center.x - loc.x)*-1 * (float)dpp;
+	patch.coords.y = (center.y - loc.y)* (float)dpp;
 	patch.color = pDoc->raster.color;
 	patch.rastersize = pDoc->raster.size;
 	patch.locked = false;
@@ -78,41 +78,41 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 	// draw a grid background around the center
 	if (overlay & GRID) {
-		for (float x = center.x; x > 0; x -= 1 / dpp)
+		for (float x = center.x; x > 0; x -= 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
 				CD2DPointF(x, 0.0f),
-				CD2DPointF(x, mainWnd.Height()),
+				CD2DPointF(x, (float)mainWnd.Height()),
 				m_pWhiteBrush,
 				0.1f
 				);
 		}
 
-		for (float x = center.x + 1 / dpp; x < mainWnd.Width(); x += 1 / dpp)
+		for (float x = center.x + 1 / (float)dpp; x < mainWnd.Width(); x += 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
 				CD2DPointF(x, 0.0f),
-				CD2DPointF(x, mainWnd.Height()),
+				CD2DPointF(x, (float)mainWnd.Height()),
 				m_pWhiteBrush,
 				0.1f
 				);
 		}
 
-		for (float y = center.y; y > 0; y -= 1 / dpp)
+		for (float y = center.y; y > 0; y -= 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
 				CD2DPointF(0.0f, y),
-				CD2DPointF(mainWnd.Width(), y),
+				CD2DPointF((float)mainWnd.Width(), y),
 				m_pWhiteBrush,
 				0.1f
 				);
 		}
 
-		for (float y = center.y + 1 / dpp; y < mainWnd.Height(); y += 1 / dpp)
+		for (float y = center.y + 1 / (float)dpp; y < mainWnd.Height(); y += 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
 				CD2DPointF(0.0f, y),
-				CD2DPointF(mainWnd.Width(), y),
+				CD2DPointF((float)mainWnd.Width(), y),
 				m_pWhiteBrush,
 				0.1f
 				);
@@ -126,28 +126,28 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 	//draw circles around the center
 	if (overlay & DEGRAD) {
 		for (float x = 0; x < 16; x++) {
-			CD2DRectF e = { center.x - 1 / dpp * x,
-				center.y - 1 / dpp * x,
-				center.x + 1 / dpp * x,
-				center.y + 1 / dpp * x };
+			CD2DRectF e = { center.x - 1 / (float)dpp * x,
+				center.y - 1 / (float)dpp * x,
+				center.x + 1 / (float)dpp * x,
+				center.y + 1 / (float)dpp * x };
 			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f);
 		}
 	}
 
 	// draw circles around foveola and fovea
 	if (overlay & FOVEOLA) {
-		CD2DRectF e1 = { center.x - 1 / dpp * 1.2f,
-		center.y - 1 / dpp * 1.2f,
-		center.x + 1 / dpp * 1.2f,
-		center.y + 1 / dpp * 1.2f };
+		CD2DRectF e1 = { center.x - 1 / (float)dpp * 1.2f,
+		center.y - 1 / (float)dpp * 1.2f,
+		center.x + 1 / (float)dpp * 1.2f,
+		center.y + 1 / (float)dpp * 1.2f };
 		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .3f);
 	}
 
 	if (overlay & FOVEA){
-		CD2DRectF e2 = { center.x - 1 / dpp * 6.2f,
-		center.y - 1 / dpp * 6.2f,
-		center.x + 1 / dpp * 6.2f,
-		center.y + 1 / dpp * 6.2f };
+		CD2DRectF e2 = { center.x - 1 / (float)dpp * 6.2f,
+		center.y - 1 / (float)dpp * 6.2f,
+		center.x + 1 / (float)dpp * 6.2f,
+		center.y + 1 / (float)dpp * 6.2f };
 	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
 	}
 
@@ -178,7 +178,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
+void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
@@ -192,13 +192,13 @@ void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + it._Ptr->_Myval.coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - it._Ptr->_Myval.rastersize / 2 / dpp,
-			center.y - it._Ptr->_Myval.coords.y * 1 / dpp - it._Ptr->_Myval.rastersize / 2 / dpp,
-			center.x + it._Ptr->_Myval.coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + it._Ptr->_Myval.rastersize / 2 / dpp,
-			center.y - it._Ptr->_Myval.coords.y * 1 / dpp + it._Ptr->_Myval.rastersize / 2 / dpp };
+		rect1 = { center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
+			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
+			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
+			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(it._Ptr->_Myval.rastersize / 2 / dpp)
+		};
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
-
 		pRenderTarget->PopLayer();
 
 	}
@@ -207,20 +207,21 @@ void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + patchlist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x - patchlist.back().rastersize / 2 / dpp,
-			center.y - patchlist.back().coords.y * 1 / dpp - patchlist.back().rastersize / 2 / dpp,
-			center.x + patchlist.back().coords.x * 1 / dpp + dpp * pDoc->raster.scale.x + patchlist.back().rastersize / 2 / dpp,
-			center.y - patchlist.back().coords.y * 1 / dpp + patchlist.back().rastersize / 2 / dpp };
+		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(patchlist.back().rastersize / 2 / dpp),
+			center.y - patchlist.back().coords.y * 1 / (float)dpp - (float)(patchlist.back().rastersize / 2 / dpp),
+			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(patchlist.back().rastersize / 2 / dpp),
+			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(patchlist.back().rastersize / 2 / dpp)
+		};
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, patchlist.back().rastersize);
+		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, (float)patchlist.back().rastersize);
 		
 		int number = 1;
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 			if (it._Ptr->_Myval.locked == true) {
-				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, it._Ptr->_Myval.rastersize, number);
+				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, (float)it._Ptr->_Myval.rastersize, number);
 				number++;
 			}
 		}
@@ -230,15 +231,15 @@ void Grid::Patch(CHwndRenderTarget* pRenderTarget) {
 	if (pDoc && pDoc->mousePos) {
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->mousePos->x - pDoc->raster.size / 2 / dpp,
-			pDoc->mousePos->y - pDoc->raster.size / 2 / dpp,
-			pDoc->mousePos->x + pDoc->raster.size / 2 / dpp,
-			pDoc->mousePos->y + pDoc->raster.size / 2 / dpp),
+			pDoc->mousePos->x - (float)(pDoc->raster.size / 2 / dpp),
+			pDoc->mousePos->y - (float)(pDoc->raster.size / 2 / dpp),
+			pDoc->mousePos->x + (float)(pDoc->raster.size / 2 / dpp),
+			pDoc->mousePos->y + (float)(pDoc->raster.size / 2 / dpp)),
 			m_pWhiteBrush,
 			.5f,
 			NULL);
-		ShowCoordinates(pRenderTarget, (center.x - pDoc->mousePos->x) *-1 * dpp,
-			(center.y - pDoc->mousePos->y) * dpp, pDoc->raster.size );
+		ShowCoordinates(pRenderTarget, (float)-(center.x - pDoc->mousePos->x) * (float)dpp,
+			(float)(center.y - pDoc->mousePos->y) * (float)dpp, (float)pDoc->raster.size);
 	}
 
 }
@@ -265,7 +266,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 		sizeTarget);								// size of the layout box
 
 	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / dpp + center.x ) - (rastersize / 2 * 1 / dpp), (yPos * - 1 / dpp + center.y) - (rastersize / 2 * 1 / dpp + 12)),
+		CD2DPointF((xPos * 1 / (float)dpp + center.x ) - (rastersize / 2 * 1 / (float)dpp), (yPos * - 1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp + 12)),
 		&textLayout,
 		m_pWhiteBrush);
 
@@ -282,14 +283,14 @@ void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPo
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 9);						// font size
 
-	vidText.Format(L"v%d", number);
+	vidText.Format(L"%d", number);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		vidText,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
 	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / dpp + center.x) - (rastersize / 2 * 1 / dpp), (yPos * -1 / dpp + center.y) - (rastersize / 2 * 1 / dpp)),
+		CD2DPointF((xPos * 1 / (float)dpp + center.x) - (rastersize / 2 * 1 / (float)dpp), (yPos * -1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp)),
 		&textLayout,
 		m_pWhiteBrush);
 

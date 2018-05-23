@@ -5,7 +5,7 @@ class Edge
 public:
 
 	CD2DPointF p, q;
-	float length, alpha;
+	double length, alpha;
 
 	Edge();
 	~Edge();

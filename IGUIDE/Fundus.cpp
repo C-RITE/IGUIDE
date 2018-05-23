@@ -15,7 +15,7 @@ Fundus::Fundus() :
 Fundus::~Fundus()
 {
 	delete filename;
-	delete picture;
+	//delete picture;
 }
 
 
@@ -25,20 +25,20 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
-		float ppd = 1/pDoc->m_pGrid->dpp;
-		float ppdimage =  pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor / 15;
-		float factor = ppd / ppdimage;
+		double ppd = 1/pDoc->m_pGrid->dpp;
+		double ppdimage =  pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor / 15;
+		float factor = (float)(ppd / ppdimage);
 
 		CD2DSizeF size = picture->GetSize();
 
 		D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
 		D2D1_MATRIX_3X2_F scale = D2D1::Matrix3x2F::Scale(
 			D2D1::Size(factor,factor),
-			D2D1::Point2F(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor,
-				pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor));
+			D2D1::Point2F((float)(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor),
+				(float)(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor)));
 		D2D1_MATRIX_3X2_F translate = D2D1::Matrix3x2F::Translation(
-			pDoc->m_pGrid->center.x - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor,
-			pDoc->m_pGrid->center.y - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor);
+			pDoc->m_pGrid->center.x - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * (float)pDoc->m_pDlgCalibration->m_sFactor,
+			pDoc->m_pGrid->center.y - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * (float)pDoc->m_pDlgCalibration->m_sFactor);
 		pRenderTarget->SetTransform(scale * translate);
 		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width, size.height));
 		pRenderTarget->SetTransform(identity);
@@ -99,7 +99,7 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 		delete[]pFilterSpecArray[nIndex].pszSpec;
 	}
 	delete[]pFilterSpecArray;
-
+	
 	return hr;
 }
 

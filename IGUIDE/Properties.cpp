@@ -5,6 +5,7 @@
 #include "IGUIDE.h"
 #include "Properties.h"
 #include "IGUIDEDoc.h"
+#include "IGUIDEView.h"
 #include "afxdialogex.h"
 #include <Shlobj.h>
 
@@ -58,8 +59,24 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 			pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
 		}
 		if (propName == L"File") {
+			CString ftfile = vt.bstrVal;
+			pDoc->m_FixationTarget = ftfile;
+		}
+		if (propName == L"Video Folder") {
+			CString folder = vt.bstrVal;
+			pDoc->m_OutputDir = folder;
+		}
+		if (propName == L"Screen") {
 			CString ref = vt.bstrVal;
-			pDoc->m_FixationTarget = ref;
+			int index = ref.ReverseFind(_T(' '));
+			ref.Truncate(index);
+			for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
+				if (it->name == ref) {
+					pDoc->m_selectedScreen = it._Ptr;
+					CIGUIDEView* pView = CIGUIDEView::GetView();
+					pView->SendMessage(SCREEN_SELECTED);
+				}
+			}
 		}
 
 		pDoc->UpdateAllViews(NULL);
@@ -82,22 +99,22 @@ void Properties::AdjustLayout()
 
 	CRect rectClient, rectCombo;
 	GetClientRect(rectClient);
-
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 void Properties::InitPropList()
 {
 	
-	m_wndPropList.SetCustomColors(	RGB(0, 0, 0),		// Background
+	
+	m_wndPropList.SetCustomColors(	RGB(50, 50, 50),		// Background
 									RGB(255, 255, 255),	// Text
 									RGB(50, 50, 50),	// GroupBackground
 									RGB(255, 255, 255), // GroupText
-									RGB(50, 50, 50),	// DescriptionBackground
-									RGB(100, 200, 100),	// DescriptionText
+									RGB(100, 100, 100),	// DescriptionBackground
+									RGB(200, 200, 200),	// DescriptionText
 									RGB(150, 150, 150));// Line
 
-	m_wndPropList.EnableHeaderCtrl(TRUE);
+	m_wndPropList.EnableHeaderCtrl(FALSE);
 	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.MarkModifiedProperties();
 
@@ -162,10 +179,12 @@ void Properties::fillProperties() {
 	_variant_t rs(pDoc->raster.size);
 	_variant_t fts(pDoc->m_FixationTargetSize);
 	_variant_t ft(pDoc->m_FixationTarget);
+	_variant_t od(pDoc->m_OutputDir);
 	_variant_t scr(pDoc->m_Screens[pDoc->m_FixationTargetScreen - 1].name);
 	_variant_t dens(pDoc->m_ScreenPixelPitch);
 	_variant_t dist(pDoc->m_ScreenDistance);
-
+	
+	VideoFolder->SetValue(od);
 	RasterSize->SetValue(rs);
 	FixationTargetSize->SetValue(fts);
 	FixationFile->SetValue(ft);
@@ -189,5 +208,8 @@ void Properties::fillProperties() {
 		option.Format(L"%s (%ix%i)", it.name, it.resolution.x, it.resolution.y);
 		FixationTargetScreen->AddOption(option);
 	}
+
+	CRect rc;
+	GetWindowRect(&rc);
 
 }

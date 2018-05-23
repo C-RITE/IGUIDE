@@ -1,18 +1,32 @@
 #pragma once
 #include <list>
-class Patches :
-	public std::list<Patches>
-{
-public:
-	Patches();
-	~Patches();
+
+struct Patch {
 
 	CD2DPointF		coords;
 	D2D1_COLOR_F	color;
+	CString			timestamp;
+	double			rastersize;
+	bool			locked;
+};
+
+class Patches : public std::list<Patch>
+{
+
+public:
+	Patches();
+	~Patches();
 	CString			filepath;
 	CString			filename;
-	float			rastersize;
-	bool			locked;
+	
+	bool			SaveToFile();
+	void			lockIn();
 
-	bool SaveToFile();
+private:
+	
+	CString			timestamp;
+	bool			fileopen;
+	void			GetSysTime(CString &buf);
+	void			cleanup();
+
 };

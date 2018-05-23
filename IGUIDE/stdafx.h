@@ -6,6 +6,7 @@
 #pragma once
 
 #define DOC_IS_READY (WM_USER + 100)
+#define SCREEN_SELECTED (WM_USER + 101)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
@@ -36,15 +37,19 @@
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 #include <afxdlgs.h>
 
-#ifdef _DEBUG
-#ifdef ATLTRACE 
-#undef ATLTRACE
-#undef ATLTRACE2
+// stuff for Application interoperability
+#include <Winsock2.h>
+#include "netcomm/WinSock2Async.h"
 
-#define ATLTRACE CustomTrace
-#define ATLTRACE2 ATLTRACE
-#endif // ATLTRACE
-#endif // _DEBUG
-
-void CustomTrace(const wchar_t* format, ...);
-void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
+//#ifdef _DEBUG
+//#ifdef ATLTRACE 
+//#undef ATLTRACE
+//#undef ATLTRACE2
+//
+//#define ATLTRACE CustomTrace
+//#define ATLTRACE2 ATLTRACE
+//#endif // ATLTRACE
+//#endif // _DEBUG
+//
+//void CustomTrace(const wchar_t* format, ...);
+//void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
