@@ -155,7 +155,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <AdditionalDependencies>version.lib;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib\xinput.lib;ntdll.lib</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;xinput9_1_0.lib;ntdll.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
