@@ -51,7 +51,6 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
-
 	afx_msg void OnClose();
 protected:
 	afx_msg LRESULT OnDisplaychange(WPARAM wParam, LPARAM lParam);

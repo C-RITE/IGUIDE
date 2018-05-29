@@ -11,6 +11,7 @@
 #endif
 
 #include "IGUIDEDoc.h"
+#include "MainFrm.h"
 #include "Grid.h"
 #include <math.h>
 #include <propkey.h>
@@ -27,7 +28,6 @@ IMPLEMENT_DYNCREATE(CIGUIDEDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_COMMAND(ID_FILE_IMPORT, &CIGUIDEDoc::OnFileImport)
-	
 	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
 	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)

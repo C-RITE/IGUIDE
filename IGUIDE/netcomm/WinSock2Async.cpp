@@ -382,7 +382,8 @@ bool CWinSock2Async::SetupEvents( SOCKET newSocket )
 
 	//Run the monitoting thread.
 	DWORD dwThreadId;
-	CreateThread(
+	HANDLE h;
+	h = CreateThread(
 			NULL,									// SD
 			102400,									// initial stack size
 			StartPlayingThread,						// thread function

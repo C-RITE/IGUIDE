@@ -23,6 +23,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_SHOWWINDOW()
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
+	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -47,7 +48,7 @@ CMainFrame::CMainFrame()
 	}
 
 	if (!m_sock.Create() ||
-		!m_sock.Connect(_T("127.0.0.1"), 1300))
+		!m_sock.Connect(_T("127.0.0.1"), 1400))
 	{
 		TCHAR szErrorMsg[WSA_ERROR_LEN];
 		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
@@ -93,15 +94,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndStatusBar.Create(this))
-	{
-		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
-
-	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
-	m_wndStatusBar.ShowWindow(SW_SHOW);
-
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
 	// enable Visual Studio 2005 style docking window auto-hide behavior
@@ -117,6 +109,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_DlgProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_DlgProperties);
 	
+	if (!m_wndStatusBar.Create(this))
+	{
+		TRACE0("Failed to create status bar\n");
+		return -1;      // fail to create
+	}
+
+	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
+	m_wndStatusBar.ShowWindow(SW_SHOW);
+
 	return 0;
 
 }
@@ -139,8 +140,10 @@ BOOL CMainFrame::CreateDockingWindows()
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
-	if( !CFrameWndEx::PreCreateWindow(cs) )
+
+	if (!CFrameWndEx::PreCreateWindow(cs))
 		return FALSE;
+
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
 	
@@ -186,14 +189,14 @@ void CMainFrame::OnClose()
 	GetWindowPlacement(&wp);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
 	CFrameWndEx::OnClose();
-
+	
 }
 
 
 void CMainFrame::OnEditProperties()
 {
 	if (m_DlgProperties.IsVisible())
-		m_DlgProperties.ShowPane(FALSE,FALSE,TRUE);
+		m_DlgProperties.ShowPane(FALSE, FALSE, TRUE);
 	else
 		m_DlgProperties.ShowPane(TRUE, FALSE, TRUE);
 	// TODO: Add your command handler code here
@@ -203,12 +206,20 @@ void CMainFrame::OnEditProperties()
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
+	int ret;
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
-		case 'S':
-			char r = 'G';
-			m_sock.Send(&r, 1, 0);
+		case 'R':
+			char msg = (char)pMsg->wParam;
+			ret = m_sock.Send(&msg, 1, 0);
 		}
 	}
 	return CFrameWndEx::PreTranslateMessage(pMsg);
+}
+
+
+void CMainFrame::OnViewStatusBar()
+{
+	m_wndStatusBar.ShowWindow(TRUE);
+	// TODO: Add your command handler code here
 }

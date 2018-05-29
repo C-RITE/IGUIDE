@@ -54,6 +54,7 @@ protected:
 public:
 	afx_msg void OnEditProperties();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnViewStatusBar();
 };
 
 
