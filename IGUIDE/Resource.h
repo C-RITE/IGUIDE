@@ -4,8 +4,10 @@
 //
 #define IDD_ABOUTBOX                    100
 #define IDR_MAINFRAME                   128
+#define ID_INDICATOR_LINK1              129
 #define IDR_IGUIDETYPE                  130
 #define ID_WINDOW_MANAGER               131
+#define ID_INDICATOR_LINK2              131
 #define ID_VIEW_PROPERTIESWND           150
 #define ID_VIEW_APPLOOK_WIN_2000        210
 #define ID_VIEW_APPLOOK_OFF_XP          211

@@ -24,14 +24,14 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
+	ON_MESSAGE(ICANDI_LINK_ESTABLISHED, &CMainFrame::OnIcandiLinkEstablished)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_CAPS,
-	ID_INDICATOR_NUM,
-	ID_INDICATOR_SCRL,
+	ID_INDICATOR_LINK1,
+	ID_INDICATOR_LINK2,
 };
 
 // CMainFrame construction/destruction
@@ -47,8 +47,7 @@ CMainFrame::CMainFrame()
 		return;
 	}
 
-	if (!m_sock.Create() ||
-		!m_sock.Connect(_T("127.0.0.1"), 1400))
+	if (!m_sock.Create() ||	!m_sock.Connect(_T("127.0.0.1"), 1400))
 	{
 		TCHAR szErrorMsg[WSA_ERROR_LEN];
 		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
@@ -222,4 +221,13 @@ void CMainFrame::OnViewStatusBar()
 {
 	m_wndStatusBar.ShowWindow(TRUE);
 	// TODO: Add your command handler code here
+}
+
+
+afx_msg LRESULT CMainFrame::OnIcandiLinkEstablished(WPARAM wParam, LPARAM lParam)
+{
+	
+	m_wndStatusBar.SetPaneTextColor(0, COLORREF(), 1);
+	return 0;
+
 }

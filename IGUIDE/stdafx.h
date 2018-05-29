@@ -7,6 +7,8 @@
 
 #define DOC_IS_READY (WM_USER + 100)
 #define SCREEN_SELECTED (WM_USER + 101)
+#define ICANDI_LINK_ESTABLISHED (WM_USER + 110)
+#define AOSACA_LINK_ESTABLISHED (WM_USER + 111)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers

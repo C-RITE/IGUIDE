@@ -120,7 +120,7 @@
     <PostBuildEvent>
       <Command>copy $(SolutionDir)$(SolutionName)\vld\bin\win32\vld_x86.dll $(TargetDir)
 copy $(SolutionDir)$(SolutionName)\vld\bin\win32\Microsoft.DTfW.DHL.manifest $(TargetDir)
-</Command>
+copy $(SolutionDir)$(SolutionName)\vld\bin\win32\dbghelp.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -149,7 +149,7 @@ copy $(SolutionDir)$(SolutionName)\vld\bin\win32\Microsoft.DTfW.DHL.manifest $(T
     <PostBuildEvent>
       <Command>copy $(SolutionDir)$(SolutionName)\vld\bin\win64\vld_x64.dll $(TargetDir)
 copy $(SolutionDir)$(SolutionName)\vld\bin\win64\Microsoft.DTfW.DHL.manifest $(TargetDir)
-</Command>
+copy $(SolutionDir)$(SolutionName)\vld\bin\win64\dbghelp.dll $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

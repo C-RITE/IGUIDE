@@ -205,18 +205,18 @@ bool CWinSock2Async::Create( LPCTSTR sAddress, int nPort )
 	//
 	//Setup for listening if necessary
 	//
-	in_addr nRemoteAddress = LookupAddress(sAddress);
-	if (nRemoteAddress.S_un.S_addr == 0)
-	{
-		TCHAR szWASError[WSA_ERROR_LEN];
-		WSAGetLastErrorMessage( szWASError );
-		TRACE( _T("*** lookup address: %s\n"), szWASError );
-		return false;
-	}
+	//in_addr nRemoteAddress = LookupAddress(sAddress);
+	//if (nRemoteAddress.S_un.S_addr == 0)
+	//{
+	//	TCHAR szWASError[WSA_ERROR_LEN];
+	//	WSAGetLastErrorMessage( szWASError );
+	//	TRACE( _T("*** lookup address: %s\n"), szWASError );
+	//	return false;
+	//}
 	
 	sockaddr_in sinRemote;
 	sinRemote.sin_family = AF_INET;
-	sinRemote.sin_addr = nRemoteAddress;
+	sinRemote.sin_addr.S_un.S_addr = INADDR_ANY; // nRemoteAddress
 	sinRemote.sin_port = htons((unsigned short)nPort);
 
 	return(  bind( m_Sd, (sockaddr*)&sinRemote, sizeof(sockaddr_in) ) == 0 );
@@ -269,9 +269,12 @@ bool CWinSock2Async::Connect(LPCTSTR sAddress, int nPort)
 			WSAGetLastErrorMessage( szWASError );
 			TRACE( _T("ERROR : Connecting.: %s\n"), szWASError );
 			return false;
+	
 		}
 	}
+	
 	return true;
+
 }
 
 
@@ -390,6 +393,7 @@ bool CWinSock2Async::SetupEvents( SOCKET newSocket )
 			this,									// thread argument
 			0,										// creation option
 			&dwThreadId );							// thread identifier
+	CloseHandle(h);
 	return true;
 }
 
@@ -653,7 +657,8 @@ void CWinSock2Async::OnConnect( int nError )
 {
 	TRACE( _T("CWinSock2Async::OnConnect(%d)\n"), nError );
 	m_bConnected = ( nError == 0 );
-	if (m_bConnected) AfxMessageBox(L"Winsock connection established", MB_OK | MB_ICONERROR, 0);
+	if (m_bConnected) SendMessage(AfxGetMainWnd()->m_hWnd, ICANDI_LINK_ESTABLISHED, NULL, NULL);
+
 }
 
 

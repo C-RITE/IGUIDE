@@ -35,7 +35,7 @@ public:
 #endif
 
 protected:  // control bar embedded members
-	CStatusBar      m_wndStatusBar;
+	CMFCStatusBar   m_wndStatusBar;
 	Properties		m_DlgProperties;					// properties dialog
 
 private:
@@ -55,6 +55,8 @@ public:
 	afx_msg void OnEditProperties();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnViewStatusBar();
+protected:
+	afx_msg LRESULT OnIcandiLinkEstablished(WPARAM wParam, LPARAM lParam);
 };
 
 
