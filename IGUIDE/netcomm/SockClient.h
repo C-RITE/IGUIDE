@@ -10,13 +10,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CSockClient : public CWinSock2Async  
+class CSockClient : public virtual CWinSock2Async  
 {
 public:
 	CSockClient();
 	virtual ~CSockClient();
-
+	bool shutdown;
+	
 private:
+
 	void OnRecieve( int nError );
 	void OnSend( int nError );
 	void OnClose( int nError );

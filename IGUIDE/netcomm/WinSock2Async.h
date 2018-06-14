@@ -44,7 +44,7 @@ public:
 	BOOL	GetPeerName( LPTSTR sAddress, int* const pnPort );
 
 	//Oneliners
-	bool	IsConnected()		{ return m_bConnected; }
+	bool	IsConnected() { return m_bConnected; }
 
 //Static methods
 public:	

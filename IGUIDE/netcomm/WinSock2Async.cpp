@@ -114,10 +114,10 @@ const int NUM_WSERROR_MESSAGES = sizeof(g_aErrorList) / sizeof(ErrorEntry);
 //		Construction/Destruction
 // ***************************************************************************
 CWinSock2Async::CWinSock2Async() :
-	m_Sd( INVALID_SOCKET ),
-	m_WSAEvent( WSA_INVALID_EVENT ),
-	m_ThreadState( eThreadNoStarted ),
-	m_bConnected( false )
+	m_Sd(INVALID_SOCKET),
+	m_WSAEvent(WSA_INVALID_EVENT),
+	m_ThreadState(eThreadNoStarted),
+	m_bConnected(false)
 {
 	TRACE( _T("CWinSock2Async::CWinSock2Async()\n") );
 	InitializeCriticalSection( &m_csRecieve );
@@ -130,6 +130,7 @@ CWinSock2Async::~CWinSock2Async()
 	Close();
 	DeleteCriticalSection( &m_csRecieve );
 	DeleteCriticalSection( &m_csSend );
+	m_bConnected = false;
 }
 
 
@@ -200,8 +201,9 @@ bool CWinSock2Async::Create( LPCTSTR sAddress, int nPort )
 	if( !SetupEvents( sockNew ) )
 		return false;
 
-	if( nPort == 0 )
+	if (nPort == 0) {
 		return true;
+	}
 	//
 	//Setup for listening if necessary
 	//
@@ -219,7 +221,9 @@ bool CWinSock2Async::Create( LPCTSTR sAddress, int nPort )
 	sinRemote.sin_addr.S_un.S_addr = INADDR_ANY; // nRemoteAddress
 	sinRemote.sin_port = htons((unsigned short)nPort);
 
-	return(  bind( m_Sd, (sockaddr*)&sinRemote, sizeof(sockaddr_in) ) == 0 );
+
+	return ( bind( m_Sd, (sockaddr*)&sinRemote, sizeof(sockaddr_in) ) == 0 );
+
 }
 
 
@@ -339,6 +343,7 @@ bool CWinSock2Async::ShutdownConnection()
 	//Socket already dead
 	m_Sd = INVALID_SOCKET;
 	return false;
+
 }
 
 
@@ -512,6 +517,7 @@ void CWinSock2Async::Close()
 
 	//Close the conneciton
 	ShutdownConnection();
+
 }
 
 
@@ -657,8 +663,6 @@ void CWinSock2Async::OnConnect( int nError )
 {
 	TRACE( _T("CWinSock2Async::OnConnect(%d)\n"), nError );
 	m_bConnected = ( nError == 0 );
-	if (m_bConnected) SendMessage(AfxGetMainWnd()->m_hWnd, ICANDI_LINK_ESTABLISHED, NULL, NULL);
-
 }
 
 
@@ -727,7 +731,7 @@ bool CWinSock2Async::Accept( CWinSock2Async *pSockNew, sockaddr* lpSockAddr, int
 void CWinSock2Async::OnClose( int nError )
 {
 	TRACE( _T("CWinSock2Async::OnClose(%d)\n"), nError );
-	m_bConnected = false;
+
 	//Check for any remaining data
 	char chBuff[WINSOCK_READ_BUFF_SIZE+1];
 	int nRead;
@@ -735,6 +739,7 @@ void CWinSock2Async::OnClose( int nError )
 	{
 		//TODO : Process the read data.
 	}
+	
 }
 
 

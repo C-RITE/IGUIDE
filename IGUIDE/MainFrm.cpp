@@ -24,7 +24,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
-	ON_MESSAGE(ICANDI_LINK_ESTABLISHED, &CMainFrame::OnIcandiLinkEstablished)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINK1, &CMainFrame::OnUpdatePage)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINK2, &CMainFrame::OnUpdatePage)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -40,31 +42,19 @@ CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
 
-
-	if (CSockClient::SocketInit() != 0)
-	{
-		AfxMessageBox(L"Unable to initialize Windows Sockets", MB_OK | MB_ICONERROR, 0);
-		return;
-	}
-
-	if (!m_sock.Create() ||	!m_sock.Connect(_T("127.0.0.1"), 1400))
-	{
-		TCHAR szErrorMsg[WSA_ERROR_LEN];
-		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
-
-		CString error;
-		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
-		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
-		//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
-		return;
-	}
-
-
+	m_pSock_ICANDI = NULL;
+	m_pSock_AOSACA = NULL;
+	
 }
 
 CMainFrame::~CMainFrame()
 {
+	if (m_pSock_ICANDI != NULL)
+		delete m_pSock_ICANDI;
 	
+	if (m_pSock_AOSACA != NULL)
+		delete m_pSock_AOSACA;
+
 }
 
 LRESULT CMainFrame::PopulateProperties(WPARAM w, LPARAM l) {
@@ -117,6 +107,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
 	m_wndStatusBar.ShowWindow(SW_SHOW);
 
+
+	// try to remote connect to host applications (ICANDI / AOSACA) in 1sec intervals
+	SetTimer(0, 2000, NULL); 
+
 	return 0;
 
 }
@@ -150,7 +144,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	cs.cy = WINDOW_HEIGHT;
 	cs.x = 320;
 	cs.y = 180;
-
+	
 	return TRUE;
 }
 
@@ -208,9 +202,31 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 	int ret;
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
+			char msg;
 		case 'R':
-			char msg = (char)pMsg->wParam;
-			ret = m_sock.Send(&msg, 1, 0);
+			msg = (char)pMsg->wParam;
+			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
+			break;
+		case VK_SPACE:
+			msg = 'V';
+			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
+			break;
+		case VK_RETURN:
+			msg = 'F';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case 0x6B:
+			msg = '+';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case 0x6D :
+			msg = '-';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case VK_NUMPAD0:
+			msg = '0';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
 		}
 	}
 	return CFrameWndEx::PreTranslateMessage(pMsg);
@@ -223,11 +239,114 @@ void CMainFrame::OnViewStatusBar()
 	// TODO: Add your command handler code here
 }
 
-
-afx_msg LRESULT CMainFrame::OnIcandiLinkEstablished(WPARAM wParam, LPARAM lParam)
+void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
 {
+	// connection status of ICANDI/AOSACA
+
+	switch (pCmdUI->m_nID) {
+
+		case ID_INDICATOR_LINK1:
 	
-	m_wndStatusBar.SetPaneTextColor(0, COLORREF(), 1);
-	return 0;
+			if (m_pSock_ICANDI && m_pSock_ICANDI->IsConnected()) {
+				pCmdUI->Enable();
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
+			}
+			else
+			{
+				pCmdUI->Enable();
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
+			}
+
+		break;
+
+		case ID_INDICATOR_LINK2:
+
+			if (m_pSock_AOSACA && m_pSock_AOSACA->IsConnected()) {
+				pCmdUI->Enable();
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
+			}
+			else
+			{
+				pCmdUI->Enable();
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
+			}
+
+		break;
+
+	}
+
+
+}
+
+void CMainFrame::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	// try to connect to ICANDI 
+	if (m_pSock_ICANDI == NULL) {
+		m_pSock_ICANDI = new CSockClient();
+		CSockClient::SocketInit();
+
+		if (!m_pSock_ICANDI->Create())
+		{
+			TCHAR szErrorMsg[WSA_ERROR_LEN];
+			CSockClient::WSAGetLastErrorMessage(szErrorMsg);
+
+			CString error;
+			error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
+			AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
+			//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
+
+		}
+		
+	}
+
+	if (m_pSock_ICANDI && !m_pSock_ICANDI->IsConnected())
+		m_pSock_ICANDI->Connect(L"127.0.0.1", 1400);
+
+	if (m_pSock_ICANDI->shutdown) {
+		delete m_pSock_ICANDI;
+		m_pSock_ICANDI = NULL;
+	}
+
+
+
+
+
+	// try to connect to AOSACA
+	if (m_pSock_AOSACA == NULL) {
+		m_pSock_AOSACA = new CSockClient();
+		CSockClient::SocketInit();
+
+		if (!m_pSock_AOSACA->Create())
+		{
+			TCHAR szErrorMsg[WSA_ERROR_LEN];
+			CSockClient::WSAGetLastErrorMessage(szErrorMsg);
+
+			CString error;
+			error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
+			AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
+			TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
+		
+
+		}
+
+	}
+
+
+
+	if (m_pSock_AOSACA && !m_pSock_AOSACA->IsConnected())		
+	m_pSock_AOSACA->Connect(L"192.168.0.1", 1500);
+
+	if (m_pSock_AOSACA->shutdown) {
+		delete m_pSock_AOSACA;
+		m_pSock_AOSACA = NULL;
+	}
+
+	CFrameWndEx::OnTimer(nIDEvent);
 
 }

@@ -36,11 +36,14 @@ public:
 
 protected:  // control bar embedded members
 	CMFCStatusBar   m_wndStatusBar;
-	Properties		m_DlgProperties;					// properties dialog
+	Properties		m_DlgProperties;
 
 private:
 
-	CSockClient				m_sock;						// for communication with ICANDI
+	// for communication with host apps
+
+	CSockClient*				m_pSock_ICANDI;	
+	CSockClient*				m_pSock_AOSACA;
 
 // Generated message map functions
 protected:
@@ -55,8 +58,8 @@ public:
 	afx_msg void OnEditProperties();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnViewStatusBar();
-protected:
-	afx_msg LRESULT OnIcandiLinkEstablished(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnUpdatePage(CCmdUI *pCmdUI);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
 
 
