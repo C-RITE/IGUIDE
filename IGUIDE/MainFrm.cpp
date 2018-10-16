@@ -340,7 +340,7 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 
 
 	if (m_pSock_AOSACA && !m_pSock_AOSACA->IsConnected())		
-	m_pSock_AOSACA->Connect(L"192.168.0.1", 1500);
+	m_pSock_AOSACA->Connect(L"10.7.217.131", 1500);
 
 	if (m_pSock_AOSACA->shutdown) {
 		delete m_pSock_AOSACA;

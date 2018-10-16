@@ -314,3 +314,5 @@ OpenCover/
 
 # Azure Stream Analytics local run output 
 ASALocalRun/
+IGUIDE/IGUIDE.vcxproj
+IGUIDE/Release/IGUIDE.res
