@@ -30,6 +30,7 @@ public:
 	CString					m_OutputDir;						// .csv output directory
 	int						m_FixationTargetSize;				// fixation target size in percent
 	int						m_FixationTargetScreen;				// fixation target screen
+	LPCTSTR					m_AOSACAIP;							// AOSACA IP Address
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
 

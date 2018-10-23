@@ -30,6 +30,7 @@ public:
 
 	void AdjustLayout();
 	void fillProperties();
+	CString getAOSACAIP();
 
 	CMFCPropertyGridProperty*		Raster;
 	CMFCPropertyGridProperty*		RasterSize;
@@ -42,6 +43,8 @@ public:
 	CMFCPropertyGridProperty*		TargetView;
 	CMFCPropertyGridFileProperty*	VideoFolder;
 	CMFCPropertyGridFileProperty*	FixationFile;
+	CMFCPropertyGridProperty*		RigProperties;
+	CMFCPropertyGridProperty*		AOSACAIP;
 
 private:
 	_variant_t * m_pFixationTarget;
@@ -49,6 +52,7 @@ private:
 	_variant_t * m_pScreen;
 	_variant_t * m_pPixelPitch;
 	_variant_t * m_pDistance;
+	_variant_t * m_pAOSACAIP;
 
 protected:
 	CFont m_fntPropList;
