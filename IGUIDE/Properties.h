@@ -45,6 +45,7 @@ public:
 	CMFCPropertyGridFileProperty*	FixationFile;
 	CMFCPropertyGridProperty*		RigProperties;
 	CMFCPropertyGridProperty*		AOSACAIP;
+	CMFCPropertyGridProperty*		FlipVertical;
 
 private:
 	_variant_t * m_pFixationTarget;
@@ -53,7 +54,7 @@ private:
 	_variant_t * m_pPixelPitch;
 	_variant_t * m_pDistance;
 	_variant_t * m_pAOSACAIP;
-
+	_variant_t * m_pFlipVertical;
 protected:
 	CFont m_fntPropList;
 	MyCMFCPropertyGridCtrl m_wndPropList;

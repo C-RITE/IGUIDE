@@ -95,8 +95,12 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	Edge k;
 	k.q.x = -centerOffset_x;
-	k.q.y = centerOffset_y;
-
+	if (pDoc->m_FlipVertical) {
+		k.q.y = -centerOffset_y;
+	}
+	else {
+		k.q.y = centerOffset_y;
+	}
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
@@ -235,7 +239,13 @@ UINT ThreadDraw(PVOID pParam) {
 				pTarget->xbox_state.LX,
 				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
-			pTarget->xbox_cross.y -= pTarget->fieldsize;
+			if (pTarget->pDoc->m_FlipVertical) {
+				pTarget->xbox_cross.y += pTarget->fieldsize;
+			}
+			else {
+				pTarget->xbox_cross.y -= pTarget->fieldsize;
+			}
+
 			pTarget->m_fired++;
 			break;
 		case 3:
@@ -385,9 +395,15 @@ UINT Target::InputControllerThread(LPVOID pParam)
 {
 	CXBOXController* Player1 = new CXBOXController(1);
 	Target* pTarget = (Target*)pParam;
-
+	int flip;
 	while (pTarget->m_bRunning){
-
+		
+		if (pTarget->pDoc->m_FlipVertical){
+			flip = -1;
+		}
+		else {
+			flip = 1;
+		}
 		if (Player1->GetState().Gamepad.wButtons == 0) {
 
 			m_bPushed = false;
@@ -411,25 +427,25 @@ UINT Target::InputControllerThread(LPVOID pParam)
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 
 			if (!m_bPushed) {
-				xbox_state.LY += 2;
+				xbox_state.LY -= flip*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY += 1;
+				xbox_state.LY -= flip*2;
 
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 			if (!m_bPushed) {
-				xbox_state.LY -= 2;
+				xbox_state.LY += flip*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY -= 2;
+				xbox_state.LY += flip*2;
 
 		}
 

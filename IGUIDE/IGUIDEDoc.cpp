@@ -103,7 +103,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
 	CString path;
-	int FTS, SCR;
+	int FTS, SCR, flip;
 
 	path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
 	if (path.IsEmpty()) {
@@ -136,6 +136,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	SCR = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
 	if (!SCR) SCR = 1;
 	m_FixationTargetScreen = SCR;
+
+	flip = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
+	if (!flip) flip = 0;
+	m_FlipVertical = flip;
 
 	UINT nl;
 	LPBYTE calib, ptr;
@@ -613,6 +617,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACAIP", m_AOSACAIP);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
 	if (raster.corner.size() == 4) AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
