@@ -122,6 +122,13 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_OutputDir = path;
 
+	path = AfxGetApp()->GetProfileString(L"Settings", L"AOSACAIP", NULL);
+	if (path.IsEmpty()) {
+		path.Append(_T("192.168.0.1"));
+	}
+
+	m_AOSACAIP = path;
+
 	FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
 	if (!FTS) FTS = 100;
 	m_FixationTargetSize = FTS;
@@ -604,6 +611,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
+	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACAIP", m_AOSACAIP);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
