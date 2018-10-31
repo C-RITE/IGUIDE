@@ -104,7 +104,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	// (SDI documents will reuse this document)
 	CString path;
 	int FTS, SCR, flip;
-	bool defaultVals = true;
+	bool defaultVals = false;
 	if(defaultVals){
 		
 		WCHAR homedir[MAX_PATH];

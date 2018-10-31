@@ -32,6 +32,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_bRunning = false;
 	fieldsize = 0;
 	pDoc = NULL;
+	m_flip = 0;
 
 }
 
@@ -61,11 +62,12 @@ void Target::calcFieldSize() {
 }
 
 void Target::setCross() {
-
+	
 	if (pDoc->m_Screens.size() > 0) {
 		CRect cRect = (CRect)pDoc->m_Screens[1].area;;
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
+	
 
 }
 
@@ -100,6 +102,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	}
 	else {
 		k.q.y = centerOffset_y;
+		
 	}
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
@@ -364,7 +367,7 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	// TODO: Add your message handler code here
 	static bool bOnce = true;
-
+	
 	if (bShow && !IsWindowVisible()
 		&& bOnce)
 	{
@@ -395,15 +398,9 @@ UINT Target::InputControllerThread(LPVOID pParam)
 {
 	CXBOXController* Player1 = new CXBOXController(1);
 	Target* pTarget = (Target*)pParam;
-	int flip;
+	int flip= pTarget->m_flip;
 	while (pTarget->m_bRunning){
 		
-		if (pTarget->pDoc->m_FlipVertical){
-			flip = -1;
-		}
-		else {
-			flip = 1;
-		}
 		if (Player1->GetState().Gamepad.wButtons == 0) {
 
 			m_bPushed = false;
