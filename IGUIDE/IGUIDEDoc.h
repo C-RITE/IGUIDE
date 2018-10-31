@@ -31,7 +31,7 @@ public:
 	int						m_FixationTargetSize;				// fixation target size in percent
 	int						m_FixationTargetScreen;				// fixation target screen
 	CString					m_AOSACAIP;							// AOSACA IP Address
-	bool					m_FlipVertical;
+	int					m_FlipVertical;
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
 

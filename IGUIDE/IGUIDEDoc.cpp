@@ -104,71 +104,97 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	// (SDI documents will reuse this document)
 	CString path;
 	int FTS, SCR, flip;
-
-	path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
-	if (path.IsEmpty()) {
+	bool defaultVals = true;
+	if(defaultVals){
+		
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
 			path = homedir;
 			path.Append(_T("\\Pictures\\"));
 		}
-	}
-	m_FixationTarget = path;
+		m_FixationTarget = path;
 
-	path = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
-	if (path.IsEmpty()) {
+
+		m_OutputDir = _T("C:\\");
+
+		m_AOSACAIP = _T("192.168.0.1");
+
+		FTS = 100;
+		m_FixationTargetSize = FTS;
+
+		SCR = 1;
+		m_FixationTargetScreen = SCR;
+
+		flip = 0;
+		m_FlipVertical = flip;
+
+		return TRUE;
+	}
+	else {
+		path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
+		if (path.IsEmpty()) {
+			WCHAR homedir[MAX_PATH];
+			if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+				path = homedir;
+				path.Append(_T("\\Pictures\\"));
+			}
+		}
+		m_FixationTarget = path;
+
+		path = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
+		if (path.IsEmpty()) {
 			path.Append(_T("C:\\"));
 		}
 
-	m_OutputDir = path;
+		m_OutputDir = path;
 
-	path = AfxGetApp()->GetProfileString(L"Settings", L"AOSACAIP", NULL);
-	if (path.IsEmpty()) {
-		path.Append(_T("192.168.0.1"));
-	}
-
-	m_AOSACAIP = path;
-
-	FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
-	if (!FTS) FTS = 100;
-	m_FixationTargetSize = FTS;
-
-	SCR = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
-	if (!SCR) SCR = 1;
-	m_FixationTargetScreen = SCR;
-
-	flip = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
-	if (!flip) flip = 0;
-	m_FlipVertical = flip;
-
-	UINT nl;
-	LPBYTE calib, ptr;
-	DWORD sz = sizeof(CD2DPointF);
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"Calibration", &calib, &nl) > 0) {
-		CD2DPointF data;
-		ptr = calib;
-		for (size_t t = 0; t < nl / sz; t++) {
-			data = (CD2DPointF*)calib;
-			raster.corner.push_back(data);
-			calib += sz;
+		path = AfxGetApp()->GetProfileString(L"Settings", L"AOSACAIP", NULL);
+		if (path.IsEmpty()) {
+			path.Append(_T("192.168.0.1"));
 		}
-	calib = ptr;
+
+		m_AOSACAIP = path;
+
+		FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
+		if (!FTS) FTS = 100;
+		m_FixationTargetSize = FTS;
+
+		SCR = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
+		if (!SCR) SCR = 1;
+		m_FixationTargetScreen = SCR;
+
+		flip = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
+		if (!flip) flip = 0;
+		m_FlipVertical = flip;
+
+		UINT nl;
+		LPBYTE calib, ptr;
+		DWORD sz = sizeof(CD2DPointF);
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"Calibration", &calib, &nl) > 0) {
+			CD2DPointF data;
+			ptr = calib;
+			for (size_t t = 0; t < nl / sz; t++) {
+				data = (CD2DPointF*)calib;
+				raster.corner.push_back(data);
+				calib += sz;
+			}
+			calib = ptr;
+		}
+
+		LPBYTE rcol;
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
+			memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+
+		LPBYTE rsize;
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
+			memcpy(&raster.size, rsize, sizeof(double));
+
+		delete calib, ptr;
+		delete rcol;
+		delete rsize;
+
+		return TRUE;
 	}
-
-	LPBYTE rcol;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
-		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
-
-	LPBYTE rsize;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl)> 0)
-		memcpy(&raster.size, rsize, sizeof(double));
-
-	delete calib,ptr;
-	delete rcol;
-	delete rsize;
-
-	return TRUE;
-
 }
 
 // CIGUIDEDoc serialization
