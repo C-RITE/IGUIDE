@@ -398,7 +398,10 @@ UINT Target::InputControllerThread(LPVOID pParam)
 {
 	CXBOXController* Player1 = new CXBOXController(1);
 	Target* pTarget = (Target*)pParam;
-	int flip= pTarget->m_flip;
+	int flipSign = 1;
+	if (pTarget->m_flip == 1) {
+		flipSign = -1;
+	}
 	while (pTarget->m_bRunning){
 		
 		if (Player1->GetState().Gamepad.wButtons == 0) {
@@ -424,25 +427,25 @@ UINT Target::InputControllerThread(LPVOID pParam)
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 
 			if (!m_bPushed) {
-				xbox_state.LY -= flip*2;
+				xbox_state.LY -= flipSign*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY -= flip*2;
+				xbox_state.LY -= flipSign*2;
 
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 			if (!m_bPushed) {
-				xbox_state.LY += flip*2;
+				xbox_state.LY += flipSign*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY += flip*2;
+				xbox_state.LY += flipSign*2;
 
 		}
 
