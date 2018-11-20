@@ -399,11 +399,14 @@ UINT Target::InputControllerThread(LPVOID pParam)
 	CXBOXController* Player1 = new CXBOXController(1);
 	Target* pTarget = (Target*)pParam;
 	int flipSign = 1;
-	if (pTarget->m_flip == 1) {
-		flipSign = -1;
-	}
+	
 	while (pTarget->m_bRunning){
-		
+		if (pTarget->m_flip == 1) {
+			flipSign = -1;
+		}
+		else {
+			flipSign = 1;
+		}
 		if (Player1->GetState().Gamepad.wButtons == 0) {
 
 			m_bPushed = false;
