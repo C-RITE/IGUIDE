@@ -56,14 +56,15 @@ bool Patches::SaveToFile() {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CString path = pDoc->m_OutputDir;
 	filepath.Format(_T("%s\\"), path);
-	CString strNumber, strDegX, strDegY;
-	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg)");
+	CString strNumber, strDegX, strDegY, strDefocus;
+	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg),Defocus");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 	{
 		strNumber.Format(_T("%.3d"), number++);
 		strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coords.x);
 		strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coords.y);
+		strDefocus.Format(_T("%.2f"), it._Ptr->_Myval.defocus);
 
 		sstream
 			<< it->timestamp.GetString()
@@ -73,6 +74,8 @@ bool Patches::SaveToFile() {
 			<< strDegX.GetString()
 			<< ","
 			<< strDegY.GetString()
+			<< ","
+			<< strDefocus.GetString()
 			<< std::endl;
 
 	}

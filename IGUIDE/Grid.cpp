@@ -216,7 +216,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 		pRenderTarget->PopLayer();
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, (float)patchlist.back().rastersize);
+		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, patchlist.back().defocus, (float)patchlist.back().rastersize);
 		
 		int number = 1;
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
@@ -239,7 +239,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			.5f,
 			NULL);
 		ShowCoordinates(pRenderTarget, (float)-(center.x - pDoc->mousePos->x) * (float)dpp,
-			(float)(center.y - pDoc->mousePos->y) * (float)dpp, (float)pDoc->raster.size);
+			(float)(center.y - pDoc->mousePos->y) * (float)dpp, patchlist.back().defocus, (float)pDoc->raster.size);
 	}
 
 }
@@ -248,7 +248,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 
 
-void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize)
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float zPos, float rastersize)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
@@ -259,7 +259,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 9);						// font size
 
-	traceText.Format(L"%.1f,%.1f", xPos, yPos);
+	traceText.Format(L"%.1f,%.1f,%.2f", xPos, yPos, zPos);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		traceText,									// text to be drawn
 		textFormat,									// text format

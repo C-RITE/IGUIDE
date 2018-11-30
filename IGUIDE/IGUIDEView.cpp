@@ -377,6 +377,18 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case VK_SPACE:
 				pDoc->m_pGrid->patchlist.lockIn();
 				break;
+			case 0x6B:
+				//msg = '+';
+				pDoc->m_pGrid->patchlist.back().defocus += .25f;
+				break;
+			case 0x6D:
+				//msg = '-';
+				pDoc->m_pGrid->patchlist.back().defocus -= .25f;
+				break;
+			case VK_NUMPAD0:
+				//msg = '0';
+				pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
+				break;
 			}
 		}
 
