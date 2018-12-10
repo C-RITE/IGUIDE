@@ -218,7 +218,7 @@ UINT ThreadDraw(PVOID pParam) {
 	// catch pushing A button
 
 	if (pTarget->m_bFireUp && pTarget->m_bFireDown) {
-
+		pTarget->show_cross = true;
 		pTarget->m_bFireDown = false;
 
 		switch (pTarget->m_fired % 5) {
@@ -413,10 +413,6 @@ UINT Target::InputControllerThread(LPVOID pParam)
 			m_bFireUp = true;
 
 		}
-
-		else
-
-			show_cross = true;
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
 
