@@ -2,20 +2,22 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "../stdafx.h"
+#include "../IGUIDE/stdafx.h"
 #include "SockClient.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-CSockClient::CSockClient():
-	shutdown(false)
+CSockClient::CSockClient(CPupilTrackerMainFrame* pParent) :
+	m_pParent(pParent)
 {
+
+	m_bConnectionClosed = false;
+
 }
 
 CSockClient::~CSockClient()
 {
-
 }
 
 // ***************************************************************************
@@ -36,6 +38,8 @@ CSockClient::~CSockClient()
 void CSockClient::OnRecieve(int nError)
 {
 	TRACE(_T("CSockClient::OnRecieve( %d )\n"), nError);
+	
+	
 	char chBuff[WINSOCK_READ_BUFF_SIZE + 1];
 	int nRead;
 	while ((nRead = Recieve(chBuff, WINSOCK_READ_BUFF_SIZE)) > 0)
@@ -49,7 +53,12 @@ void CSockClient::OnRecieve(int nError)
 		//	chBuff[nPos] = chBuff[nPos] + 1;
 		//}
 		//Send(chBuff, nRead);
+
+		double payload[6];
+		Send((char*)&payload, sizeof(payload));
+
 	}
+	
 }
 
 // ***************************************************************************
@@ -70,6 +79,7 @@ void CSockClient::OnRecieve(int nError)
 void CSockClient::OnSend( int nError )
 {
     _tprintf( _T("CSockClient::OnSend( %d )\n"), nError );
+
 }
 
 
@@ -92,15 +102,16 @@ void CSockClient::OnSend( int nError )
 void CSockClient::OnClose( int nError )
 {
     _tprintf( _T("CSockClient::OnClose( %d )\n"), nError );
-    //Check for any remaining data
+    
+	//Check for any remaining data
     char chBuff[WINSOCK_READ_BUFF_SIZE+1];
     while( Recieve( chBuff, WINSOCK_READ_BUFF_SIZE ) )
     {
         //TODO : Process the read data.
 
     }
-	
-	shutdown = true;
+
+	m_bConnectionClosed = true;
 
 }
 

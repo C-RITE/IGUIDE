@@ -131,60 +131,6 @@ BOOL CMainFrame::CreateDockingWindows()
 	return TRUE;
 }
 
-BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
-{
-
-	if (!CFrameWndEx::PreCreateWindow(cs))
-		return FALSE;
-
-	// TODO: Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
-	
-	cs.cx = WINDOW_WIDTH;
-	cs.cy = WINDOW_HEIGHT;
-	cs.x = 320;
-	cs.y = 180;
-	
-	return TRUE;
-}
-
-
-void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	
-	// TODO: Add your message handler code here
-	CFrameWndEx::OnShowWindow(bShow, nStatus);
-	static bool bOnce = true;
-
-	if (bShow && !IsWindowVisible()
-		&& bOnce)
-	{
-		bOnce = false;
-		WINDOWPLACEMENT *lwp;
-		UINT nl;
-
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Main", (LPBYTE*)&lwp, &nl))
-		{
-			SetWindowPlacement(lwp);
-		}
-		delete[] lwp;
-	}
-
-}
-
-
-void CMainFrame::OnClose()
-{
-
-	GetActiveView()->SendMessage(WM_CLOSE);
-	// TODO: Add your message handler code here and/or call default
-	WINDOWPLACEMENT wp;
-	GetWindowPlacement(&wp);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Main", (LPBYTE)&wp, sizeof(wp));
-	CFrameWndEx::OnClose();
-	
-}
-
 
 void CMainFrame::OnEditProperties()
 {
@@ -286,66 +232,66 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	// try to connect to ICANDI 
-	if (m_pSock_ICANDI == NULL) {
-		m_pSock_ICANDI = new CSockClient();
-		CSockClient::SocketInit();
+	//// try to connect to ICANDI 
+	//if (m_pSock_ICANDI == NULL) {
+	//	m_pSock_ICANDI = new CSockClient();
+	//	CSockClient::SocketInit();
 
-		if (!m_pSock_ICANDI->Create())
-		{
-			TCHAR szErrorMsg[WSA_ERROR_LEN];
-			CSockClient::WSAGetLastErrorMessage(szErrorMsg);
+	//	if (!m_pSock_ICANDI->Create())
+	//	{
+	//		TCHAR szErrorMsg[WSA_ERROR_LEN];
+	//		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
 
-			CString error;
-			error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
-			AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
-			//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
+	//		CString error;
+	//		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
+	//		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
+	//		//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
 
-		}
-		
-	}
+	//	}
+	//	
+	//}
 
-	if (m_pSock_ICANDI && !m_pSock_ICANDI->IsConnected())
-		m_pSock_ICANDI->Connect(L"127.0.0.1", 1400);
+	//if (m_pSock_ICANDI && !m_pSock_ICANDI->IsConnected())
+	//	m_pSock_ICANDI->Connect(L"127.0.0.1", 1400);
 
-	if (m_pSock_ICANDI->shutdown) {
-		delete m_pSock_ICANDI;
-		m_pSock_ICANDI = NULL;
-	}
-
-
+	//if (m_pSock_ICANDI->shutdown) {
+	//	delete m_pSock_ICANDI;
+	//	m_pSock_ICANDI = NULL;
+	//}
 
 
 
-	// try to connect to AOSACA
-	if (m_pSock_AOSACA == NULL) {
-		m_pSock_AOSACA = new CSockClient();
-		CSockClient::SocketInit();
-
-		if (!m_pSock_AOSACA->Create())
-		{
-			TCHAR szErrorMsg[WSA_ERROR_LEN];
-			CSockClient::WSAGetLastErrorMessage(szErrorMsg);
-
-			CString error;
-			error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
-			AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
-			TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
-		
-
-		}
-
-	}
 
 
+	//// try to connect to AOSACA
+	//if (m_pSock_AOSACA == NULL) {
+	//	m_pSock_AOSACA = new CSockClient();
+	//	CSockClient::SocketInit();
 
-	if (m_pSock_AOSACA && !m_pSock_AOSACA->IsConnected())		
-	m_pSock_AOSACA->Connect(L"192.168.0.1", 1500);
+	//	if (!m_pSock_AOSACA->Create())
+	//	{
+	//		TCHAR szErrorMsg[WSA_ERROR_LEN];
+	//		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
 
-	if (m_pSock_AOSACA->shutdown) {
-		delete m_pSock_AOSACA;
-		m_pSock_AOSACA = NULL;
-	}
+	//		CString error;
+	//		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
+	//		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
+	//		TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
+	//	
+
+	//	}
+
+	//}
+
+
+
+	//if (m_pSock_AOSACA && !m_pSock_AOSACA->IsConnected())		
+	//m_pSock_AOSACA->Connect(L"192.168.0.1", 1500);
+
+	//if (m_pSock_AOSACA->shutdown) {
+	//	delete m_pSock_AOSACA;
+	//	m_pSock_AOSACA = NULL;
+	//}
 
 	CFrameWndEx::OnTimer(nIDEvent);
 

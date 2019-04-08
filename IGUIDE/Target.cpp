@@ -17,14 +17,14 @@ bool Target::show_cross = false;
 bool Target::m_bFireDown = false;
 bool Target::m_bFireUp = true;
 
-IMPLEMENT_DYNAMIC(Target, CDialog);
+IMPLEMENT_DYNAMIC(Target, CDialogEx);
 CCriticalSection m_CritSection;
 
 Target::Target(CIGUIDEView* pParent /*=NULL*/)
-	: CDialog(IDD_TARGET, pParent)
+	: CDialogEx(IDD_TARGET, pParent)
 {
 
-	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
+	EnableD2DSupport();
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
@@ -40,12 +40,11 @@ Target::~Target()
 	delete m_POI;
 }
 
-BEGIN_MESSAGE_MAP(Target, CDialog)
-	//ON_WM_LBUTTONDOWN()
+BEGIN_MESSAGE_MAP(Target, CDialogEx)
+	ON_WM_LBUTTONDOWN()
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
-	ON_WM_CLOSE()
 	ON_WM_SHOWWINDOW()
-	ON_WM_CREATE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 void Target::calcFieldSize() {
@@ -332,43 +331,26 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	// CDialog::OnLButtonUp(nFlags, point);
 }
 
-
-void Target::OnClose()
-{
-
-	// TODO: Add your message handler code here and/or call default
-
-	m_bRunning = false;
-	WaitForSingleObject(m_pThread->m_hThread, INFINITE);
-	delete m_pThread;
-
-	WINDOWPLACEMENT wp;
-	GetWindowPlacement(&wp);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
-
-}
-
-
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 
 	// TODO: Add your message handler code here
-	static bool bOnce = true;
+	//static bool bOnce = true;
 
-	if (bShow && !IsWindowVisible()
-		&& bOnce)
-	{
-		bOnce = false;
-		WINDOWPLACEMENT *lwp;
-		UINT nl;
+	//if (bShow && !IsWindowVisible()
+	//	&& bOnce)
+	//{
+	//	bOnce = false;
+	//	WINDOWPLACEMENT *lwp;
+	//	UINT nl;
 
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
-		{
-			SetWindowPlacement(lwp);
-		}
-	
-		delete[] lwp;
-	}
+	//	if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
+	//	{
+	//		SetWindowPlacement(lwp);
+	//	}
+	//
+	//	delete[] lwp;
+	//}
 
 	if (!m_bRunning) {
 		
@@ -466,3 +448,20 @@ UINT Target::InputControllerThread(LPVOID pParam)
 
 }
 
+
+
+void Target::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	// TODO: Add your message handler code here
+
+	m_bRunning = false;
+	WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+	delete m_pThread;
+
+	//WINDOWPLACEMENT wp;
+	//GetWindowPlacement(&wp);
+	//AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
+
+}

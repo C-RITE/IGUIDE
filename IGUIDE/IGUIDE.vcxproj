@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81A6AFD9-6CC5-4032-AF8D-226FA32F1C62}</ProjectGuid>
     <RootNamespace>IGUIDE</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
     <ProjectName>IGUIDE</ProjectName>
   </PropertyGroup>
@@ -29,14 +29,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -210,6 +210,9 @@ copy $(SolutionDir)$(SolutionName)\vld\bin\win64\dbghelp.dll $(TargetDir)</Comma
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\NetCom\SockClient.h" />
+    <ClInclude Include="..\NetCom\SockListener.h" />
+    <ClInclude Include="..\NetCom\WinSock2Async.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="CXBOXController.h" />
     <ClInclude Include="Edge.h" />
@@ -220,9 +223,6 @@ copy $(SolutionDir)$(SolutionName)\vld\bin\win64\dbghelp.dll $(TargetDir)</Comma
     <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Monitors.h" />
-    <ClInclude Include="netcomm\SockClient.h" />
-    <ClInclude Include="netcomm\SockListener.h" />
-    <ClInclude Include="netcomm\WinSock2Async.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Resource.h" />
@@ -232,6 +232,14 @@ copy $(SolutionDir)$(SolutionName)\vld\bin\win64\dbghelp.dll $(TargetDir)</Comma
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\NetCom\SockClient.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\NetCom\SockListener.cpp" />
+    <ClCompile Include="..\NetCom\WinSock2Async.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="CXBOXController.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -245,18 +253,6 @@ copy $(SolutionDir)$(SolutionName)\vld\bin\win64\dbghelp.dll $(TargetDir)</Comma
     <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Monitors.cpp" />
-    <ClCompile Include="netcomm\SockClient.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="netcomm\SockListener.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="netcomm\WinSock2Async.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="stdafx.cpp">

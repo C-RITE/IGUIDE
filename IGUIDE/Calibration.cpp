@@ -16,7 +16,7 @@ IMPLEMENT_DYNAMIC(D2DStatic, CStatic)
 
 void D2DStatic::PreSubclassWindow()
 {
-	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
+	EnableD2DSupport();
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	fundus = new CD2DBitmap(GetRenderTarget(), *pDoc->m_pFundus->filename);
 	fundus->Create(GetRenderTarget());
@@ -209,7 +209,7 @@ BOOL Calibration::OnInitDialog()
 	CRect OKRect;
 	OK->GetClientRect(&OKRect);
 
-	// TODO:  Add extra initialization here)
+	// TODO:  Add extra initialization here
 	CD2DSizeF size = pDoc->m_pFundus->picture->GetSize();
 
 	ry = size.height / m_WorkArea.bottom;
@@ -250,6 +250,7 @@ BOOL Calibration::OnInitDialog()
 			(int)size.height + 23,
 			OKRect.Width(),
 			OKRect.Height());
+
 	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control

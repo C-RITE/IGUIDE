@@ -13,8 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="NetComm">
-      <UniqueIdentifier>{9f0a6174-753d-4257-b621-66c4a99d8467}</UniqueIdentifier>
+    <Filter Include="NetCom">
+      <UniqueIdentifier>{04ddd2f1-49a0-4aec-94a6-be0608d8dfe1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,14 +72,14 @@
     <ClInclude Include="Monitors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="netcomm\SockListener.h">
-      <Filter>NetComm</Filter>
+    <ClInclude Include="..\NetCom\WinSock2Async.h">
+      <Filter>NetCom</Filter>
     </ClInclude>
-    <ClInclude Include="netcomm\WinSock2Async.h">
-      <Filter>NetComm</Filter>
+    <ClInclude Include="..\NetCom\SockListener.h">
+      <Filter>NetCom</Filter>
     </ClInclude>
-    <ClInclude Include="netcomm\SockClient.h">
-      <Filter>NetComm</Filter>
+    <ClInclude Include="..\NetCom\SockClient.h">
+      <Filter>NetCom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -128,14 +128,14 @@
     <ClCompile Include="Monitors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="netcomm\SockListener.cpp">
-      <Filter>NetComm</Filter>
+    <ClCompile Include="..\NetCom\SockClient.cpp">
+      <Filter>NetCom</Filter>
     </ClCompile>
-    <ClCompile Include="netcomm\WinSock2Async.cpp">
-      <Filter>NetComm</Filter>
+    <ClCompile Include="..\NetCom\SockListener.cpp">
+      <Filter>NetCom</Filter>
     </ClCompile>
-    <ClCompile Include="netcomm\SockClient.cpp">
-      <Filter>NetComm</Filter>
+    <ClCompile Include="..\NetCom\WinSock2Async.cpp">
+      <Filter>NetCom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 
 #pragma once
 #include "Properties.h"
-#include "netcomm\sockclient.h"
+#include "..\NetCom\sockclient.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -23,8 +23,6 @@ public:
 public:
 
 // Overrides
-public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
 // Implementation
 public:
@@ -50,8 +48,6 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	BOOL CreateDockingWindows();
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg void OnClose();
 	afx_msg LRESULT PopulateProperties(WPARAM w, LPARAM l);
 
 public:

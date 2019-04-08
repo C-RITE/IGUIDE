@@ -76,6 +76,7 @@ CIGUIDEView * CIGUIDEView::GetView()
 		return NULL;
 
 	return (CIGUIDEView*)pView;
+
 }
 
 
@@ -169,9 +170,6 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	CRect area = (CRect)pDoc->m_selectedScreen->area;
 	CRect wRect;
-
-	m_pDlgTarget->GetClientRect(wRect);
-	m_pDlgTarget->ClientToScreen(wRect);
 	
 	m_pDlgTarget->SetWindowPos(&this->wndBottom,
 		area.left - wRect.left ,
@@ -265,7 +263,7 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// Enable D2D support for this window:
-	EnableD2DSupport(D2D1_FACTORY_TYPE_MULTI_THREADED);
+	EnableD2DSupport();
 
 	// TODO:  Add your specialized creation code here
 	//Invalidate();

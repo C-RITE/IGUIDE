@@ -82,7 +82,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pFundus;
 	delete mousePos;
 	delete m_pDlgCalibration;
-		
+
 }
 
 // Get Doc, made for other classes that need access to attributes
@@ -90,7 +90,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 {
 
-	CFrameWndEx * pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
+	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
 	return (CIGUIDEDoc *)pFrame->GetActiveDocument();
 	
 }

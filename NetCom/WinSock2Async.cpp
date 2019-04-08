@@ -16,7 +16,7 @@
 //		Link with	Ws2_32.lib
 // ***************************************************************************
 
-#include "../stdafx.h"
+#include "stdafx.h"
 #include "WinSock2Async.h"							//Socket for Requesting data
 
 
@@ -122,7 +122,9 @@ CWinSock2Async::CWinSock2Async() :
 	TRACE( _T("CWinSock2Async::CWinSock2Async()\n") );
 	InitializeCriticalSection( &m_csRecieve );
 	InitializeCriticalSection( &m_csSend );
+
 }
+
 
 CWinSock2Async::~CWinSock2Async()
 {
@@ -663,6 +665,7 @@ void CWinSock2Async::OnConnect( int nError )
 {
 	TRACE( _T("CWinSock2Async::OnConnect(%d)\n"), nError );
 	m_bConnected = ( nError == 0 );
+
 }
 
 
@@ -688,6 +691,7 @@ void CWinSock2Async::OnAccept( int nError )
 //	{
 //		//TODO: Some error display
 //	}
+	
 }
 
 
@@ -712,6 +716,8 @@ bool CWinSock2Async::Accept( CWinSock2Async *pSockNew, sockaddr* lpSockAddr, int
 		return false;
 
 	return pSockNew->SetupEvents( sockNew );
+
+
 }
 
 
@@ -731,6 +737,7 @@ bool CWinSock2Async::Accept( CWinSock2Async *pSockNew, sockaddr* lpSockAddr, int
 void CWinSock2Async::OnClose( int nError )
 {
 	TRACE( _T("CWinSock2Async::OnClose(%d)\n"), nError );
+	m_bConnected = false;
 
 	//Check for any remaining data
 	char chBuff[WINSOCK_READ_BUFF_SIZE+1];
@@ -774,6 +781,7 @@ void CWinSock2Async::ThreadRunner()
 			WSAGetLastErrorMessage( szWASError );
 			TRACE( _T("*** ERROR : In Event Enum.: %s\n"), szWASError );
 			//TODO : Do something with this error type
+
 		} 
 		else 
 		{

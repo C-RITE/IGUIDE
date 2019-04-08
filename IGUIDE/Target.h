@@ -19,7 +19,7 @@ struct cursorposition {
 
 UINT ThreadDraw(PVOID pParam);
 
-class Target : public CDialog
+class Target : public CDialogEx
 {
 	DECLARE_DYNAMIC(Target)
 
@@ -55,8 +55,6 @@ public:
 	void finishCalibration();
 	static UINT InputControllerThread(LPVOID pParam);
 	
-	
-
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_TARGET };
@@ -69,7 +67,6 @@ protected:
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnClose();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-
+	afx_msg void OnDestroy();
 };
