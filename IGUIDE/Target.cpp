@@ -393,48 +393,48 @@ UINT Target::InputControllerThread(LPVOID pParam)
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 
 			if (!m_bPushed) {
-				xbox_state.LY -= 1;
+				xbox_state.LY += 2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY -= 1;
+				xbox_state.LY += 1;
 
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 			if (!m_bPushed) {
-				xbox_state.LY += 1;
+				xbox_state.LY -= 2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY += 1;
+				xbox_state.LY -= 2;
 
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
 			if (!m_bPushed) {
-				xbox_state.LX -= 1;
+				xbox_state.LX -= 2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LX -= 1;
+				xbox_state.LX -= 2;
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
 			if (!m_bPushed) {
-				xbox_state.LX += 1;
+				xbox_state.LX += 2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LX += 1;
+				xbox_state.LX += 2;
 		}
 
 		Sleep(50);
