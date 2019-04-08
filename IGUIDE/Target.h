@@ -39,10 +39,12 @@ class Target : public CDialogEx
 	int						m_fired;			// times hit
 	double					ppd_client;			// pixel per degree on client screen
 	int						fieldsize;			// fieldsize in pixel on client screen
+	int						m_flip;
 
 private:
 	bool					m_bRunning;
 	CWinThread*				m_pThread;
+	
 
 // Operations
 public:

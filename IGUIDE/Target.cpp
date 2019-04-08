@@ -32,6 +32,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_bRunning = false;
 	fieldsize = 0;
 	pDoc = NULL;
+	m_flip = 0;
 
 }
 
@@ -60,11 +61,12 @@ void Target::calcFieldSize() {
 }
 
 void Target::setCross() {
-
+	
 	if (pDoc->m_Screens.size() > 0) {
 		CRect cRect = (CRect)pDoc->m_Screens[1].area;;
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
+	
 
 }
 
@@ -94,8 +96,13 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	Edge k;
 	k.q.x = -centerOffset_x;
-	k.q.y = centerOffset_y;
-
+	if (pDoc->m_FlipVertical) {
+		k.q.y = -centerOffset_y;
+	}
+	else {
+		k.q.y = centerOffset_y;
+		
+	}
 	alpha = pDoc->raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
@@ -210,7 +217,7 @@ UINT ThreadDraw(PVOID pParam) {
 	// catch pushing A button
 
 	if (pTarget->m_bFireUp && pTarget->m_bFireDown) {
-
+		pTarget->show_cross = true;
 		pTarget->m_bFireDown = false;
 
 		switch (pTarget->m_fired % 5) {
@@ -234,7 +241,13 @@ UINT ThreadDraw(PVOID pParam) {
 				pTarget->xbox_state.LX,
 				(int)pTarget->xbox_cross.y +
 				pTarget->xbox_state.LY));
-			pTarget->xbox_cross.y -= pTarget->fieldsize;
+			if (pTarget->pDoc->m_FlipVertical) {
+				pTarget->xbox_cross.y += pTarget->fieldsize;
+			}
+			else {
+				pTarget->xbox_cross.y -= pTarget->fieldsize;
+			}
+
 			pTarget->m_fired++;
 			break;
 		case 3:
@@ -335,22 +348,24 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 
 	// TODO: Add your message handler code here
-	//static bool bOnce = true;
 
-	//if (bShow && !IsWindowVisible()
-	//	&& bOnce)
-	//{
-	//	bOnce = false;
-	//	WINDOWPLACEMENT *lwp;
-	//	UINT nl;
+	static bool bOnce = true;
+	
+	if (bShow && !IsWindowVisible()
+		&& bOnce)
+	{
+		bOnce = false;
+		WINDOWPLACEMENT *lwp;
+		UINT nl;
 
-	//	if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
-	//	{
-	//		SetWindowPlacement(lwp);
-	//	}
-	//
-	//	delete[] lwp;
-	//}
+		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
+		{
+			SetWindowPlacement(lwp);
+		}
+	
+		delete[] lwp;
+	}
+
 
 	if (!m_bRunning) {
 		
@@ -367,19 +382,21 @@ UINT Target::InputControllerThread(LPVOID pParam)
 {
 	CXBOXController* Player1 = new CXBOXController(1);
 	Target* pTarget = (Target*)pParam;
-
+	int flipSign = 1;
+	
 	while (pTarget->m_bRunning){
-
+		if (pTarget->m_flip == 1) {
+			flipSign = -1;
+		}
+		else {
+			flipSign = 1;
+		}
 		if (Player1->GetState().Gamepad.wButtons == 0) {
 
 			m_bPushed = false;
 			m_bFireUp = true;
 
 		}
-
-		else
-
-			show_cross = true;
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
 
@@ -393,25 +410,25 @@ UINT Target::InputControllerThread(LPVOID pParam)
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 
 			if (!m_bPushed) {
-				xbox_state.LY += 2;
+				xbox_state.LY -= flipSign*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY += 1;
+				xbox_state.LY -= flipSign*2;
 
 		}
 
 		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 			if (!m_bPushed) {
-				xbox_state.LY -= 2;
+				xbox_state.LY += flipSign*2;
 				m_bPushed = true;
 				Sleep(100);
 			}
 
 			else
-				xbox_state.LY -= 2;
+				xbox_state.LY += flipSign*2;
 
 		}
 

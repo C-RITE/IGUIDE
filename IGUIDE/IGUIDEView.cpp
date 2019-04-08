@@ -250,6 +250,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
+	m_pDlgTarget->m_flip = pDoc->m_FlipVertical;
 	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
 	m_pDlgTarget->getFixationTarget();	
 
@@ -373,6 +374,18 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 			case VK_SPACE:
 				pDoc->m_pGrid->patchlist.lockIn();
+				break;
+			case 0x6B:
+				//msg = '+';
+				pDoc->m_pGrid->patchlist.back().defocus += .25f;
+				break;
+			case 0x6D:
+				//msg = '-';
+				pDoc->m_pGrid->patchlist.back().defocus -= .25f;
+				break;
+			case VK_NUMPAD0:
+				//msg = '0';
+				pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
 				break;
 			}
 		}

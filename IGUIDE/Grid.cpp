@@ -216,7 +216,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 		pRenderTarget->PopLayer();
 
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, (float)patchlist.back().rastersize);
+		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, patchlist.back().defocus, (float)patchlist.back().rastersize);
 		
 		int number = 1;
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
@@ -239,7 +239,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			.5f,
 			NULL);
 		ShowCoordinates(pRenderTarget, (float)-(center.x - pDoc->mousePos->x) * (float)dpp,
-			(float)(center.y - pDoc->mousePos->y) * (float)dpp, (float)pDoc->raster.size);
+			(float)(center.y - pDoc->mousePos->y) * (float)dpp, patchlist.back().defocus*(float)dpp, (float)pDoc->raster.size);
 	}
 
 }
@@ -248,7 +248,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 
 
-void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize)
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float zPos, float rastersize)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
@@ -257,16 +257,16 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
-		sizeDpi.height / 9);						// font size
+		sizeDpi.height /7);						// font size
 
-	traceText.Format(L"%.1f,%.1f", xPos, yPos);
+	traceText.Format(L"%.1f,%.1f,%.2f", xPos, yPos, zPos);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		traceText,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
 	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / (float)dpp + center.x ) - (rastersize / 2 * 1 / (float)dpp), (yPos * - 1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp + 12)),
+		CD2DPointF((xPos * 1 / (float)dpp + center.x ) - (rastersize / 2 * 1 / (float)dpp), (yPos * - 1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp + 24)),
 		&textLayout,
 		m_pWhiteBrush);
 

@@ -18,7 +18,8 @@ Properties::Properties()
 	m_pScreen = new _variant_t;
 	m_pPixelPitch = new _variant_t;
 	m_pDistance = new _variant_t;
-	
+	m_pAOSACAIP = new _variant_t;
+	m_pFlipVertical = new _variant_t;
 }
 
 Properties::~Properties()
@@ -29,6 +30,8 @@ Properties::~Properties()
 	delete m_pScreen;
 	delete m_pPixelPitch;
 	delete m_pDistance;
+	delete m_pAOSACAIP;
+	delete m_pFlipVertical;
 
 }
 
@@ -77,6 +80,13 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 					pView->SendMessage(SCREEN_SELECTED);
 				}
 			}
+		}
+		if (propName == L"AOSACA IP") {
+			CString aoip = vt.bstrVal;
+			pDoc->m_AOSACAIP = aoip;
+		}
+		if (propName == L"Flip Vertical") {
+			pDoc->m_FlipVertical = vt;
 		}
 
 		pDoc->UpdateAllViews(NULL);
@@ -131,6 +141,9 @@ void Properties::InitPropList()
 	ScreenDistance = new CMFCPropertyGridProperty(L"Distance", m_pDistance, _T("Distance between subject's pupil and screen surface in mm"), NULL, NULL, NULL);
 	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", m_pScreen, _T("Pick the display for target screen. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
 	FixationTargetSize = new CMFCPropertyGridProperty(L"Size", m_pFixationTarget , _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
+	RigProperties = new CMFCPropertyGridProperty(L"Rig Properties");
+	AOSACAIP = new CMFCPropertyGridProperty(L"AOSACA IP", m_pAOSACAIP, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
+	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", m_pFlipVertical, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
 
 	RECT Rect;
 	GetClientRect(&Rect);
@@ -146,6 +159,9 @@ void Properties::InitPropList()
 	TargetView->AddSubItem(PixelDensity);
 	TargetView->AddSubItem(FixationFile);
 	TargetView->AddSubItem(FixationTargetSize);
+	m_wndPropList.AddProperty(RigProperties);
+	RigProperties->AddSubItem(AOSACAIP);
+	RigProperties->AddSubItem(FlipVertical);
 	
 }
 
@@ -183,6 +199,8 @@ void Properties::fillProperties() {
 	_variant_t scr(pDoc->m_Screens[pDoc->m_FixationTargetScreen - 1].name);
 	_variant_t dens(pDoc->m_ScreenPixelPitch);
 	_variant_t dist(pDoc->m_ScreenDistance);
+	_variant_t aoip(pDoc->m_AOSACAIP);
+	_variant_t fv(pDoc->m_FlipVertical);
 	
 	VideoFolder->SetValue(od);
 	RasterSize->SetValue(rs);
@@ -191,6 +209,9 @@ void Properties::fillProperties() {
 	FixationTargetScreen->SetValue(scr);
 	PixelDensity->SetValue(dens);
 	ScreenDistance->SetValue(dist);
+	AOSACAIP->SetValue(aoip);
+	FlipVertical->SetValue(fv);
+
 
 	COLORREF col = RGB(
 		(int)(pDoc->raster.color.r / (1 / 255.0)),
@@ -212,4 +233,8 @@ void Properties::fillProperties() {
 	CRect rc;
 	GetWindowRect(&rc);
 
+}
+
+CString Properties::getAOSACAIP() {
+	return AOSACAIP->GetValue();
 }

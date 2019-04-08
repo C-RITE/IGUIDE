@@ -8,6 +8,7 @@ struct Patch {
 	CString			timestamp;
 	double			rastersize;
 	bool			locked;
+	float			defocus;
 };
 
 class Patches : public std::list<Patch>
