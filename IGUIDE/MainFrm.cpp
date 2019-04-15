@@ -109,7 +109,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 
 	// try to remote connect to host applications (ICANDI / AOSACA) in 1sec intervals
-	SetTimer(0, 2000, NULL); 
+	//SetTimer(0, 2000, NULL); 
 
 	return 0;
 
