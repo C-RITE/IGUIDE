@@ -40,8 +40,8 @@ private:
 
 	// for communication with host apps
 
-	CSockClient*				m_pSock_ICANDI;	
-	CSockClient*				m_pSock_AOSACA;
+	CSockClient				m_pSock_ICANDI;	
+	CSockClient				m_pSock_AOSACA;
 
 // Generated message map functions
 protected:

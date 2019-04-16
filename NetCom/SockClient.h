@@ -15,7 +15,7 @@ class CPupilTrackerMainFrame;
 class CSockClient : public virtual CWinSock2Async  
 {
 public:
-	CSockClient(CPupilTrackerMainFrame* pParent);
+	CSockClient();
 	virtual ~CSockClient();
 
 	bool m_bConnectionClosed;

@@ -51,7 +51,7 @@ void CSockListener::OnAccept(int nError)
 	Sleep(1);
 
 	//Create the new connection
-	m_psockClient = new CSockClient(m_pParent);
+	m_psockClient = new CSockClient();
 
 	if (Accept(m_psockClient) == 0)
 	{

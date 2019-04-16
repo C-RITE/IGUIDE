@@ -41,19 +41,11 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
-
-	m_pSock_ICANDI = NULL;
-	m_pSock_AOSACA = NULL;
 	
 }
 
 CMainFrame::~CMainFrame()
 {
-	if (m_pSock_ICANDI != NULL)
-		delete m_pSock_ICANDI;
-	
-	if (m_pSock_AOSACA != NULL)
-		delete m_pSock_AOSACA;
 
 }
 
@@ -107,9 +99,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
 	m_wndStatusBar.ShowWindow(SW_SHOW);
 
+	CSockClient::SocketInit();
 
 	// try to remote connect to host applications (ICANDI / AOSACA) in 1sec intervals
-	//SetTimer(0, 2000, NULL); 
+	SetTimer(0, 1000, NULL); 
 
 	return 0;
 
@@ -151,27 +144,27 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			char msg;
 		case 'R':
 			msg = (char)pMsg->wParam;
-			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
+			ret = m_pSock_ICANDI.Send(&msg, 1, 0);
 			break;
 		case VK_SPACE:
 			msg = 'V';
-			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
+			ret = m_pSock_ICANDI.Send(&msg, 1, 0);
 			break;
 		case VK_RETURN:
 			msg = 'F';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
 			break;
 		case 0x6B:
 			msg = '+';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
 			break;
 		case 0x6D :
 			msg = '-';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
 			break;
 		case VK_NUMPAD0:
 			msg = '0';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
 			break;
 		}
 	}
@@ -193,7 +186,7 @@ void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
 
 		case ID_INDICATOR_LINK1:
 	
-			if (m_pSock_ICANDI && m_pSock_ICANDI->IsConnected()) {
+			if (m_pSock_ICANDI.IsConnected()) {
 				pCmdUI->Enable();
 				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
 				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
@@ -209,7 +202,7 @@ void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
 
 		case ID_INDICATOR_LINK2:
 
-			if (m_pSock_AOSACA && m_pSock_AOSACA->IsConnected()) {
+			if (m_pSock_AOSACA.IsConnected()) {
 				pCmdUI->Enable();
 				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
 				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
@@ -228,71 +221,17 @@ void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
 
 }
 
+
 void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	//// try to connect to ICANDI 
-	//if (m_pSock_ICANDI == NULL) {
-	//	m_pSock_ICANDI = new CSockClient();
-	//	CSockClient::SocketInit();
+	CString IP = m_DlgProperties.getAOSACAIP();
+	if (IP == L"localhost")
+		IP.SetString(L"127.0.0.1");
+	if (!m_pSock_AOSACA.IsConnected())
+		m_pSock_AOSACA.Connect(IP,1500);
 
-	//	if (!m_pSock_ICANDI->Create())
-	//	{
-	//		TCHAR szErrorMsg[WSA_ERROR_LEN];
-	//		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
-
-	//		CString error;
-	//		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
-	//		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
-	//		//TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
-
-	//	}
-	//	
-	//}
-
-	//if (m_pSock_ICANDI && !m_pSock_ICANDI->IsConnected())
-	//	m_pSock_ICANDI->Connect(L"127.0.0.1", 1400);
-
-	//if (m_pSock_ICANDI->shutdown) {
-	//	delete m_pSock_ICANDI;
-	//	m_pSock_ICANDI = NULL;
-	//}
-
-
-
-
-
-	//// try to connect to AOSACA
-	//if (m_pSock_AOSACA == NULL) {
-	//	m_pSock_AOSACA = new CSockClient();
-	//	CSockClient::SocketInit();
-
-	//	if (!m_pSock_AOSACA->Create())
-	//	{
-	//		TCHAR szErrorMsg[WSA_ERROR_LEN];
-	//		CSockClient::WSAGetLastErrorMessage(szErrorMsg);
-
-	//		CString error;
-	//		error.Format(L"Socket Create/Connect failed Error:\n%s", szErrorMsg);
-	//		AfxMessageBox(error, MB_OK | MB_ICONERROR, 0);
-	//		TRACE(_T("Socket Create/Connect failed Error: %s"), szErrorMsg);
-	//	
-
-	//	}
-
-	//}
-
-
-	if (m_pSock_AOSACA && !m_pSock_AOSACA->IsConnected())		
-	m_pSock_AOSACA->Connect(m_DlgProperties.getAOSACAIP(), 1500);
-
-
-	//if (m_pSock_AOSACA->shutdown) {
-	//	delete m_pSock_AOSACA;
-	//	m_pSock_AOSACA = NULL;
-	//}
 
 	CFrameWndEx::OnTimer(nIDEvent);
-
 }
