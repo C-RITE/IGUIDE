@@ -14,9 +14,6 @@ protected: // create from serialization only
 public:
 	Target*				m_pDlgTarget;						// target dialog
 	static CIGUIDEView * GetView();
-
-private:
-	bool		showTrace;
 	
 // Overrides
 public:
@@ -30,6 +27,7 @@ protected:
 // Implementation
 public:
 	virtual ~CIGUIDEView();
+	void ToggleFixationTarget();
 
 protected:
 

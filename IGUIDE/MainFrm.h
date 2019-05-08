@@ -40,22 +40,27 @@ private:
 
 	// for communication with host apps
 
-	CSockClient				m_pSock_ICANDI;	
-	CSockClient				m_pSock_AOSACA;
+	CSockClient*				m_pSock_ICANDI;	
+	CSockClient*				m_pSock_AOSACA;
 
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	BOOL CreateDockingWindows();
 	DECLARE_MESSAGE_MAP()
-	afx_msg LRESULT PopulateProperties(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
+	afx_msg LRESULT ConnectionFailure(WPARAM w, LPARAM l);
+	afx_msg LRESULT ConnectionClosed(WPARAM w, LPARAM l);
 
 public:
 	afx_msg void OnEditProperties();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnViewStatusBar();
-	afx_msg void OnUpdatePage(CCmdUI *pCmdUI);
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
+	bool Connect2AOSACA();
+	bool Connect2ICANDI();
+
+	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
 };
 
 

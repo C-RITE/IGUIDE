@@ -19,7 +19,6 @@
 CSockListener::CSockListener()
 {
 	m_psockClient = NULL;
-	m_bConnectionEstablished = false;
 
 }
 
@@ -27,19 +26,6 @@ CSockListener::~CSockListener()
 {
 	delete m_psockClient;
 }
-
-void CSockListener::SetParent(CPupilTrackerMainFrame* pParent)
-{
-	m_pParent = pParent;
-}
-
-bool CSockListener::isConnectionEstablished() 
-{ 
-	if (m_psockClient && m_psockClient->m_bConnectionClosed)
-		return false;
-	else
-		return m_bConnectionEstablished;
-};
 
 void CSockListener::OnAccept(int nError)
 {
@@ -67,6 +53,5 @@ void CSockListener::OnAccept(int nError)
 	if (m_psockClient->GetPeerName(szAddress, &nPort) == 0)
 		TRACE(_T("Connected to %s on port %d\n"), szAddress, nPort);
 
-	m_bConnectionEstablished = true;
 
 }

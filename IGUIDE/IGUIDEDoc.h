@@ -31,9 +31,12 @@ public:
 	int						m_FixationTargetSize;				// fixation target size in percent
 	int						m_FixationTargetScreen;				// fixation target screen
 	CString					m_AOSACAIP;							// AOSACA IP Address
-	int					m_FlipVertical;
+	int						m_FlipVertical;						// flip target screen
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
+
+private:
+	DWORD					overlaySettings;
 
 // Operations
 public:
@@ -46,7 +49,9 @@ public:
 	double ComputeOrientationAngle(Edge k);
 	bool CheckCalibrationValidity();
 	bool getScreens();
-	CString getTraceInfo();
+	CString getTraceInfo();					// for debug purposes only
+	vector<CString> getQuickHelp();					// show remote control hotkeys
+	CString getCurDefocus();				// show current defocus value from AOSACA
 
 	// Overrides
 public:
@@ -92,4 +97,10 @@ public:
 	afx_msg void OnOverlayTraceinfo();
 	afx_msg void OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI);
 	virtual void OnCloseDocument();
+	afx_msg void OnOverlayQuickhelp();
+	afx_msg void OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayDefocus();
+	afx_msg void OnUpdateOverlayDefocus(CCmdUI *pCmdUI);
+	void ToggleOverlay();
+
 };

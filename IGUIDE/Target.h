@@ -29,6 +29,7 @@ class Target : public CDialogEx
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
+	bool					m_bVisible;			// for toggling the fixation target
 	
 	static XboxControlState	xbox_state;			// store controller states
 	CD2DPointF				xbox_cross;			// controller's cursor location

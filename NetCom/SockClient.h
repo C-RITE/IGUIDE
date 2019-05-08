@@ -10,7 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CPupilTrackerMainFrame;
+class CMainFrame;
 
 class CSockClient : public virtual CWinSock2Async  
 {
@@ -18,15 +18,17 @@ public:
 	CSockClient();
 	virtual ~CSockClient();
 
-	bool m_bConnectionClosed;
+	bool pending;
+	void setParent(CMainFrame* parent);
 
 private:
 
 	void OnRecieve( int nError );
 	void OnSend( int nError );
 	void OnClose( int nError );
+	void OnConnect(int nError);
 
-	CPupilTrackerMainFrame* m_pParent;
+	CMainFrame* m_pParent;
 
 };
 

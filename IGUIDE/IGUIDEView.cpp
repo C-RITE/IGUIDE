@@ -108,7 +108,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (pDoc->CheckFOV()) {
-		pDoc->m_pGrid->StoreClick(static_cast<CD2DPointF>(point));
+		pDoc->m_pGrid->StorePatch(static_cast<CD2DPointF>(point));
 	}
 	else
 		return;
@@ -120,6 +120,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	m_pDlgTarget->Invalidate();
 	Invalidate();
+
 }
 
 
@@ -152,6 +153,7 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 	ShowCursor(FALSE);
 
 	RedrawWindow();
+
 }
 
 
@@ -270,6 +272,7 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//Invalidate();
 
 	return 0;
+
 }
 
 // CIGUIDEView drawing
@@ -292,12 +295,17 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->Mark(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
+		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+			_T("Consolas"),								// font family name
+			sizeDpi.height / 8);						// font size
+
+		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
+			_T("Fixedsys"),								// font family name
+			sizeDpi.height / 4);						// font size
+
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
-			CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-			CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-			CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-				_T("Consolas"),								// font family name
-				sizeDpi.height / 8);						// font size
 
 			CString traceText = pDoc->getTraceInfo();
 			// construct a CD2DTextLayout object which represents a block of formatted text 
@@ -306,14 +314,76 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				textFormat,									// text format
 				sizeTarget);								// size of the layout box
 
-			pRenderTarget->DrawTextLayout(CD2DPointF(5, 5),	// top-left corner of the text 
+			pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width - 210, 5),
+															// place on top-right corner
 				&textLayout,								// text layout object
 				&CD2DSolidColorBrush						// brush used for text
 				(pRenderTarget,
 					D2D1::ColorF(D2D1::ColorF::LightGreen)));
 
 		}
-		
+
+		if (pDoc->m_pGrid->overlay & QUICKHELP) {
+
+			vector<CString> help = pDoc->getQuickHelp();
+
+			CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
+			CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
+			CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
+
+
+			CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
+				help[0],									// text to be drawn
+				textFormat,									// text format
+				sizeTarget);								// size of the layout box
+
+			CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
+				help[1],									// text to be drawn
+				textFormat,									// text format
+				sizeTarget);								// size of the layout box
+
+			CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
+				help[2],									// text to be drawn
+				textFormat,									// text format
+				sizeTarget);								// size of the layout box
+
+
+			pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
+				&AOSACA_help,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+			pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
+				&IGUIDE_help,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+			pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
+				&ICANDI_help,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+		}
+
+		if (pDoc->m_pGrid->overlay & DEFOCUS) {
+
+			CString defocus(L"DEFOCUS:\n");
+			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+				defocus + pDoc->getCurDefocus(),			// text to be drawn
+				textFormat2,								// text format
+				sizeTarget);								// size of the layout box
+
+			pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width/2, 5),	// top-left corner of the text 
+				&textLayout,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::IndianRed)));
+
+		}
+
 	}
 
 	return 0;
@@ -343,7 +413,6 @@ void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 
 	// TODO: Add your message handler code here
 
-
 }
 
 
@@ -352,6 +421,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	// TODO: Add your specialized code here and/or call the base class
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
+	// keyboard controls depending on drawn patches
 	if (pDoc->m_pGrid->patchlist.size() > 0) {
 		
 		if (pMsg->message == WM_KEYDOWN) {
@@ -388,7 +458,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
 				break;
 			}
+
 		}
+
+		// delete last patch with right mouse button
 
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
@@ -408,7 +481,24 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		
 	}
 
-		return CView::PreTranslateMessage(pMsg);
+	// other keyboard controls
+
+	if (pMsg->message == WM_KEYDOWN) {
+		switch (pMsg->wParam) {
+		case VK_F1:
+			pDoc->OnOverlayQuickhelp();
+			break;
+
+		case VK_F2:
+			pDoc->ToggleOverlay();
+			break;
+
+		case VK_F3:
+			ToggleFixationTarget();
+		}
+	}
+
+	return CView::PreTranslateMessage(pMsg);
 
 }
 
@@ -445,4 +535,10 @@ afx_msg LRESULT CIGUIDEView::OnDisplaychange(WPARAM wParam, LPARAM lParam)
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 	return 0;
 
+}
+
+
+void CIGUIDEView::ToggleFixationTarget()
+{
+	m_pDlgTarget->m_bVisible ? m_pDlgTarget->m_bVisible = false : m_pDlgTarget->m_bVisible = true;
 }

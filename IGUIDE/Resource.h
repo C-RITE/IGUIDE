@@ -4,10 +4,9 @@
 //
 #define IDD_ABOUTBOX                    100
 #define IDR_MAINFRAME                   128
-#define ID_INDICATOR_LINK1              129
+#define ID_INDICATOR_ICANDI             129
 #define IDR_IGUIDETYPE                  130
-#define ID_WINDOW_MANAGER               131
-#define ID_INDICATOR_LINK2              131
+#define ID_INDICATOR_AOSACA             131
 #define ID_VIEW_PROPERTIESWND           150
 #define ID_VIEW_APPLOOK_WIN_2000        210
 #define ID_VIEW_APPLOOK_OFF_XP          211
@@ -38,6 +37,8 @@
 #define ID_OVERLAY_TRACEINFO            32785
 #define ID_OVERLAY_OPTICDISC            32786
 #define IDR_PROPERTIES                  32787
+#define ID_OVERLAY_QUICKHELP            32789
+#define ID_OVERLAY_DEFOCUS              32790
 #define IDS_PROPERTIES_WND              57346
 
 // Next default values for new objects
@@ -45,7 +46,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         32789
+#define _APS_NEXT_COMMAND_VALUE         32791
 #define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           313
 #endif

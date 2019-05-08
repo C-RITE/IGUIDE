@@ -14,8 +14,7 @@ Fundus::Fundus() :
 
 Fundus::~Fundus()
 {
-	delete filename;
-	//delete picture;
+
 }
 
 

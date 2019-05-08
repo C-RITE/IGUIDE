@@ -17,23 +17,25 @@
 IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
-	ON_MESSAGE(DOC_IS_READY, PopulateProperties)
+	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
+	ON_MESSAGE(NETCOM_ERROR, ConnectionFailure)
+	ON_MESSAGE(NETCOM_CLOSED, ConnectionClosed)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINK1, &CMainFrame::OnUpdatePage)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINK2, &CMainFrame::OnUpdatePage)
-	ON_WM_TIMER()
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_AOSACA, &CMainFrame::OnUpdateLinkIndicators)
+	ON_WM_PARENTNOTIFY()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_LINK1,
-	ID_INDICATOR_LINK2,
+	ID_INDICATOR_ICANDI,
+	ID_INDICATOR_AOSACA,
 };
 
 // CMainFrame construction/destruction
@@ -41,18 +43,56 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
+	m_pSock_AOSACA = NULL;
 	
 }
 
 CMainFrame::~CMainFrame()
 {
+	delete m_pSock_AOSACA;
+}
+
+LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
+
+	// insert all parameters into property list
+	m_DlgProperties.fillProperties();
+
+	// now that all properties are in place (i.e. IP-address)
+	// we can try to establish remote control
+	
+	Connect2AOSACA();
+	Connect2ICANDI();
+
+	return 0L;
 
 }
 
-LRESULT CMainFrame::PopulateProperties(WPARAM w, LPARAM l) {
+LRESULT CMainFrame::ConnectionFailure(WPARAM w, LPARAM l) {
 
-	m_DlgProperties.fillProperties();
+	int errorID(w);
+	CString errorDescription((LPCTSTR)l);
+
+	CString errorMessage = L"Couldn't connect to AOSACA!\nReason: " + errorDescription + ".";
+
+	int answer = AfxMessageBox(errorMessage, MB_RETRYCANCEL);
+
+	if (answer == IDRETRY || answer == IDCANCEL) {
+		delete m_pSock_AOSACA;
+		m_pSock_AOSACA = NULL;
+	}
+
+	if (answer == IDRETRY)
+		Connect2AOSACA();
+
 	return 0L;
+
+}
+
+LRESULT CMainFrame::ConnectionClosed(WPARAM w, LPARAM l) {
+
+	delete m_pSock_AOSACA;
+	m_pSock_AOSACA = NULL;
+	return 0;
 
 }
 
@@ -99,11 +139,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
 	m_wndStatusBar.ShowWindow(SW_SHOW);
 
-	CSockClient::SocketInit();
-
-	// try to remote connect to host applications (ICANDI / AOSACA) in 1sec intervals
-	SetTimer(0, 1000, NULL); 
-
 	return 0;
 
 }
@@ -139,36 +174,44 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
 	int ret;
+
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
 			char msg;
+
+			// ICANDI remote commands go here
 		case 'R':
 			msg = (char)pMsg->wParam;
-			ret = m_pSock_ICANDI.Send(&msg, 1, 0);
+			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
 			break;
 		case VK_SPACE:
 			msg = 'V';
-			ret = m_pSock_ICANDI.Send(&msg, 1, 0);
+			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
 			break;
+
+			// AOSACA remote commands go here
 		case VK_RETURN:
 			msg = 'F';
-			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
 			break;
 		case 0x6B:
 			msg = '+';
-			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
 			break;
-		case 0x6D :
+		case 0x6D:
 			msg = '-';
-			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
 			break;
 		case VK_NUMPAD0:
 			msg = '0';
-			ret = m_pSock_AOSACA.Send(&msg, 1, 0);
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
 			break;
 		}
+
 	}
+	
 	return CFrameWndEx::PreTranslateMessage(pMsg);
+
 }
 
 
@@ -178,15 +221,15 @@ void CMainFrame::OnViewStatusBar()
 	// TODO: Add your command handler code here
 }
 
-void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
+void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
 {
 	// connection status of ICANDI/AOSACA
-
+	
 	switch (pCmdUI->m_nID) {
 
-		case ID_INDICATOR_LINK1:
+		/*case ID_INDICATOR_ICANDI:
 	
-			if (m_pSock_ICANDI.IsConnected()) {
+			if (m_pSock_ICANDI->IsConnected()) {
 				pCmdUI->Enable();
 				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
 				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
@@ -198,40 +241,100 @@ void CMainFrame::OnUpdatePage(CCmdUI *pCmdUI)
 				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
 			}
 
-		break;
+		break;*/
 
-		case ID_INDICATOR_LINK2:
+		case ID_INDICATOR_AOSACA:
 
-			if (m_pSock_AOSACA.IsConnected()) {
+			if (m_pSock_AOSACA == NULL) {
+
+				pCmdUI->Enable();
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
+				return;
+			}
+
+			if	(m_pSock_AOSACA->IsConnected()) {
 				pCmdUI->Enable();
 				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
 				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
 			}
-			else
+			
+			else if (m_pSock_AOSACA->pending)
 			{
 				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
+				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(100, 100, 100), 1);
+				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(255, 188, 0), 1);
 			}
 
 		break;
 
 	}
 
+}
+
+
+bool CMainFrame::Connect2AOSACA()
+{
+	// TODO: Add your implementation code here.
+	/*if (WSAGetLastError() == WSAEINPROGRESS || WSAGetLastError() == WSAEALREADY || m_pSock_AOSACA.IsConnected())
+		return false;*/
+
+	if (m_pSock_AOSACA == NULL) {
+		m_pSock_AOSACA = new CSockClient();
+		CSockClient::SocketInit();
+		m_pSock_AOSACA->Create();
+		m_pSock_AOSACA->pending = true;
+		m_pSock_AOSACA->setParent(this);
+	}
+	
+	CString IP = m_DlgProperties.getAOSACAIP();
+	if (!m_pSock_AOSACA->Connect(IP, 1500)) {
+		delete m_pSock_AOSACA;	
+		m_pSock_AOSACA = NULL;
+		Connect2AOSACA();
+		return false;
+	}
+
+	return true;
 
 }
 
 
-void CMainFrame::OnTimer(UINT_PTR nIDEvent)
+bool CMainFrame::Connect2ICANDI()
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CString IP = m_DlgProperties.getAOSACAIP();
-	if (IP == L"localhost")
-		IP.SetString(L"127.0.0.1");
-	if (!m_pSock_AOSACA.IsConnected())
-		m_pSock_AOSACA.Connect(IP,1500);
+	// TODO: Add your implementation code here.
+	return false;
+}
 
 
-	CFrameWndEx::OnTimer(nIDEvent);
+
+void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
+{
+	// TODO: Add your message handler code here
+	CFrameWndEx::OnParentNotify(message, lParam);
+
+	if (!m_wndStatusBar)
+		return;
+
+	WORD x_coord = LOWORD(lParam);
+	WORD y_coord = HIWORD(lParam);
+	POINT pt{ x_coord, y_coord };
+	RECT rect_AOSACA;
+	RECT clientRect;
+	RECT statusBarRect;
+
+	GetClientRect(&clientRect);
+	m_wndStatusBar.GetClientRect(&statusBarRect);
+	pt.y -= clientRect.bottom - statusBarRect.bottom;
+	
+
+	switch (message) {
+		case WM_LBUTTONDOWN:
+			m_wndStatusBar.GetItemRect(2, &rect_AOSACA);
+			if (PtInRect(&rect_AOSACA, pt) && m_pSock_AOSACA == NULL)
+				Connect2AOSACA();
+			break;
+
+	}
+
 }

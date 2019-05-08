@@ -12,7 +12,9 @@ enum Overlay
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,
-	FUNDUS = 128
+	FUNDUS = 128,
+	QUICKHELP = 256,
+	DEFOCUS = 512
 };
 	
 
@@ -52,7 +54,7 @@ public:
 
 	void DelPatch();
 	void ClearPatchlist();
-	void StoreClick(CD2DPointF point);
+	void StorePatch(CD2DPointF point);						// store patch upon click of mouse button
 	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
 	void Mark(CHwndRenderTarget* pRenderTarget);			// draw patches

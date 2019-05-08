@@ -32,6 +32,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_bRunning = false;
 	fieldsize = 0;
 	pDoc = NULL;
+	m_bVisible = true;
 	m_flip = 0;
 
 }
@@ -163,55 +164,57 @@ UINT ThreadDraw(PVOID pParam) {
 
 	pRenderTarget->Clear(ColorF(ColorF::Black));
 
+	if (pTarget->m_bVisible) {
 
-	float scalingFactor;
-	if (pTarget->pDoc)
-		scalingFactor = (float)pTarget->pDoc->m_FixationTargetSize / 100;
+		float scalingFactor;
+		if (pTarget->pDoc)
+			scalingFactor = (float)pTarget->pDoc->m_FixationTargetSize / 100;
 
-	// custom fixation target
-	if (pTarget->m_POI && pTarget->m_pFixationTarget->IsValid()) {
-		CD2DSizeF size = pTarget->m_pFixationTarget->GetSize();
-		CD2DPointF center{ (pTarget->m_POI->left + pTarget->m_POI->right) / 2,
-			(pTarget->m_POI->bottom + pTarget->m_POI->top) / 2,
-		};
-		pRenderTarget->DrawBitmap(pTarget->m_pFixationTarget, CD2DRectF(
-			center.x - (size.width / 2 * scalingFactor),
-			center.y - (size.height / 2 * scalingFactor),
-			center.x + (size.width / 2 * scalingFactor),
-			center.y + (size.height / 2 * scalingFactor)),
-			1.0f,
-			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
+		// custom fixation target
+		if (pTarget->m_POI && pTarget->m_pFixationTarget->IsValid()) {
+			CD2DSizeF size = pTarget->m_pFixationTarget->GetSize();
+			CD2DPointF center{ (pTarget->m_POI->left + pTarget->m_POI->right) / 2,
+				(pTarget->m_POI->bottom + pTarget->m_POI->top) / 2,
+			};
+			pRenderTarget->DrawBitmap(pTarget->m_pFixationTarget, CD2DRectF(
+				center.x - (size.width / 2 * scalingFactor),
+				center.y - (size.height / 2 * scalingFactor),
+				center.x + (size.width / 2 * scalingFactor),
+				center.y + (size.height / 2 * scalingFactor)),
+				1.0f,
+				D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
 			);
-	}
-
-	// default fixation target
-	else if (pTarget->m_POI) {
-		pRenderTarget->DrawEllipse(*pTarget->m_POI, pTarget->m_pBrushWhite, 1, NULL);
-		pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->top - 4),
-			CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->bottom + 4),
-			pTarget->m_pBrushWhite);
-		pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->bottom + 4),
-			CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->top - 4),
-			pTarget->m_pBrushWhite);
-	}
-
-	else if (pTarget->pDoc) {
-
-		// draw white crosses to user define FOV
-		for (size_t i = 0; i < pTarget->pDoc->raster.corner.size(); i++) {
-			pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y - 7),
-				CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y + 7),
-				pTarget->m_pBrushWhite,
-				1,
-				NULL);
-			pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y + 7),
-				CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y - 7),
-				pTarget->m_pBrushWhite,
-				1,
-				NULL);
 		}
 
+		// default fixation target
+		else if (pTarget->m_POI) {
+			pRenderTarget->DrawEllipse(*pTarget->m_POI, pTarget->m_pBrushWhite, 1, NULL);
+			pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->top - 4),
+				CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->bottom + 4),
+				pTarget->m_pBrushWhite);
+			pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->bottom + 4),
+				CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->top - 4),
+				pTarget->m_pBrushWhite);
+		}
 
+		else if (pTarget->pDoc) {
+
+			// draw white crosses to user define FOV
+			for (size_t i = 0; i < pTarget->pDoc->raster.corner.size(); i++) {
+				pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y - 7),
+					CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y + 7),
+					pTarget->m_pBrushWhite,
+					1,
+					NULL);
+				pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y + 7),
+					CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y - 7),
+					pTarget->m_pBrushWhite,
+					1,
+					NULL);
+			}
+
+
+		}
 	}
 
 	// catch pushing A button

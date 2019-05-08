@@ -7,6 +7,8 @@
 
 #define DOC_IS_READY (WM_USER + 100)
 #define SCREEN_SELECTED (WM_USER + 101)
+#define NETCOM_ERROR (WM_USER + 102)
+#define NETCOM_CLOSED (WM_USER + 103)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers

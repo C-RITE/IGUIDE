@@ -86,6 +86,7 @@ private:
 	CRITICAL_SECTION	m_csRecieve;				//Recieve Critical section handler
 	CRITICAL_SECTION	m_csSend;					//Send ...
 
+protected:
     bool				m_bConnected;				//True if already connected
 
 };

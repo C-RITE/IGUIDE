@@ -42,6 +42,10 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FUNDUS, &CIGUIDEDoc::OnUpdateOverlayFundus)
 	ON_COMMAND(ID_OVERLAY_TRACEINFO, &CIGUIDEDoc::OnOverlayTraceinfo)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TRACEINFO, &CIGUIDEDoc::OnUpdateOverlayTraceinfo)
+	ON_COMMAND(ID_OVERLAY_QUICKHELP, &CIGUIDEDoc::OnOverlayQuickhelp)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_QUICKHELP, &CIGUIDEDoc::OnUpdateOverlayQuickhelp)
+	ON_COMMAND(ID_OVERLAY_DEFOCUS, &CIGUIDEDoc::OnOverlayDefocus)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_DEFOCUS, &CIGUIDEDoc::OnUpdateOverlayDefocus)
 END_MESSAGE_MAP()
 
 
@@ -60,6 +64,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_ScreenPixelPitch = 96;
 	m_ScreenDistance = 100;
 	m_FixationTargetSize = 100;
+	overlaySettings = 0;
 	getScreens();
 
 }
@@ -196,6 +201,28 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		return TRUE;
 	}
 }
+
+void CIGUIDEDoc::OnCloseDocument()
+{
+	// TODO: Add your specialized code here and/or call the base class
+	// TODO: Add your message handler code here
+
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
+	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
+	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
+	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACAIP", m_AOSACAIP);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
+	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
+	if (raster.corner.size() == 4) AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_FixationTargetScreen);
+	D2D1_COLOR_F rcol = raster.color;
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
+	CDocument::OnCloseDocument();
+
+}
+
 
 // CIGUIDEDoc serialization
 
@@ -339,6 +366,24 @@ CString CIGUIDEDoc::getTraceInfo() {
 		return trace;
 	return NULL;
 
+}
+
+vector<CString> CIGUIDEDoc::getQuickHelp() {
+
+	CString helpArray[3];
+	helpArray[0].Format(L"AOSACA hotkeys\n===============================\nKEY:\t\tACTION:\n\n<RETURN>\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<NUM-0>\t\tReset Defocus");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\t\tACTION:\n\n<F1>\t\tToggle Quick Help\n\<F2>\t\tToggle Overlays\n<F3>\t\tToggle Fixation Target");
+	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n");
+
+	vector<CString> help(helpArray, helpArray+3);
+	
+	return help;
+
+}
+
+CString CIGUIDEDoc::getCurDefocus()
+{
+	return CString();
 }
 
 CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount)
@@ -494,6 +539,7 @@ void CIGUIDEDoc::OnFileImport()
 	HRESULT hr = m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
 
 	UpdateAllViews(NULL);
+
 	if (!m_pFundus->picture->IsValid()) {
 		CStringW message;
 		message.Format(L"Failed to load image!\n%s", *m_pFundus->filename);
@@ -502,6 +548,7 @@ void CIGUIDEDoc::OnFileImport()
 		return;
 	}
 	m_pDlgCalibration->DoModal();
+
 	UpdateAllViews(NULL);
 	
 }
@@ -513,6 +560,7 @@ void CIGUIDEDoc::OnOverlayGrid()
 		m_pGrid->overlay = m_pGrid->overlay & (~GRID);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | GRID;
+
 	UpdateAllViews(NULL);
 }
 
@@ -531,6 +579,7 @@ void CIGUIDEDoc::OnOverlayRadius()
 		m_pGrid->overlay = m_pGrid->overlay & (~DEGRAD);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | DEGRAD;
+
 	UpdateAllViews(NULL);
 }
 
@@ -539,6 +588,7 @@ void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
+
 }
 
 
@@ -549,6 +599,7 @@ void CIGUIDEDoc::OnOverlayFovea()
 		m_pGrid->overlay = m_pGrid->overlay & ~FOVEA & ~FOVEOLA;
 	else
 		m_pGrid->overlay = m_pGrid->overlay | FOVEA | FOVEOLA;
+
 	UpdateAllViews(NULL);
 }
 
@@ -567,6 +618,7 @@ void CIGUIDEDoc::OnOverlayOpticdisc()
 		m_pGrid->overlay = m_pGrid->overlay & (~OPTICDISC);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | OPTICDISC;
+
 	UpdateAllViews(NULL);
 }
 
@@ -575,6 +627,7 @@ void CIGUIDEDoc::OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & OPTICDISC);
+
 }
 
 
@@ -585,6 +638,7 @@ void CIGUIDEDoc::OnOverlayCrosshair()
 		m_pGrid->overlay = m_pGrid->overlay & (~CROSSHAIR);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | CROSSHAIR;
+
 	UpdateAllViews(NULL);
 }
 
@@ -603,6 +657,7 @@ void CIGUIDEDoc::OnOverlayFundus()
 		m_pGrid->overlay = m_pGrid->overlay & (~FUNDUS);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | FUNDUS;
+
 	UpdateAllViews(NULL);
 }
 
@@ -621,6 +676,7 @@ void CIGUIDEDoc::OnOverlayTraceinfo()
 		m_pGrid->overlay = m_pGrid->overlay & (~TRACEINFO);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | TRACEINFO;
+
 	UpdateAllViews(NULL);
 }
 
@@ -633,23 +689,54 @@ void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 
 
 
-void CIGUIDEDoc::OnCloseDocument()
+void CIGUIDEDoc::OnOverlayQuickhelp()
 {
-	// TODO: Add your specialized code here and/or call the base class
-	// TODO: Add your message handler code here
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & QUICKHELP)
+		m_pGrid->overlay = m_pGrid->overlay & (~QUICKHELP);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
+
+	UpdateAllViews(NULL);
+}
+
+
+void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & QUICKHELP);
+}
+
+
+void CIGUIDEDoc::OnOverlayDefocus()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & DEFOCUS)
+		m_pGrid->overlay = m_pGrid->overlay & (~DEFOCUS);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
+
+	UpdateAllViews(NULL);
+}
+
+
+void CIGUIDEDoc::OnUpdateOverlayDefocus(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & DEFOCUS);
+}
+
+
+void CIGUIDEDoc::ToggleOverlay()
+{
+	// TODO: Add your implementation code here.
+	if (m_pGrid->overlay > 0) {
+		overlaySettings = m_pGrid->overlay;
+		m_pGrid->overlay = 0;
+	}
+	else
+		m_pGrid->overlay = overlaySettings;
 	
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
-	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
-	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
-	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACAIP", m_AOSACAIP);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
-	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
-	if (raster.corner.size() == 4) AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_FixationTargetScreen);
-	D2D1_COLOR_F rcol = raster.color;
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
-	CDocument::OnCloseDocument();
+	UpdateAllViews(NULL);
 
 }

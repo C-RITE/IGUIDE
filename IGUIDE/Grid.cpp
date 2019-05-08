@@ -54,7 +54,9 @@ void Grid::ClearPatchlist() {
 
 }
 
-void Grid::StoreClick(CD2DPointF loc) {
+void Grid::StorePatch(CD2DPointF loc) {
+
+
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	Patch patch;
@@ -66,6 +68,7 @@ void Grid::StoreClick(CD2DPointF loc) {
 	patch.color = pDoc->raster.color;
 	patch.rastersize = pDoc->raster.size;
 	patch.locked = false;
+	patch.defocus = 0;
 	patchlist.push_back(patch);
 
 }
@@ -180,6 +183,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
+	// draw all marked locations (i.e. list of patches) in operator view
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	
@@ -238,8 +242,8 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			m_pWhiteBrush,
 			.5f,
 			NULL);
-		ShowCoordinates(pRenderTarget, (float)-(center.x - pDoc->mousePos->x) * (float)dpp,
-			(float)(center.y - pDoc->mousePos->y) * (float)dpp, patchlist.back().defocus*(float)dpp, (float)pDoc->raster.size);
+		/*ShowCoordinates(pRenderTarget, (float)-(center.x - pDoc->mousePos->x) * (float)dpp,
+			(float)(center.y - pDoc->mousePos->y) * (float)dpp, patchlist.back().defocus*(float)dpp, (float)pDoc->raster.size);*/
 	}
 
 }

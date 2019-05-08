@@ -237,7 +237,7 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Import...\tCtrl+I",          ID_FILE_IMPORT
+        MENUITEM "&Fundus...\tCtrl+I",          ID_FILE_IMPORT
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -270,6 +270,7 @@ BEGIN
             MENUITEM "Optic Disc",                  ID_OVERLAY_OPTICDISC
             MENUITEM "Crosshair",                   ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
+            MENUITEM "Defocus",                     ID_OVERLAY_DEFOCUS
             MENUITEM "Trace Info",                  ID_OVERLAY_TRACEINFO
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
@@ -283,6 +284,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "Hotkeys\tF1",                 ID_OVERLAY_QUICKHELP
+        MENUITEM SEPARATOR
         MENUITEM "&About IGUIDE...",            ID_APP_ABOUT
     END
 END
@@ -318,8 +321,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,5,1
- PRODUCTVERSION 0,5,5,1
+ FILEVERSION 0,5,6,0
+ PRODUCTVERSION 0,5,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -336,12 +339,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.5.5.1"
+            VALUE "FileVersion", "0.5.6.0"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2019 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.5.5.1"
+            VALUE "ProductVersion", "0.5.6.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -359,9 +362,9 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "IGUIDE"
-    ID_INDICATOR_LINK1      "ICANDI"
+    ID_INDICATOR_ICANDI     "ICANDI"
     IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
-    ID_INDICATOR_LINK2      "AOSACA"
+    ID_INDICATOR_AOSACA     "AOSACA"
 END
 
 STRINGTABLE
