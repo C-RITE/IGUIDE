@@ -352,24 +352,6 @@ void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	// TODO: Add your message handler code here
 
-	static bool bOnce = true;
-	
-	if (bShow && !IsWindowVisible()
-		&& bOnce)
-	{
-		bOnce = false;
-		WINDOWPLACEMENT *lwp;
-		UINT nl;
-
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"WP_Target", (LPBYTE*)&lwp, &nl))
-		{
-			SetWindowPlacement(lwp);
-		}
-	
-		delete[] lwp;
-	}
-
-
 	if (!m_bRunning) {
 		
 		m_pThread = AfxBeginThread(InputControllerThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
@@ -476,9 +458,11 @@ void Target::OnDestroy()
 
 	// TODO: Add your message handler code here
 
-	m_bRunning = false;
-	WaitForSingleObject(m_pThread->m_hThread, INFINITE);
-	delete m_pThread;
+	if (m_bRunning) {
+		m_bRunning = false;
+		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+		delete m_pThread;
+	}
 
 	//WINDOWPLACEMENT wp;
 	//GetWindowPlacement(&wp);

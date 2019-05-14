@@ -20,6 +20,7 @@ static BOOL CALLBACK MonitorEnum(HMONITOR hMon, HDC hdc, LPRECT lprcMonitor, LPA
 	EnumDisplayDevices(dd.DeviceName, 0, &dd2, EDD_GET_DEVICE_INTERFACE_NAME);
 	
 	pThis->screen.name = dd2.DeviceString;
+	pThis->screen.display = monInf.szDevice;
 	pThis->screen.monitor = hMon;
 	pThis->screen.area = *lprcMonitor;
 	pThis->screen.resolution = CPoint(monInf.rcMonitor.right - monInf.rcMonitor.left, monInf.rcMonitor.bottom - monInf.rcMonitor.top);
@@ -30,6 +31,8 @@ static BOOL CALLBACK MonitorEnum(HMONITOR hMon, HDC hdc, LPRECT lprcMonitor, LPA
 	return TRUE;
 
 }
+
+
 
 Monitors::Monitors()
 {

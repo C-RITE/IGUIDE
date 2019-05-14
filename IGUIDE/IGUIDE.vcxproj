@@ -229,6 +229,7 @@
     <ClInclude Include="Monitors.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="Raster.h" />
+    <ClInclude Include="Remote.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Patches.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="Monitors.cpp" />
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
+    <ClCompile Include="Remote.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

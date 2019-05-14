@@ -18,8 +18,6 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
-	ON_MESSAGE(NETCOM_ERROR, ConnectionFailure)
-	ON_MESSAGE(NETCOM_CLOSED, ConnectionClosed)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
@@ -43,56 +41,27 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	// TODO: add member initialization code here
-	m_pSock_AOSACA = NULL;
+
 	
 }
 
 CMainFrame::~CMainFrame()
 {
-	delete m_pSock_AOSACA;
+	
 }
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
-	// insert all parameters into property list
+	// insert all properties into list
 	m_DlgProperties.fillProperties();
 
-	// now that all properties are in place (i.e. IP-address)
-	// we can try to establish remote control
+	// now that all properties are in place (i.e. IP-address, etc.)
+	// we can try to establish the desired remote control options
 	
-	Connect2AOSACA();
-	Connect2ICANDI();
+	RemoteControl.init(&m_DlgProperties);
+	RemoteControl.connect();
 
 	return 0L;
-
-}
-
-LRESULT CMainFrame::ConnectionFailure(WPARAM w, LPARAM l) {
-
-	int errorID(w);
-	CString errorDescription((LPCTSTR)l);
-
-	CString errorMessage = L"Couldn't connect to AOSACA!\nReason: " + errorDescription + ".";
-
-	int answer = AfxMessageBox(errorMessage, MB_RETRYCANCEL);
-
-	if (answer == IDRETRY || answer == IDCANCEL) {
-		delete m_pSock_AOSACA;
-		m_pSock_AOSACA = NULL;
-	}
-
-	if (answer == IDRETRY)
-		Connect2AOSACA();
-
-	return 0L;
-
-}
-
-LRESULT CMainFrame::ConnectionClosed(WPARAM w, LPARAM l) {
-
-	delete m_pSock_AOSACA;
-	m_pSock_AOSACA = NULL;
-	return 0;
 
 }
 
@@ -137,8 +106,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators) / sizeof(UINT));
-	m_wndStatusBar.ShowWindow(SW_SHOW);
+	m_wndStatusBar.ShowWindow(TRUE);
 
+	// create dummy remote control window
+	// MFC demand to call this, else there will be no CWnd* to show messageboxes
+	if (!RemoteControl.Create(_T("STATIC"), _T(""), NULL, CRect(0, 0, 0, 0), this, 1234))
+	{
+		TRACE0("Failed to create remote control\n");
+		return -1;      // fail to create
+	}
 	return 0;
 
 }
@@ -170,51 +146,6 @@ void CMainFrame::OnEditProperties()
 }
 
 
-BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
-{
-	// TODO: Add your specialized code here and/or call the base class
-	int ret;
-
-	if (pMsg->message == WM_KEYDOWN) {
-		switch (pMsg->wParam) {
-			char msg;
-
-			// ICANDI remote commands go here
-		case 'R':
-			msg = (char)pMsg->wParam;
-			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
-			break;
-		case VK_SPACE:
-			msg = 'V';
-			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
-			break;
-
-			// AOSACA remote commands go here
-		case VK_RETURN:
-			msg = 'F';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			break;
-		case 0x6B:
-			msg = '+';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			break;
-		case 0x6D:
-			msg = '-';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			break;
-		case VK_NUMPAD0:
-			msg = '0';
-			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			break;
-		}
-
-	}
-	
-	return CFrameWndEx::PreTranslateMessage(pMsg);
-
-}
-
-
 void CMainFrame::OnViewStatusBar()
 {
 	m_wndStatusBar.ShowWindow(TRUE);
@@ -224,47 +155,58 @@ void CMainFrame::OnViewStatusBar()
 void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
 {
 	// connection status of ICANDI/AOSACA
-	
+	// 'traffic lights' paradigm
+
+	Connection active = RemoteControl.getActiveConnections();
+	Connection pending = RemoteControl.getPendingConnections();
+
 	switch (pCmdUI->m_nID) {
 
-		/*case ID_INDICATOR_ICANDI:
-	
-			if (m_pSock_ICANDI->IsConnected()) {
-				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
-			}
-			else
-			{
-				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
-			}
+	case ID_INDICATOR_ICANDI:
 
-		break;*/
+		if ((active == ICANDI) | (active == BOTH))
+		{
+			pCmdUI->Enable();
+			m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+			m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
+			return;
+		}
 
-		case ID_INDICATOR_AOSACA:
+		if ((pending == ICANDI) | (pending == BOTH))
+		{
+			pCmdUI->Enable();
+			m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(100, 100, 100), 1);
+			m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(255, 188, 0), 1);
+			return;
+		}
 
-			if (m_pSock_AOSACA == NULL) {
+		pCmdUI->Enable();
+		m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+		m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
 
-				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
-				return;
-			}
+		break;
 
-			if	(m_pSock_AOSACA->IsConnected()) {
-				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
-			}
-			
-			else if (m_pSock_AOSACA->pending)
-			{
-				pCmdUI->Enable();
-				m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(100, 100, 100), 1);
-				m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(255, 188, 0), 1);
-			}
+	case ID_INDICATOR_AOSACA:
+
+		if ((active == AOSACA) | (active == BOTH))
+		{
+			pCmdUI->Enable();
+			m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+			m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
+			return;
+		}
+
+		if ((pending == AOSACA) | (pending == BOTH))
+		{
+			pCmdUI->Enable();
+			m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(100, 100, 100), 1);
+			m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(255, 188, 0), 1);
+			return;
+		}
+
+		pCmdUI->Enable();
+		m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
+		m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(200, 0, 0), 1);
 
 		break;
 
@@ -272,45 +214,13 @@ void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
 
 }
 
-
-bool CMainFrame::Connect2AOSACA()
-{
-	// TODO: Add your implementation code here.
-	/*if (WSAGetLastError() == WSAEINPROGRESS || WSAGetLastError() == WSAEALREADY || m_pSock_AOSACA.IsConnected())
-		return false;*/
-
-	if (m_pSock_AOSACA == NULL) {
-		m_pSock_AOSACA = new CSockClient();
-		CSockClient::SocketInit();
-		m_pSock_AOSACA->Create();
-		m_pSock_AOSACA->pending = true;
-		m_pSock_AOSACA->setParent(this);
-	}
-	
-	CString IP = m_DlgProperties.getAOSACAIP();
-	if (!m_pSock_AOSACA->Connect(IP, 1500)) {
-		delete m_pSock_AOSACA;	
-		m_pSock_AOSACA = NULL;
-		Connect2AOSACA();
-		return false;
-	}
-
-	return true;
-
-}
-
-
-bool CMainFrame::Connect2ICANDI()
-{
-	// TODO: Add your implementation code here.
-	return false;
-}
-
-
-
 void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 {
-	// TODO: Add your message handler code here
+	// Manual override switch for AOSACA / ICANDI connection
+
+	// This is necessary to catch clicks in status bar, which is outside of the client window.
+	// It is more of a workaround, because status bars are usually inclined to passive behaviour.
+
 	CFrameWndEx::OnParentNotify(message, lParam);
 
 	if (!m_wndStatusBar)
@@ -320,6 +230,7 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 	WORD y_coord = HIWORD(lParam);
 	POINT pt{ x_coord, y_coord };
 	RECT rect_AOSACA;
+	RECT rect_ICANDI;
 	RECT clientRect;
 	RECT statusBarRect;
 
@@ -327,14 +238,27 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 	m_wndStatusBar.GetClientRect(&statusBarRect);
 	pt.y -= clientRect.bottom - statusBarRect.bottom;
 	
+	// trigger connection attempt upon left click on status item
 
 	switch (message) {
 		case WM_LBUTTONDOWN:
 			m_wndStatusBar.GetItemRect(2, &rect_AOSACA);
-			if (PtInRect(&rect_AOSACA, pt) && m_pSock_AOSACA == NULL)
-				Connect2AOSACA();
+			if (PtInRect(&rect_AOSACA, pt))
+				RemoteControl.connect(AOSACA);
+			m_wndStatusBar.GetItemRect(1, &rect_ICANDI);
+			if (PtInRect(&rect_ICANDI, pt))
+				RemoteControl.connect(ICANDI);
 			break;
 
 	}
 
+}
+
+
+BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	RemoteControl.PreTranslateMessage(pMsg);
+	return CFrameWndEx::PreTranslateMessage(pMsg);
 }

@@ -4,6 +4,7 @@
 struct Screen {
 	RECT area;				// display area in pixels;
 	CString name;			// display identifier
+	CString display;		// the display enum
 	CPoint resolution;		// screen resolution
 	int number;				// display number
 	HMONITOR monitor;		// monitor handle

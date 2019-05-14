@@ -136,7 +136,7 @@ void CSockClient::OnRecieve(int nError)
 	
 }
 
-void CSockClient::setParent(CMainFrame* pParent)
+void CSockClient::setParent(CWnd* pParent)
 {
 	m_pParent = pParent;
 }
@@ -144,7 +144,10 @@ void CSockClient::setParent(CMainFrame* pParent)
 void CSockClient::OnConnect(int nError)
 {
 	//TRACE(_T("CWinSock2Async::OnConnect(%d)\n"), nError);
-	m_bConnected = (nError == 0);
+	if (nError == 0) {
+		m_bConnected = true;
+		pending = false;
+	}
 
 	if (nError > 0) {
 		ErrorEntry err;
@@ -153,7 +156,7 @@ void CSockClient::OnConnect(int nError)
 				err = g_aErrorList[i];
 		}
 
-		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)err.nID, (LPARAM)err.pcMessage);
+		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
 
 	}
 
@@ -216,10 +219,10 @@ void CSockClient::OnClose( int nError )
 				err = g_aErrorList[i];
 		}
 
-		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)err.nID, (LPARAM)err.pcMessage);
+		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
 	}
 
-	m_pParent->PostMessage(NETCOM_CLOSED, NULL, NULL);
+	m_pParent->PostMessage(NETCOM_CLOSED, (WPARAM)m_IP, NULL);
 
 }
 

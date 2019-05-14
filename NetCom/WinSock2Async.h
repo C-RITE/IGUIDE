@@ -47,6 +47,7 @@ public:
 	//Oneliners
 	bool	IsConnected() { return m_bConnected; }
 
+
 //Static methods
 public:	
 	static in_addr	LookupAddress( LPCTSTR szHost );
@@ -88,6 +89,7 @@ private:
 
 protected:
     bool				m_bConnected;				//True if already connected
+	LPCTSTR				m_IP;
 
 };
 

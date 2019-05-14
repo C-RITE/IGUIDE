@@ -161,7 +161,6 @@ void CIGUIDEView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
 	
-
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 	
@@ -169,7 +168,10 @@ void CIGUIDEView::OnInitialUpdate()
 
 LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 
+
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	m_pDlgTarget->ShowWindow(TRUE);
+
 	CRect area = (CRect)pDoc->m_selectedScreen->area;
 	CRect wRect;
 	
@@ -505,9 +507,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);
-	m_pDlgTarget->ShowWindow(TRUE);
 	return CView::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 	// TODO: Add your specialized code here and/or call the base class
 

@@ -65,6 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_ScreenDistance = 100;
 	m_FixationTargetSize = 100;
 	overlaySettings = 0;
+	m_RemoteCtrl = L"NONE";
 	getScreens();
 
 }
@@ -94,6 +95,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 
 CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 {
+	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
 
 	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
 	return (CIGUIDEDoc *)pFrame->GetActiveDocument();
@@ -107,99 +109,115 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
-	CString path;
-	int FTS, SCR, flip;
-	bool defaultVals = false;
-	if(defaultVals){
-		
+
+	CString data;
+
+	//bool defaultVals = false;
+
+	//if(defaultVals){
+	//	
+	//	WCHAR homedir[MAX_PATH];
+	//	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+	//		path = homedir;
+	//		path.Append(_T("\\Pictures\\"));
+	//	}
+	//	m_FixationTarget = path;
+
+	//	m_OutputDir = _T("C:\\");
+
+	//	m_AOSACAIP = _T("192.168.0.1");
+
+	//	FTS = 100;
+	//	m_FixationTargetSize = FTS;
+
+	//	SCR = 1;
+	//	m_FixationTargetScreen = SCR;
+
+	//	flip = 0;
+	//	m_FlipVertical = flip;
+
+	//	return TRUE;
+	//}
+	//else {
+
+	// parse settings stored in registry or set default
+
+	data = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
+	if (data.IsEmpty()) {
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
-			path = homedir;
-			path.Append(_T("\\Pictures\\"));
+			data = homedir;
+			data.Append(_T("\\Pictures\\"));
 		}
-		m_FixationTarget = path;
-
-
-		m_OutputDir = _T("C:\\");
-
-		m_AOSACAIP = _T("192.168.0.1");
-
-		FTS = 100;
-		m_FixationTargetSize = FTS;
-
-		SCR = 1;
-		m_FixationTargetScreen = SCR;
-
-		flip = 0;
-		m_FlipVertical = flip;
-
-		return TRUE;
 	}
-	else {
-		path = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
-		if (path.IsEmpty()) {
-			WCHAR homedir[MAX_PATH];
-			if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
-				path = homedir;
-				path.Append(_T("\\Pictures\\"));
-			}
-		}
-		m_FixationTarget = path;
 
-		path = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
-		if (path.IsEmpty()) {
-			path.Append(_T("C:\\"));
-		}
+	m_FixationTarget = data;
 
-		m_OutputDir = path;
-
-		path = AfxGetApp()->GetProfileString(L"Settings", L"AOSACAIP", NULL);
-		if (path.IsEmpty()) {
-			path.Append(_T("192.168.0.1"));
-		}
-
-		m_AOSACAIP = path;
-
-		FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
-		if (!FTS) FTS = 100;
-		m_FixationTargetSize = FTS;
-
-		SCR = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
-		if (!SCR) SCR = 1;
-		m_FixationTargetScreen = SCR;
-
-		flip = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
-		if (!flip) flip = 0;
-		m_FlipVertical = flip;
-
-		UINT nl;
-		LPBYTE calib, ptr;
-		DWORD sz = sizeof(CD2DPointF);
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"Calibration", &calib, &nl) > 0) {
-			CD2DPointF data;
-			ptr = calib;
-			for (size_t t = 0; t < nl / sz; t++) {
-				data = (CD2DPointF*)calib;
-				raster.corner.push_back(data);
-				calib += sz;
-			}
-			calib = ptr;
-		}
-
-		LPBYTE rcol;
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
-			memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
-
-		LPBYTE rsize;
-		if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
-			memcpy(&raster.size, rsize, sizeof(double));
-
-		delete calib, ptr;
-		delete rcol;
-		delete rsize;
-
-		return TRUE;
+	data = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
+	if (data.IsEmpty()) {
+		data.Format(_T("C:\\"));
 	}
+
+	m_OutputDir = data;
+
+	data = AfxGetApp()->GetProfileString(L"Settings", L"AOSACA IP", NULL);
+	if (data.IsEmpty()) {
+		data.Format(_T("192.168.0.1"));
+	}
+
+	m_AOSACA_IP = data;
+
+	data = AfxGetApp()->GetProfileString(L"Settings", L"ICANDI IP", NULL);
+	if (data.IsEmpty()) {
+		data.Format(_T("192.168.0.2"));
+	}
+
+	m_ICANDI_IP = data;
+
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
+
+	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
+	if (!FTS) FTS = 100;
+	m_FixationTargetSize = FTS;
+
+	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
+	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
+		if (it->number == screen) {
+			m_selectedScreen = it._Ptr;
+		}
+	}
+
+	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
+
+	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", 0);
+
+	UINT nl;
+	LPBYTE calib, ptr;
+	DWORD sz = sizeof(CD2DPointF);
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"Calibration", &calib, &nl) > 0) {
+		CD2DPointF data;
+		ptr = calib;
+		for (size_t t = 0; t < nl / sz; t++) {
+			data = (CD2DPointF*)calib;
+			raster.corner.push_back(data);
+			calib += sz;
+		}
+		calib = ptr;
+	}
+
+	LPBYTE rcol;
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
+		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+
+	LPBYTE rsize;
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
+		memcpy(&raster.size, rsize, sizeof(double));
+
+	delete calib, ptr;
+	delete rcol;
+	delete rsize;
+
+	return TRUE;
 }
 
 void CIGUIDEDoc::OnCloseDocument()
@@ -208,15 +226,19 @@ void CIGUIDEDoc::OnCloseDocument()
 	// TODO: Add your message handler code here
 
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_selectedScreen->number);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
-	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACAIP", m_AOSACAIP);
+	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
+	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE)&raster.size, sizeof(double));
+	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &raster.size, sizeof(double));
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
-	if (raster.corner.size() == 4) AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_FixationTargetScreen);
+	if (raster.corner.size() == 4)
+		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
+
 	D2D1_COLOR_F rcol = raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
 	CDocument::OnCloseDocument();
@@ -372,8 +394,8 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"AOSACA hotkeys\n===============================\nKEY:\t\tACTION:\n\n<RETURN>\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<NUM-0>\t\tReset Defocus");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\t\tACTION:\n\n<F1>\t\tToggle Quick Help\n\<F2>\t\tToggle Overlays\n<F3>\t\tToggle Fixation Target");
-	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\t\tACTION:\n\n<F1>\t\tToggle Quick Help\n<F2>\t\tToggle Overlays\n<F3>\t\tToggle Fixation Target");
+	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref. Frame\n<SPACE>\t\tSave Video");
 
 	vector<CString> help(helpArray, helpArray+3);
 	

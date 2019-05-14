@@ -30,7 +30,7 @@ public:
 
 	void AdjustLayout();
 	void fillProperties();
-	CString getAOSACAIP();
+
 
 	CMFCPropertyGridProperty*		Raster;
 	CMFCPropertyGridProperty*		RasterSize;
@@ -44,7 +44,10 @@ public:
 	CMFCPropertyGridFileProperty*	VideoFolder;
 	CMFCPropertyGridFileProperty*	FixationFile;
 	CMFCPropertyGridProperty*		RigProperties;
-	CMFCPropertyGridProperty*		AOSACAIP;
+	CMFCPropertyGridProperty*		RemoteControl;
+	CMFCPropertyGridProperty*		RemoteCapability;
+	CMFCPropertyGridProperty*		AOSACA_IP;
+	CMFCPropertyGridProperty*		ICANDI_IP;
 	CMFCPropertyGridProperty*		FlipVertical;
 
 private:
@@ -53,8 +56,11 @@ private:
 	_variant_t * m_pScreen;
 	_variant_t * m_pPixelPitch;
 	_variant_t * m_pDistance;
-	_variant_t * m_pAOSACAIP;
+	_variant_t * m_pAOSACA_IP;
+	_variant_t * m_pICANDI_IP;
+	_variant_t * m_pRemote;
 	_variant_t * m_pFlipVertical;
+
 protected:
 	CFont m_fntPropList;
 	MyCMFCPropertyGridCtrl m_wndPropList;
@@ -70,4 +76,7 @@ DECLARE_MESSAGE_MAP()
 
 
 public:
+	CString getRemoteCapability();
+	CString getAOSACA_IP();
+	CString getICANDI_IP();
 };

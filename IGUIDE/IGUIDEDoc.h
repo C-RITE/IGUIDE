@@ -29,11 +29,12 @@ public:
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	int						m_FixationTargetSize;				// fixation target size in percent
-	int						m_FixationTargetScreen;				// fixation target screen
-	CString					m_AOSACAIP;							// AOSACA IP Address
+	CString					m_AOSACA_IP;						// AOSACA IP Address
+	CString					m_ICANDI_IP;						// AOSACA IP Address
 	int						m_FlipVertical;						// flip target screen
 	Raster					raster;
 	CPoint*					mousePos;							// current mouse position
+	CString					m_RemoteCtrl;						// remote control subsystem settings
 
 private:
 	DWORD					overlaySettings;
@@ -50,7 +51,7 @@ public:
 	bool CheckCalibrationValidity();
 	bool getScreens();
 	CString getTraceInfo();					// for debug purposes only
-	vector<CString> getQuickHelp();					// show remote control hotkeys
+	vector<CString> getQuickHelp();			// show remote control hotkeys
 	CString getCurDefocus();				// show current defocus value from AOSACA
 
 	// Overrides
@@ -66,6 +67,7 @@ public:
 	// Implementation
 public:
 	virtual ~CIGUIDEDoc();
+
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

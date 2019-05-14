@@ -254,6 +254,8 @@ bool CWinSock2Async::Connect(LPCTSTR sAddress, int nPort)
 		TRACE( _T("*** lookup address: %s\n"), szWASError );
 		return false;
 	}
+
+	m_IP = sAddress;
 	
 	in_addr Address;
 	memcpy(&Address, &nRemoteAddress, sizeof(u_long)); 

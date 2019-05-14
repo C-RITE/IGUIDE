@@ -81,6 +81,9 @@
     <ClInclude Include="..\NetCom\SockClient.h">
       <Filter>NetCom</Filter>
     </ClInclude>
+    <ClInclude Include="Remote.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IGUIDE.cpp">
@@ -136,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="..\NetCom\WinSock2Async.cpp">
       <Filter>NetCom</Filter>
+    </ClCompile>
+    <ClCompile Include="Remote.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

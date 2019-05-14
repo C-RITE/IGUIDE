@@ -19,7 +19,7 @@ public:
 	virtual ~CSockClient();
 
 	bool pending;
-	void setParent(CMainFrame* parent);
+	void setParent(CWnd* parent);
 
 private:
 
@@ -28,7 +28,7 @@ private:
 	void OnClose( int nError );
 	void OnConnect(int nError);
 
-	CMainFrame* m_pParent;
+	CWnd* m_pParent;
 
 };
 
