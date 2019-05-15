@@ -53,5 +53,5 @@ void CSockListener::OnAccept(int nError)
 	if (m_psockClient->GetPeerName(szAddress, &nPort) == 0)
 		TRACE(_T("Connected to %s on port %d\n"), szAddress, nPort);
 
-
 }
+

@@ -83,7 +83,7 @@ protected:
 #endif // SHARED_HANDLERS
 
 public:
-	afx_msg void OnFileImport();
+	afx_msg void OnFundusImport();
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayRadius();

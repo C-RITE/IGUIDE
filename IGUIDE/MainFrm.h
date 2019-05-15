@@ -1,6 +1,5 @@
 
 // MainFrm.h : interface of the CMainFrame class
-//
 
 #pragma once
 #include "Properties.h"
@@ -39,7 +38,7 @@ protected:  // control bar embedded members
 
 private:
 
-	// for communication with host apps
+	// for communication with host apps (ICANDI / AOSACA)
 	Remote RemoteControl;
 
 // Generated message map functions

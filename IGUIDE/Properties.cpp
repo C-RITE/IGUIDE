@@ -22,6 +22,7 @@ Properties::Properties()
 	m_pICANDI_IP = new _variant_t;
 	m_pFlipVertical = new _variant_t;
 	m_pRemote = new _variant_t;
+
 }
 
 Properties::~Properties()
@@ -54,7 +55,9 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
+
 	CString propName = prop->GetName();
+
 		if (propName == L"Size") {
 			if (prop->GetParent() == Raster)
 				pDoc->raster.size = vt;
@@ -105,7 +108,8 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 		pDoc->UpdateAllViews(NULL);
 
-	return 0;
+	return S_OK;
+
 }
 
 void Properties::OnSize(UINT nType, int cx, int cy)
@@ -124,6 +128,7 @@ void Properties::AdjustLayout()
 	CRect rectClient, rectCombo;
 	GetClientRect(rectClient);
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+
 }
 
 void Properties::InitPropList()
@@ -223,7 +228,6 @@ void Properties::fillProperties() {
 	_variant_t icip(pDoc->m_ICANDI_IP);
 	_variant_t fv(pDoc->m_FlipVertical);
 	_variant_t rem(pDoc->m_RemoteCtrl);
-
 	
 	VideoFolder->SetValue(od);
 	RasterSize->SetValue(rs);
@@ -252,14 +256,14 @@ void Properties::fillProperties() {
 		// never parse primary monitor, because it is dedicated to operator view
 		if (screen.number == 1)
 			FixationTargetScreen->SetValue(L"NONE");
-		else if (screen.number == pDoc->m_selectedScreen->number)
+		else if (screen.number == pDoc->m_selectedScreen->number) {
 			option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
 			FixationTargetScreen->SetValue(option);
 			CIGUIDEView* pView = CIGUIDEView::GetView();
 			pView->SendMessage(SCREEN_SELECTED);
 		}
+	}
 	
-
 	FixationTargetScreen->RemoveAllOptions(); // need for removal if fillProperties() is called more than once
 
 	for (auto& screen : pDoc->m_Screens) {

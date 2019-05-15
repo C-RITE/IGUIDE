@@ -257,8 +257,10 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	// TODO: Add your specialized code here and/or call the base class
-
+	// route keyboard input to remote control
 	RemoteControl.PreTranslateMessage(pMsg);
+
+	// then return to sender
 	return CFrameWndEx::PreTranslateMessage(pMsg);
+
 }

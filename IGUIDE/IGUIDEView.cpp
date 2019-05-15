@@ -258,8 +258,11 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
 	m_pDlgTarget->getFixationTarget();	
 
+	SetFocus();
 	Invalidate();
+
 	delete FOV;
+
 }
 
 int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -333,6 +336,12 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
 			CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
 
+			CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
+			CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };;
+
+			CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120};
+			pRenderTarget->FillRectangle(black_box, &BlackBrush);
+			pRenderTarget->DrawRectangle(black_box, &YellowGreenBrush);
 
 			CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
 				help[0],									// text to be drawn

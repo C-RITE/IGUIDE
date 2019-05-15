@@ -10,7 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CMainFrame;
+
 
 class CSockClient : public virtual CWinSock2Async  
 {

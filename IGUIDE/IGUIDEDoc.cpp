@@ -27,7 +27,7 @@ using namespace D2D1;
 IMPLEMENT_DYNCREATE(CIGUIDEDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
-	ON_COMMAND(ID_FILE_IMPORT, &CIGUIDEDoc::OnFileImport)
+	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEDoc::OnFundusImport)
 	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
 	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
@@ -112,34 +112,6 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	CString data;
 
-	//bool defaultVals = false;
-
-	//if(defaultVals){
-	//	
-	//	WCHAR homedir[MAX_PATH];
-	//	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
-	//		path = homedir;
-	//		path.Append(_T("\\Pictures\\"));
-	//	}
-	//	m_FixationTarget = path;
-
-	//	m_OutputDir = _T("C:\\");
-
-	//	m_AOSACAIP = _T("192.168.0.1");
-
-	//	FTS = 100;
-	//	m_FixationTargetSize = FTS;
-
-	//	SCR = 1;
-	//	m_FixationTargetScreen = SCR;
-
-	//	flip = 0;
-	//	m_FlipVertical = flip;
-
-	//	return TRUE;
-	//}
-	//else {
-
 	// parse settings stored in registry or set default
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"FixationTarget", NULL);
@@ -189,7 +161,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
 
-	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", 0);
+	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 
 	UINT nl;
 	LPBYTE calib, ptr;
@@ -394,8 +366,8 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"AOSACA hotkeys\n===============================\nKEY:\t\tACTION:\n\n<RETURN>\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<NUM-0>\t\tReset Defocus");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\t\tACTION:\n\n<F1>\t\tToggle Quick Help\n<F2>\t\tToggle Overlays\n<F3>\t\tToggle Fixation Target");
-	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref. Frame\n<SPACE>\t\tSave Video");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target");
+	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\tACTION:\n\n<R>\tReset Reference Frame\n<SPACE>\tSave Video");
 
 	vector<CString> help(helpArray, helpArray+3);
 	
@@ -547,7 +519,7 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 
 }
 
-void CIGUIDEDoc::OnFileImport()
+void CIGUIDEDoc::OnFundusImport()
 {
 	// TODO: Add your command handler code here
 
@@ -566,10 +538,12 @@ void CIGUIDEDoc::OnFileImport()
 		CStringW message;
 		message.Format(L"Failed to load image!\n%s", *m_pFundus->filename);
 		AfxMessageBox(message, MB_OK);
-		delete m_pFundus->filename;
-		return;
+
 	}
-	m_pDlgCalibration->DoModal();
+	else
+		m_pDlgCalibration->DoModal();
+	
+	m_pGrid->overlay += FUNDUS;
 
 	UpdateAllViews(NULL);
 	
@@ -720,6 +694,7 @@ void CIGUIDEDoc::OnOverlayQuickhelp()
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
 
 	UpdateAllViews(NULL);
+
 }
 
 
@@ -752,13 +727,21 @@ void CIGUIDEDoc::OnUpdateOverlayDefocus(CCmdUI *pCmdUI)
 void CIGUIDEDoc::ToggleOverlay()
 {
 	// TODO: Add your implementation code here.
-	if (m_pGrid->overlay > 0) {
+	if (m_pGrid->overlay > QUICKHELP) {
+		overlaySettings = m_pGrid->overlay - QUICKHELP;
+		m_pGrid->overlay = QUICKHELP;
+		UpdateAllViews(NULL);
+		return;
+	}
+
+	else if (m_pGrid->overlay & ~QUICKHELP) {
 		overlaySettings = m_pGrid->overlay;
 		m_pGrid->overlay = 0;
+		UpdateAllViews(NULL);
+		return;
 	}
-	else
-		m_pGrid->overlay = overlaySettings;
 	
+	m_pGrid->overlay += overlaySettings;
 	UpdateAllViews(NULL);
 
 }

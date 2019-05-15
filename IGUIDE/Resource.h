@@ -26,6 +26,7 @@
 #define IDC_STATIC_CAL                  1002
 #define IDC_VERSION                     1004
 #define ID_FILE_IMPORT                  32772
+#define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775
 #define ID_FILE_TEST                    32778
 #define ID_OVERLAY_GRID                 32779
@@ -46,7 +47,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         32791
+#define _APS_NEXT_COMMAND_VALUE         32795
 #define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           313
 #endif

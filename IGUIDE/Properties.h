@@ -10,18 +10,37 @@ public:
 	}
 
 	virtual BOOL AllowShowOnList() const { return FALSE; }
+
+
 };
 
 class Properties : public CDockablePane
 {
+	// Override PropertyGrid base class for some customization
 
-	//customize label width to match entries
-	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl{
+	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl {
 	public:
-		virtual void AdjustLayout() {
+
+		// we want the left column a bit smaller than default
+
+		virtual void AdjustLayout()
+		{
 			m_nLeftColumnWidth = 85;
 			CMFCPropertyGridCtrl::AdjustLayout();
 		}
+
+		// we also want to focus back on the main window after hitting return
+
+		virtual BOOL MyCMFCPropertyGridCtrl::PreTranslateMessage(MSG* pMsg)
+		{
+			if (pMsg->message == WM_KEYDOWN)
+			{
+				if (GetKeyState(VK_RETURN))
+					AfxGetMainWnd()->PostMessageW(WM_SETFOCUS);
+			}
+			return CMFCPropertyGridCtrl::PreTranslateMessage(pMsg);
+		}
+	
 	};
 
 public:
@@ -30,7 +49,6 @@ public:
 
 	void AdjustLayout();
 	void fillProperties();
-
 
 	CMFCPropertyGridProperty*		Raster;
 	CMFCPropertyGridProperty*		RasterSize;
@@ -79,4 +97,5 @@ public:
 	CString getRemoteCapability();
 	CString getAOSACA_IP();
 	CString getICANDI_IP();
+
 };
