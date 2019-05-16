@@ -2,7 +2,7 @@
 // MainFrm.h : interface of the CMainFrame class
 
 #pragma once
-#include "Properties.h"
+class Properties;
 #include "Remote.h"
 
 

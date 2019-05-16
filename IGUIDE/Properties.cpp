@@ -268,8 +268,8 @@ void Properties::fillProperties() {
 
 	for (auto& screen : pDoc->m_Screens) {
 		// never parse primary monitor, because it is dedicated to operator view
-		if (screen.number == 1)
-			continue;
+		if (screen.number == 1)	continue;
+		// all others: put in list
 		option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
 		FixationTargetScreen->AddOption(option);
 	}

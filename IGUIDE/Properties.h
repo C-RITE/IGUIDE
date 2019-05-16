@@ -11,7 +11,6 @@ public:
 
 	virtual BOOL AllowShowOnList() const { return FALSE; }
 
-
 };
 
 class Properties : public CDockablePane
@@ -29,16 +28,34 @@ class Properties : public CDockablePane
 			CMFCPropertyGridCtrl::AdjustLayout();
 		}
 
-		// we also want to focus back on the main window after hitting return
+		// we also want the keyboardfocus to go back to main frame after hitting return
 
 		virtual BOOL MyCMFCPropertyGridCtrl::PreTranslateMessage(MSG* pMsg)
 		{
 			if (pMsg->message == WM_KEYDOWN)
 			{
-				if (GetKeyState(VK_RETURN))
-					AfxGetMainWnd()->PostMessageW(WM_SETFOCUS);
+				if (pMsg->wParam == VK_RETURN) {
+					GetMainFrame()->PostMessageW(WM_SETFOCUS);
+				}
 			}
 			return CMFCPropertyGridCtrl::PreTranslateMessage(pMsg);
+		}
+
+		CFrameWndEx* MyCMFCPropertyGridCtrl::GetMainFrame()
+		{
+			CFrameWndEx* pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
+
+			if (!pFrame)
+				return NULL;
+
+			// Fail if view is of wrong kind
+			// (this could occur with splitter windows, or additional
+			// views on a single document
+
+			if (!pFrame->IsKindOf(RUNTIME_CLASS(CFrameWndEx)))
+				return NULL;
+
+			return (CFrameWndEx*)pFrame;
 		}
 	
 	};
