@@ -6,15 +6,13 @@
 
 Fundus::Fundus() :
 	picture(NULL),
-	calibration(FALSE),
-	filename(NULL)
+	calibration(FALSE)
 {
 }
 
 
 Fundus::~Fundus()
 {
-	delete filename;
 }
 
 
@@ -48,7 +46,7 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 
 HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 {
-	filename = new CStringW();
+
 	// create IFileOpenDialog instance.
 	CComPtr<IFileOpenDialog> pIFileOpenDialog;
 	HRESULT hr = pIFileOpenDialog.CoCreateInstance(CLSID_FileOpenDialog);
@@ -86,7 +84,7 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 		{
 			LPWSTR pszName = NULL;
 			hr = pIShellItem->GetDisplayName(SIGDN_FILESYSPATH, &pszName);
-			*filename = pszName;
+			filename = pszName;
 			CoTaskMemFree(pszName);
 		}
 	}

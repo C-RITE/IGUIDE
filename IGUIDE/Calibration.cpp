@@ -13,12 +13,11 @@ using namespace D2D1;
 
 IMPLEMENT_DYNAMIC(D2DStatic, CStatic)
 
-
 void D2DStatic::PreSubclassWindow()
 {
 	EnableD2DSupport();
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	fundus = new CD2DBitmap(GetRenderTarget(), *pDoc->m_pFundus->filename);
+	fundus = new CD2DBitmap(GetRenderTarget(), pDoc->m_pFundus->filename);
 	fundus->Create(GetRenderTarget());
 }
 

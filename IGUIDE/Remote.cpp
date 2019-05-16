@@ -260,7 +260,8 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 
 		}
 
-		return CWnd::PreTranslateMessage(pMsg);
 	}
+	
+	return CWnd::PreTranslateMessage(pMsg);
 
 }

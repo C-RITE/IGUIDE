@@ -527,23 +527,24 @@ void CIGUIDEDoc::OnFundusImport()
 
 	if (nullptr != m_pFundus->picture)
 	{
-		m_pFundus->picture->Destroy();
+		delete m_pFundus->picture;
+		m_pFundus->picture = NULL;
 	}
 
-	HRESULT hr = m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
+	m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
 
 	UpdateAllViews(NULL);
 
 	if (!m_pFundus->picture->IsValid()) {
 		CStringW message;
-		message.Format(L"Failed to load image!\n%s", *m_pFundus->filename);
+		message.Format(L"Couldn't load: %s\nAborting Fundus import!\n", m_pFundus->filename);
 		AfxMessageBox(message, MB_OK);
 
 	}
 	else
 		m_pDlgCalibration->DoModal();
 	
-	m_pGrid->overlay += FUNDUS;
+	m_pGrid->overlay = m_pGrid->overlay | FUNDUS;
 
 	UpdateAllViews(NULL);
 	
