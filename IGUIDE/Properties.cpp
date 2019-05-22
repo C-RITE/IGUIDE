@@ -12,7 +12,6 @@
 
 Properties::Properties()
 {
-
 	m_pRasterSize = new _variant_t;
 	m_pFixationTarget = new _variant_t;
 	m_pScreen = new _variant_t;
@@ -22,6 +21,19 @@ Properties::Properties()
 	m_pICANDI_IP = new _variant_t;
 	m_pFlipVertical = new _variant_t;
 	m_pRemote = new _variant_t;
+	
+	// override default font for something bigger
+	m_fntPropList.CreateFont(14, 0, 0, 0, FW_NORMAL,
+		FALSE,
+		FALSE,
+		FALSE,
+		0,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,
+		DEFAULT_PITCH
+		FF_DONTCARE,
+		L"Arial");
 
 }
 
@@ -128,6 +140,7 @@ void Properties::AdjustLayout()
 	CRect rectClient, rectCombo;
 	GetClientRect(rectClient);
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+	m_wndPropList.SetFont(&m_fntPropList);
 
 }
 

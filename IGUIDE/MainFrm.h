@@ -2,9 +2,9 @@
 // MainFrm.h : interface of the CMainFrame class
 
 #pragma once
-class Properties;
 #include "Remote.h"
 
+class Properties;
 
 class CMainFrame : public CFrameWndEx
 {

@@ -4,6 +4,7 @@
 BEGIN_MESSAGE_MAP(Remote, CWnd)
 	ON_MESSAGE(NETCOM_ERROR, ConnectionFailure)
 	ON_MESSAGE(NETCOM_CLOSED, ConnectionClosed)
+	ON_MESSAGE(NETCOM_RECEIVED, DataReceived)
 END_MESSAGE_MAP()
 
 Remote::Remote()
@@ -210,6 +211,21 @@ LRESULT Remote::ConnectionClosed(WPARAM w, LPARAM l) {
 
 }
 
+LRESULT Remote::DataReceived(WPARAM w, LPARAM l)
+{
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	
+	CString* command = (CString*)w;
+	CString* value = (CString*)l;
+	
+	if (command->Compare(L"AOSACA_DEFOCUS") == 0)
+		pDoc->setDefocus(*value);
+
+	pDoc->UpdateAllViews(NULL);
+
+	return 0;
+}
+
 
 BOOL Remote::PreTranslateMessage(MSG* pMsg)
 {
@@ -234,34 +250,34 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 
 		}
 
-		if (pMsg->message == WM_KEYDOWN && m_pSock_AOSACA) {
-			switch (pMsg->wParam) {
-				char msg;
+	}
 
-				// AOSACA remote commands go here
+	if (pMsg->message == WM_KEYDOWN && m_pSock_AOSACA) {
+		switch (pMsg->wParam) {
+			char msg;
 
-			case VK_RETURN:
-				msg = 'F';
-				ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-				break;
-			case 0x6B:
-				msg = '+';
-				ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-				break;
-			case 0x6D:
-				msg = '-';
-				ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-				break;
-			case VK_NUMPAD0:
-				msg = '0';
-				ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-				break;
-			}
+			// AOSACA remote commands go here
 
+		case VK_RETURN:
+			msg = 'F';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case 0x6B:
+			msg = '+';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case 0x6D:
+			msg = '-';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
+		case VK_NUMPAD0:
+			msg = '0';
+			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			break;
 		}
 
 	}
-	
+
 	return CWnd::PreTranslateMessage(pMsg);
 
 }

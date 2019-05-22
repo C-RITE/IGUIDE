@@ -297,11 +297,10 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 			_T("Consolas"),								// font family name
-			sizeDpi.height / 8);						// font size
-
+			sizeDpi.height / 8);							// font size
 		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
-			_T("Fixedsys"),								// font family name
-			sizeDpi.height / 4);						// font size
+			_T("Consolas"),								// font family name
+			sizeDpi.height / 4);
 
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
 
@@ -320,6 +319,26 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 					D2D1::ColorF(D2D1::ColorF::LightGreen)));
 
 		}
+
+		if (pDoc->m_pGrid->overlay & DEFOCUS) {
+
+			CString defocus = L"DEFOCUS: ";
+			defocus.Append(pDoc->getCurrentDefocus());
+
+			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+				defocus,									// text to be drawn
+				textFormat2,									// text format
+				sizeTarget);								// size of the layout box
+
+			pRenderTarget->DrawTextLayout(CD2DPointF(5),
+				// place on top-right corner
+				&textLayout,								// text layout object
+				&CD2DSolidColorBrush						// brush used for text
+				(pRenderTarget,
+					D2D1::ColorF(D2D1::ColorF::PaleVioletRed)));
+
+		}
+
 
 		if (pDoc->m_pGrid->overlay & QUICKHELP) {
 
@@ -369,22 +388,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				&CD2DSolidColorBrush						// brush used for text
 				(pRenderTarget,
 					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-		}
-
-		if (pDoc->m_pGrid->overlay & DEFOCUS) {
-
-			CString defocus(L"DEFOCUS:\n");
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				defocus + pDoc->getCurDefocus(),			// text to be drawn
-				textFormat2,								// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width/2, 5),	// top-left corner of the text 
-				&textLayout,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::IndianRed)));
 
 		}
 
@@ -449,18 +452,18 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case VK_SPACE:
 				pDoc->m_pGrid->patchlist.lockIn();
 				break;
-			case 0x6B:
-				//msg = '+';
-				pDoc->m_pGrid->patchlist.back().defocus += .25f;
-				break;
-			case 0x6D:
-				//msg = '-';
-				pDoc->m_pGrid->patchlist.back().defocus -= .25f;
-				break;
-			case VK_NUMPAD0:
-				//msg = '0';
-				pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
-				break;
+			//case 0x6B:
+			//	//msg = '+';
+			//	pDoc->m_pGrid->patchlist.back().defocus += .25f;
+			//	break;
+			//case 0x6D:
+			//	//msg = '-';
+			//	pDoc->m_pGrid->patchlist.back().defocus -= .25f;
+			//	break;
+			//case VK_NUMPAD0:
+			//	//msg = '0';
+			//	pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
+			//	break;
 			}
 
 		}

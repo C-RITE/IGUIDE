@@ -38,6 +38,7 @@ public:
 
 private:
 	DWORD					overlaySettings;
+	CString					defocus;
 
 // Operations
 public:
@@ -50,9 +51,10 @@ public:
 	double ComputeOrientationAngle(Edge k);
 	bool CheckCalibrationValidity();
 	bool getScreens();
+	CString getCurrentDefocus() { return defocus; };
+	void setDefocus(CString def) { defocus = def; };
 	CString getTraceInfo();					// for debug purposes only
 	vector<CString> getQuickHelp();			// show remote control hotkeys
-	CString getCurDefocus();				// show current defocus value from AOSACA
 
 	// Overrides
 public:
@@ -84,12 +86,15 @@ protected:
 
 public:
 	afx_msg void OnFundusImport();
+
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayRadius();
 	afx_msg void OnUpdateOverlayRadius(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayFovea();
 	afx_msg void OnUpdateOverlayFovea(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayDefocus();
+	afx_msg void OnUpdateOverlayDefocus(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayOpticdisc();
 	afx_msg void OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayCrosshair();
@@ -98,11 +103,10 @@ public:
 	afx_msg void OnUpdateOverlayFundus(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayTraceinfo();
 	afx_msg void OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI);
-	virtual void OnCloseDocument();
 	afx_msg void OnOverlayQuickhelp();
 	afx_msg void OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI);
-	afx_msg void OnOverlayDefocus();
-	afx_msg void OnUpdateOverlayDefocus(CCmdUI *pCmdUI);
+	
 	void ToggleOverlay();
+	virtual void OnCloseDocument();
 
 };

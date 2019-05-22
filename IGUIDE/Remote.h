@@ -1,6 +1,7 @@
 #pragma once
 #include "..\NetCom\sockclient.h"
 #include "Properties.h"
+#include "IGUIDEDoc.h"
 
 enum Connection {
 	NONE = 0,
@@ -38,6 +39,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT Remote::ConnectionFailure(WPARAM w, LPARAM l);
 	afx_msg LRESULT Remote::ConnectionClosed(WPARAM w, LPARAM l);
+	afx_msg LRESULT Remote::DataReceived(WPARAM w, LPARAM l);
 
 
 public:

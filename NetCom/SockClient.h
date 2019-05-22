@@ -30,6 +30,9 @@ private:
 
 	CWnd* m_pParent;
 
+	CString* command;
+	CString* value;
+
 };
 
 #endif // !defined(AFX_SOCKCLIENT_H__F435A5D7_7556_42D5_83CC_D820BC575D99__INCLUDED_)

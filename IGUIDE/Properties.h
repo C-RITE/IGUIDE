@@ -24,11 +24,12 @@ class Properties : public CDockablePane
 
 		virtual void AdjustLayout()
 		{
-			m_nLeftColumnWidth = 85;
+			m_nLeftColumnWidth = 90;
 			CMFCPropertyGridCtrl::AdjustLayout();
+
 		}
 
-		// we also want the keyboardfocus to go back to main frame after hitting return
+		// we also want the window focus to go back to main frame after hitting return
 
 		virtual BOOL MyCMFCPropertyGridCtrl::PreTranslateMessage(MSG* pMsg)
 		{

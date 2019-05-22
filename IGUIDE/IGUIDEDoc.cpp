@@ -65,6 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_ScreenDistance = 100;
 	m_FixationTargetSize = 100;
 	overlaySettings = 0;
+	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
 	getScreens();
 
@@ -375,11 +376,6 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 }
 
-CString CIGUIDEDoc::getCurDefocus()
-{
-	return CString();
-}
-
 CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount)
 {
 	CD2DPointF centroid = { 0, 0 };
@@ -524,6 +520,7 @@ void CIGUIDEDoc::OnFundusImport()
 	// TODO: Add your command handler code here
 
 	m_pFundus->calibration = FALSE;
+	m_pFundus->filename.SetString(L"");
 
 	if (nullptr != m_pFundus->picture)
 	{
@@ -535,19 +532,11 @@ void CIGUIDEDoc::OnFundusImport()
 
 	UpdateAllViews(NULL);
 
-	if (!m_pFundus->picture->IsValid()) {
-		CStringW message;
-		message.Format(L"Couldn't load: %s\nAborting Fundus import!\n", m_pFundus->filename);
-		AfxMessageBox(message, MB_OK);
-
-	}
-	else
-		m_pDlgCalibration->DoModal();
+	if (m_pFundus->picture) m_pDlgCalibration->DoModal();
 	
 	m_pGrid->overlay = m_pGrid->overlay | FUNDUS;
 
 	UpdateAllViews(NULL);
-	
 }
 
 void CIGUIDEDoc::OnOverlayGrid()
@@ -585,7 +574,6 @@ void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
-
 }
 
 
@@ -607,6 +595,24 @@ void CIGUIDEDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(m_pGrid->overlay & FOVEA);
 }
 
+void CIGUIDEDoc::OnOverlayDefocus()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & DEFOCUS)
+		m_pGrid->overlay = m_pGrid->overlay & ~DEFOCUS;
+	else
+		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
+
+	UpdateAllViews(NULL);
+}
+
+
+void CIGUIDEDoc::OnUpdateOverlayDefocus(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & DEFOCUS);
+}
+
 
 void CIGUIDEDoc::OnOverlayOpticdisc()
 {
@@ -624,7 +630,6 @@ void CIGUIDEDoc::OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & OPTICDISC);
-
 }
 
 
@@ -695,7 +700,6 @@ void CIGUIDEDoc::OnOverlayQuickhelp()
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
 
 	UpdateAllViews(NULL);
-
 }
 
 
@@ -704,26 +708,6 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & QUICKHELP);
 }
-
-
-void CIGUIDEDoc::OnOverlayDefocus()
-{
-	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & DEFOCUS)
-		m_pGrid->overlay = m_pGrid->overlay & (~DEFOCUS);
-	else
-		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
-
-	UpdateAllViews(NULL);
-}
-
-
-void CIGUIDEDoc::OnUpdateOverlayDefocus(CCmdUI *pCmdUI)
-{
-	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & DEFOCUS);
-}
-
 
 void CIGUIDEDoc::ToggleOverlay()
 {
@@ -743,6 +727,6 @@ void CIGUIDEDoc::ToggleOverlay()
 	}
 	
 	m_pGrid->overlay += overlaySettings;
-	UpdateAllViews(NULL);
 
+	UpdateAllViews(NULL);
 }

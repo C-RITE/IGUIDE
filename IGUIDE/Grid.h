@@ -59,7 +59,7 @@ public:
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
 	void Mark(CHwndRenderTarget* pRenderTarget);			// draw patches
 	
-	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float zPos, float rastersize);
+	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);
 
 };
