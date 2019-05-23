@@ -134,14 +134,9 @@ void CSockClient::OnRecieve(int nError)
 		*value = message->Mid(split+1, message->GetLength());
 
 	}
+	
+	pParent->PostMessageW(NETCOM_RECEIVED, (WPARAM)command, (LPARAM)value);
 
-	m_pParent->PostMessageW(NETCOM_RECEIVED, (WPARAM)command, (LPARAM)value);
-
-}
-
-void CSockClient::setParent(CWnd* pParent)
-{
-	m_pParent = pParent;
 }
 
 void CSockClient::OnConnect(int nError)
@@ -159,7 +154,7 @@ void CSockClient::OnConnect(int nError)
 				err = g_aErrorList[i];
 		}
 
-		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
+		pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
 
 	}
 
@@ -222,10 +217,10 @@ void CSockClient::OnClose( int nError )
 				err = g_aErrorList[i];
 		}
 
-		m_pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
+		pParent->PostMessage(NETCOM_ERROR, (WPARAM)m_IP, (LPARAM)err.pcMessage);
 	}
 
-	m_pParent->PostMessage(NETCOM_CLOSED, (WPARAM)m_IP, NULL);
+	pParent->PostMessage(NETCOM_CLOSED, (WPARAM)m_IP, NULL);
 
 }
 

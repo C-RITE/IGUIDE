@@ -19,7 +19,7 @@ public:
 	virtual ~CSockClient();
 
 	bool pending;
-	void setParent(CWnd* parent);
+	void setParent(CWnd* wnd) { pParent = wnd; }
 
 private:
 
@@ -28,10 +28,10 @@ private:
 	void OnClose( int nError );
 	void OnConnect(int nError);
 
-	CWnd* m_pParent;
-
 	CString* command;
 	CString* value;
+
+	CWnd* pParent;
 
 };
 

@@ -61,8 +61,6 @@ CIGUIDEDoc::CIGUIDEDoc()
 	raster.size = 1.28;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
-	m_ScreenPixelPitch = 96;
-	m_ScreenDistance = 100;
 	m_FixationTargetSize = 100;
 	overlaySettings = 0;
 	defocus = L"0";
@@ -366,9 +364,9 @@ CString CIGUIDEDoc::getTraceInfo() {
 vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
-	helpArray[0].Format(L"AOSACA hotkeys\n===============================\nKEY:\t\tACTION:\n\n<RETURN>\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<NUM-0>\t\tReset Defocus");
+	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
 	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target");
-	helpArray[2].Format(L"ICANDI hotkeys\n===============================\nKEY:\tACTION:\n\n<R>\tReset Reference Frame\n<SPACE>\tSave Video");
+	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZero Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
 	

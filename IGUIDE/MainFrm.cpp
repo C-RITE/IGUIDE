@@ -54,7 +54,7 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	m_DlgProperties.fillProperties();
 
 	// now that all properties are in place (i.e. IP-address, etc.)
-	// we can try to establish the desired remote control options
+	// we can try to establish the desired remote control capability
 	
 	RemoteControl.init(&m_DlgProperties);
 	RemoteControl.connect();
@@ -136,18 +136,20 @@ BOOL CMainFrame::CreateDockingWindows()
 
 void CMainFrame::OnEditProperties()
 {
-	if (m_DlgProperties.IsVisible())
+	// TODO: Add your command handler code here
+	if (m_DlgProperties.IsVisible()) {
 		m_DlgProperties.ShowPane(FALSE, FALSE, TRUE);
+		SetFocus();
+	}
 	else
 		m_DlgProperties.ShowPane(TRUE, FALSE, TRUE);
-	// TODO: Add your command handler code here
 }
 
 
 void CMainFrame::OnViewStatusBar()
 {
-	m_wndStatusBar.ShowWindow(TRUE);
 	// TODO: Add your command handler code here
+	m_wndStatusBar.ShowWindow(TRUE);
 }
 
 void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
@@ -255,10 +257,15 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
+	CWnd* active = GetActiveView();
+	CWnd* focus = GetFocus();
+	
 	// route keyboard input to remote control
-	RemoteControl.PreTranslateMessage(pMsg);
+	// but only if the view has focus (not property pane, etc.)
+	if (active == focus)
+		RemoteControl.PreTranslateMessage(pMsg);
 
-	// then return to sender
+	// pass it on
 	return CFrameWndEx::PreTranslateMessage(pMsg);
 
 }

@@ -24,11 +24,11 @@ Remote::~Remote()
 // Initialize remote with values from Properties class
 void Remote::init(Properties* p)
 {
+	// TODO: Add your implementation code here.
 	mode = p->getRemoteCapability();
 	AOSACA_IP = p->getAOSACA_IP();
 	ICANDI_IP = p->getICANDI_IP();
 
-	// TODO: Add your implementation code here.
 }
 
 
@@ -65,9 +65,9 @@ bool Remote::Connect2AOSACA()
 	if (m_pSock_AOSACA == NULL) {
 		m_pSock_AOSACA = new CSockClient();
 		CSockClient::SocketInit();
-		m_pSock_AOSACA->Create();
-		m_pSock_AOSACA->pending = true;
+		m_pSock_AOSACA->Create(); 
 		m_pSock_AOSACA->setParent(this);
+		m_pSock_AOSACA->pending = true;
 	}
 
 	if (!m_pSock_AOSACA->Connect(AOSACA_IP, 1500)) {
@@ -90,8 +90,8 @@ bool Remote::Connect2ICANDI()
 		m_pSock_ICANDI = new CSockClient();
 		CSockClient::SocketInit();
 		m_pSock_ICANDI->Create();
-		m_pSock_ICANDI->pending = true;
 		m_pSock_ICANDI->setParent(this);
+		m_pSock_ICANDI->pending = true;
 	}
 
 	if (!m_pSock_ICANDI->Connect(ICANDI_IP, 1400)) {

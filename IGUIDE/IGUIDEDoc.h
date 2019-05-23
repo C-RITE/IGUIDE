@@ -21,8 +21,6 @@ protected: // create from serialization only
 public:
 	vector<Screen>			m_Screens;							// all connected monitors
 	Screen*					m_selectedScreen;					// target monitor
-	int						m_ScreenPixelPitch;					// pixel pitch of target monitor
-	int						m_ScreenDistance;					// distance between eye and screen
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Calibration*			m_pDlgCalibration;					// calibration class

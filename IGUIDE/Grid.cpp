@@ -198,6 +198,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
 			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(it._Ptr->_Myval.rastersize / 2 / dpp)
 		};
+
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
@@ -205,6 +206,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 	}
 
 	if (patchlist.size() > 0) {
+
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
@@ -214,10 +216,16 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(patchlist.back().rastersize / 2 / dpp)
 		};
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
+		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 2);
 		pRenderTarget->PopLayer();
 
-		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
-		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, (float)patchlist.back().rastersize);
+		CD2DEllipse center(&rect1);
+		center.radiusX = center.radiusY = .5;
+		
+		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .5);
+
+		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, rect1);	
+		
 		
 		int number = 1;
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
@@ -247,29 +255,49 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 
 
-void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize)
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CString zPos = pDoc->getCurrentDefocus();
 
-	CString traceText;
-	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CString xCoords, yCoords;
+	CD2DSizeF sizeTarget(rect.Width(), 10);
 	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
 		sizeDpi.height /7);							// font size
 
-	traceText.Format(L"%.1f,%.1f,%s", xPos, yPos, zPos);
+	xCoords.Format(L"%.1f", xPos);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-		traceText,									// text to be drawn
+		xCoords,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
-	pRenderTarget->DrawTextLayout(
-		CD2DPointF( (xPos * 1 / (float)dpp + center.x ) - (rastersize / 2 * 1 / (float)dpp),
-					(yPos * - 1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp + 24) ),
-		&textLayout,
-		m_pWhiteBrush);
+	CSize marginX;
+	CSize marginY;
+
+	if (xPos >= 10.0f)
+		marginX = { 28, 0 };
+	else if (xPos >= 0.f)
+		marginX = { 20, 0 };
+	else if (xPos <= -10.f)
+		marginX = { 35, 0 };
+	else if (xPos < 0.f)
+		marginX = { 28, 0 };
+
+	if (yPos > 0)
+		marginY = { 25, 4 };
+	else
+		marginY = { 33, 4 };
+	
+	pRenderTarget->DrawTextLayout(rect.BottomRight() - marginX, &textLayout, m_pWhiteBrush);
+
+	yCoords.Format(L"%.1f", yPos);
+	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
+		yCoords,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(rect.TopLeft() - marginY, &textLayout2, m_pWhiteBrush);
 
 }
 

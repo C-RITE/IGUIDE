@@ -12,16 +12,7 @@
 
 Properties::Properties()
 {
-	m_pRasterSize = new _variant_t;
-	m_pFixationTarget = new _variant_t;
-	m_pScreen = new _variant_t;
-	m_pPixelPitch = new _variant_t;
-	m_pDistance = new _variant_t;
-	m_pAOSACA_IP = new _variant_t;
-	m_pICANDI_IP = new _variant_t;
-	m_pFlipVertical = new _variant_t;
-	m_pRemote = new _variant_t;
-	
+		
 	// override default font for something bigger
 	m_fntPropList.CreateFont(14, 0, 0, 0, FW_NORMAL,
 		FALSE,
@@ -40,16 +31,6 @@ Properties::Properties()
 Properties::~Properties()
 {
 
-	delete m_pFixationTarget;
-	delete m_pRasterSize;
-	delete m_pScreen;
-	delete m_pPixelPitch;
-	delete m_pDistance;
-	delete m_pAOSACA_IP;
-	delete m_pICANDI_IP;
-	delete m_pFlipVertical;
-	delete m_pRemote;
-
 }
 
 
@@ -64,61 +45,62 @@ END_MESSAGE_MAP()
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
 	_variant_t vt(prop->GetValue());
 
 	CString propName = prop->GetName();
 
-		if (propName == L"Size") {
-			if (prop->GetParent() == Raster)
-				pDoc->raster.size = vt;
-			if (prop->GetParent() == TargetView)
-				pDoc->m_FixationTargetSize = vt;
-		}
-		if (propName == L"Color") {
-			COLORREF ref = vt;
-			pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
-		}
-		if (propName == L"File") {
-			CString ftfile = vt.bstrVal;
-			pDoc->m_FixationTarget = ftfile;
-		}
-		if (propName == L"Video Folder") {
-			CString folder = vt.bstrVal;
-			pDoc->m_OutputDir = folder;
-		}
-		if (propName == L"Screen") {
-			CString ref = vt.bstrVal;
-			int index = ref.ReverseFind(_T(' '));
-			ref.Truncate(index);
-			for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
-				if (it->name == ref) {
-					pDoc->m_selectedScreen = it._Ptr;
-					CIGUIDEView* pView = CIGUIDEView::GetView();
-					pView->SendMessage(SCREEN_SELECTED);
-				}
+	if (propName == "RasterSize") {
+		pDoc->raster.size = vt;
+	}
+	if (propName == L"Size") {
+		pDoc->m_FixationTargetSize = vt;
+	}
+	if (propName == L"Color") {
+		COLORREF ref = vt;
+		pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
+	}
+	if (propName == L"File") {
+		CString ftfile = vt.bstrVal;
+		pDoc->m_FixationTarget = ftfile;
+	}
+	if (propName == L"Video Folder") {
+		CString folder = vt.bstrVal;
+		pDoc->m_OutputDir = folder;
+	}
+	if (propName == L"Screen") {
+		CString ref = vt.bstrVal;
+		int index = ref.ReverseFind(_T(' '));
+		ref.Truncate(index);
+		for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
+			if (it->name == ref) {
+				pDoc->m_selectedScreen = it._Ptr;
+				CIGUIDEView* pView = CIGUIDEView::GetView();
+				pView->SendMessage(SCREEN_SELECTED);
 			}
 		}
-		if (propName == L"AOSACA IP") {
-			CString aoip = vt.bstrVal;
-			pDoc->m_AOSACA_IP = aoip;
-		}
+	}
+	if (propName == L"AOSACA IP") {
+		CString aoip = vt.bstrVal;
+		pDoc->m_AOSACA_IP = aoip;
+	}
 
-		if (propName == L"ICANDI IP") {
-			CString icip = vt.bstrVal;
-			pDoc->m_ICANDI_IP = icip;
-		}
+	if (propName == L"ICANDI IP") {
+		CString icip = vt.bstrVal;
+		pDoc->m_ICANDI_IP = icip;
+	}
 
-		if (propName == L"Flip Vertical") {
-			pDoc->m_FlipVertical = vt;
-		}
+	if (propName == L"Flip Vertical") {
+		pDoc->m_FlipVertical = vt;
+	}
 
-		if (propName == L"Capability") {
-			pDoc->m_RemoteCtrl = vt;
-		}
+	if (propName == L"Capability") {
+		pDoc->m_RemoteCtrl = vt;
+	}
 
-		pDoc->UpdateAllViews(NULL);
+	pDoc->UpdateAllViews(NULL);
 
 	return S_OK;
 
@@ -162,41 +144,38 @@ void Properties::InitPropList()
 
 	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"D:\\", NULL, _T("Choose output directory of captured video files"));
 	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
-	Raster = new CMFCPropertyGridProperty(L"Raster");
-	RasterSize = new CMFCPropertyGridProperty(L"Size", m_pRasterSize, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
+	Patch = new CMFCPropertyGridProperty(L"Patch");
+	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
 	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
 	Color->EnableOtherButton(L"Other..");
 	ICANDI = new CMFCPropertyGridProperty(L"ICANDI");
 	TargetView = new CMFCPropertyGridProperty(L"Target View");
-	PixelDensity = new CMFCPropertyGridProperty(L"Pixel Pitch", m_pPixelPitch, _T("Distance between pixel centers. Check for specifications in monitor manual!"), NULL, NULL, NULL);
-	ScreenDistance = new CMFCPropertyGridProperty(L"Distance", m_pDistance, _T("Distance between subject's pupil and screen surface in mm"), NULL, NULL, NULL);
-	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", m_pScreen, _T("Pick the display for fixation target presentation. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
-	FixationTargetSize = new CMFCPropertyGridProperty(L"Size", m_pFixationTarget , _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
+	PhysParam = new CMFCPropertyGridProperty(L"Physical Parameters");
+	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", ScreenValue, _T("Pick the display for fixation target presentation. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
+	FixationTargetSize = new CMFCPropertyGridProperty(L"Scale", FixationTargetValue, _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
 	RigProperties = new CMFCPropertyGridProperty(L"Rig Properties");
 	RemoteControl = new CMFCPropertyGridProperty(L"Remote Control");
-	RemoteCapability = new CMFCPropertyGridProperty(L"Capability", m_pRemote, _T("Enable or Disable Remote Control Function"), NULL, NULL, NULL);
-	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", m_pAOSACA_IP, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
-	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", m_pICANDI_IP, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
-	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", m_pFlipVertical, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
+	RemoteCapability = new CMFCPropertyGridProperty(L"Capability", RemoteValue, _T("Enable or Disable Remote Control Function"), NULL, NULL, NULL);
+	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", AOSACA_IPValue, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
+	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", ICANDI_IPValue, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
+	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", FlipVerticalValue, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
 
 	RECT Rect;
 	GetClientRect(&Rect);
 	MapWindowPoints(this, &Rect);
-	m_wndPropList.AddProperty(Raster);
-	Raster->AddSubItem(RasterSize);
-	Raster->AddSubItem(Color);
+	m_wndPropList.AddProperty(PhysParam);
+	PhysParam->AddSubItem(RasterSize);
+	m_wndPropList.AddProperty(Patch);
+	Patch->AddSubItem(Color);
 	m_wndPropList.AddProperty(ICANDI);
 	ICANDI->AddSubItem(VideoFolder);
 	m_wndPropList.AddProperty(TargetView);
 	TargetView->AddSubItem(FixationTargetScreen);
-	TargetView->AddSubItem(ScreenDistance);
-	TargetView->AddSubItem(PixelDensity);
 	TargetView->AddSubItem(FixationFile);
 	TargetView->AddSubItem(FixationTargetSize);
 	m_wndPropList.AddProperty(RigProperties);
 	RigProperties->AddSubItem(FlipVertical);
-
 	m_wndPropList.AddProperty(RemoteControl);
 	RemoteControl->AddSubItem(RemoteCapability);
 	RemoteControl->AddSubItem(AOSACA_IP);
@@ -235,8 +214,6 @@ void Properties::fillProperties() {
 	_variant_t fts(pDoc->m_FixationTargetSize);
 	_variant_t ft(pDoc->m_FixationTarget);
 	_variant_t od(pDoc->m_OutputDir);
-	_variant_t dens(pDoc->m_ScreenPixelPitch);
-	_variant_t dist(pDoc->m_ScreenDistance);
 	_variant_t aoip(pDoc->m_AOSACA_IP);
 	_variant_t icip(pDoc->m_ICANDI_IP);
 	_variant_t fv(pDoc->m_FlipVertical);
@@ -246,9 +223,6 @@ void Properties::fillProperties() {
 	RasterSize->SetValue(rs);
 	FixationTargetSize->SetValue(fts);
 	FixationFile->SetValue(ft);
-
-	PixelDensity->SetValue(dens);
-	ScreenDistance->SetValue(dist);
 	AOSACA_IP->SetValue(aoip);
 	ICANDI_IP->SetValue(icip);
 	FlipVertical->SetValue(fv);

@@ -1,5 +1,5 @@
 #pragma once
-// Properties dialog
+// Custom Property Pane implementation
 
 class CPropertiesToolBar : public CMFCToolBar
 {
@@ -68,12 +68,11 @@ public:
 	void AdjustLayout();
 	void fillProperties();
 
-	CMFCPropertyGridProperty*		Raster;
+	CMFCPropertyGridProperty*		Patch;
 	CMFCPropertyGridProperty*		RasterSize;
+	CMFCPropertyGridProperty*		PhysParam;
 	CMFCPropertyGridProperty*		FixationTargetSize;
 	CMFCPropertyGridProperty*		FixationTargetScreen;
-	CMFCPropertyGridProperty*		ScreenDistance;
-	CMFCPropertyGridProperty*		PixelDensity;
 	CMFCPropertyGridColorProperty*	Color;
 	CMFCPropertyGridProperty*		ICANDI;
 	CMFCPropertyGridProperty*		TargetView;
@@ -87,15 +86,13 @@ public:
 	CMFCPropertyGridProperty*		FlipVertical;
 
 private:
-	_variant_t * m_pFixationTarget;
-	_variant_t * m_pRasterSize;
-	_variant_t * m_pScreen;
-	_variant_t * m_pPixelPitch;
-	_variant_t * m_pDistance;
-	_variant_t * m_pAOSACA_IP;
-	_variant_t * m_pICANDI_IP;
-	_variant_t * m_pRemote;
-	_variant_t * m_pFlipVertical;
+	_variant_t FixationTargetValue;
+	_variant_t RasterSizeValue;
+	_variant_t ScreenValue;
+	_variant_t AOSACA_IPValue;
+	_variant_t ICANDI_IPValue;
+	_variant_t RemoteValue;
+	_variant_t FlipVerticalValue;
 
 protected:
 	CFont m_fntPropList;

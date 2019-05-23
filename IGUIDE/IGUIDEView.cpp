@@ -335,7 +335,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				&textLayout,								// text layout object
 				&CD2DSolidColorBrush						// brush used for text
 				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleVioletRed)));
+					D2D1::ColorF(D2D1::ColorF::White)));
 
 		}
 
@@ -452,18 +452,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case VK_SPACE:
 				pDoc->m_pGrid->patchlist.lockIn();
 				break;
-			//case 0x6B:
-			//	//msg = '+';
-			//	pDoc->m_pGrid->patchlist.back().defocus += .25f;
-			//	break;
-			//case 0x6D:
-			//	//msg = '-';
-			//	pDoc->m_pGrid->patchlist.back().defocus -= .25f;
-			//	break;
-			//case VK_NUMPAD0:
-			//	//msg = '0';
-			//	pDoc->m_pGrid->patchlist.back().defocus = 0.0f;
-			//	break;
+
 			}
 
 		}
