@@ -24,7 +24,7 @@ class Properties : public CDockablePane
 
 		virtual void AdjustLayout()
 		{
-			m_nLeftColumnWidth = 90;
+			m_nLeftColumnWidth = 100;
 			CMFCPropertyGridCtrl::AdjustLayout();
 
 		}
@@ -78,7 +78,8 @@ public:
 	CMFCPropertyGridProperty*		TargetView;
 	CMFCPropertyGridFileProperty*	VideoFolder;
 	CMFCPropertyGridFileProperty*	FixationFile;
-	CMFCPropertyGridProperty*		RigProperties;
+	CMFCPropertyGridProperty*		SubjectCalibration;
+	CMFCPropertyGridProperty*		InputController;
 	CMFCPropertyGridProperty*		RemoteControl;
 	CMFCPropertyGridProperty*		RemoteCapability;
 	CMFCPropertyGridProperty*		AOSACA_IP;
@@ -89,6 +90,7 @@ private:
 	_variant_t FixationTargetValue;
 	_variant_t RasterSizeValue;
 	_variant_t ScreenValue;
+	_variant_t InputControl;
 	_variant_t AOSACA_IPValue;
 	_variant_t ICANDI_IPValue;
 	_variant_t RemoteValue;

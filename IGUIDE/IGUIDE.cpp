@@ -11,7 +11,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 // CIGUIDEApp
 
 BEGIN_MESSAGE_MAP(CIGUIDEApp, CWinAppEx)
@@ -37,12 +36,11 @@ CIGUIDEApp::CIGUIDEApp()
 
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
+
 }
 
 // The one and only CIGUIDEApp object
-
 CIGUIDEApp theApp;
-
 
 // CIGUIDEApp initialization
 
@@ -101,14 +99,14 @@ BOOL CIGUIDEApp::InitInstance()
 	//  In an SDI app, this should occur after ProcessShellCommand
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
-	
+
 	return TRUE;
 }
 
 int CIGUIDEApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
-	return CWinApp::ExitInstance();
+	return CWinAppEx::ExitInstance();
 }
 
 // CIGUIDEApp message handlers

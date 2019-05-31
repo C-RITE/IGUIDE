@@ -20,17 +20,19 @@ protected: // create from serialization only
 
 public:
 	vector<Screen>			m_Screens;							// all connected monitors
+	Controller				m_Controller;						// controller used for subject calibration
 	Screen*					m_selectedScreen;					// target monitor
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
+	Raster					raster;
 	Calibration*			m_pDlgCalibration;					// calibration class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
-	int						m_FixationTargetSize;				// fixation target size in percent
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// AOSACA IP Address
+	CString					m_InputController;					// for subject calibration procedure
 	int						m_FlipVertical;						// flip target screen
-	Raster					raster;
+	int						m_FixationTargetSize;				// fixation target size in percent
 	CPoint*					mousePos;							// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 
@@ -40,19 +42,20 @@ private:
 
 // Operations
 public:
-	static CIGUIDEDoc * GetDoc();
+	static CIGUIDEDoc *		GetDoc();
 	bool CheckFOV();
-	float CalcEdgeLength(Edge k);
-	CD2DPointF compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
-	void ComputeDisplacementAngles();
-	double ComputeDisplacementAngle(Edge k);
-	double ComputeOrientationAngle(Edge k);
-	bool CheckCalibrationValidity();
-	bool getScreens();
-	CString getCurrentDefocus() { return defocus; };
-	void setDefocus(CString def) { defocus = def; };
-	CString getTraceInfo();					// for debug purposes only
-	vector<CString> getQuickHelp();			// show remote control hotkeys
+	float					CalcEdgeLength(Edge k);
+	CD2DPointF				compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
+	void					ComputeDisplacementAngles();
+	double					ComputeDisplacementAngle(Edge k);
+	double					ComputeOrientationAngle(Edge k);
+	bool					CheckCalibrationValidity();
+	
+	bool					getScreens();
+	CString					getCurrentDefocus() { return defocus; };
+	void					setDefocus(CString def) { defocus = def; };
+	CString					getTraceInfo();								// for debug purposes only
+	vector<CString>			getQuickHelp();								// show remote control hotkeys
 
 	// Overrides
 public:

@@ -103,12 +103,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <AdditionalDependencies>version.lib;xinput9_1_0.lib;Ntdll.lib</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;Ntdll.lib;DirectXTK.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Midl>
@@ -218,7 +218,7 @@
     <ClInclude Include="..\NetCom\SockListener.h" />
     <ClInclude Include="..\NetCom\WinSock2Async.h" />
     <ClInclude Include="Calibration.h" />
-    <ClInclude Include="CXBOXController.h" />
+    <ClInclude Include="Controller.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="Fundus.h" />
     <ClInclude Include="Grid.h" />
@@ -251,10 +251,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Calibration.cpp" />
-    <ClCompile Include="CXBOXController.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Fundus.cpp" />
     <ClCompile Include="Grid.cpp" />
@@ -278,6 +275,7 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
+    <None Include="packages.config" />
     <None Include="res\IGUIDE.rc2" />
   </ItemGroup>
   <ItemGroup>
@@ -292,10 +290,17 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties RESOURCE_FILE="IGUIDE.rc" />
     </VisualStudio>
   </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets'))" />
+  </Target>
 </Project>
