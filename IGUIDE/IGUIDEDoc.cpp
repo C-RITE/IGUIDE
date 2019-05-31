@@ -65,6 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	overlaySettings = 0;
 	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
+	m_InputController = L"Mouse";
 	getScreens();
 
 }
@@ -87,6 +88,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pFundus;
 	delete mousePos;
 	delete m_pDlgCalibration;
+
 
 }
 
@@ -160,6 +162,8 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
 
+	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"InputController", L"Mouse");
+
 	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 
 	UINT nl;
@@ -202,6 +206,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
+	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
@@ -212,6 +217,7 @@ void CIGUIDEDoc::OnCloseDocument()
 
 	D2D1_COLOR_F rcol = raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
+
 	CDocument::OnCloseDocument();
 
 }

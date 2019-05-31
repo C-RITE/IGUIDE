@@ -66,9 +66,6 @@
     <ClInclude Include="Patches.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CXBOXController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Monitors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -82,6 +79,9 @@
       <Filter>NetCom</Filter>
     </ClInclude>
     <ClInclude Include="Remote.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,9 +125,6 @@
     <ClCompile Include="Patches.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CXBOXController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Monitors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -143,6 +140,9 @@
     <ClCompile Include="Remote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\IGUIDE.rc2">
@@ -150,6 +150,7 @@
     </None>
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IGUIDE.rc">

@@ -7,15 +7,10 @@
 #include "IGUIDEView.h"
 #include "Target.h"
 #include "MainFrm.h"
+#include "GamePad.h"
 
 using namespace D2D1;
 // Target dialog
-
-XboxControlState Target::xbox_state;
-bool Target::m_bPushed = false;
-bool Target::show_cross = false;
-bool Target::m_bFireDown = false;
-bool Target::m_bFireUp = true;
 
 IMPLEMENT_DYNAMIC(Target, CDialogEx);
 CCriticalSection m_CritSection;
@@ -28,25 +23,24 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	m_fired = 0;
-	m_bRunning = false;
+
 	fieldsize = 0;
 	pDoc = NULL;
 	m_bVisible = true;
-	m_flip = 0;
 
 }
 
 Target::~Target()
 {
+	m_Control.shutdown();
 	delete m_POI;
+	
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &Target::OnDraw2d)
 	ON_WM_SHOWWINDOW()
-	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 void Target::calcFieldSize() {
@@ -68,7 +62,6 @@ void Target::setCross() {
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
 	
-
 }
 
 void Target::getFixationTarget() {
@@ -123,16 +116,6 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 		(pDoc->raster.mid.y + (float)y + 10))
 	};
 
-	/*ATLTRACE(_T("alpha is %f\n"), alpha);
-	ATLTRACE(_T("beta is %f\n"), beta);
-	ATLTRACE(_T("gamma is %f\n"), gamma);
-	ATLTRACE(_T("x \t\t%f\n"), x);
-	ATLTRACE(_T("y \t\t%f\n"), y);
-	ATLTRACE(_T("c \t\t%f\n"), c);
-	ATLTRACE(_T("center \tx=%f, y=%f\n"), pDoc->m_pGrid->center.x, pDoc->m_pGrid->center.y);
-	ATLTRACE(_T("offset \tx=%f, y=%f\n"), centerOffset_x, centerOffset_y);
-	ATLTRACE(_T("POI \t %f\n\n"), *m_POI);
-	*/
 }
 
 void Target::DoDataExchange(CDataExchange* pDX)
@@ -155,6 +138,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 UINT ThreadDraw(PVOID pParam) {
 
 	Target* pTarget = (Target*)pParam;
+	XboxControlState state = pTarget->m_Control.getState();
 
 	CHwndRenderTarget* pRenderTarget = NULL;
 	pRenderTarget = pTarget->GetRenderTarget();
@@ -213,72 +197,53 @@ UINT ThreadDraw(PVOID pParam) {
 					NULL);
 			}
 
-
 		}
+
 	}
 
-	// catch pushing A button
-
-	if (pTarget->m_bFireUp && pTarget->m_bFireDown) {
+	if (state.fired > 1) {
 		pTarget->show_cross = true;
-		pTarget->m_bFireDown = false;
 
-		switch (pTarget->m_fired % 5) {
+		switch (state.fired % 5) {
 
 		case 0:
 			pTarget->pDoc->raster.corner.size() == 4 ? pTarget->OnLButtonDown(0, CPoint(0, 0)) : 0;
-			pTarget->m_fired++;
 			break;
 		case 1:
 			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x +
-				pTarget->xbox_state.LX,
-				(int)pTarget->xbox_cross.y +
-				pTarget->xbox_state.LY));
+				(int)pTarget->xbox_cross.x + state.LX,
+				(int)pTarget->xbox_cross.y + state.LY));
 			pTarget->xbox_cross.x += pTarget->fieldsize;
-			pTarget->m_fired++;
 			break;
 		case 2:
 			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x +
-				pTarget->xbox_state.LX,
-				(int)pTarget->xbox_cross.y +
-				pTarget->xbox_state.LY));
+				(int)pTarget->xbox_cross.x + state.LX,
+				(int)pTarget->xbox_cross.y + state.LY));
 			if (pTarget->pDoc->m_FlipVertical) {
 				pTarget->xbox_cross.y += pTarget->fieldsize;
 			}
 			else {
 				pTarget->xbox_cross.y -= pTarget->fieldsize;
 			}
-
-			pTarget->m_fired++;
 			break;
 		case 3:
 			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x +
-				pTarget->xbox_state.LX,
-				(int)pTarget->xbox_cross.y +
-				pTarget->xbox_state.LY));
+				(int)pTarget->xbox_cross.x + state.LX,
+				(int)pTarget->xbox_cross.y + state.LY));
 			pTarget->xbox_cross.x -= pTarget->fieldsize;
-			pTarget->m_fired++;
 			break;
 		case 4:
 			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x +
-				pTarget->xbox_state.LX,
-				(int)pTarget->xbox_cross.y +
-				pTarget->xbox_state.LY));
+				(int)pTarget->xbox_cross.x + state.LX,
+				(int)pTarget->xbox_cross.y + state.LY));
 			pTarget->show_cross = false;
 			pTarget->finishCalibration();
 			pTarget->setCross();
-			pTarget->m_fired++;
-			
-		break;
+			break;
 
 		}
 
 	}
-
 
 	// draw cross while moving around with pov hat
 
@@ -289,12 +254,12 @@ UINT ThreadDraw(PVOID pParam) {
 		CD2DPointF c(pTarget->xbox_cross.x + 7, pTarget->xbox_cross.y - 7);
 		CD2DPointF d(pTarget->xbox_cross.x - 7, pTarget->xbox_cross.y + 7);
 
-		pRenderTarget->DrawLine(CD2DPointF(a.x + pTarget->xbox_state.LX, a.y + pTarget->xbox_state.LY),
-			CD2DPointF(b.x + pTarget->xbox_state.LX, b.y + pTarget->xbox_state.LY),
+		pRenderTarget->DrawLine(CD2DPointF(a.x + state.LX, a.y + state.LY),
+			CD2DPointF(b.x + state.LX, b.y + state.LY),
 			pTarget->m_pBrushWhite, 1, NULL);
 
-		pRenderTarget->DrawLine(CD2DPointF(c.x + pTarget->xbox_state.LX, c.y + pTarget->xbox_state.LY),
-			CD2DPointF(d.x + pTarget->xbox_state.LX, d.y + pTarget->xbox_state.LY),
+		pRenderTarget->DrawLine(CD2DPointF(c.x + state.LX, c.y + state.LY),
+			CD2DPointF(d.x + state.LX, d.y + state.LY),
 			pTarget->m_pBrushWhite, 1, NULL);
 	}
 
@@ -342,130 +307,29 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	RedrawWindow();
 	singleLock.Unlock();
 
-
-	// call default
-	// CDialog::OnLButtonUp(nFlags, point);
 }
 
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-
 	// TODO: Add your message handler code here
-
-	if (!m_bRunning) {
-		
-		m_pThread = AfxBeginThread(InputControllerThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
-		m_pThread->m_bAutoDelete = FALSE;
-		m_bRunning = true;
-		m_pThread->ResumeThread();
-
-	}
-
-}
-
-UINT Target::InputControllerThread(LPVOID pParam)
-{
-	CXBOXController* Player1 = new CXBOXController(1);
-	Target* pTarget = (Target*)pParam;
-	int flipSign = 1;
-	
-	while (pTarget->m_bRunning){
-		if (pTarget->m_flip == 1) {
-			flipSign = -1;
-		}
-		else {
-			flipSign = 1;
-		}
-		if (Player1->GetState().Gamepad.wButtons == 0) {
-
-			m_bPushed = false;
-			m_bFireUp = true;
-
-		}
-
-		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A)
-
-		{
-
-			m_bFireUp = false;
-			m_bFireDown = true;
-
-		}
-
-		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
-
-			if (!m_bPushed) {
-				xbox_state.LY -= flipSign*2;
-				m_bPushed = true;
-				Sleep(100);
-			}
-
-			else
-				xbox_state.LY -= flipSign*2;
-
-		}
-
-		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
-			if (!m_bPushed) {
-				xbox_state.LY += flipSign*2;
-				m_bPushed = true;
-				Sleep(100);
-			}
-
-			else
-				xbox_state.LY += flipSign*2;
-
-		}
-
-		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
-			if (!m_bPushed) {
-				xbox_state.LX -= 2;
-				m_bPushed = true;
-				Sleep(100);
-			}
-
-			else
-				xbox_state.LX -= 2;
-		}
-
-		if (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
-			if (!m_bPushed) {
-				xbox_state.LX += 2;
-				m_bPushed = true;
-				Sleep(100);
-			}
-
-			else
-				xbox_state.LX += 2;
-		}
-
-		Sleep(50);
-		pTarget->Invalidate();
-
-	}
-	
-	delete Player1;
-
-	return 0;
+	if (bShow)
+		m_Control.init(this);
 
 }
 
 
-
-void Target::OnDestroy()
+BOOL Target::PreTranslateMessage(MSG* pMsg)
 {
-	CDialog::OnDestroy();
 
-	// TODO: Add your message handler code here
+	// TODO: Add your specialized code here and/or call the base class
 
-	if (m_bRunning) {
-		m_bRunning = false;
-		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
-		delete m_pThread;
+	switch (pMsg->message)
+	{
+	case WM_LBUTTONDOWN:
+		if (m_bMouseEnable == false)
+			return true;
 	}
 
-	//WINDOWPLACEMENT wp;
-	//GetWindowPlacement(&wp);
-	//AfxGetApp()->WriteProfileBinary(L"Settings", L"WP_Target", (LPBYTE)&wp, sizeof(wp));
+	return __super::PreTranslateMessage(pMsg);
 
 }

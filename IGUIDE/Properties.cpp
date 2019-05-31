@@ -82,6 +82,12 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 			}
 		}
 	}
+	if (propName == L"Input Controller") {
+		CString inpcon = vt.bstrVal;
+		pDoc->m_InputController = inpcon;
+		pDoc->m_Controller.reset();
+	}
+
 	if (propName == L"AOSACA IP") {
 		CString aoip = vt.bstrVal;
 		pDoc->m_AOSACA_IP = aoip;
@@ -154,12 +160,13 @@ void Properties::InitPropList()
 	PhysParam = new CMFCPropertyGridProperty(L"Physical Parameters");
 	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", ScreenValue, _T("Pick the display for fixation target presentation. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
 	FixationTargetSize = new CMFCPropertyGridProperty(L"Scale", FixationTargetValue, _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
-	RigProperties = new CMFCPropertyGridProperty(L"Rig Properties");
+	SubjectCalibration = new CMFCPropertyGridProperty(L"Subject Calibration");
 	RemoteControl = new CMFCPropertyGridProperty(L"Remote Control");
 	RemoteCapability = new CMFCPropertyGridProperty(L"Capability", RemoteValue, _T("Enable or Disable Remote Control Function"), NULL, NULL, NULL);
 	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", AOSACA_IPValue, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
 	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", ICANDI_IPValue, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
 	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", FlipVerticalValue, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
+	InputController = new CMFCPropertyGridProperty(L"Input Controller", InputControl, _T("Select Mouse or XBox-Controller for Calibration procedure"), NULL, NULL, NULL);
 
 	RECT Rect;
 	GetClientRect(&Rect);
@@ -174,8 +181,9 @@ void Properties::InitPropList()
 	TargetView->AddSubItem(FixationTargetScreen);
 	TargetView->AddSubItem(FixationFile);
 	TargetView->AddSubItem(FixationTargetSize);
-	m_wndPropList.AddProperty(RigProperties);
-	RigProperties->AddSubItem(FlipVertical);
+	TargetView->AddSubItem(FlipVertical);
+	m_wndPropList.AddProperty(SubjectCalibration);
+	SubjectCalibration->AddSubItem(InputController);
 	m_wndPropList.AddProperty(RemoteControl);
 	RemoteControl->AddSubItem(RemoteCapability);
 	RemoteControl->AddSubItem(AOSACA_IP);
@@ -218,6 +226,7 @@ void Properties::fillProperties() {
 	_variant_t icip(pDoc->m_ICANDI_IP);
 	_variant_t fv(pDoc->m_FlipVertical);
 	_variant_t rem(pDoc->m_RemoteCtrl);
+	_variant_t inpcon(pDoc->m_InputController);
 	
 	VideoFolder->SetValue(od);
 	RasterSize->SetValue(rs);
@@ -226,6 +235,7 @@ void Properties::fillProperties() {
 	AOSACA_IP->SetValue(aoip);
 	ICANDI_IP->SetValue(icip);
 	FlipVertical->SetValue(fv);
+	InputController->SetValue(inpcon);
 	RemoteCapability->SetValue(rem);
 
 	COLORREF col = RGB(
@@ -251,7 +261,7 @@ void Properties::fillProperties() {
 		}
 	}
 	
-	FixationTargetScreen->RemoveAllOptions(); // need for removal if fillProperties() is called more than once
+	FixationTargetScreen->RemoveAllOptions();	// need for removal if fillProperties() is called more than once
 
 	for (auto& screen : pDoc->m_Screens) {
 		// never parse primary monitor, because it is dedicated to operator view
@@ -261,12 +271,15 @@ void Properties::fillProperties() {
 		FixationTargetScreen->AddOption(option);
 	}
 	
+	RemoteCapability->RemoveAllOptions();	// need for removal if fillProperties() is called more than once
 	CString capability[4]{ L"NONE", L"AOSACA", L"ICANDI", L"FULL"};
 	for (int i = 0; i < 4; i++)
 		RemoteCapability->AddOption(capability[i]);
 
-	CRect rc;
-	GetWindowRect(&rc);
+	InputController->RemoveAllOptions(); // same as before
+	CString control[2]{ L"Mouse", L"Xbox-Controller" };
+	for (int i = 0; i < 2; i++)
+		InputController->AddOption(control[i]);
 
 }
 

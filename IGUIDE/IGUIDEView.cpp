@@ -247,7 +247,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
-	m_pDlgTarget->m_flip = pDoc->m_FlipVertical;
 	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
 	m_pDlgTarget->getFixationTarget();	
 

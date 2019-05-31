@@ -33,11 +33,11 @@ Grid::~Grid() {
 
 	delete m_pDarkRedBrush;
 	delete m_pRedBrush;
-	delete m_pBlueBrush;
 	delete m_pWhiteBrush;
-	delete m_pPatchBrush;
+	delete m_pBlueBrush;
 	delete m_pDarkGreenBrush;
 	delete m_pMagentaBrush;;
+	delete m_pPatchBrush;
 	delete pLayer;
 }
 
