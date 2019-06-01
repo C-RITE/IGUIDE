@@ -4,6 +4,8 @@
 
 Controller::Controller()
 {
+	m_pThread = NULL;
+	m_pGamePad = NULL;
 }
 
 Controller::~Controller()
@@ -17,7 +19,6 @@ void Controller::init(Target* pTarget) {
 	m_pThread->m_bAutoDelete = false;
 	m_bRunning = true;
 	m_pThread->ResumeThread();
-
 
 }
 
@@ -37,7 +38,8 @@ void Controller::reset(){
 void Controller::shutdown() {
 	
 	m_bRunning = false;
-	WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+	if (m_pThread)
+		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
 	delete m_pThread;
 	delete m_pGamePad;
 }

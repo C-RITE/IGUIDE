@@ -159,8 +159,8 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CIGUIDEView::OnInitialUpdate()
 {
-	CView::OnInitialUpdate();
 	
+	CView::OnInitialUpdate();
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 	

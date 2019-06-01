@@ -34,7 +34,6 @@ Target::~Target()
 {
 	m_Control.shutdown();
 	delete m_POI;
-	
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialogEx)
@@ -58,7 +57,7 @@ void Target::calcFieldSize() {
 void Target::setCross() {
 	
 	if (pDoc->m_Screens.size() > 0) {
-		CRect cRect = (CRect)pDoc->m_Screens[1].area;;
+		CRect cRect = (CRect)pDoc->m_selectedScreen->area;
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
 	
