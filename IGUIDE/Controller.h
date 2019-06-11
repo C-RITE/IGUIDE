@@ -1,13 +1,9 @@
 #pragma once
 #include "GamePad.h"
+// wrapper class for Gamepad Controller
 
-class Target;
-class CIGUIDEDoc;
-
-// wrapper class for XboxController
-
-struct XboxControlState {
-	XboxControlState() : LX(0),LY(0),pushed(false),fireDown(false),fireUp(false),fired(0) {};
+struct ControlState {
+	ControlState() : LX(0),LY(0),pushed(false),fireDown(false),fireUp(false),fired(0) {};
 	int LX;					// DPAD x pos
 	int LY;					// DPAD y pos
 	bool pushed;			// for input delay
@@ -18,7 +14,7 @@ struct XboxControlState {
 
 UINT GamePadThread(LPVOID pParam);
 
-class Controller 
+class Controller
 {
 
 public:
@@ -26,15 +22,14 @@ public:
 	~Controller();
 
 	DirectX::GamePad*	m_pGamePad;
-	Target*				m_pTarget;		// where subject calibration takes place
 	CWinThread*			m_pThread;
 
 	void				reset();
-	void				init(Target* pTarget);
 	void				shutdown();
-	XboxControlState	state;								// store controller states
-	XboxControlState	getState() { return this->state; };
+	ControlState		state;								// store controller states
+	ControlState		getState() { return this->state; };
 	int					flipSign;
-	bool				m_bRunning;
+	bool				m_bRunning;							// thread runtime
+	bool				m_bActive;							// gamepad on/off
 };
 

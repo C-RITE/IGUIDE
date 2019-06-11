@@ -54,6 +54,7 @@ protected:
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 };

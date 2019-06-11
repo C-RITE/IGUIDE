@@ -23,7 +23,6 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-
 	fieldsize = 0;
 	pDoc = NULL;
 	m_bVisible = true;
@@ -34,6 +33,7 @@ Target::~Target()
 {
 	m_Control.shutdown();
 	delete m_POI;
+	
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialogEx)
@@ -137,7 +137,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 UINT ThreadDraw(PVOID pParam) {
 
 	Target* pTarget = (Target*)pParam;
-	XboxControlState state = pTarget->m_Control.getState();
+	ControlState state = pTarget->m_Control.getState();
 
 	CHwndRenderTarget* pRenderTarget = NULL;
 	pRenderTarget = pTarget->GetRenderTarget();
@@ -308,15 +308,6 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 
 }
 
-void Target::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	// TODO: Add your message handler code here
-	if (bShow)
-		m_Control.init(this);
-
-}
-
-
 BOOL Target::PreTranslateMessage(MSG* pMsg)
 {
 
@@ -330,5 +321,14 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 	}
 
 	return __super::PreTranslateMessage(pMsg);
+
+}
+
+
+void Target::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialogEx::OnShowWindow(bShow, nStatus);
+
+	// TODO: Add your message handler code here
 
 }

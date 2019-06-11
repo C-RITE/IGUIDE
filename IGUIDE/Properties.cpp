@@ -166,7 +166,7 @@ void Properties::InitPropList()
 	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", AOSACA_IPValue, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
 	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", ICANDI_IPValue, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
 	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", FlipVerticalValue, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
-	InputController = new CMFCPropertyGridProperty(L"Input Controller", InputControl, _T("Select Mouse or XBox-Controller for Calibration procedure"), NULL, NULL, NULL);
+	InputController = new CMFCPropertyGridProperty(L"Input Controller", InputControl, _T("Select Mouse or Gamepad Controller for Subject Calibration procedure"), NULL, NULL, NULL);
 
 	RECT Rect;
 	GetClientRect(&Rect);
@@ -277,7 +277,7 @@ void Properties::fillProperties() {
 		RemoteCapability->AddOption(capability[i]);
 
 	InputController->RemoveAllOptions(); // same as before
-	CString control[2]{ L"Mouse", L"Xbox-Controller" };
+	CString control[2]{ L"Mouse", L"Gamepad" };
 	for (int i = 0; i < 2; i++)
 		InputController->AddOption(control[i]);
 
