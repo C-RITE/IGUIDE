@@ -1,6 +1,5 @@
 #pragma once
 #include "IGUIDEView.h"
-#include "Controller.h"
 
 class Edge;
 class CIGUIDEDoc;
@@ -12,8 +11,6 @@ struct cursorposition {
 	float y;
 };
 
-UINT ThreadDraw(PVOID pParam);
-
 class Target : public CDialogEx
 {
 	DECLARE_DYNAMIC(Target)
@@ -24,7 +21,6 @@ class Target : public CDialogEx
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
-	Controller				m_Control;			// input controller thread subsystem
 	CD2DPointF				xbox_cross;			// controller's current cursor location
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
@@ -41,6 +37,7 @@ public:
 	void getFixationTarget();
 	void calcFieldSize();
 	void setCross();
+	void OnGamePadCalibration();
 	void finishCalibration();
 
 // Dialog Data
@@ -49,12 +46,11 @@ public:
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

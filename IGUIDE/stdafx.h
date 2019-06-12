@@ -10,6 +10,7 @@
 #define NETCOM_ERROR (WM_USER + 102)
 #define NETCOM_CLOSED (WM_USER + 103)
 #define NETCOM_RECEIVED (WM_USER + 104)
+#define GAMEPAD_UPDATE (WM_USER + 105)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers

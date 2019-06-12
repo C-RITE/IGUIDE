@@ -18,6 +18,7 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
+	ON_MESSAGE(GAMEPAD_UPDATE, OnGamePadUpdate)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
@@ -62,6 +63,20 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	return 0L;
 
 }
+
+
+LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
+
+	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
+	if (w == 1)
+		pView->m_pDlgTarget->OnGamePadCalibration(); // we hit a button
+	else 
+		pView->m_pDlgTarget->RedrawWindow();		 // move the cursor
+
+	return 0;
+
+}
+
 
 // CMainFrame diagnostics
 

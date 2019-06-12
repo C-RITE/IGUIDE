@@ -47,6 +47,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
 
 public:
 	afx_msg void OnEditProperties();

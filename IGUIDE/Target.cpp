@@ -7,7 +7,7 @@
 #include "IGUIDEView.h"
 #include "Target.h"
 #include "MainFrm.h"
-#include "GamePad.h"
+
 
 using namespace D2D1;
 // Target dialog
@@ -26,14 +26,14 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	fieldsize = 0;
 	pDoc = NULL;
 	m_bVisible = true;
+	show_cross = false;
 
 }
 
 Target::~Target()
 {
-	m_Control.shutdown();
+
 	delete m_POI;
-	
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialogEx)
@@ -60,6 +60,8 @@ void Target::setCross() {
 		CRect cRect = (CRect)pDoc->m_selectedScreen->area;
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
 	}
+	
+	show_cross = true;
 	
 }
 
@@ -100,7 +102,6 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
 
-
 	a = centerOffset_x;
 	b = centerOffset_y;
 	c = sqrt(pow(a, 2) + pow(b, 2));
@@ -126,40 +127,28 @@ void Target::DoDataExchange(CDataExchange* pDX)
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	CSingleLock singleLock(&m_CritSection);
-	singleLock.Lock();
-	ThreadDraw(this);
-	singleLock.Unlock();
-	return (LRESULT)TRUE;
+	ControlState state = pDoc->m_Controller.state;
 
-}
-
-UINT ThreadDraw(PVOID pParam) {
-
-	Target* pTarget = (Target*)pParam;
-	ControlState state = pTarget->m_Control.getState();
-
-	CHwndRenderTarget* pRenderTarget = NULL;
-	pRenderTarget = pTarget->GetRenderTarget();
+	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 
 	if (!pRenderTarget->IsValid())
 		return -1;
 
 	pRenderTarget->Clear(ColorF(ColorF::Black));
 
-	if (pTarget->m_bVisible) {
+	if (m_bVisible) {
 
 		float scalingFactor;
-		if (pTarget->pDoc)
-			scalingFactor = (float)pTarget->pDoc->m_FixationTargetSize / 100;
+		if (pDoc)
+			scalingFactor = (float)pDoc->m_FixationTargetSize / 100;
 
 		// custom fixation target
-		if (pTarget->m_POI && pTarget->m_pFixationTarget->IsValid()) {
-			CD2DSizeF size = pTarget->m_pFixationTarget->GetSize();
-			CD2DPointF center{ (pTarget->m_POI->left + pTarget->m_POI->right) / 2,
-				(pTarget->m_POI->bottom + pTarget->m_POI->top) / 2,
+		if (m_POI && m_pFixationTarget->IsValid()) {
+			CD2DSizeF size = m_pFixationTarget->GetSize();
+			CD2DPointF center{ (m_POI->left + m_POI->right) / 2,
+				(m_POI->bottom + m_POI->top) / 2,
 			};
-			pRenderTarget->DrawBitmap(pTarget->m_pFixationTarget, CD2DRectF(
+			pRenderTarget->DrawBitmap(m_pFixationTarget, CD2DRectF(
 				center.x - (size.width / 2 * scalingFactor),
 				center.y - (size.height / 2 * scalingFactor),
 				center.x + (size.width / 2 * scalingFactor),
@@ -170,75 +159,31 @@ UINT ThreadDraw(PVOID pParam) {
 		}
 
 		// default fixation target
-		else if (pTarget->m_POI) {
-			pRenderTarget->DrawEllipse(*pTarget->m_POI, pTarget->m_pBrushWhite, 1, NULL);
-			pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->top - 4),
-				CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->bottom + 4),
-				pTarget->m_pBrushWhite);
-			pRenderTarget->DrawLine(CD2DPointF(pTarget->m_POI->left - 4, pTarget->m_POI->bottom + 4),
-				CD2DPointF(pTarget->m_POI->right + 4, pTarget->m_POI->top - 4),
-				pTarget->m_pBrushWhite);
+		else if (m_POI) {
+			pRenderTarget->DrawEllipse(*m_POI, m_pBrushWhite, 1, NULL);
+			pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->top - 4),
+				CD2DPointF(m_POI->right + 4, m_POI->bottom + 4),
+				m_pBrushWhite);
+			pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->bottom + 4),
+				CD2DPointF(m_POI->right + 4, m_POI->top - 4),
+				m_pBrushWhite);
 		}
 
-		else if (pTarget->pDoc) {
+		else if (pDoc) {
 
 			// draw white crosses to user define FOV
-			for (size_t i = 0; i < pTarget->pDoc->raster.corner.size(); i++) {
-				pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y - 7),
-					CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y + 7),
-					pTarget->m_pBrushWhite,
+			for (size_t i = 0; i < pDoc->raster.corner.size(); i++) {
+				pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y - 7),
+					CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y + 7),
+					m_pBrushWhite,
 					1,
 					NULL);
-				pRenderTarget->DrawLine(CD2DPointF(pTarget->pDoc->raster.corner[i].x - 7, pTarget->pDoc->raster.corner[i].y + 7),
-					CD2DPointF(pTarget->pDoc->raster.corner[i].x + 7, pTarget->pDoc->raster.corner[i].y - 7),
-					pTarget->m_pBrushWhite,
+				pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y + 7),
+					CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y - 7),
+					m_pBrushWhite,
 					1,
 					NULL);
 			}
-
-		}
-
-	}
-
-	if (state.fired > 1) {
-		pTarget->show_cross = true;
-
-		switch (state.fired % 5) {
-
-		case 0:
-			pTarget->pDoc->raster.corner.size() == 4 ? pTarget->OnLButtonDown(0, CPoint(0, 0)) : 0;
-			break;
-		case 1:
-			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x + state.LX,
-				(int)pTarget->xbox_cross.y + state.LY));
-			pTarget->xbox_cross.x += pTarget->fieldsize;
-			break;
-		case 2:
-			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x + state.LX,
-				(int)pTarget->xbox_cross.y + state.LY));
-			if (pTarget->pDoc->m_FlipVertical) {
-				pTarget->xbox_cross.y += pTarget->fieldsize;
-			}
-			else {
-				pTarget->xbox_cross.y -= pTarget->fieldsize;
-			}
-			break;
-		case 3:
-			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x + state.LX,
-				(int)pTarget->xbox_cross.y + state.LY));
-			pTarget->xbox_cross.x -= pTarget->fieldsize;
-			break;
-		case 4:
-			pTarget->OnLButtonDown(0, CPoint(
-				(int)pTarget->xbox_cross.x + state.LX,
-				(int)pTarget->xbox_cross.y + state.LY));
-			pTarget->show_cross = false;
-			pTarget->finishCalibration();
-			pTarget->setCross();
-			break;
 
 		}
 
@@ -246,20 +191,20 @@ UINT ThreadDraw(PVOID pParam) {
 
 	// draw cross while moving around with pov hat
 
-	if (pTarget->show_cross) {
+	if (show_cross) {
 		// points outlining the cross
-		CD2DPointF a(pTarget->xbox_cross.x - 7, pTarget->xbox_cross.y - 7);
-		CD2DPointF b(pTarget->xbox_cross.x + 7, pTarget->xbox_cross.y + 7);
-		CD2DPointF c(pTarget->xbox_cross.x + 7, pTarget->xbox_cross.y - 7);
-		CD2DPointF d(pTarget->xbox_cross.x - 7, pTarget->xbox_cross.y + 7);
+		CD2DPointF a(xbox_cross.x - 7, xbox_cross.y - 7);
+		CD2DPointF b(xbox_cross.x + 7, xbox_cross.y + 7);
+		CD2DPointF c(xbox_cross.x + 7, xbox_cross.y - 7);
+		CD2DPointF d(xbox_cross.x - 7, xbox_cross.y + 7);
 
 		pRenderTarget->DrawLine(CD2DPointF(a.x + state.LX, a.y + state.LY),
 			CD2DPointF(b.x + state.LX, b.y + state.LY),
-			pTarget->m_pBrushWhite, 1, NULL);
+			m_pBrushWhite, 1, NULL);
 
 		pRenderTarget->DrawLine(CD2DPointF(c.x + state.LX, c.y + state.LY),
 			CD2DPointF(d.x + state.LX, d.y + state.LY),
-			pTarget->m_pBrushWhite, 1, NULL);
+			m_pBrushWhite, 1, NULL);
 	}
 
 	return 0;
@@ -275,6 +220,57 @@ void Target::finishCalibration() {
 	center = mainWnd.CenterPoint();
 	pView->OnLButtonUp(0, center);
 	pView->SetFocus();
+
+}
+
+void Target::OnGamePadCalibration(){
+
+	ControlState state = pDoc->m_Controller.state;
+
+	if (state.fired > 1) {
+
+		show_cross = true;
+
+		switch (state.fired % 5) {
+
+		case 0:
+			pDoc->raster.corner.size() == 4 ? OnLButtonDown(0, CPoint(0, 0)) : 0;
+			break;
+		case 1:
+			OnLButtonDown(0, CPoint(
+				(int)xbox_cross.x + state.LX,
+				(int)xbox_cross.y + state.LY));
+			xbox_cross.x += fieldsize;
+			break;
+		case 2:
+			OnLButtonDown(0, CPoint(
+				(int)xbox_cross.x + state.LX,
+				(int)xbox_cross.y + state.LY));
+			if (pDoc->m_FlipVertical) {
+				xbox_cross.y += fieldsize;
+			}
+			else {
+				xbox_cross.y -= fieldsize;
+			}
+			break;
+		case 3:
+			OnLButtonDown(0, CPoint(
+				(int)xbox_cross.x + state.LX,
+				(int)xbox_cross.y + state.LY));
+			xbox_cross.x -= fieldsize;
+			break;
+		case 4:
+			OnLButtonDown(0, CPoint(
+				(int)xbox_cross.x + state.LX,
+				(int)xbox_cross.y + state.LY));
+			show_cross = false;
+			finishCalibration();
+			setCross();
+			break;
+
+		}
+
+	}
 
 }
 
@@ -298,13 +294,8 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 		pDoc->m_pGrid->ClearPatchlist();
 	}
 
-	pDoc->IsModified();
 	pDoc->UpdateAllViews(NULL);
-	
-	CSingleLock singleLock(&m_CritSection);
-	singleLock.Lock();
 	RedrawWindow();
-	singleLock.Unlock();
 
 }
 
@@ -316,7 +307,7 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 	switch (pMsg->message)
 	{
 	case WM_LBUTTONDOWN:
-		if (m_bMouseEnable == false)
+		if (pDoc->m_Controller.m_bActive == true)
 			return true;
 	}
 
@@ -328,7 +319,7 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialogEx::OnShowWindow(bShow, nStatus);
-
+	
 	// TODO: Add your message handler code here
 
 }

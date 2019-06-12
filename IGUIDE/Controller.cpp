@@ -2,38 +2,31 @@
 #include "Controller.h"
 #include "Target.h"
 #include "IGUIDEDoc.h"
+#include "GamePad.h"
 
 Controller::Controller()
 {
+
 	m_pThread = NULL;
-	m_pGamePad = NULL;
 	m_bRunning = false;
 	m_bActive = false;
-
 }
 
 Controller::~Controller()
 {
-	delete m_pThread;
-	delete m_pGamePad;
 }
 
 void Controller::reset(){
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
+
 	if (pDoc->m_InputController == L"Gamepad") {
-		if (!m_pGamePad)
-		m_pGamePad = new DirectX::GamePad;
 		m_bActive = true;
 	}
 
 	else {
 		m_bActive = false;
-	}
-
-	if (m_bRunning) {
-		shutdown();
 	}
 
 	if (pDoc->m_FlipVertical == 1) {
@@ -55,22 +48,31 @@ void Controller::reset(){
 
 void Controller::shutdown() {
 	
+	m_bActive = false;
 	m_bRunning = false;
-	if (m_pThread)
+	if (m_pThread) {
 		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+		delete m_pThread;
+	}
 
 }
 
 UINT GamePadThread(LPVOID pParam) {
 
 	Controller* parent = (Controller*)pParam;
+	DirectX::GamePad* m_pGamePad; 
+	m_pGamePad = new DirectX::GamePad;
 	DirectX::GamePad::State state;
+	ControlState localState;
+
+	HWND mainWnd = AfxGetMainWnd()->GetSafeHwnd();
 
 	while (parent->m_bRunning) {
 
 		while (parent->m_bActive) {
 
-			state = parent->m_pGamePad->GetState(0);
+			localState = parent->state;
+			state = m_pGamePad->GetState(0);
 
 			if (state.IsConnected()) {
 
@@ -84,7 +86,6 @@ UINT GamePadThread(LPVOID pParam) {
 				if (!state.buttons.a)
 
 				{
-
 					parent->state.fireUp = true;
 					parent->state.fireDown = false;
 
@@ -98,8 +99,9 @@ UINT GamePadThread(LPVOID pParam) {
 						Sleep(100);
 					}
 
-					else
+					else {
 						parent->state.LY -= parent->flipSign * 2;
+					}
 
 				}
 
@@ -110,9 +112,9 @@ UINT GamePadThread(LPVOID pParam) {
 						Sleep(100);
 					}
 
-					else
+					else {
 						parent->state.LY += parent->flipSign * 2;
-
+					}
 				}
 
 				if (state.IsDPadLeftPressed()) {
@@ -122,8 +124,9 @@ UINT GamePadThread(LPVOID pParam) {
 						Sleep(100);
 					}
 
-					else
+					else {
 						parent->state.LX -= 2;
+					}
 				}
 
 				if (state.IsDPadRightPressed()) {
@@ -133,8 +136,9 @@ UINT GamePadThread(LPVOID pParam) {
 						Sleep(100);
 					}
 
-					else
+					else {
 						parent->state.LX += 2;
+					}
 				}
 
 				if (parent->state.fireUp && parent->state.fireDown) {
@@ -144,14 +148,22 @@ UINT GamePadThread(LPVOID pParam) {
 
 			}
 
-			Sleep(50);
+			if (parent->state == localState) 
+				continue;
 
-			if (parent->m_pThread)
-			PostMessage(AfxGetMainWnd()->GetSafeHwnd(), AFX_WM_DRAW2D, 0, 0);
+ 			Sleep(50);
+
+			if (parent->state.fired > localState.fired)
+				PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
+			else
+				PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around.
 
 		}
 
 	}
 
+	delete m_pGamePad;
+
 	return 0;
+
 }

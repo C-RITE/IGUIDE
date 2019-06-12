@@ -83,7 +83,7 @@ bool CIGUIDEDoc::getScreens() {
 
 CIGUIDEDoc::~CIGUIDEDoc()
 {
-	
+	m_Controller.shutdown();
 	delete m_pGrid;
 	delete m_pFundus;
 	delete mousePos;
@@ -162,7 +162,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
 
-	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"InputController", L"Mouse");
+	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 
 	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 

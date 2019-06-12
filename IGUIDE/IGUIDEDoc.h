@@ -8,6 +8,7 @@
 #include "Raster.h"
 #include "Properties.h"
 #include "Monitors.h"
+#include "Controller.h"
 
 
 class CIGUIDEDoc : public CDocument
