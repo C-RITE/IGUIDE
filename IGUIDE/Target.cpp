@@ -223,54 +223,53 @@ void Target::finishCalibration() {
 
 }
 
-void Target::OnGamePadCalibration(){
+void Target::OnGamePadCalibration() {
+
+	// hijack left-mouse-button click handler to store calibration coordinates
+	// move cursor from one raster corner to the next with each click
 
 	ControlState state = pDoc->m_Controller.state;
 
-	if (state.fired > 1) {
+	switch (state.fired % 5) {
 
-		show_cross = true;
+	case 0:
+		// reset it all
+		setCross();
+		OnLButtonDown(0, CPoint(0, 0));
+		break;
 
-		switch (state.fired % 5) {
+	case 1:
+		OnLButtonDown(0, CPoint(
+			(int)xbox_cross.x + state.LX,
+			(int)xbox_cross.y + state.LY));
+		xbox_cross.x += fieldsize;
+		break;
 
-		case 0:
-			pDoc->raster.corner.size() == 4 ? OnLButtonDown(0, CPoint(0, 0)) : 0;
-			break;
-		case 1:
-			OnLButtonDown(0, CPoint(
-				(int)xbox_cross.x + state.LX,
-				(int)xbox_cross.y + state.LY));
-			xbox_cross.x += fieldsize;
-			break;
-		case 2:
-			OnLButtonDown(0, CPoint(
-				(int)xbox_cross.x + state.LX,
-				(int)xbox_cross.y + state.LY));
-			if (pDoc->m_FlipVertical) {
-				xbox_cross.y += fieldsize;
-			}
-			else {
-				xbox_cross.y -= fieldsize;
-			}
-			break;
-		case 3:
-			OnLButtonDown(0, CPoint(
-				(int)xbox_cross.x + state.LX,
-				(int)xbox_cross.y + state.LY));
-			xbox_cross.x -= fieldsize;
-			break;
-		case 4:
-			OnLButtonDown(0, CPoint(
-				(int)xbox_cross.x + state.LX,
-				(int)xbox_cross.y + state.LY));
-			show_cross = false;
-			finishCalibration();
-			setCross();
-			break;
+	case 2:
+		OnLButtonDown(0, CPoint(
+			(int)xbox_cross.x + state.LX,
+			(int)xbox_cross.y + state.LY));
+		xbox_cross.y += fieldsize;
 
-		}
+		break;
+
+	case 3:
+		OnLButtonDown(0, CPoint(
+			(int)xbox_cross.x + state.LX,
+			(int)xbox_cross.y + state.LY));
+		xbox_cross.x -= fieldsize;
+		break;
+
+	case 4:
+		OnLButtonDown(0, CPoint(
+			(int)xbox_cross.x + state.LX,
+			(int)xbox_cross.y + state.LY));
+		show_cross = false;
+		break;
 
 	}
+
+	RedrawWindow();
 
 }
 
@@ -281,8 +280,12 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
-	if (pDoc->raster.corner.size() < 4)
+	if (pDoc->raster.corner.size() < 3)
 		pDoc->raster.corner.push_back(d2dpoint);
+	else if (pDoc->raster.corner.size() == 3) {
+		pDoc->raster.corner.push_back(d2dpoint);
+		finishCalibration();
+	}
 
 	else {
 		free(m_POI);

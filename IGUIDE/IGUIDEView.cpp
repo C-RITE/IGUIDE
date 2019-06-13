@@ -201,7 +201,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	CRect clientRect;
 	AfxGetMainWnd()->GetClientRect(&clientRect);
 
-	// deduce edges from corners
+	// make edges from corners
 	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
 		for (int i = 0; i < 3; i++) {
 			Edge k;
@@ -250,7 +250,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
-	pDoc->raster.corner.size()==0? m_pDlgTarget->setCross():0;
 	m_pDlgTarget->getFixationTarget();	
 
 	SetFocus();

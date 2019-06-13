@@ -3,13 +3,11 @@
 // wrapper class for Gamepad Controller
 
 struct ControlState {
-	ControlState() : LX(0),LY(0),pushed(false),fireDown(false),fireUp(true),fired(0) {};
+	ControlState() : LX(0),LY(0),fireDown(false),fired(0) {};
 	int LX;					// DPAD x pos
 	int LY;					// DPAD y pos
-	bool pushed;			// for input delay
 	bool fireDown;			// for fire signal state
-	bool fireUp;			// for fire signal state
-	int fired;				// counter for A being fired
+	int fired;				// counter for A-button
 	bool operator==(const ControlState &a)
 	{
 		if (memcmp(this,&a,sizeof(ControlState)) == 0)

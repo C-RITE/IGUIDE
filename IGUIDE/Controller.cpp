@@ -10,6 +10,7 @@ Controller::Controller()
 	m_pThread = NULL;
 	m_bRunning = false;
 	m_bActive = false;
+	state.fired = -1;
 }
 
 Controller::~Controller()
@@ -76,87 +77,37 @@ UINT GamePadThread(LPVOID pParam) {
 
 			if (state.IsConnected()) {
 
-				if (state.IsAPressed()) {
-
-					parent->state.pushed = false;
-					parent->state.fireDown = true;
-
-				}
-
-				if (!state.buttons.a)
-
-				{
-					parent->state.fireUp = true;
-					parent->state.fireDown = false;
-
-				}
-
-				if (state.IsDPadDownPressed()) {
-
-					if (!parent->state.pushed) {
-						parent->state.LY -= parent->flipSign * 2;
-						parent->state.pushed = true;
-						Sleep(100);
-					}
-
-					else {
-						parent->state.LY -= parent->flipSign * 2;
-					}
-
-				}
-
-				if (state.IsDPadUpPressed()) {
-					if (!parent->state.pushed) {
-						parent->state.LY += parent->flipSign * 2;
-						parent->state.pushed = true;
-						Sleep(100);
-					}
-
-					else {
-						parent->state.LY += parent->flipSign * 2;
-					}
-				}
-
-				if (state.IsDPadLeftPressed()) {
-					if (!parent->state.pushed) {
-						parent->state.LX -= 2;
-						parent->state.pushed = true;
-						Sleep(100);
-					}
-
-					else {
-						parent->state.LX -= 2;
-					}
-				}
-
-				if (state.IsDPadRightPressed()) {
-					if (!parent->state.pushed) {
-						parent->state.LX += 2;
-						parent->state.pushed = true;
-						Sleep(100);
-					}
-
-					else {
-						parent->state.LX += 2;
-					}
-				}
-
-				if (parent->state.fireUp && parent->state.fireDown) {
+				if (state.IsAPressed())
 					parent->state.fired++;
-					parent->state.fireDown = false;
-				}
+
+				if (state.IsDPadDownPressed())
+					parent->state.LY -= parent->flipSign;
+
+				if (state.IsDPadUpPressed())
+					parent->state.LY += parent->flipSign;
+
+				if (state.IsDPadLeftPressed())
+					parent->state.LX -= 1;
+
+				if (state.IsDPadRightPressed()) 
+					parent->state.LX += 1;
 
 			}
 
 			if (parent->state == localState) 
 				continue;
 
- 			Sleep(50);
+			while (state.buttons.a){
+				Sleep(10);
+				state = m_pGamePad->GetState(0);
+			}
 
-			if (parent->state.fired > localState.fired)
+			if (parent->state.fired > localState.fired) 
 				PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
-			else
+			else {
 				PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around.
+				Sleep(100);
+			}
 
 		}
 
