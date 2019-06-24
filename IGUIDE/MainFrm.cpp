@@ -52,7 +52,7 @@ CMainFrame::~CMainFrame()
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
 	// insert all properties into list
-	m_DlgProperties.fillProperties();
+	m_DlgProperties.createPropertyList();
 
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability

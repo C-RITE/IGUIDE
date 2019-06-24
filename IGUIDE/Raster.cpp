@@ -2,7 +2,8 @@
 #include "Raster.h"
 
 
-Raster::Raster() :size(0),
+Raster::Raster() :
+size(0),
 corner(),
 perimeter(),
 scale(0, 0),

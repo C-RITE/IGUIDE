@@ -58,7 +58,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	mousePos = NULL;
-	raster.size = 1.28;
+	raster.size = 600;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
 	m_FixationTargetSize = 100;
@@ -149,7 +149,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
 
-	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
+	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 1);
 	if (!FTS) FTS = 100;
 	m_FixationTargetSize = FTS;
 
@@ -160,7 +160,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		}
 	}
 
-	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
+	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 1);
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 
@@ -184,13 +184,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	LPBYTE rsize;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
-		memcpy(&raster.size, rsize, sizeof(double));
+	raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", raster.size);
 
 	delete calib, ptr;
 	delete rcol;
-	delete rsize;
 
 	return TRUE;
 }
@@ -210,7 +207,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &raster.size, sizeof(double));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", raster.size);
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
 	if (raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);

@@ -11,6 +11,7 @@ Controller::Controller()
 	m_bRunning = false;
 	m_bActive = false;
 	state.fired = -1;
+
 }
 
 Controller::~Controller()
@@ -21,7 +22,6 @@ void Controller::reset(){
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
-
 	if (pDoc->m_InputController == L"Gamepad") {
 		m_bActive = true;
 	}
@@ -30,15 +30,9 @@ void Controller::reset(){
 		m_bActive = false;
 	}
 
-	if (pDoc->m_FlipVertical == 1) {
-		flipSign = -1;
-	}
-
-	else {
-		flipSign = 1;
-	}
+	flipSign = pDoc->m_FlipVertical;
 	
-	if (m_bActive) {
+	if (m_bActive && m_pThread == NULL) {
 		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
 		m_pThread->m_bAutoDelete = false;
 		m_bRunning = true;
@@ -80,11 +74,13 @@ UINT GamePadThread(LPVOID pParam) {
 				if (state.IsAPressed())
 					parent->state.fired++;
 
-				if (state.IsDPadDownPressed())
-					parent->state.LY -= parent->flipSign;
+				if (state.IsDPadDownPressed()) {
+					parent->state.LY += (parent->flipSign * 1);
+				}
 
-				if (state.IsDPadUpPressed())
-					parent->state.LY += parent->flipSign;
+				if (state.IsDPadUpPressed()) {
+					(parent->state.LY -= parent->flipSign * 1);
+				}
 
 				if (state.IsDPadLeftPressed())
 					parent->state.LX -= 1;

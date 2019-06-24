@@ -84,22 +84,19 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
+	int flipsign = pDoc->m_FlipVertical;
 	double alpha, beta, gamma;
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
-	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;
+
+	ppd_client = (1 / ((double)pDoc->raster.videodim / (double)pDoc->raster.size)) * pDoc->raster.meanEdge;
 
 	Edge k;
-	k.q.x = -centerOffset_x;
-	if (pDoc->m_FlipVertical) {
-		k.q.y = -centerOffset_y;
-	}
-	else {
-		k.q.y = centerOffset_y;
-		
-	}
+	k.q.x = centerOffset_x;
+	k.q.y = flipsign * centerOffset_y;
+
 	alpha = pDoc->raster.meanAlpha;
-	beta = 360 - pDoc->ComputeOrientationAngle(k);
+	beta = pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
 
 	a = centerOffset_x;
