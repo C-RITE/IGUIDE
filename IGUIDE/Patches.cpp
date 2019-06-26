@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileopen(FALSE)
+Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE)
 {
 }
 
@@ -37,6 +37,13 @@ void Patches::lockIn(){
 	cleanup();
 	SaveToFile();
 	this->push_back(dummy);
+}
+
+void Patches::untouch() {
+
+		fileTouched = false;
+		filename = "IGUIDE.csv";
+
 }
 
 void Patches::cleanup() {
@@ -91,7 +98,7 @@ bool Patches::SaveToFile() {
 	}*/
 
 
-	if (!fileopen) {
+	if (!fileTouched) {
 		GetSysTime(timestamp);
 		filename = timestamp + "_" + filename;
 	}
@@ -100,7 +107,7 @@ bool Patches::SaveToFile() {
 		CStdioFile outputFile(filepath + filename, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
     		outputFile.WriteString(header + "\n" + sstream.str().c_str());
 		outputFile.Close();
-		fileopen = true;
+		fileTouched = true;
 	}
 
 	catch (CFileException* pe)
@@ -114,8 +121,8 @@ bool Patches::SaveToFile() {
 		strFormatted += szCause;
 		AfxMessageBox(strFormatted);
 
-		fileopen = FALSE;
-		filename = "";
+		fileTouched = FALSE;
+		filename = "IGUIDE.csv";
 		return FALSE;
 
 	}

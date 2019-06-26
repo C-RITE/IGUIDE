@@ -21,12 +21,14 @@ public:
 	CString			filename;
 	
 	bool			SaveToFile();
+	bool			isFileTouched() { return fileTouched; };
 	void			lockIn();
+	void			untouch();
 
 private:
 	
 	CString			timestamp;
-	bool			fileopen;
+	bool			fileTouched;
 	void			GetSysTime(CString &buf);
 	void			cleanup();
 

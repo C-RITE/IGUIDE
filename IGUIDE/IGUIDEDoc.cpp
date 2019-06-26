@@ -120,7 +120,6 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
 			data = homedir;
-			data.Append(_T("\\Pictures\\"));
 		}
 	}
 
@@ -146,6 +145,16 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	}
 
 	m_ICANDI_IP = data;
+
+	data = AfxGetApp()->GetProfileString(L"Settings", L"MRUFundus", NULL);
+	if (data.IsEmpty()) {
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			data = homedir;
+		}
+	}
+
+	m_pFundus->mru_folder = data;
 
 	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
 
@@ -204,6 +213,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
+	AfxGetApp()->WriteProfileString(L"Settings", L"MRUFundus", m_pFundus->mru_folder);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
@@ -600,7 +610,7 @@ void CIGUIDEDoc::OnOverlayDefocus()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & DEFOCUS)
-		m_pGrid->overlay = m_pGrid->overlay & ~DEFOCUS;
+		m_pGrid->overlay = m_pGrid->overlay & (~DEFOCUS);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
 
@@ -713,21 +723,24 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 void CIGUIDEDoc::ToggleOverlay()
 {
 	// TODO: Add your implementation code here.
-	if (m_pGrid->overlay > QUICKHELP) {
-		overlaySettings = m_pGrid->overlay - QUICKHELP;
-		m_pGrid->overlay = QUICKHELP;
+
+	if (m_pGrid->overlay == 0 || m_pGrid->overlay == QUICKHELP) {
+		m_pGrid->overlay = overlaySettings;
 		UpdateAllViews(NULL);
 		return;
 	}
 
-	else if (m_pGrid->overlay & ~QUICKHELP) {
+	if (m_pGrid->overlay & QUICKHELP) {
+		overlaySettings = m_pGrid->overlay;
+		m_pGrid->overlay = QUICKHELP;
+	}
+	else
+	{
 		overlaySettings = m_pGrid->overlay;
 		m_pGrid->overlay = 0;
-		UpdateAllViews(NULL);
-		return;
+
 	}
-	
-	m_pGrid->overlay += overlaySettings;
 
 	UpdateAllViews(NULL);
+
 }
