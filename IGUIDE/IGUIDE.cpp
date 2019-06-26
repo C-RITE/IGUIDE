@@ -204,6 +204,16 @@ BOOL CAboutDlg::OnInitDialog()
 	CWnd *label = GetDlgItem(IDC_VERSION);
 	label->SetWindowTextW(str);
 
+	CEdit* edit = (CEdit*)GetDlgItem(IDC_EDIT1);
+
+	// get the initial text length
+	int nLength = edit->GetWindowTextLength();
+	// put the selection at the end of text
+	edit->SetSel(nLength, nLength);
+	// replace the selection
+	str = L"DISCLAIMER\:\r\n\r\nTHIS SOFTWARE IS PROVIDED BY AG HARMENING\r\nAND THE CONTRIBUTORS AS IS WITH NO WARRANTY\r\nOF ANY KIND, EITHER EXPRESSED OR IMPLIED.\r\nIN NO EVENT SHALL AG HARMENING OR THE CONTRIBUTORS\r\n BE LIABLE FOR ANY DAMAGES SUFFERED BY THE USERS\r\nARISING OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED\r\nOF THE POSSIBILITY OF SUCH DAMAGE.";
+	edit->ReplaceSel(str);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }

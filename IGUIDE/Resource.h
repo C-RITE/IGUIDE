@@ -16,6 +16,8 @@
 #define IDI_CROSSHAIR                   333
 #define IDC_STATIC_CAL                  1002
 #define IDC_VERSION                     1004
+#define IDC_RICHEDIT21                  1010
+#define IDC_EDIT1                       1011
 #define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775
@@ -39,7 +41,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        346
 #define _APS_NEXT_COMMAND_VALUE         32796
-#define _APS_NEXT_CONTROL_VALUE         1010
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           313
 #endif
 #endif
