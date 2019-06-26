@@ -37,7 +37,7 @@ protected:
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 
 private:
-	// brushes, etc..
+	CD2DBitmap* m_pFixationTarget;
 
 public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

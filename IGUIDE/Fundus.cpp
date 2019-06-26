@@ -46,6 +46,7 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 
 HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 {
+	// Windows Imaging Component File Open Dialog
 
 	// create IFileOpenDialog instance.
 	CComPtr<IFileOpenDialog> pIFileOpenDialog;
@@ -69,6 +70,15 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 	if (SUCCEEDED(hr))
 		hr = pIFileOpenDialog->SetFileTypeIndex(cbFilterSpecCount);
 
+	// Set the path recently used for fundus import
+	IShellItem* pSI;
+	if (SUCCEEDED(hr)) {
+		HRESULT hr = SHCreateItemFromParsingName(mru_folder, NULL, IID_IShellItem, (void**)&pSI);
+	}
+	if (SUCCEEDED(hr)) {
+		hr = pIFileOpenDialog->SetFolder(pSI);
+	}
+
 	// show the file open dialog, and get the chosen file
 	if (SUCCEEDED(hr))
 	{
@@ -85,6 +95,9 @@ HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 			LPWSTR pszName = NULL;
 			hr = pIShellItem->GetDisplayName(SIGDN_FILESYSPATH, &pszName);
 			filename = pszName;
+			int c = filename.ReverseFind('\\');
+			mru_folder = filename;
+			mru_folder.Truncate(c);
 			CoTaskMemFree(pszName);
 		}
 	}

@@ -55,33 +55,63 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	if (propName == "Raster Size") {
 		pDoc->raster.size = vt;
 	}
+
 	if (propName == L"Scale") {
 		pDoc->m_FixationTargetSize = vt;
 	}
+
 	if (propName == L"Color") {
 		COLORREF ref = vt;
 		pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
 	}
+
 	if (propName == L"File") {
 		CString ftfile = vt.bstrVal;
 		pDoc->m_FixationTarget = ftfile;
 	}
+
 	if (propName == L"Video Folder") {
+
+		VideoFolder->SetOriginalValue(pDoc->m_OutputDir);
 		CString folder = vt.bstrVal;
-		pDoc->m_OutputDir = folder;
+
+		if (pDoc->m_pGrid->patchlist.isFileTouched()) {
+
+			CString message;
+			message.Format(L"Data has already been written in into %s.\nChange folder anyway?\n", pDoc->m_OutputDir);
+			
+			switch (AfxMessageBox(message, MB_YESNO)) {
+			
+			case IDYES:
+				pDoc->m_OutputDir = folder;
+				pDoc->m_pGrid->patchlist.untouch();
+				break;
+
+			case IDNO:
+				VideoFolder->ResetOriginalValue();
+				break;
+
+			}
+		}
 	}
+
 	if (propName == L"Screen") {
+
 		CString ref = vt.bstrVal;
 		int index = ref.ReverseFind(_T(' '));
 		ref.Truncate(index);
+
 		for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
+
 			if (it->name == ref) {
 				pDoc->m_selectedScreen = it._Ptr;
 				CIGUIDEView* pView = CIGUIDEView::GetView();
 				pView->SendMessage(SCREEN_SELECTED);
+
 			}
 		}
 	}
+
 	if (propName == L"Input Controller") {
 		CString inpcon = vt.bstrVal;
 		pDoc->m_InputController = inpcon;

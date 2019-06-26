@@ -44,6 +44,7 @@ END_MESSAGE_MAP()
 CIGUIDEView::CIGUIDEView()
 {
 	m_pDlgTarget = NULL;
+	m_pFixationTarget = NULL;
 }
 
 CIGUIDEView::~CIGUIDEView()
@@ -166,6 +167,7 @@ void CIGUIDEView::OnInitialUpdate()
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	pDoc->m_Controller.reset();
+
 	
 }
 
@@ -251,6 +253,11 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->calcFieldSize();
 	m_pDlgTarget->getFixationTarget();	
+
+	if (m_pFixationTarget && m_pFixationTarget->IsValid())
+		delete m_pFixationTarget;
+
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
 
 	SetFocus();
 	Invalidate();
@@ -350,7 +357,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
 
 			CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
-			CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };;
+			CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };
 
 			CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120};
 			pRenderTarget->FillRectangle(black_box, &BlackBrush);
@@ -392,6 +399,51 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		}
 
+		// is (custom) fixation target on or off?
+		if (m_pDlgTarget->m_bVisible) {
+
+			CD2DBrushProperties prop{ .5f };
+			CD2DSolidColorBrush brush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Beige), &prop };
+			CD2DRectF upperRight{sizeTarget.width - 100,
+								50, sizeTarget.width - 50,
+								100 };
+			pRenderTarget->DrawRectangle(CD2DRectF(
+				upperRight.left-1,
+				upperRight.top-1,
+				upperRight.right+1,
+				upperRight.bottom+1),
+				&brush);
+
+			if (m_pFixationTarget && m_pFixationTarget->IsValid()) {
+				CD2DSizeF size = m_pFixationTarget->GetSize();
+				pRenderTarget->DrawBitmap(
+					m_pFixationTarget,
+					upperRight,
+					0.25f,
+					D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+			}
+
+			else {
+
+				CD2DRectF frame(upperRight);
+				frame.left += 15;
+				frame.right -= 15;
+				frame.top += 15;
+				frame.bottom -= 15;
+				pRenderTarget->DrawEllipse(frame, &brush);
+				pRenderTarget->DrawLine(
+					CD2DPointF(frame.left, frame.top), 
+					CD2DPointF(frame.right, frame.bottom),
+					&brush);
+				pRenderTarget->DrawLine(
+					CD2DPointF(frame.right, frame.top),
+					CD2DPointF(frame.left, frame.bottom),
+					&brush);
+
+			}
+
+		}
+			   
 	}
 
 	return 0;
@@ -404,7 +456,6 @@ void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 	// all the drawing happens in OnDraw2D
 
 }
-
 
 void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 {
@@ -492,7 +543,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F3:
 			ToggleFixationTarget();
+			break;
 		}
+
 	}
 
 	return CView::PreTranslateMessage(pMsg);
