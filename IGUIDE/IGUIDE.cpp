@@ -132,6 +132,8 @@ protected:
 public:
 	afx_msg void OnStnClickedAo();
 	virtual BOOL OnInitDialog();
+	afx_msg void OnStnClickedHdf5();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -146,6 +148,8 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 	ON_STN_CLICKED(IDB_AO, &CAboutDlg::OnStnClickedAo)
 	ON_WM_SIZE()
+	ON_STN_CLICKED(IDC_HDF5, &CAboutDlg::OnStnClickedHdf5)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 // App command to run the dialog
@@ -211,9 +215,33 @@ BOOL CAboutDlg::OnInitDialog()
 	// put the selection at the end of text
 	edit->SetSel(nLength, nLength);
 	// replace the selection
-	str = L"DISCLAIMER\:\r\n\r\nTHIS SOFTWARE IS PROVIDED BY AG HARMENING\r\nAND THE CONTRIBUTORS AS IS WITH NO WARRANTY\r\nOF ANY KIND, EITHER EXPRESSED OR IMPLIED.\r\nIN NO EVENT SHALL AG HARMENING OR THE CONTRIBUTORS\r\n BE LIABLE FOR ANY DAMAGES SUFFERED BY THE USERS\r\nARISING OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED\r\nOF THE POSSIBILITY OF SUCH DAMAGE.";
+	str = L"THIS SOFTWARE IS PROVIDED BY AG HARMENING\r\nAND THE CONTRIBUTORS AS IS WITH NO WARRANTY\r\nOF ANY KIND, EITHER EXPRESSED OR IMPLIED.\r\nIN NO EVENT SHALL AG HARMENING OR THE CONTRIBUTORS\r\nBE LIABLE FOR ANY DAMAGES SUFFERED BY THE USERS\r\nARISING OUT OF THE USE OF THIS SOFTWARE,\r\nEVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
 	edit->ReplaceSel(str);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+void CAboutDlg::OnStnClickedHdf5()
+{
+	// TODO: Add your control notification handler code here
+	(32 >= (int)ShellExecute(NULL, L"open", L"https://support.hdfgroup.org/ftp/HDF5/documentation/doc1.8/Copyright.html", NULL, NULL, SW_SHOWNORMAL));
+}
+
+
+HBRUSH CAboutDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	switch (nCtlColor)
+	{
+	case CTLCOLOR_STATIC:
+		if (pWnd->GetSafeHwnd() == GetDlgItem(IDC_HDF5)->GetSafeHwnd()) {
+			pDC->SetTextColor(RGB(0, 0, 255));
+			pDC->SetBkColor(RGB(240, 240, 240));
+
+			return (HBRUSH)GetStockObject(NULL_BRUSH);
+		}
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
 }

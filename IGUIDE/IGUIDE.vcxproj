@@ -363,6 +363,7 @@
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
     <None Include="packages.config" />
+    <None Include="resource.hm" />
     <None Include="res\IGUIDE.rc2" />
   </ItemGroup>
   <ItemGroup>

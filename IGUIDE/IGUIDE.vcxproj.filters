@@ -415,6 +415,9 @@
     <None Include="ClassDiagram.cd" />
     <None Include="IGUIDE.reg" />
     <None Include="packages.config" />
+    <None Include="resource.hm">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IGUIDE.rc">
