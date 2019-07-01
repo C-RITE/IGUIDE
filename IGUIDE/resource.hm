@@ -1,0 +1,4 @@
+// Microsoft Visual C++ generated Help ID include file.
+// Used by IGUIDE.rc
+//
+#define HIDC_STATIC                     0x8064ffff    // IDD_ABOUTBOX [English (United States)]
