@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 
+
 struct Patch {
 
 	CD2DPointF		coords;
@@ -21,6 +22,7 @@ public:
 	CString			filename;
 	
 	bool			SaveToFile();
+	void			SaveSequence();
 	bool			isFileTouched() { return fileTouched; };
 	void			lockIn();
 	void			untouch();

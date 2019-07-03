@@ -3,6 +3,8 @@
 #include "IGUIDEDoc.h"
 #include "MainFrm.h"
 #include <sstream>
+#include <hdf5.h>
+#include <H5Cpp.h>
 
 using namespace std;
 
@@ -87,6 +89,7 @@ bool Patches::SaveToFile() {
 
 	}
 
+
 	//CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
 
 	/*if (FileDlg.DoModal() == IDOK) {
@@ -126,6 +129,12 @@ bool Patches::SaveToFile() {
 		return FALSE;
 
 	}
-
+	SaveSequence();
 	return TRUE;
+}
+
+void Patches::SaveSequence() {
+	H5::H5File* file = new H5::H5File(H5std_string("test.h5"), H5F_ACC_TRUNC);
+	delete file;
+
 }
