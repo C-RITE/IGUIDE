@@ -156,12 +156,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pFundus->mru_folder = data;
 
-	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 49);
 
-	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 1);
-	if (!FTS) FTS = 100;
-	m_FixationTargetSize = FTS;
-
+	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
+	
 	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
 	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
 		if (it->number == screen) {
