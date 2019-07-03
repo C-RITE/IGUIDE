@@ -22,15 +22,17 @@ class Grid{
 
 private:
 
-	CD2DSolidColorBrush 
+	CD2DSolidColorBrush
 		*m_pDarkRedBrush,
 		*m_pRedBrush,
 		*m_pWhiteBrush,
 		*m_pBlueBrush,
+		*m_pGrayBrush,
 		*m_pDarkGreenBrush,
 		*m_pMagentaBrush,
 		*m_pPatchBrush;
 
+	CD2DBrushProperties*	m_pBrushProp;
 	CD2DLayer*				pLayer;
 
 public:

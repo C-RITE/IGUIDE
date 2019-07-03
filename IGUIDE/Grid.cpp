@@ -10,11 +10,13 @@ using namespace D2D1;
 
 Grid::Grid()
 {
+	m_pBrushProp = new CD2DBrushProperties(.5f);
 	m_pPatchBrush = new CD2DSolidColorBrush(NULL, NULL);
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
+	m_pGrayBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGray), m_pBrushProp);
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
 
@@ -38,6 +40,8 @@ Grid::~Grid() {
 	delete m_pDarkGreenBrush;
 	delete m_pMagentaBrush;;
 	delete m_pPatchBrush;
+	delete m_pGrayBrush;
+	delete m_pBrushProp;
 	delete pLayer;
 }
 
@@ -72,6 +76,8 @@ void Grid::StorePatch(CD2DPointF loc) {
 
 void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
+	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
 	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2);
@@ -81,10 +87,10 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 		for (float x = center.x; x > 0; x -= 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(x, 0.1f),
+				CD2DPointF(x, 1),
 				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
@@ -93,8 +99,8 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 			pRenderTarget->DrawLine(
 				CD2DPointF(x, 0.1f),
 				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
@@ -103,8 +109,8 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 			pRenderTarget->DrawLine(
 				CD2DPointF(0.1f, y),
 				CD2DPointF((float)mainWnd.Width(), y),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
@@ -113,11 +119,13 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 			pRenderTarget->DrawLine(
 				CD2DPointF(0.1f, y),
 				CD2DPointF((float)mainWnd.Width(), y),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 	}
+
+	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
 
 }
 
@@ -130,7 +138,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 				center.y - 1 / (float)dpp * x,
 				center.x + 1 / (float)dpp * x,
 				center.y + 1 / (float)dpp * x };
-			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f);
+			pRenderTarget->DrawEllipse(e, m_pGrayBrush, 1);
 		}
 	}
 
@@ -140,7 +148,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 		center.y - 1 / (float)dpp * 1.2f,
 		center.x + 1 / (float)dpp * 1.2f,
 		center.y + 1 / (float)dpp * 1.2f };
-		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .3f);
+		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
 	}
 
 	if (overlay & FOVEA){

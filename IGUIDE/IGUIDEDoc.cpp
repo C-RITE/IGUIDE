@@ -156,7 +156,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pFundus->mru_folder = data;
 
-	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 49);
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 33);
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
 	
