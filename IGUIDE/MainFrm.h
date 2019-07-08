@@ -15,9 +15,9 @@ protected:
 
 // Attributes
 public:
-	const int WINDOW_WIDTH = 1200;
+	const int WINDOW_WIDTH = 1280;
 	const double ASPECT_RATIO = (double)16 / 9;
-	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / (int)ASPECT_RATIO);
+	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / ASPECT_RATIO);
 
 // Operations
 public:
@@ -47,6 +47,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnDisplayChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
 
 public:
@@ -55,6 +56,7 @@ public:
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 };
 
 

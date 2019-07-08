@@ -16,8 +16,7 @@ public:
 	static CIGUIDEView * GetView();
 	
 // Overrides
-public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -43,14 +42,14 @@ public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual void OnDraw(CDC* /*pDC*/);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
 	afx_msg void OnClose();
 protected:
-	afx_msg LRESULT OnDisplaychange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDisplayChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT ChangeTargetDisplay(WPARAM w, LPARAM l);
 };

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Grid.h"
 #include "Target.h"
+#include "MainFrm.h"
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 #include "resource.h"
@@ -78,51 +79,36 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-	AfxGetMainWnd()->GetClientRect(mainWnd);
+	CMainFrame* pMainWnd = (CMainFrame*) AfxGetMainWnd();
+	pMainWnd->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
-	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2);
+
+	dpp = (m_pDeltaFOD + m_pRadNerve) / pMainWnd->WINDOW_WIDTH;
+	double ppd = 1 / dpp;	//pixel per degree
 
 	// draw a grid background around the center
 	if (overlay & GRID) {
-		for (float x = center.x; x > 0; x -= 1 / (float)dpp)
+		for (float x = - ppd / 2 ; x < mainWnd.Width(); x += ppd)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(x, 1),
+				CD2DPointF(x, - ppd / 2),
 				CD2DPointF(x, (float)mainWnd.Height()),
 				m_pGrayBrush,
 				1
 				);
 		}
 
-		for (float x = center.x + 1 / (float)dpp; x < mainWnd.Width(); x += 1 / (float)dpp)
+		
+		for (float y = - ppd / 2; y < mainWnd.Height(); y += ppd)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(x, 0.1f),
-				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pGrayBrush,
-				1
-				);
-		}
-
-		for (float y = center.y; y > 0; y -= 1 / (float)dpp)
-		{
-			pRenderTarget->DrawLine(
-				CD2DPointF(0.1f, y),
+				CD2DPointF(- ppd / 2, y),
 				CD2DPointF((float)mainWnd.Width(), y),
 				m_pGrayBrush,
 				1
 				);
 		}
 
-		for (float y = center.y + 1 / (float)dpp; y < mainWnd.Height(); y += 1 / (float)dpp)
-		{
-			pRenderTarget->DrawLine(
-				CD2DPointF(0.1f, y),
-				CD2DPointF((float)mainWnd.Width(), y),
-				m_pGrayBrush,
-				1
-				);
-		}
 	}
 
 	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
@@ -130,6 +116,8 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 }
 
 void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
+
+	CMainFrame* mainWnd = (CMainFrame*)AfxGetMainWnd();
 
 	//draw circles around the center
 	if (overlay & DEGRAD) {
@@ -161,9 +149,9 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
-		nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
+		nerve = { float(center.x + mainWnd->WINDOW_WIDTH / 2 - 5 / dpp),
 		(float)((center.y - 2.5 / dpp) - 86),
-		(float)(center.x + mainWnd.Width() / 2),
+		(float)(center.x + mainWnd->WINDOW_WIDTH / 2),
 		(float)((center.y + 2.5 / dpp) - 86) };
 		pRenderTarget->DrawEllipse(nerve, m_pBlueBrush, .3f);
 	}

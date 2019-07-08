@@ -18,6 +18,7 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
+	ON_MESSAGE(WM_DISPLAYCHANGE, &CMainFrame::OnDisplayChange)
 	ON_MESSAGE(GAMEPAD_UPDATE, OnGamePadUpdate)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
@@ -51,12 +52,10 @@ CMainFrame::~CMainFrame()
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
-	// insert all properties into list
-	m_DlgProperties.createPropertyList();
-
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability
-	
+
+	m_DlgProperties.InitPropList();
 	RemoteControl.init(&m_DlgProperties);
 	RemoteControl.connect();
 
@@ -64,6 +63,13 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
 }
 
+afx_msg LRESULT CMainFrame::OnDisplayChange(WPARAM wParam, LPARAM lParam) {
+
+	m_DlgProperties.refreshDisplayProperties();
+	
+	return 0L;
+
+}
 
 LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 
@@ -94,13 +100,14 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+
 	if (CFrameWndEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
 	// enable Visual Studio 2005 style docking window auto-hide behavior
-	EnableAutoHidePanes(CBRS_ALIGN_ANY);
+	EnableAutoHidePanes(CBRS_ALIGN_LEFT);
 
 	// create docking windows
 	if (!CreateDockingWindows())
@@ -109,7 +116,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	m_DlgProperties.EnableDocking(CBRS_ALIGN_ANY);
+	m_DlgProperties.EnableDocking(CBRS_ALIGN_LEFT);
 	DockPane(&m_DlgProperties);
 	
 	if (!m_wndStatusBar.Create(this))
@@ -128,6 +135,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create remote control\n");
 		return -1;      // fail to create
 	}
+
 	return 0;
 
 }
@@ -139,7 +147,7 @@ BOOL CMainFrame::CreateDockingWindows()
 	CString strPropertiesWnd;
 	bNameValid = strPropertiesWnd.LoadString(IDS_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_DlgProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), FALSE, ID_VIEW_PROPERTIESWND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
+	if (!m_DlgProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIESWND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create

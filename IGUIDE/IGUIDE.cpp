@@ -207,3 +207,19 @@ BOOL CAboutDlg::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
+
+
+BOOL CIGUIDEApp::SaveState(LPCTSTR lpszSectionName, CFrameImpl* pFrameImpl)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	return false;
+}
+
+
+BOOL CIGUIDEApp::StoreWindowPlacement(const CRect& rectNormalPosition, int nFflags, int nShowCmd)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	return false;
+}

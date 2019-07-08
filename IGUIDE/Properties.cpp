@@ -8,8 +8,6 @@
 #include "IGUIDEView.h"
 #include "afxdialogex.h"
 #include "ws2tcpip.h"
-#include <Shlobj.h>
-
 
 Properties::Properties()
 {
@@ -30,17 +28,34 @@ Properties::Properties()
 
 Properties::~Properties()
 {
-
 }
 
+IMPLEMENT_DYNAMIC(Properties, CDockablePane)
 
+// Properties message handler
 BEGIN_MESSAGE_MAP(Properties, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 END_MESSAGE_MAP()
 
-// Properties message handler
+int Properties::OnCreate(LPCREATESTRUCT lp)
+{
+	if (CDockablePane::OnCreate(lp) == -1)
+		return -1;
+	DWORD style = WS_CHILD | WS_VISIBLE;
+
+	CRect rectDummy;
+	rectDummy.SetRectEmpty();
+
+	if (!m_wndPropList.Create(style, rectDummy, this, IDC_PROPERTIES))
+		TRACE(L"Unable to create Property List");
+	
+	m_wndPropList.SetFont(&m_fntPropList);
+
+	return 0;
+}
+
 
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
@@ -181,24 +196,20 @@ bool Properties::isValidIpAddress(_variant_t ipAddress)
 
 }
 
+void Properties::refreshDisplayProperties(){
+
+	
+	FixationScreen->RemoveAllOptions();
+	setPropertyValues();
+
+}
+
 
 void Properties::OnSize(UINT nType, int cx, int cy)
 {
-	AdjustLayout();
+
 	CDockablePane::OnSize(nType, cx, cy);
-}
-
-void Properties::AdjustLayout()
-{
-	if (!m_wndPropList)
-	{
-		return;
-	}
-
-	CRect rectClient, rectCombo;
-	GetClientRect(rectClient);
-	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
-	m_wndPropList.SetFont(&m_fntPropList);
+	m_wndPropList.SetWindowPos(NULL, 0, 0, cx, cy, SWP_NOACTIVATE | SWP_NOZORDER);
 
 }
 
@@ -270,10 +281,6 @@ void Properties::InitPropList()
 	else
 		FlipVertical->SetValue(L"Yes");
 
-
-	FixationScreen->RemoveAllOptions();	// need for removal if fillProperties() is called more than once 
-										// (happens if you connect/disconnect monitors)
-
 	CString option;
 
 	for (auto& screen : pDoc->m_Screens) {
@@ -284,12 +291,10 @@ void Properties::InitPropList()
 		FixationScreen->AddOption(option);
 	}
 
-	RemoteCapability->RemoveAllOptions();	// need for removal if fillProperties() is called more than once
 	CString capability[4]{ L"NONE", L"AOSACA", L"ICANDI", L"FULL" };
 	for (int i = 0; i < 4; i++)
 		RemoteCapability->AddOption(capability[i]);
 
-	InputController->RemoveAllOptions(); // same as before
 	CString control[2]{ L"Mouse", L"Gamepad" };
 	for (int i = 0; i < 2; i++)
 		InputController->AddOption(control[i]);
@@ -298,18 +303,6 @@ void Properties::InitPropList()
 	InputController->AllowEdit(FALSE);
 	VideoFolder->AllowEdit(FALSE);
 	
-}
-
-void Properties::createPropertyList() {
-
-	CRect rectDummy;
-	rectDummy.SetRectEmpty();
-
-	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
-		TRACE(L"Unable to create Property List");
-
-	InitPropList();
-
 }
 
 void Properties::setPropertyValues() {

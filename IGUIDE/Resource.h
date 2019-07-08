@@ -15,6 +15,7 @@
 #define IDI_ICON2                       333
 #define IDI_CROSSHAIR                   333
 #define IDC_STATIC_CAL                  1002
+#define IDC_PROPERTIES					1003
 #define IDC_VERSION                     1004
 #define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772

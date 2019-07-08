@@ -35,8 +35,9 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
-	ON_MESSAGE(WM_DISPLAYCHANGE, &CIGUIDEView::OnDisplaychange)
+	ON_MESSAGE(WM_DISPLAYCHANGE, &CIGUIDEView::OnDisplayChange)
 	ON_MESSAGE(SCREEN_SELECTED, &CIGUIDEView::ChangeTargetDisplay)
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -50,14 +51,6 @@ CIGUIDEView::CIGUIDEView()
 CIGUIDEView::~CIGUIDEView()
 {
 	delete m_pDlgTarget;
-}
-
-BOOL CIGUIDEView::PreCreateWindow(CREATESTRUCT& cs)
-{
-	// TODO: Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
-	
-	return CView::PreCreateWindow(cs);
 }
 
 CIGUIDEView * CIGUIDEView::GetView()
@@ -160,7 +153,8 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CIGUIDEView::OnInitialUpdate()
 {
-	
+	ModifyStyleEx(WS_EX_CLIENTEDGE, NULL);
+
 	CView::OnInitialUpdate();
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
@@ -173,10 +167,10 @@ void CIGUIDEView::OnInitialUpdate()
 
 LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 
-
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-	m_pDlgTarget->ShowWindow(TRUE);
 
+	m_pDlgTarget->ShowWindow(TRUE);
+	
 	CRect area = (CRect)pDoc->m_selectedScreen->area;
 	CRect wRect;
 	
@@ -186,6 +180,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 		area.Width(),
 		area.Height(),
 		NULL);
+	
 	return 0;
 
 }
@@ -268,6 +263,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 
 int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
@@ -285,6 +281,7 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
+
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	ASSERT_VALID(pRenderTarget);	
@@ -457,24 +454,6 @@ void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 
 }
 
-void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
-{
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-
-	CView::OnSize(nType, cx, cy);
-	CRect rect;
-	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
-	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
-	pDoc->raster.scale.y = (float)cy / (pMainWnd->WINDOW_HEIGHT - 62);
-	
-	if (nType == SIZE_RESTORED)
-		Invalidate();
-
-	// TODO: Add your message handler code here
-
-}
-
-
 BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
@@ -555,11 +534,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 
+	// TODO: Add your specialized code here and/or call the base class
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);
+
 	return CView::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
-	// TODO: Add your specialized code here and/or call the base class
 
 }
 
@@ -575,15 +555,15 @@ void CIGUIDEView::OnClose()
 }
 
 
-afx_msg LRESULT CIGUIDEView::OnDisplaychange(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CIGUIDEView::OnDisplayChange(WPARAM wParam, LPARAM lParam)
 {
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	m_pDlgTarget->ShowWindow(SW_HIDE);
 	AfxMessageBox(L"Monitor configuration change detected.\n\nSelect a screen in Properties/Target View now!", MB_ICONWARNING);
 	pDoc->getScreens();
-	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
-	return 0;
+	
+	return 0L;
 
 }
 
@@ -591,4 +571,20 @@ afx_msg LRESULT CIGUIDEView::OnDisplaychange(WPARAM wParam, LPARAM lParam)
 void CIGUIDEView::ToggleFixationTarget()
 {
 	m_pDlgTarget->m_bVisible ? m_pDlgTarget->m_bVisible = false : m_pDlgTarget->m_bVisible = true;
+}
+
+
+BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: Add your message handler code here and/or call default
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	//CRect rect;
+	//CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
+	//pDoc->raster.scale.x = (float)zDelta / (pMainWnd->WINDOW_WIDTH - 20);
+	//pDoc->raster.scale.y = (float)zDelta / (pMainWnd->WINDOW_HEIGHT - 62);
+
+	//RedrawWindow();
+
+	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }

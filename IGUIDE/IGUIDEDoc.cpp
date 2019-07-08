@@ -99,7 +99,11 @@ CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
 
 	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
-	return (CIGUIDEDoc *)pFrame->GetActiveDocument();
+	CDocument* doc = pFrame->GetActiveDocument();
+	if (doc)
+		return (CIGUIDEDoc*)doc;
+	else
+		return NULL;
 	
 }
 
@@ -127,7 +131,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
 	if (data.IsEmpty()) {
-		data.Format(_T("C:\\"));
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			data = homedir;
+		}
 	}
 
 	m_OutputDir = data;

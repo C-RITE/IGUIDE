@@ -1,17 +1,4 @@
 #pragma once
-// Custom Property Pane implementation
-
-class CPropertiesToolBar : public CMFCToolBar
-{
-public:
-	virtual void OnUpdateCmdUI(CFrameWndEx* /*pTarget*/, BOOL bDisableIfNoHndler)
-	{
-		CMFCToolBar::OnUpdateCmdUI((CFrameWndEx*)GetOwner(), bDisableIfNoHndler);
-	}
-
-	virtual BOOL AllowShowOnList() const { return FALSE; }
-
-};
 
 class Properties : public CDockablePane
 {
@@ -66,9 +53,8 @@ public:
 	Properties();   // standard constructor
 	~Properties();
 
-	void AdjustLayout();
-	void createPropertyList();
 	void setPropertyValues();
+	void refreshDisplayProperties();
 
 	CMFCPropertyGridProperty*		Patch;
 	CMFCPropertyGridProperty*		RasterSize;
@@ -88,6 +74,8 @@ public:
 	CMFCPropertyGridProperty*		ICANDI_IP;
 	CMFCPropertyGridProperty*		FlipVertical;
 
+	void InitPropList();
+
 private:
 	_variant_t FixationTargetSizeValue;
 	_variant_t FixationTargetFilenameValue;
@@ -103,14 +91,15 @@ private:
 	
 	bool isValidIpAddress(_variant_t ipAddr);
 
-protected:
-	CFont m_fntPropList;
-	MyCMFCPropertyGridCtrl m_wndPropList;
-	void InitPropList();
+	CFont					m_fntPropList;
+	MyCMFCPropertyGridCtrl	m_wndPropList;
 
 protected:
+	afx_msg int OnCreate(LPCREATESTRUCT lp);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
+
+DECLARE_DYNAMIC(Properties)
 DECLARE_MESSAGE_MAP()
 
 
