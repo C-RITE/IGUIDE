@@ -23,7 +23,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	fieldsize = 0;
+	fieldsize = 120;
 	pDoc = NULL;
 	m_bVisible = true;
 	show_cross = false;
@@ -42,23 +42,15 @@ BEGIN_MESSAGE_MAP(Target, CDialogEx)
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
-void Target::calcFieldSize() {
-
-	double fs;
-	double pi = atan(1) * 4;			// just pi
-	double pixelpitch = 0.13725;		// pixel pitch of screen in mm
-	double d = 650;						// distance between beam splitter and screen in mm
-	fs = 2 * d * tan((pDoc->raster.size / 2) * (pi / 180));
-	fs /= pixelpitch;
-	fieldsize = (int)fs;
-
-}
 
 void Target::setCross() {
 	
+	int flipsign = pDoc->m_FlipVertical;
+	int aspect = (fieldsize / 2) * flipsign;
+
 	if (pDoc->m_Screens.size() > 0) {
 		CRect cRect = (CRect)pDoc->m_selectedScreen->area;
-		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
+		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - aspect), (float)(cRect.Height() / 2 - aspect));
 	}
 	
 	show_cross = true;
@@ -226,6 +218,7 @@ void Target::OnGamePadCalibration() {
 	// move cursor from one raster corner to the next with each click
 
 	ControlState state = pDoc->m_Controller.state;
+	int flipsign = pDoc->m_FlipVertical;
 
 	switch (state.fired % 5) {
 
@@ -246,8 +239,7 @@ void Target::OnGamePadCalibration() {
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		xbox_cross.y += fieldsize;
-
+		xbox_cross.y -= fieldsize * flipsign;
 		break;
 
 	case 3:

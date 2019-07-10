@@ -246,7 +246,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
 
 	m_pDlgTarget->pDoc = pDoc;
-	m_pDlgTarget->calcFieldSize();
 	m_pDlgTarget->getFixationTarget();	
 
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
