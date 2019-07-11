@@ -9,7 +9,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE)
+Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE),numPatches(0)
 {
 }
 
@@ -37,8 +37,14 @@ void Patches::lockIn(){
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
 	cleanup();
-	SaveToFile();
+	//SaveToFile();
+	SaveSequence();
 	this->push_back(dummy);
+	numPatches++;
+}
+
+int Patches::getNumPatches() {
+	return numPatches;
 }
 
 void Patches::untouch() {
@@ -134,7 +140,49 @@ bool Patches::SaveToFile() {
 }
 
 void Patches::SaveSequence() {
-	H5::H5File* file = new H5::H5File(H5std_string("test.h5"), H5F_ACC_TRUNC);
-	delete file;
-
+	H5std_string FILE_NAME("test.h5");
+	H5std_string DATASET_NAME("Patches");
+	hsize_t dimsf[2];
+	dimsf[0] = 10;
+	dimsf[1] = 3;
+	H5::DataSpace dataspace(2, dimsf);
+	float XYZ[10][3] = { 0.0 };
+	int i = 0;
+	for (auto it = this->begin(); it != this->end(); ++it)
+	{
+		XYZ[i][0] = it._Ptr->_Myval.coords.x;
+		XYZ[i][1] = it._Ptr->_Myval.coords.y;
+		XYZ[i][2] = _ttof(it._Ptr->_Myval.defocus);
+		i++;
+	}
+	
+	try {
+		H5::H5File file(FILE_NAME, H5F_ACC_TRUNC);
+		H5::FloatType datatype(H5::PredType::NATIVE_FLOAT);
+		H5::DataSet dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+		dataset.write(XYZ, H5::PredType::NATIVE_FLOAT);
+		H5Dclose(dataset.getId());
+		H5Fclose(file.getId());
+	}
+	// catch failure caused by the H5File operations
+	catch (H5::FileIException error)
+	{
+		error.printErrorStack();
+	}
+	// catch failure caused by the DataSet operations
+	catch (H5::DataSetIException error)
+	{
+		error.printErrorStack();
+	}
+	// catch failure caused by the DataSpace operations
+	catch (H5::DataSpaceIException error)
+	{
+		error.printErrorStack();
+	}
+	// catch failure caused by the DataSpace operations
+	catch (H5::DataTypeIException error)
+	{
+		error.printErrorStack();
+	}
+	
 }
