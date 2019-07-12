@@ -27,6 +27,9 @@ void Patches::GetSysTime(CString &buf) {
 	timeinfo = localtime(&rawtime);
 	strftime(buffer, 80, "%Y_%m_%d_%H_%M_%S", timeinfo);
 	buf = buffer;
+	if (!fileTouched) {
+		strftime(h5Name, 100, "%Y_%m_%d_%H_%M_%S_IGUIDE.h5", timeinfo);
+	}
 
 }
 
@@ -111,8 +114,8 @@ bool Patches::SaveToFile() {
 	if (!fileTouched) {
 		GetSysTime(timestamp);
 		filename = timestamp + "_" + filename;
-		hid_t file;
-		file = H5Fcreate("IGUIDE.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+		CString holder = L"_IGUIDE.h5";
+		hid_t file = H5Fcreate(h5Name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 		hid_t group = H5Gcreate(file, "/Patches", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		H5Gclose(group);
 		H5Fclose(file);
@@ -152,7 +155,7 @@ void Patches::SaveSequence() {
 	dimsf[1] = 3;
 	try {
 	hid_t dataspace = H5Screate_simple(2, dimsf, NULL);
-	hid_t file = H5Fopen("IGUIDE.h5", H5F_ACC_RDWR,H5P_DEFAULT);
+	hid_t file = H5Fopen(h5Name, H5F_ACC_RDWR,H5P_DEFAULT);
 	hid_t group = H5Gopen(file, "Patches", H5P_DEFAULT);
 	//first one to write to it's own dataset; second to write into one dataset
 	//hid_t dataset = H5Dcreate(group, this->getNumPatches(), H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

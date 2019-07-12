@@ -20,6 +20,7 @@ public:
 	~Patches();
 	CString			filepath;
 	CString			filename;
+	char h5Name[100];
 	int numPatches;
 	
 	bool			SaveToFile();
@@ -34,6 +35,7 @@ private:
 	bool			fileTouched;
 	void			GetSysTime(CString &buf);
 	void			cleanup();
-	char*				getNumPatches();
+	char*			getNumPatches();
+	char*			getFileName();
 
 };
