@@ -37,14 +37,15 @@ void Patches::lockIn(){
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
 	cleanup();
-	//SaveToFile();
-	SaveSequence();
+	SaveToFile();
 	this->push_back(dummy);
 	numPatches++;
 }
 
-int Patches::getNumPatches() {
-	return numPatches;
+char* Patches::getNumPatches() {
+	char strNumPatches[3];
+	sprintf(strNumPatches, "%.3d", numPatches);
+	return strNumPatches;
 }
 
 void Patches::untouch() {
@@ -110,6 +111,11 @@ bool Patches::SaveToFile() {
 	if (!fileTouched) {
 		GetSysTime(timestamp);
 		filename = timestamp + "_" + filename;
+		hid_t file;
+		file = H5Fcreate("IGUIDE.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+		hid_t group = H5Gcreate(file, "/Patches", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+		H5Gclose(group);
+		H5Fclose(file);
 	}
 
 	try {
@@ -117,6 +123,7 @@ bool Patches::SaveToFile() {
     		outputFile.WriteString(header + "\n" + sstream.str().c_str());
 		outputFile.Close();
 		fileTouched = true;
+		
 	}
 
 	catch (CFileException* pe)
@@ -140,29 +147,26 @@ bool Patches::SaveToFile() {
 }
 
 void Patches::SaveSequence() {
-	H5std_string FILE_NAME("test.h5");
-	H5std_string DATASET_NAME("Patches");
 	hsize_t dimsf[2];
-	dimsf[0] = 10;
+	dimsf[0] = 1;
 	dimsf[1] = 3;
-	H5::DataSpace dataspace(2, dimsf);
-	float XYZ[10][3] = { 0.0 };
-	int i = 0;
-	for (auto it = this->begin(); it != this->end(); ++it)
-	{
-		XYZ[i][0] = it._Ptr->_Myval.coords.x;
-		XYZ[i][1] = it._Ptr->_Myval.coords.y;
-		XYZ[i][2] = _ttof(it._Ptr->_Myval.defocus);
-		i++;
-	}
-	
 	try {
-		H5::H5File file(FILE_NAME, H5F_ACC_TRUNC);
-		H5::FloatType datatype(H5::PredType::NATIVE_FLOAT);
-		H5::DataSet dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
-		dataset.write(XYZ, H5::PredType::NATIVE_FLOAT);
-		H5Dclose(dataset.getId());
-		H5Fclose(file.getId());
+	hid_t dataspace = H5Screate_simple(2, dimsf, NULL);
+	hid_t file = H5Fopen("IGUIDE.h5", H5F_ACC_RDWR,H5P_DEFAULT);
+	hid_t group = H5Gopen(file, "Patches", H5P_DEFAULT);
+	//first one to write to it's own dataset; second to write into one dataset
+	//hid_t dataset = H5Dcreate(group, this->getNumPatches(), H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	hid_t dataset = H5Dcreate(group, this->getNumPatches(), H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	float XYZ[3];
+	XYZ[0] = this->back().coords.x;
+	XYZ[1] = this->back().coords.y;
+	XYZ[2] = _ttof(this->back().defocus);
+
+	H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, XYZ);
+	
+	H5Dclose(dataset);
+	H5Gclose(group);
+	H5Fclose(file);
 	}
 	// catch failure caused by the H5File operations
 	catch (H5::FileIException error)
