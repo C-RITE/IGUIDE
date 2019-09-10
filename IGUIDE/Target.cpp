@@ -32,7 +32,6 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 
 Target::~Target()
 {
-
 	delete m_POI;
 }
 

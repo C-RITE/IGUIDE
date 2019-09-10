@@ -2,7 +2,7 @@
 #include "IGUIDE.h"
 #include "IGUIDEDoc.h"
 #include "Fundus.h"
-
+#include "MainFrm.h"
 
 Fundus::Fundus() :
 	picture(NULL),
@@ -10,39 +10,39 @@ Fundus::Fundus() :
 {
 }
 
-
 Fundus::~Fundus()
 {
 }
 
-
 void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
+	CIGUIDEView* view = CIGUIDEView::GetView();
+	CD2DPointF center = view->GetRelativeCenter();;
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
-		double ppd = 1/pDoc->m_pGrid->dpp;
-		double ppdimage =  pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor / 15;
-		float factor = (float)(ppd / ppdimage);
+		
+		double ppdimage = (pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor) / _DELTA_D;
+		float factor = (float)(PPD / ppdimage);
+		float sfactor = pDoc->m_pDlgCalibration->m_sFactor;
 
+		CD2DPointF calibCenter = (pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x, pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y);
 		CD2DSizeF size = picture->GetSize();
 
 		D2D1_MATRIX_3X2_F identity = D2D1::IdentityMatrix();
 		D2D1_MATRIX_3X2_F scale = D2D1::Matrix3x2F::Scale(
-			D2D1::Size(factor,factor),
-			D2D1::Point2F((float)(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * pDoc->m_pDlgCalibration->m_sFactor),
-				(float)(pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * pDoc->m_pDlgCalibration->m_sFactor)));
+			D2D1::Size(factor, factor),
+			D2D1::Point2F(center.x, center.y));
 		D2D1_MATRIX_3X2_F translate = D2D1::Matrix3x2F::Translation(
-			pDoc->m_pGrid->center.x - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x * (float)pDoc->m_pDlgCalibration->m_sFactor,
-			pDoc->m_pGrid->center.y - pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y * (float)pDoc->m_pDlgCalibration->m_sFactor);
-		pRenderTarget->SetTransform(scale * translate);
-		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width, size.height));
+			calibCenter.x - center.x,
+			calibCenter.y - center.y);
+		pRenderTarget->SetTransform(scale);
+		pRenderTarget->DrawBitmap(picture, CD2DRectF(0,0, size.width, size.height));
 		pRenderTarget->SetTransform(identity);
 	}
 
 }
-
 
 HRESULT Fundus::_ShowWICFileOpenDialog(HWND hWndOwner)
 {

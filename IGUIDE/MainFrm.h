@@ -9,20 +9,29 @@ class Properties;
 class CMainFrame : public CFrameWndEx
 {
 
+public:
+	   
+	static
+	CPoint CMainFrame::GetCenterOffset()
+	{
+		CRect rect;
+		if (!AfxGetMainWnd())
+			return CPoint(0, 0);
+		AfxGetMainWnd()->GetClientRect(&rect);
+		CPoint clientCenter = rect.CenterPoint();
+		return CPoint(-CENTER + clientCenter.x,
+			-CENTER + clientCenter.y);
+	}
+
+	static
+	CPoint CMainFrame::GetCenter()
+	{
+		return CPoint{ CENTER, CENTER };
+	}
+	
 protected:
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
-
-// Attributes
-public:
-	const int WINDOW_WIDTH = 1280;
-	const double ASPECT_RATIO = (double)16 / 9;
-	const int WINDOW_HEIGHT = WINDOW_WIDTH * (1 / ASPECT_RATIO);
-
-// Operations
-public:
-
-// Overrides
 
 // Implementation
 public:
@@ -43,9 +52,9 @@ private:
 
 // Generated message map functions
 protected:
+	DECLARE_MESSAGE_MAP()
 	BOOL CreateDockingWindows();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
 	afx_msg LRESULT OnDisplayChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);

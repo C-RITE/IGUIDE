@@ -44,23 +44,36 @@ END_MESSAGE_MAP()
 
 CIGUIDEView::CIGUIDEView()
 {
+
+	mouseTraveled = false;
 	m_pDlgTarget = NULL;
 	m_pFixationTarget = NULL;
+	zoom = 1;
+	origin = CD2DPointF(0, 0);
+	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), origin);
+
 }
 
 CIGUIDEView::~CIGUIDEView()
 {
+
 	delete m_pDlgTarget;
+
 }
 
-CIGUIDEView * CIGUIDEView::GetView()
+CIGUIDEView* CIGUIDEView::GetView()
 {
+
 	CFrameWndEx * pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
+
+	if (!pFrame)
+		return NULL;
 
 	CView * pView = pFrame->GetActiveView();
 
 	if (!pView)
 		return NULL;
+
 
 	// Fail if view is of wrong kind
 	// (this could occur with splitter windows, or additional
@@ -73,7 +86,6 @@ CIGUIDEView * CIGUIDEView::GetView()
 
 }
 
-
 // CIGUIDEView printing
 
 BOOL CIGUIDEView::OnPreparePrinting(CPrintInfo* pInfo)
@@ -82,10 +94,12 @@ BOOL CIGUIDEView::OnPreparePrinting(CPrintInfo* pInfo)
 	return DoPreparePrinting(pInfo);
 }
 
+
 void CIGUIDEView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add extra initialization before printing
 }
+
 
 void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
@@ -93,76 +107,104 @@ void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 }
 
 
-// CIGUIDEView message handlers
-
-void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
+CD2DPointF CIGUIDEView::GetRelativeCenter()
 {
-	// TODO: Add your message handler code here and/or call default
-	
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	CPoint p(CMainFrame::GetCenter() + CMainFrame::GetCenterOffset());
+	center.x = p.x + mouseDist.x * zoom;
+	center.y = p.y + mouseDist.y * zoom;
 
-	if (pDoc->CheckFOV()) {
-		pDoc->m_pGrid->StorePatch(static_cast<CD2DPointF>(point));
-	}
-	else
-		return;
-
-	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-	free(pDoc->mousePos);
-	pDoc->mousePos = NULL;
-	ShowCursor(TRUE);
-
-	m_pDlgTarget->Invalidate();
-	Invalidate();
+	return center;
 
 }
-
-
-void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
-{
-	// TODO: Add your message handler code here and/or call default
-	
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-
-	if (pDoc->mousePos)
-		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
-			pDoc->mousePos->SetPoint(point.x, point.y);
-			RedrawWindow();
-		}
-
-}
-
 
 void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (!pDoc->mousePos && pDoc->CheckFOV()) {
-		pDoc->mousePos = (CPoint*)malloc(sizeof(CPoint));
-		pDoc->mousePos->SetPoint(point.x, point.y);
+	mousePos = mouseDist + point;
+	
+}
+
+
+void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	if (mouseTraveled) {
+		mouseTraveled = false;
+		return;
 	}
 
-	ShowCursor(FALSE);
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	if (pDoc->CheckFOV()) {
+		pDoc->m_pGrid->StorePatch(point, zoom);
+	}
+
+	else
+		return;
+
+	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+	m_pDlgTarget->Invalidate();
 
 	RedrawWindow();
 
 }
 
+void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	
+	/*if (mousePos)
+		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
+			mousePos->SetPoint(point.x, point.y);
+			RedrawWindow();
+		}*/
+
+	if (GetKeyState(VK_LBUTTON) < 0) {
+		mouseDist = mousePos - point;
+		mouseTraveled = true;
+		RedrawWindow();
+	}
+	
+}
+
+
+BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: Add your message handler code here and/or call default
+	
+	if ((zoom + zDelta / 100) >= 1) {
+		zoom += zDelta / 100;
+	}
+
+	mouseZoom = pt;
+
+	origin = { center.x + mouseDist.x / zoom, center.y + mouseDist.y / zoom };
+
+	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), origin);
+
+	RedrawWindow();
+	
+	return CView::OnMouseWheel(nFlags, zDelta, pt);
+
+}
 
 void CIGUIDEView::OnInitialUpdate()
 {
 	ModifyStyleEx(WS_EX_CLIENTEDGE, NULL);
+	
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
+
+	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
 
 	CView::OnInitialUpdate();
+
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	pDoc->m_Controller.reset();
 
-	
 }
 
 LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
@@ -185,12 +227,10 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 
 }
 
-
 void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 {
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 
 	CD2DPointF* FOV = new CD2DPointF[4];
@@ -242,9 +282,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
-	pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;
-	pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
-
 	m_pDlgTarget->pDoc = pDoc;
 	m_pDlgTarget->getFixationTarget();	
 
@@ -280,10 +317,14 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
+	if (!GetView())
+		return 1;
 
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	ASSERT_VALID(pRenderTarget);	
+
+	center = GetRelativeCenter();
 
 	if (!pDoc)
 		return FALSE;
@@ -292,16 +333,28 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	if (pRenderTarget) {
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
-		pDoc->m_pFundus->Paint(pRenderTarget);
-		pDoc->m_pGrid->Paint(pRenderTarget);
+		
+		if (pDoc->m_pGrid->m_pGridGeom) {
+
+			pRenderTarget->SetTransform(scale);
+			pRenderTarget->DrawGeometry(
+				pDoc->m_pGrid->m_pGridGeom,
+				&CD2DSolidColorBrush(pRenderTarget, D2D1::ColorF(D2D1::ColorF::DarkGray)),
+				.1f
+			);
+		}
+
+
+
 		pDoc->m_pGrid->Mark(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
+		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 			_T("Consolas"),								// font family name
-			sizeDpi.height / 8);							// font size
+			sizeDpi.height / 8);						// font size
 		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
 			_T("Consolas"),								// font family name
 			sizeDpi.height / 4);
@@ -315,8 +368,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				textFormat,									// text format
 				sizeTarget);								// size of the layout box
 
-			pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width - 210, 5),
-															// place on top-right corner
+			pRenderTarget->DrawTextLayout(
+				CD2DPointF(sizeTarget.width - 210, 5),		// place on top-right corner
 				&textLayout,								// text layout object
 				&CD2DSolidColorBrush						// brush used for text
 				(pRenderTarget,
@@ -342,7 +395,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 					D2D1::ColorF(D2D1::ColorF::White)));
 
 		}
-
 
 		if (pDoc->m_pGrid->overlay & QUICKHELP) {
 
@@ -373,7 +425,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				help[2],									// text to be drawn
 				textFormat,									// text format
 				sizeTarget);								// size of the layout box
-
 
 			pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
 				&AOSACA_help,								// text layout object
@@ -418,8 +469,9 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 					0.25f,
 					D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
 			}
-
+		
 			else {
+			// use default fixation target
 
 				CD2DRectF frame(upperRight);
 				frame.left += 15;
@@ -439,7 +491,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			}
 
 		}
-			   
+		
 	}
 
 	return 0;
@@ -542,8 +594,6 @@ BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 
 }
 
-
-
 void CIGUIDEView::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
@@ -552,7 +602,6 @@ void CIGUIDEView::OnClose()
 	CView::OnClose();
 
 }
-
 
 afx_msg LRESULT CIGUIDEView::OnDisplayChange(WPARAM wParam, LPARAM lParam)
 {
@@ -566,24 +615,9 @@ afx_msg LRESULT CIGUIDEView::OnDisplayChange(WPARAM wParam, LPARAM lParam)
 
 }
 
-
 void CIGUIDEView::ToggleFixationTarget()
 {
 	m_pDlgTarget->m_bVisible ? m_pDlgTarget->m_bVisible = false : m_pDlgTarget->m_bVisible = true;
+
 }
 
-
-BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-{
-	// TODO: Add your message handler code here and/or call default
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-
-	//CRect rect;
-	//CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
-	//pDoc->raster.scale.x = (float)zDelta / (pMainWnd->WINDOW_WIDTH - 20);
-	//pDoc->raster.scale.y = (float)zDelta / (pMainWnd->WINDOW_HEIGHT - 62);
-
-	//RedrawWindow();
-
-	return CView::OnMouseWheel(nFlags, zDelta, pt);
-}

@@ -91,6 +91,7 @@ BOOL CIGUIDEApp::InitInstance()
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
+
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
@@ -206,20 +207,4 @@ BOOL CAboutDlg::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-
-BOOL CIGUIDEApp::SaveState(LPCTSTR lpszSectionName, CFrameImpl* pFrameImpl)
-{
-	// TODO: Add your specialized code here and/or call the base class
-
-	return false;
-}
-
-
-BOOL CIGUIDEApp::StoreWindowPlacement(const CRect& rectNormalPosition, int nFflags, int nShowCmd)
-{
-	// TODO: Add your specialized code here and/or call the base class
-
-	return false;
 }

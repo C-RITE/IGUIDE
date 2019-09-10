@@ -42,7 +42,7 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-	
+
 }
 
 CMainFrame::~CMainFrame()

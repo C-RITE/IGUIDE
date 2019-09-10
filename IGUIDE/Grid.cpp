@@ -21,15 +21,22 @@ Grid::Grid()
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
 
-	lpHi = { D2D1::InfiniteRect(),
+	m_pLayer1 = new CD2DLayer(NULL);	// opacity layer parameters
+
+	m_pGridGeom = NULL;
+
+	// layer for patch-opacity
+	lpHi = {
+		D2D1::InfiniteRect(),
 		NULL,
-		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
+		D2D1_ANTIALIAS_MODE_ALIASED,
 		D2D1::IdentityMatrix(),
-		.4f,
+		1.0,
 		NULL,
-		D2D1_LAYER_OPTIONS_NONE };
-	pLayer = new CD2DLayer(NULL);
-	
+		D2D1_LAYER_OPTIONS_NONE
+	};
+
+
 }
 
 Grid::~Grid() {
@@ -43,7 +50,7 @@ Grid::~Grid() {
 	delete m_pPatchBrush;
 	delete m_pGrayBrush;
 	delete m_pBrushProp;
-	delete pLayer;
+	delete m_pLayer1;
 }
 
 void Grid::DelPatch() {
@@ -58,15 +65,15 @@ void Grid::ClearPatchlist() {
 
 }
 
-void Grid::StorePatch(CD2DPointF loc) {
+void Grid::StorePatch(CPoint loc, float zoom) {
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	Patch patch;
+	CIGUIDEView* view = CIGUIDEView::GetView();
+	CD2DPointF center = view->GetRelativeCenter();;
 
-	AfxGetMainWnd()->GetClientRect(mainWnd);
-	center = mainWnd.CenterPoint();
-	patch.coords.x = (center.x - loc.x)*-1 * (float)dpp;
-	patch.coords.y = (center.y - loc.y)* (float)dpp;
+	Patch patch;
+	patch.coords.x = ((center.x - loc.x) * DPP) / zoom;
+	patch.coords.y = ((center.y - loc.y) * DPP) / zoom;
 	patch.color = pDoc->raster.color;
 	patch.rastersize = pDoc->raster.size;
 	patch.locked = false;
@@ -75,101 +82,119 @@ void Grid::StorePatch(CD2DPointF loc) {
 
 }
 
-void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
+void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 
-	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+	// grid geometry creation
 
-	CMainFrame* pMainWnd = (CMainFrame*) AfxGetMainWnd();
-	pMainWnd->GetClientRect(mainWnd);
-	center = mainWnd.CenterPoint();
+	CD2DPointF offset = CMainFrame::GetCenterOffset();
 
-	dpp = (m_pDeltaFOD + m_pRadNerve) / pMainWnd->WINDOW_WIDTH;
-	double ppd = 1 / dpp;	//pixel per degree
+	m_pGridGeom = new CD2DPathGeometry(pRenderTarget,1);
+	m_pGridGeom->Create(pRenderTarget);
+	CD2DGeometrySink GridGeomSink(*m_pGridGeom);
 
-	// draw a grid background around the center
-	if (overlay & GRID) {
-		for (float x = - ppd / 2 ; x < mainWnd.Width(); x += ppd)
-		{
-			pRenderTarget->DrawLine(
-				CD2DPointF(x, - ppd / 2),
-				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pGrayBrush,
-				1
-				);
-		}
+	CD2DPointF point;
 
+	// x-plot
+	for (int i = 1; i < LANES; i++) {
+		GridGeomSink.BeginFigure(
+			CD2DPointF(offset.x + PPD * i, offset.y), D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+			
+		point.x = offset.x + PPD * i;
+		point.y = offset.y + PPD * LANES;
+
+		GridGeomSink.AddLine(point);
 		
-		for (float y = - ppd / 2; y < mainWnd.Height(); y += ppd)
-		{
-			pRenderTarget->DrawLine(
-				CD2DPointF(- ppd / 2, y),
-				CD2DPointF((float)mainWnd.Width(), y),
-				m_pGrayBrush,
-				1
-				);
-		}
+		GridGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 
 	}
 
-	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+	// y-plot
+	for (int i = 1; i < LANES; i++) {
+		GridGeomSink.BeginFigure(
+			CD2DPointF(offset.x, offset.y + PPD * i), D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 
+		point.x = offset.x + PPD * LANES;
+		point.y = offset.y + PPD * i;
+
+		GridGeomSink.AddLine(point);
+
+		GridGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+
+	}
+	
 }
 
 void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
-	CMainFrame* mainWnd = (CMainFrame*)AfxGetMainWnd();
+	CIGUIDEView* view = CIGUIDEView::GetView();
+	CD2DPointF offset = CMainFrame::GetCenterOffset();
+	CD2DPointF gridcenter{ offset.x + CENTER, offset.y + CENTER };
+	CD2DPointF a, b;
+	CD2DRectF r;
 
 	//draw circles around the center
 	if (overlay & DEGRAD) {
-		for (float x = 0; x < 16; x++) {
-			CD2DRectF e = { center.x - 1 / (float)dpp * x,
-				center.y - 1 / (float)dpp * x,
-				center.x + 1 / (float)dpp * x,
-				center.y + 1 / (float)dpp * x };
-			pRenderTarget->DrawEllipse(e, m_pGrayBrush, 1);
+		const int RANGE = CENTER * DPP;
+		CD2DPointF a[RANGE];
+		CD2DPointF b[RANGE];
+		for (int f = 0; f < RANGE; f++) {
+			a[f].x = offset.x + f * PPD;
+			a[f].y = offset.y + f * PPD;
+			b[f].x = offset.x + CANVAS - f * PPD;
+			b[f].y = offset.y + CANVAS - f * PPD;
+		}
+
+		for (int f = 0; f < RANGE; f++) {
+			CD2DRectF r{ a[f].x, a[f].y, b[f].x, b[f].y };
+				pRenderTarget->DrawEllipse(r, m_pGrayBrush, .1f);
 		}
 	}
 
 	// draw circles around foveola and fovea
 	if (overlay & FOVEOLA) {
-		CD2DRectF e1 = { center.x - 1 / (float)dpp * 1.2f,
-		center.y - 1 / (float)dpp * 1.2f,
-		center.x + 1 / (float)dpp * 1.2f,
-		center.y + 1 / (float)dpp * 1.2f };
-		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
+		a.x = gridcenter.x - _FOVEOLA * PPD;
+		a.y = gridcenter.y - _FOVEOLA * PPD;
+		b.x = gridcenter.x + _FOVEOLA * PPD;
+		b.y = gridcenter.y + _FOVEOLA * PPD;
+		r = { a.x, a.y, b.x, b.y };
+		pRenderTarget->DrawEllipse(r, m_pRedBrush, .2f);
 	}
 
 	if (overlay & FOVEA){
-		CD2DRectF e2 = { center.x - 1 / (float)dpp * 6.2f,
-		center.y - 1 / (float)dpp * 6.2f,
-		center.x + 1 / (float)dpp * 6.2f,
-		center.y + 1 / (float)dpp * 6.2f };
-	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
+		a.x = gridcenter.x - _FOVEA * PPD;
+		a.y = gridcenter.y - _FOVEA * PPD;
+		b.x = gridcenter.x + _FOVEA * PPD;
+		b.y = gridcenter.y + _FOVEA * PPD;
+		r = { a.x, a.y, b.x, b.y };
+		pRenderTarget->DrawEllipse(r, m_pRedBrush, .2f);
 	}
 
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
-		nerve = { float(center.x + mainWnd->WINDOW_WIDTH / 2 - 5 / dpp),
-		(float)((center.y - 2.5 / dpp) - 86),
-		(float)(center.x + mainWnd->WINDOW_WIDTH / 2),
-		(float)((center.y + 2.5 / dpp) - 86) };
-		pRenderTarget->DrawEllipse(nerve, m_pBlueBrush, .3f);
+		a.x = gridcenter.x + _DELTA_D * PPD - _OPTIC_DISC / DPP;
+		a.y = gridcenter.y - _OPTIC_DISC / DPP - _DELTA_DY / DPP;
+		b.x = gridcenter.x + _DELTA_D * PPD + _OPTIC_DISC / DPP;
+		b.y = gridcenter.y + _OPTIC_DISC / DPP - _DELTA_DY / DPP;
+		r = { a.x, a.y, b.x, b.y };
+		pRenderTarget->DrawEllipse(r, m_pBlueBrush, .2f);
 	}
 
-	// draw cross in fovea
+	// draw cross in center of the fovea
 	if (overlay & CROSSHAIR) {
-		CD2DRectF fovea(center.x - 4,
-			center.y - 4,
-			center.x + 4,
-			center.y + 4);
+		a.x = gridcenter.x - 5;
+		a.y = gridcenter.y - 5;
+		b.x = gridcenter.x + 5;
+		b.y = gridcenter.y + 5;
+		r = { a.x, a.y, b.x, b.y };
+		pRenderTarget->DrawEllipse(r, m_pWhiteBrush, .1f);
 
-		pRenderTarget->DrawEllipse(fovea, m_pWhiteBrush);
-		pRenderTarget->DrawLine(CD2DPointF(center.x - 8, center.y),
-			CD2DPointF(center.x + 8, center.y),
-			m_pWhiteBrush);
-	pRenderTarget->DrawLine(CD2DPointF(center.x, center.y - 8),
-		CD2DPointF(center.x, center.y + 8),
-		m_pWhiteBrush);
+		pRenderTarget->DrawLine(CD2DPointF(gridcenter.x - 8, gridcenter.y),
+			CD2DPointF(gridcenter.x + 8, gridcenter.y),
+			m_pWhiteBrush, .1f);
+
+		pRenderTarget->DrawLine(CD2DPointF(gridcenter.x, gridcenter.y - 8),
+			CD2DPointF(gridcenter.x, gridcenter.y + 8),
+			m_pWhiteBrush, .1f);
 	}
 
 }
@@ -179,24 +204,26 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 	// draw all marked locations (i.e. list of patches) in operator view
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	
-	AfxGetMainWnd()->GetClientRect(mainWnd);
-	center = mainWnd.CenterPoint();
+	CIGUIDEView* view = CIGUIDEView::GetView();
+	CD2DPointF center = view->GetRelativeCenter();
+
 	CD2DRectF rect1;
 	CRect intersect;
 	float rsdeg; // raster size in degree visual angle
-	
+
 
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 		
+		if (!m_pLayer1) m_pLayer1->Create(pRenderTarget);
+		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
+
 		rsdeg = (float)pDoc->raster.videodim / it._Ptr->_Myval.rastersize; 
 
-		pRenderTarget->PushLayer(lpHi, *pLayer);
-
-		rect1 = { center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(rsdeg / 2 / dpp),
-			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp - (float)(rsdeg / 2 / dpp),
-			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(rsdeg / 2 / dpp),
-			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(rsdeg / 2 / dpp)
+		rect1 = { 
+			(float)(center.x - it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD),
+			(float)(center.y - it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD),
+			(float)(center.x - it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD),
+			(float)(center.y - it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD)
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
@@ -207,18 +234,16 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 	if (patchlist.size() > 0) {
 
-		rsdeg = (float)pDoc->raster.videodim / patchlist.back().rastersize; // raster size in degree visual angle
+		rsdeg = (float)pDoc->raster.videodim / patchlist.back().rastersize;
 
-		pRenderTarget->PushLayer(lpHi, *pLayer);
-
-		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(rsdeg / 2 / dpp),
-			center.y - patchlist.back().coords.y * 1 / (float)dpp - (float)(rsdeg / 2 / dpp),
-			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(rsdeg / 2 / dpp),
-			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(rsdeg / 2 / dpp)
+		rect1 = { 
+			(float)(center.x - patchlist.back().coords.x * PPD - rsdeg / 2 * PPD),
+			(float)(center.y - patchlist.back().coords.y * PPD - rsdeg / 2 * PPD),
+			(float)(center.x - patchlist.back().coords.x * PPD + rsdeg / 2 * PPD),
+			(float)(center.y - patchlist.back().coords.y * PPD + rsdeg / 2 * PPD)
 		};
-		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
-		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 2);
-		pRenderTarget->PopLayer();
+		
+		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
 
 		CD2DEllipse center(&rect1);
 		center.radiusX = center.radiusY = .5;
@@ -226,35 +251,36 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .5);
 
 		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, rect1);	
-		
-		
+				
 		int number = 1;
+
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 			
-			rsdeg = (double)pDoc->raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
+			rsdeg = (double)pDoc->raster.videodim / (double)it._Ptr->_Myval.rastersize;
 
 			if (it._Ptr->_Myval.locked == true) {
 				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, rsdeg, number);
 				number++;
 			}
+
 		}
 
 	}
 
 
-	if (pDoc && pDoc->mousePos) {
-		
-		rsdeg = (float)pDoc->raster.videodim / pDoc->raster.size;
+	//if (pDoc && pDoc->mousePos) {
+	//	
+	//	rsdeg = (float)pDoc->raster.videodim / pDoc->raster.size;
 
-		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->mousePos->x - (float)(rsdeg / 2 / dpp),
-			pDoc->mousePos->y - (float)(rsdeg / 2 / dpp),
-			pDoc->mousePos->x + (float)(rsdeg / 2 / dpp),
-			pDoc->mousePos->y + (float)(rsdeg / 2 / dpp)),
-			m_pWhiteBrush,
-			.5f,
-			NULL);
-	}
+	//	pRenderTarget->DrawRectangle(CD2DRectF(
+	//		pDoc->mousePos->x - (float)(rsdeg / 2 / DPP),
+	//		pDoc->mousePos->y - (float)(rsdeg / 2 / DPP),
+	//		pDoc->mousePos->x + (float)(rsdeg / 2 / DPP),
+	//		pDoc->mousePos->y + (float)(rsdeg / 2 / DPP)),
+	//		m_pWhiteBrush,
+	//		.5f,
+	//		NULL);
+	//}
 
 }
 
@@ -310,6 +336,8 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 
 void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number) {
 	
+	CD2DPointF center = CMainFrame::GetCenter();
+
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CString vidText;
 
@@ -326,7 +354,7 @@ void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPo
 		sizeTarget);								// size of the layout box
 
 	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / (float)dpp + center.x) - (rastersize / 2 * 1 / (float)dpp), (yPos * -1 / (float)dpp + center.y) - (rastersize / 2 * 1 / (float)dpp)),
+		CD2DPointF((xPos * 1 / (float)DPP + center.x) - (rastersize / 2 * 1 / (float)DPP), (yPos * -1 / (float)DPP + center.y) - (rastersize / 2 * 1 / (float)DPP)),
 		&textLayout,
 		m_pWhiteBrush);
 

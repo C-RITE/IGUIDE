@@ -190,7 +190,7 @@ void Calibration::OnBnClickedOk()
 			CDialog::OnOK();
 			break;
 		default:
-			AfxMessageBox(_T("Calibration incomplete!\n\nPlease select two distinct points in image to proceed."), MB_OK | MB_ICONSTOP);
+			AfxMessageBox(_T("Calibration incomplete!\n\nPlease mark distance between fovea and optic disc to proceed."), MB_OK | MB_ICONSTOP);
 	}
 }
 

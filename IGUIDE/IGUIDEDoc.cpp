@@ -57,7 +57,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
-	mousePos = NULL;
+
 	raster.size = 600;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
@@ -70,6 +70,14 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 }
 
+CIGUIDEDoc::~CIGUIDEDoc()
+{
+	m_Controller.shutdown();
+	delete m_pGrid;
+	delete m_pFundus;
+	delete m_pDlgCalibration;
+
+}
 
 bool CIGUIDEDoc::getScreens() {
 
@@ -81,16 +89,6 @@ bool CIGUIDEDoc::getScreens() {
 
 }
 
-CIGUIDEDoc::~CIGUIDEDoc()
-{
-	m_Controller.shutdown();
-	delete m_pGrid;
-	delete m_pFundus;
-	delete mousePos;
-	delete m_pDlgCalibration;
-
-
-}
 
 // Get Doc, made for other classes that need access to attributes
 
@@ -348,10 +346,11 @@ float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 
 CString CIGUIDEDoc::getTraceInfo() {
 
-//	POSITION pos = GetFirstViewPosition();
-//	CWnd* target = GetNextView(pos);
 	CString trace;
 	Edge k;
+
+	CIGUIDEView* view = CIGUIDEView::GetView();
+	CD2DPointF center = view->GetRelativeCenter();;
 
 	if (!m_pGrid->patchlist.empty()) {
 		k.q.x = m_pGrid->patchlist.back().coords.x;
@@ -359,7 +358,7 @@ CString CIGUIDEDoc::getTraceInfo() {
 	}
 
 	double beta = 360 - ComputeOrientationAngle(k);
-	double dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
+	double dist = center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
 	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
 		raster.meanAlpha,
@@ -369,7 +368,7 @@ CString CIGUIDEDoc::getTraceInfo() {
 		raster.scale.x,
 		raster.scale.y,
 		dist,
-		1 / m_pGrid->dpp,
+		PPD,
 		raster.meanEdge/raster.size
 	);
 

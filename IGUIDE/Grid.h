@@ -1,6 +1,4 @@
 #pragma once
-#include "stdafx.h"
-#include <vector>
 #include "Patches.h"
 
 enum Overlay
@@ -32,8 +30,12 @@ private:
 		*m_pMagentaBrush,
 		*m_pPatchBrush;
 
+
 	CD2DBrushProperties*	m_pBrushProp;
-	CD2DLayer*				pLayer;
+	CD2DLayer*				m_pLayer1;
+
+	D2D1_LAYER_PARAMETERS	lpHi;
+
 
 public:
 
@@ -44,23 +46,16 @@ public:
 	DWORD					overlay;						// for different view styles
 	Patches					patchlist;						// storage for all rasters
 	CD2DRectF				nerve;							// optic disc
-	CD2DPointF				center;
-	CRect					mainWnd;
-	
-	D2D1_LAYER_PARAMETERS	lpHi;
-
-	const int				m_pDeltaFOD = 15;				/* distance between foveal and 
-															   optic disc center in degrees */
-	const double			m_pRadNerve = 2.5;				// radius of optic nerve head
-	double					dpp;							// degree per pixel
+	CRect					mainWnd;						// client area of operator view
+	CD2DPathGeometry*		m_pGridGeom;					// the grid
 
 	void DelPatch();
 	void ClearPatchlist();
-	void StorePatch(CD2DPointF point);						// store patch upon click of mouse button
-	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
-	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
+	void StorePatch(CPoint point, float zoom);					// store patch upon click of mouse button
+	void DrawOverlay(CHwndRenderTarget* pRenderTarget);			// draw information overlay
 	void Mark(CHwndRenderTarget* pRenderTarget);			// draw patches
 	
+	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);	// construct the grid
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);
 

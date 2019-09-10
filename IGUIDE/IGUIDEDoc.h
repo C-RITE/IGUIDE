@@ -34,7 +34,6 @@ public:
 	CString					m_InputController;					// for subject calibration procedure
 	int						m_FlipVertical;						// flip target screen
 	int						m_FixationTargetSize;				// fixation target size in percent
-	CPoint*					mousePos;							// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 
 private:
