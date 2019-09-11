@@ -26,8 +26,8 @@ class Target : public CDialogEx
 	bool					show_cross;			// cross visibility
 	bool					m_bMouseEnable;		// toggle mouse operation
 	double					ppd_client;			// pixel per degree on client screen
-	int						fieldsize;			// fieldsize 'dummy' constant for simplifying xbox
-												// calibration process
+	int						fieldsize;			// fieldsize in pixel on client screen
+	int						discretion;			// distance in pixel to raster corners during calibration
 
 // Operations
 
@@ -36,8 +36,10 @@ public:
 	~Target();
 	void Pinpoint(float x, float y);
 	void getFixationTarget();
+	void calcFieldSize();
 	void setCross();
 	void OnGamePadCalibration();
+	void restartCalibration();
 	void finishCalibration();
 
 // Dialog Data

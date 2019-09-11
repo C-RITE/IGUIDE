@@ -58,7 +58,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	mousePos = NULL;
-	raster.size = 600;
+	raster.size = 1.28;
 	raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
 	m_FixationTargetSize = 100;
@@ -88,7 +88,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pFundus;
 	delete mousePos;
 	delete m_pDlgCalibration;
-
 
 }
 
@@ -120,6 +119,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
 			data = homedir;
+			data.Append(_T("\\Pictures\\"));
 		}
 	}
 
@@ -146,20 +146,12 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_ICANDI_IP = data;
 
-	data = AfxGetApp()->GetProfileString(L"Settings", L"MRUFundus", NULL);
-	if (data.IsEmpty()) {
-		WCHAR homedir[MAX_PATH];
-		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
-			data = homedir;
-		}
-	}
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
 
-	m_pFundus->mru_folder = data;
+	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
+	if (!FTS) FTS = 100;
+	m_FixationTargetSize = FTS;
 
-	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 33);
-
-	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
-	
 	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
 	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
 		if (it->number == screen) {
@@ -167,7 +159,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		}
 	}
 
-	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 1);
+	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 
@@ -191,10 +183,13 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", raster.size);
+	LPBYTE rsize;
+	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
+		memcpy(&raster.size, rsize, sizeof(double));
 
 	delete calib, ptr;
 	delete rcol;
+	delete rsize;
 
 	return TRUE;
 }
@@ -211,11 +206,10 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
-	AfxGetApp()->WriteProfileString(L"Settings", L"MRUFundus", m_pFundus->mru_folder);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", raster.size);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &raster.size, sizeof(double));
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
 	if (raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
@@ -608,7 +602,7 @@ void CIGUIDEDoc::OnOverlayDefocus()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & DEFOCUS)
-		m_pGrid->overlay = m_pGrid->overlay & (~DEFOCUS);
+		m_pGrid->overlay = m_pGrid->overlay & ~DEFOCUS;
 	else
 		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
 
@@ -721,24 +715,21 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 void CIGUIDEDoc::ToggleOverlay()
 {
 	// TODO: Add your implementation code here.
-
-	if (m_pGrid->overlay == 0 || m_pGrid->overlay == QUICKHELP) {
-		m_pGrid->overlay = overlaySettings;
+	if (m_pGrid->overlay > QUICKHELP) {
+		overlaySettings = m_pGrid->overlay - QUICKHELP;
+		m_pGrid->overlay = QUICKHELP;
 		UpdateAllViews(NULL);
 		return;
 	}
 
-	if (m_pGrid->overlay & QUICKHELP) {
-		overlaySettings = m_pGrid->overlay;
-		m_pGrid->overlay = QUICKHELP;
-	}
-	else
-	{
+	else if (m_pGrid->overlay & ~QUICKHELP) {
 		overlaySettings = m_pGrid->overlay;
 		m_pGrid->overlay = 0;
-
+		UpdateAllViews(NULL);
+		return;
 	}
+	
+	m_pGrid->overlay += overlaySettings;
 
 	UpdateAllViews(NULL);
-
 }

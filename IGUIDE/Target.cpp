@@ -23,10 +23,11 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	fieldsize = 120;
+	fieldsize = 0;
 	pDoc = NULL;
 	m_bVisible = true;
 	show_cross = false;
+	discretion = 10;
 
 }
 
@@ -42,15 +43,30 @@ BEGIN_MESSAGE_MAP(Target, CDialogEx)
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
+void Target::calcFieldSize() {
+
+	double fs;
+	double pi = atan(1) * 4;			// just pi
+	double pixelpitch = 0.13725;		// pixel pitch of screen in mm
+	double d = 650;						// distance between beam splitter and screen in mm
+	fs = 2 * d * tan((pDoc->raster.size / 2) * (pi / 180));
+	fs /= pixelpitch;
+	fieldsize = (int)fs;
+
+}
 
 void Target::setCross() {
 	
-	int flipsign = pDoc->m_FlipVertical;
-	int aspect = (fieldsize / 2) * flipsign;
-
 	if (pDoc->m_Screens.size() > 0) {
 		CRect cRect = (CRect)pDoc->m_selectedScreen->area;
-		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - aspect), (float)(cRect.Height() / 2 - aspect));
+		
+		// place first cross on top-left corner of the raster
+		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
+		
+		// add discretion
+		xbox_cross.x -= discretion;
+		xbox_cross.y -= discretion;
+
 	}
 	
 	show_cross = true;
@@ -76,19 +92,22 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
 
-	int flipsign = pDoc->m_FlipVertical;
 	double alpha, beta, gamma;
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
-
-	ppd_client = (1 / ((double)pDoc->raster.videodim / (double)pDoc->raster.size)) * pDoc->raster.meanEdge;
+	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;
 
 	Edge k;
-	k.q.x = centerOffset_x;
-	k.q.y = flipsign * centerOffset_y;
-
+	k.q.x = -centerOffset_x;
+	if (pDoc->m_FlipVertical) {
+		k.q.y = -centerOffset_y;
+	}
+	else {
+		k.q.y = centerOffset_y;
+		
+	}
 	alpha = pDoc->raster.meanAlpha;
-	beta = pDoc->ComputeOrientationAngle(k);
+	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
 
 	a = centerOffset_x;
@@ -200,6 +219,18 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 }
 
+void Target::restartCalibration() {
+
+	free(m_POI);
+	m_POI = NULL;
+	pDoc->raster.meanAlpha = 0;
+	pDoc->raster.meanEdge = 0;
+	pDoc->raster.corner.clear();
+	pDoc->raster.perimeter.clear();
+	pDoc->m_pGrid->ClearPatchlist();
+	
+}
+
 void Target::finishCalibration() {
 
 	CRect mainWnd;
@@ -218,35 +249,37 @@ void Target::OnGamePadCalibration() {
 	// move cursor from one raster corner to the next with each click
 
 	ControlState state = pDoc->m_Controller.state;
-	int flipsign = pDoc->m_FlipVertical;
 
 	switch (state.fired % 5) {
 
 	case 0:
 		// reset it all
 		setCross();
-		OnLButtonDown(0, CPoint(0, 0));
+		OnLButtonDown(0x00FF, CPoint(0, 0));
 		break;
 
 	case 1:
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
-			(int)xbox_cross.y + state.LY));
-		xbox_cross.x += fieldsize;
+			(int)xbox_cross.y + state.LY)
+		);
+		xbox_cross.x += fieldsize + discretion * 2;
 		break;
 
 	case 2:
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		xbox_cross.y -= fieldsize * flipsign;
+		
+		xbox_cross.y += fieldsize + discretion * 2;
+
 		break;
 
 	case 3:
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		xbox_cross.x -= fieldsize;
+		xbox_cross.x -= fieldsize + discretion * 2;
 		break;
 
 	case 4:
@@ -269,22 +302,17 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
-	if (pDoc->raster.corner.size() < 3)
-		pDoc->raster.corner.push_back(d2dpoint);
-	else if (pDoc->raster.corner.size() == 3) {
+	if (nFlags == 0x00FF || pDoc->raster.corner.size() > 3) {
+		restartCalibration();
+		return;
+	}
+
+	if (pDoc->raster.corner.size() == 3) {
 		pDoc->raster.corner.push_back(d2dpoint);
 		finishCalibration();
 	}
-
-	else {
-		free(m_POI);
-		m_POI = NULL;
-		pDoc->raster.meanAlpha = 0;
-		pDoc->raster.meanEdge = 0;
-		pDoc->raster.corner.clear();
-		pDoc->raster.perimeter.clear();
-		pDoc->m_pGrid->ClearPatchlist();
-	}
+	else
+		pDoc->raster.corner.push_back(d2dpoint);
 
 	pDoc->UpdateAllViews(NULL);
 	RedrawWindow();
