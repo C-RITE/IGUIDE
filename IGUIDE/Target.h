@@ -27,6 +27,7 @@ class Target : public CDialogEx
 	bool					m_bMouseEnable;		// toggle mouse operation
 	double					ppd_client;			// pixel per degree on client screen
 	int						fieldsize;			// fieldsize in pixel on client screen
+	int						discretion;			// distance in pixel to raster corners during calibration
 
 // Operations
 
@@ -38,6 +39,7 @@ public:
 	void calcFieldSize();
 	void setCross();
 	void OnGamePadCalibration();
+	void restartCalibration();
 	void finishCalibration();
 
 // Dialog Data

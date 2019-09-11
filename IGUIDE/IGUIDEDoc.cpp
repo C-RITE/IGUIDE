@@ -89,7 +89,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete mousePos;
 	delete m_pDlgCalibration;
 
-
 }
 
 // Get Doc, made for other classes that need access to attributes
@@ -160,7 +159,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		}
 	}
 
-	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 0);
+	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 
@@ -208,7 +207,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &raster.size, sizeof(double));
 	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));

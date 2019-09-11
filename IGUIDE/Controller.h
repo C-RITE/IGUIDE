@@ -8,6 +8,7 @@ struct ControlState {
 	int LY;					// DPAD y pos
 	bool fireDown;			// for fire signal state
 	int fired;				// counter for A-button
+	int accel;				// dynamic acceleration
 	bool operator==(const ControlState &a)
 	{
 		if (memcmp(this,&a,sizeof(ControlState)) == 0)
@@ -28,9 +29,10 @@ public:
 
 	CWinThread*			m_pThread;
 
-	void				reset();
-	void				shutdown();
 	ControlState		state;								// store controller states
+	void				reset();
+	void				setFlip();
+	void				shutdown();
 	int					flipSign;
 	bool				m_bRunning;							// thread runtime
 	bool				m_bActive;							// gamepad on/off

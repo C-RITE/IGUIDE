@@ -99,7 +99,8 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	}
 
 	if (propName == L"Flip Vertical") {
-		pDoc->m_FlipVertical = vt;
+		pDoc->m_FlipVertical = vt.bstrVal;
+		pDoc->m_Controller.setFlip();
 	}
 
 	if (propName == L"Capability") {
@@ -280,6 +281,11 @@ void Properties::fillProperties() {
 	CString control[2]{ L"Mouse", L"Gamepad" };
 	for (int i = 0; i < 2; i++)
 		InputController->AddOption(control[i]);
+
+	FlipVertical->RemoveAllOptions(); // same as before
+	CString vert[2]{ L"True", L"False" };
+	for (int i = 0; i < 2; i++)
+		FlipVertical->AddOption(vert[i]);
 
 }
 
