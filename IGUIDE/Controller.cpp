@@ -31,15 +31,15 @@ void Controller::reset(){
 	else {
 		m_bActive = false;
 	}
-		
-	if (m_bActive && m_bRunning == false) {
+
+	if (m_bActive) {
 		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
-		m_pThread->m_bAutoDelete = false;
 		m_bRunning = true;
 		m_pThread->ResumeThread();
 	}
 
 }
+
 
 void Controller::setFlip() {
 	
@@ -58,7 +58,6 @@ void Controller::shutdown() {
 	m_bRunning = false;
 	if (m_pThread) {
 		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
-		delete m_pThread;
 	}
 
 }
@@ -70,7 +69,7 @@ UINT GamePadThread(LPVOID pParam) {
 	m_pGamePad = new DirectX::GamePad;
 	DirectX::GamePad::State state;
 	ControlState localState;
-
+	
 	HWND mainWnd = AfxGetMainWnd()->GetSafeHwnd();
 
 	while (parent->m_bRunning) {
@@ -82,51 +81,75 @@ UINT GamePadThread(LPVOID pParam) {
 
 			if (state.IsConnected()) {
 
-				if (state.IsAPressed())
+				if (state.IsAPressed()) {
 					parent->state.fired++;
+					PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
+				}
 
-				if (state.IsDPadDownPressed())
-					parent->state.LY -= parent->flipSign;
+				// sleep as long as 'A' is in pressed state
+				while (state.IsAPressed()){
+					state = m_pGamePad->GetState(0);
+					Sleep(10);
+				}
 
-				if (state.IsDPadUpPressed())
-					parent->state.LY += parent->flipSign;
-
-				if (state.IsDPadLeftPressed())
-					parent->state.LX -= 1;
-
-				if (state.IsDPadRightPressed())
-					parent->state.LX += 1;
-
-				if (parent->state.accel > 5)
+				while (state.IsDPadDownPressed() || state.IsDPadLeftPressed() || state.IsDPadRightPressed() || state.IsDPadUpPressed()) {
+					if (parent->state.accel > 5) 
 						parent->state.accel -= 5;
+
+					if (state.IsDPadDownPressed())
+						parent->state.LY -= parent->flipSign;
+
+					if (state.IsDPadUpPressed())
+						parent->state.LY += parent->flipSign;
+
+					if (state.IsDPadLeftPressed())
+						parent->state.LX -= 1;
+
+					if (state.IsDPadRightPressed())
+						parent->state.LX += 1;
+
+					Sleep(parent->state.accel);
+					ATLTRACE(_T("This is state.accel: %d\n"), parent->state.accel);
+					
+					PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around...
+
+					state = m_pGamePad->GetState(0);
+
+				}
+
+			}
+
+			else {
+				int answer = AfxMessageBox(L"Gamepad not found!\nFall back to mouse?", MB_YESNOCANCEL);
+				if (answer == IDYES) {
+					parent->m_bActive = false;
+					parent->m_bRunning = false;
+
+					PostMessage(mainWnd, MOUSE_FALLBACK, 0, 0);
+				}
+				if (answer == IDCANCEL) {
+
+					parent->m_bActive = false;
+					parent->m_bRunning = false;
+					
+				}
+
 			}
 
 			// controller back to initial state
 			// reset accellerator
-			if (parent->state == localState) 
+			if (parent->state == localState && parent->state.accel < 100) {
 				parent->state.accel = 100;
-			
-			// accelerate
-			if (parent->state.accel < 100)
-				Sleep(parent->state.accel);
-
-			// sleep as long as 'A' is in pressed state
-			while (state.buttons.a){
-				Sleep(1);
-				state = m_pGamePad->GetState(0);
+				ATLTRACE(_T("This is state.accel reset to 100"));
 			}
 
-			if (parent->state.fired > localState.fired) 
-				PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
-			else {
-				PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around...
-			}
 
 		}
 
+	delete m_pGamePad;
+
 	}
 
-	delete m_pGamePad;
 
 	return 0;
 

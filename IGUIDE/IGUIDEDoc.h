@@ -5,7 +5,7 @@
 #include "Target.h"
 #include "Grid.h"
 #include "Fundus.h"
-#include "Raster.h"
+#include "raster.h"
 #include "Properties.h"
 #include "Monitors.h"
 #include "Controller.h"
@@ -22,10 +22,10 @@ protected: // create from serialization only
 public:
 	vector<Screen>			m_Screens;							// all connected monitors
 	Controller				m_Controller;						// controller used for subject calibration
-	Screen*					m_selectedScreen;					// target monitor
+	Screen*					m_pSelectedScreen;					// target monitor
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
-	Raster					raster;
+	Raster					m_raster;
 	Calibration*			m_pDlgCalibration;					// calibration class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
@@ -34,7 +34,7 @@ public:
 	CString					m_InputController;					// for subject calibration procedure
 	CString					m_FlipVertical;						// flip target screen
 	int						m_FixationTargetSize;				// fixation target size in percent
-	CPoint*					mousePos;							// current mouse position
+	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 
 private:

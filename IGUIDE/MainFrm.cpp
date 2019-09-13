@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "MainFrm.h"
 #include "IGUIDE.h"
+#include "IGUIDEDoc.h"
 
 
 #ifdef _DEBUG
@@ -19,6 +20,7 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
 	ON_MESSAGE(GAMEPAD_UPDATE, OnGamePadUpdate)
+	ON_MESSAGE(MOUSE_FALLBACK, OnMouseFallback)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
@@ -77,6 +79,17 @@ LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 
 }
 
+
+LRESULT CMainFrame::OnMouseFallback(WPARAM w, LPARAM l) {
+	
+	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)pView->GetDocument();
+	pDoc->m_InputController = L"Mouse";
+	m_DlgProperties.fillProperties();
+	pDoc->m_Controller.reset();
+
+	return 0;
+}
 
 // CMainFrame diagnostics
 

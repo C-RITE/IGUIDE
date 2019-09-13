@@ -62,8 +62,8 @@ void Grid::StorePatch(CD2DPointF loc) {
 	center = mainWnd.CenterPoint();
 	patch.coords.x = (center.x - loc.x)*-1 * (float)dpp;
 	patch.coords.y = (center.y - loc.y)* (float)dpp;
-	patch.color = pDoc->raster.color;
-	patch.rastersize = pDoc->raster.size;
+	patch.color = pDoc->m_raster.color;
+	patch.rastersize = pDoc->m_raster.size;
 	patch.locked = false;
 	patch.defocus = pDoc->getCurrentDefocus();
 	patchlist.push_back(patch);
@@ -193,9 +193,9 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
+		rect1 = { center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
 			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
-			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
+			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
 			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(it._Ptr->_Myval.rastersize / 2 / dpp)
 		};
 
@@ -210,9 +210,9 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->raster.scale.x - (float)(patchlist.back().rastersize / 2 / dpp),
+		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(patchlist.back().rastersize / 2 / dpp),
 			center.y - patchlist.back().coords.y * 1 / (float)dpp - (float)(patchlist.back().rastersize / 2 / dpp),
-			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->raster.scale.x + (float)(patchlist.back().rastersize / 2 / dpp),
+			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(patchlist.back().rastersize / 2 / dpp),
 			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(patchlist.back().rastersize / 2 / dpp)
 		};
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
@@ -237,13 +237,13 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	if (pDoc && pDoc->mousePos) {
+	if (pDoc && pDoc->m_pMousePos) {
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->mousePos->x - (float)(pDoc->raster.size / 2 / dpp),
-			pDoc->mousePos->y - (float)(pDoc->raster.size / 2 / dpp),
-			pDoc->mousePos->x + (float)(pDoc->raster.size / 2 / dpp),
-			pDoc->mousePos->y + (float)(pDoc->raster.size / 2 / dpp)),
+			pDoc->m_pMousePos->x - (float)(pDoc->m_raster.size / 2 / dpp),
+			pDoc->m_pMousePos->y - (float)(pDoc->m_raster.size / 2 / dpp),
+			pDoc->m_pMousePos->x + (float)(pDoc->m_raster.size / 2 / dpp),
+			pDoc->m_pMousePos->y + (float)(pDoc->m_raster.size / 2 / dpp)),
 			m_pWhiteBrush,
 			.5f,
 			NULL);

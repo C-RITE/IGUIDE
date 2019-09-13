@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Raster.h"
+#include "raster.h"
 
 
 Raster::Raster() :size(0),

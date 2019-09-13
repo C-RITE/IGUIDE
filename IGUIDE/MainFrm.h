@@ -48,6 +48,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
 	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnMouseFallback(WPARAM w, LPARAM l);
 
 public:
 	afx_msg void OnEditProperties();

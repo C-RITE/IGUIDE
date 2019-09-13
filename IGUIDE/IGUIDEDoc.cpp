@@ -57,9 +57,9 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
-	mousePos = NULL;
-	raster.size = 1.28;
-	raster.meanAlpha = 0;
+	m_pMousePos = NULL;
+	m_raster.size = 1.28;
+	m_raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
 	m_FixationTargetSize = 100;
 	overlaySettings = 0;
@@ -86,7 +86,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	m_Controller.shutdown();
 	delete m_pGrid;
 	delete m_pFundus;
-	delete mousePos;
+	delete m_pMousePos;
 	delete m_pDlgCalibration;
 
 }
@@ -155,7 +155,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
 	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
 		if (it->number == screen) {
-			m_selectedScreen = it._Ptr;
+			m_pSelectedScreen = it._Ptr;
 		}
 	}
 
@@ -173,7 +173,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		ptr = calib;
 		for (size_t t = 0; t < nl / sz; t++) {
 			data = (CD2DPointF*)calib;
-			raster.corner.push_back(data);
+			m_raster.corner.push_back(data);
 			calib += sz;
 		}
 		calib = ptr;
@@ -181,11 +181,11 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	LPBYTE rcol;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
-		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
 	LPBYTE rsize;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
-		memcpy(&raster.size, rsize, sizeof(double));
+		memcpy(&m_raster.size, rsize, sizeof(double));
 
 	delete calib, ptr;
 	delete rcol;
@@ -200,7 +200,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	// TODO: Add your message handler code here
 
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_selectedScreen->number);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_pSelectedScreen->number);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
@@ -209,12 +209,12 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &raster.size, sizeof(double));
-	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
-	if (raster.corner.size() == 4)
-		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
+	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &m_raster.size, sizeof(double));
+	const DWORD dataSize = static_cast<DWORD>(m_raster.corner.size() * sizeof(CD2DPointF));
+	if (m_raster.corner.size() == 4)
+		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&m_raster.corner[0].x, dataSize);
 
-	D2D1_COLOR_F rcol = raster.color;
+	D2D1_COLOR_F rcol = m_raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
 
 	CDocument::OnCloseDocument();
@@ -311,7 +311,7 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 bool CIGUIDEDoc::CheckFOV()
 {
 
-	if (raster.corner.size() < 4) {
+	if (m_raster.corner.size() < 4) {
 		AfxMessageBox(_T("Please draw raster corners (clockwise) in Target View window first!"), MB_OK);
 		ShowCursor(TRUE);
 		return FALSE;
@@ -349,15 +349,15 @@ CString CIGUIDEDoc::getTraceInfo() {
 	double dist = m_pGrid->center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
 	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
-		raster.meanAlpha,
+		m_raster.meanAlpha,
 		beta,
-		raster.meanAlpha + beta,
-		raster.size,
-		raster.scale.x,
-		raster.scale.y,
+		m_raster.meanAlpha + beta,
+		m_raster.size,
+		m_raster.scale.x,
+		m_raster.scale.y,
 		dist,
 		1 / m_pGrid->dpp,
-		raster.meanEdge/raster.size
+		m_raster.meanEdge/m_raster.size
 	);
 
 	if (m_pGrid->overlay & TRACEINFO)
@@ -477,20 +477,20 @@ double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 	ATLTRACE(_T("\n"));
-	Edge k = raster.perimeter[0];
+	Edge k = m_raster.perimeter[0];
 	double theta = ComputeOrientationAngle(k);
 
-	for (size_t i = 0; i < raster.perimeter.size(); i++) {
-		raster.perimeter[i].alpha = ComputeDisplacementAngle(raster.perimeter[i]);
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++) {
+		m_raster.perimeter[i].alpha = ComputeDisplacementAngle(m_raster.perimeter[i]);
 		if (theta > 90 && theta <= 180)
-			raster.perimeter[i].alpha = 180 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 180 - m_raster.perimeter[i].alpha;
 		if (theta > 180 && theta <= 270)
-			raster.perimeter[i].alpha = 270 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 270 - m_raster.perimeter[i].alpha;
 		if (theta > 270 && theta <= 360)
-			raster.perimeter[i].alpha = 360 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 360 - m_raster.perimeter[i].alpha;
 	}
-		for (size_t i = 0; i < raster.perimeter.size(); i++)
-			ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
+		for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+			ATLTRACE(_T("alpha is %f\n"), m_raster.perimeter[i].alpha);
 
 }
 
@@ -499,15 +499,15 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 
 	//calc mean of all angles
 	double sum = 0;
-	for (size_t i = 0; i < raster.perimeter.size(); i++)
-		sum += raster.perimeter[i].alpha;
-	double mean = sum / raster.perimeter.size();
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+		sum += m_raster.perimeter[i].alpha;
+	double mean = sum / m_raster.perimeter.size();
 	
 	//calc variance
 	double temp = 0;
-	for (size_t i = 0; i < raster.perimeter.size(); i++)
-		temp += (raster.perimeter[i].alpha - mean)*(raster.perimeter[i].alpha - mean);
-	double var = temp / raster.perimeter.size();
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+		temp += (m_raster.perimeter[i].alpha - mean)*(m_raster.perimeter[i].alpha - mean);
+	double var = temp / m_raster.perimeter.size();
 
 	//calc standard deviation
 	double stddev = sqrt(var);

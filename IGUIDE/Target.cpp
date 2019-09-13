@@ -49,7 +49,7 @@ void Target::calcFieldSize() {
 	double pi = atan(1) * 4;			// just pi
 	double pixelpitch = 0.13725;		// pixel pitch of screen in mm
 	double d = 650;						// distance between beam splitter and screen in mm
-	fs = 2 * d * tan((pDoc->raster.size / 2) * (pi / 180));
+	fs = 2 * d * tan((pDoc->m_raster.size / 2) * (pi / 180));
 	fs /= pixelpitch;
 	fieldsize = (int)fs;
 
@@ -58,7 +58,7 @@ void Target::calcFieldSize() {
 void Target::setCross() {
 	
 	if (pDoc->m_Screens.size() > 0) {
-		CRect cRect = (CRect)pDoc->m_selectedScreen->area;
+		CRect cRect = (CRect)pDoc->m_pSelectedScreen->area;
 		
 		// place first cross on top-left corner of the raster
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
@@ -95,7 +95,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	double alpha, beta, gamma;
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
-	ppd_client = (1 / pDoc->raster.size) * pDoc->raster.meanEdge;
+	ppd_client = (1 / pDoc->m_raster.size) * pDoc->m_raster.meanEdge;
 
 	Edge k;
 	k.q.x = -centerOffset_x;
@@ -106,7 +106,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 		k.q.y = centerOffset_y;
 		
 	}
-	alpha = pDoc->raster.meanAlpha;
+	alpha = pDoc->m_raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
 
@@ -118,10 +118,10 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
-		(pDoc->raster.mid.x + (float)x - 10),
-		(pDoc->raster.mid.y + (float)y - 10),
-		(pDoc->raster.mid.x + (float)x + 10),
-		(pDoc->raster.mid.y + (float)y + 10))
+		(pDoc->m_raster.mid.x + (float)x - 10),
+		(pDoc->m_raster.mid.y + (float)y - 10),
+		(pDoc->m_raster.mid.x + (float)x + 10),
+		(pDoc->m_raster.mid.y + (float)y + 10))
 	};
 
 }
@@ -180,14 +180,14 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		else if (pDoc) {
 
 			// draw white crosses to user define FOV
-			for (size_t i = 0; i < pDoc->raster.corner.size(); i++) {
-				pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y - 7),
-					CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y + 7),
+			for (size_t i = 0; i < pDoc->m_raster.corner.size(); i++) {
+				pRenderTarget->DrawLine(CD2DPointF(pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y - 7),
+					CD2DPointF(pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y + 7),
 					m_pBrushWhite,
 					1,
 					NULL);
-				pRenderTarget->DrawLine(CD2DPointF(pDoc->raster.corner[i].x - 7, pDoc->raster.corner[i].y + 7),
-					CD2DPointF(pDoc->raster.corner[i].x + 7, pDoc->raster.corner[i].y - 7),
+				pRenderTarget->DrawLine(CD2DPointF(pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y + 7),
+					CD2DPointF(pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y - 7),
 					m_pBrushWhite,
 					1,
 					NULL);
@@ -223,10 +223,10 @@ void Target::restartCalibration() {
 
 	free(m_POI);
 	m_POI = NULL;
-	pDoc->raster.meanAlpha = 0;
-	pDoc->raster.meanEdge = 0;
-	pDoc->raster.corner.clear();
-	pDoc->raster.perimeter.clear();
+	pDoc->m_raster.meanAlpha = 0;
+	pDoc->m_raster.meanEdge = 0;
+	pDoc->m_raster.corner.clear();
+	pDoc->m_raster.perimeter.clear();
 	pDoc->m_pGrid->ClearPatchlist();
 	
 }
@@ -302,17 +302,17 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
-	if (nFlags == 0x00FF || pDoc->raster.corner.size() > 3) {
+	if (nFlags == 0x00FF || pDoc->m_raster.corner.size() > 3) {
 		restartCalibration();
 		return;
 	}
 
-	if (pDoc->raster.corner.size() == 3) {
-		pDoc->raster.corner.push_back(d2dpoint);
+	if (pDoc->m_raster.corner.size() == 3) {
+		pDoc->m_raster.corner.push_back(d2dpoint);
 		finishCalibration();
 	}
 	else
-		pDoc->raster.corner.push_back(d2dpoint);
+		pDoc->m_raster.corner.push_back(d2dpoint);
 
 	pDoc->UpdateAllViews(NULL);
 	RedrawWindow();

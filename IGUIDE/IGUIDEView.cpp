@@ -114,8 +114,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-	free(pDoc->mousePos);
-	pDoc->mousePos = NULL;
+	free(pDoc->m_pMousePos);
+	pDoc->m_pMousePos = NULL;
 	ShowCursor(TRUE);
 
 	m_pDlgTarget->Invalidate();
@@ -130,9 +130,9 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (pDoc->mousePos)
-		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
-			pDoc->mousePos->SetPoint(point.x, point.y);
+	if (pDoc->m_pMousePos)
+		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->m_raster.corner.size() == 4)) {
+			pDoc->m_pMousePos->SetPoint(point.x, point.y);
 			RedrawWindow();
 		}
 
@@ -145,9 +145,9 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (!pDoc->mousePos && pDoc->CheckFOV()) {
-		pDoc->mousePos = (CPoint*)malloc(sizeof(CPoint));
-		pDoc->mousePos->SetPoint(point.x, point.y);
+	if (!pDoc->m_pMousePos && pDoc->CheckFOV()) {
+		pDoc->m_pMousePos = (CPoint*)malloc(sizeof(CPoint));
+		pDoc->m_pMousePos->SetPoint(point.x, point.y);
 	}
 
 	ShowCursor(FALSE);
@@ -175,7 +175,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	m_pDlgTarget->ShowWindow(TRUE);
 
-	CRect area = (CRect)pDoc->m_selectedScreen->area;
+	CRect area = (CRect)pDoc->m_pSelectedScreen->area;
 	CRect wRect;
 	
 	m_pDlgTarget->SetWindowPos(&this->wndBottom,
@@ -202,34 +202,34 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	AfxGetMainWnd()->GetClientRect(&clientRect);
 
 	// make edges from corners
-	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
+	if (pDoc->m_raster.corner.size() == 4 && pDoc->m_raster.meanEdge == 0) {
 		for (int i = 0; i < 3; i++) {
 			Edge k;
-			k.p = pDoc->raster.corner[i];
-			k.q = pDoc->raster.corner[i + 1];
-			pDoc->raster.perimeter.push_back(k);
+			k.p = pDoc->m_raster.corner[i];
+			k.q = pDoc->m_raster.corner[i + 1];
+			pDoc->m_raster.perimeter.push_back(k);
 		}
 		for (int i = 0; i < 4; i++)
-			FOV[i] = pDoc->raster.corner[i];
-		pDoc->raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
+			FOV[i] = pDoc->m_raster.corner[i];
+		pDoc->m_raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
 		Edge k;
-		k.p = pDoc->raster.corner[3];
-		k.q = pDoc->raster.corner[0];
-		pDoc->raster.perimeter.push_back(k);
+		k.p = pDoc->m_raster.corner[3];
+		k.q = pDoc->m_raster.corner[0];
+		pDoc->m_raster.perimeter.push_back(k);
 	}
 
 	// calculate length of edges, mean edge length and angle
-	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
+	if (pDoc->m_raster.corner.size() == 4 && pDoc->m_raster.meanEdge == 0) {
 		pDoc->ComputeDisplacementAngles();
 		if (pDoc->CheckCalibrationValidity()) {
-			for (size_t i = 0; i < pDoc->raster.perimeter.size(); i++) {
-				pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
-				pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
-				pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+			for (size_t i = 0; i < pDoc->m_raster.perimeter.size(); i++) {
+				pDoc->m_raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->m_raster.perimeter[i]);
+				pDoc->m_raster.meanEdge += pDoc->m_raster.perimeter[i].length;
+				pDoc->m_raster.meanAlpha += pDoc->m_raster.perimeter[i].alpha;
 			}
 
-			pDoc->raster.meanEdge /= 4;
-			pDoc->raster.meanAlpha /= 4;
+			pDoc->m_raster.meanEdge /= 4;
+			pDoc->m_raster.meanAlpha /= 4;
 		}
 		else {
 			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
@@ -413,8 +413,8 @@ void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 	CRect rect;
 	CMainFrame* pMainWnd = (CMainFrame*)AfxGetMainWnd();
-	pDoc->raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
-	pDoc->raster.scale.y = (float)cy / (pMainWnd->WINDOW_HEIGHT - 62);
+	pDoc->m_raster.scale.x = (float)cx / (pMainWnd->WINDOW_WIDTH - 20);
+	pDoc->m_raster.scale.y = (float)cy / (pMainWnd->WINDOW_HEIGHT - 62);
 	
 	if (nType == SIZE_RESTORED)
 		Invalidate();
