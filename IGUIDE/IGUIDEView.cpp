@@ -221,6 +221,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	// calculate length of edges, mean edge length and angle
 	if (pDoc->m_raster.corner.size() == 4 && pDoc->m_raster.meanEdge == 0) {
 		pDoc->ComputeDisplacementAngles();
+
 		if (pDoc->CheckCalibrationValidity()) {
 			for (size_t i = 0; i < pDoc->m_raster.perimeter.size(); i++) {
 				pDoc->m_raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->m_raster.perimeter[i]);
@@ -231,9 +232,16 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 			pDoc->m_raster.meanEdge /= 4;
 			pDoc->m_raster.meanAlpha /= 4;
 		}
+		
 		else {
+			if (pDoc->m_InputController == L"Gamepad" && pDoc->m_Controller.m_bRunning) {
+				m_pDlgTarget->OnLButtonDown(NULL, NULL);
+				pDoc->m_Controller.m_pThread->SuspendThread();
+			}
 			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
 			m_pDlgTarget->OnLButtonDown(NULL, NULL);
+			if (!pDoc->m_Controller.m_bRunning && pDoc->m_InputController == L"Gamepad")
+				pDoc->m_Controller.m_pThread->ResumeThread();
 		}
 	
 	}
@@ -434,27 +442,36 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
-			case VK_UP:
-				pDoc->m_pGrid->patchlist.back().coords.y += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_DOWN:
-				pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_LEFT:
-				pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_RIGHT:
-				pDoc->m_pGrid->patchlist.back().coords.x += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_SPACE:
-				pDoc->m_pGrid->patchlist.lockIn();
-				break;
+				case VK_UP:
+					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_DOWN:
+					pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_LEFT:
+					pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_RIGHT:
+					pDoc->m_pGrid->patchlist.back().coords.x += .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_SPACE:
+					pDoc->m_pGrid->patchlist.lockIn();
+					break;
 
 			}
+
+			if (pDoc->m_pGrid->patchlist.size() > 0)
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+			else
+				m_pDlgTarget->m_POI = NULL;
+
+			m_pDlgTarget->Invalidate();
+
+			this->Invalidate();
 
 		}
 
@@ -467,14 +484,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			pDoc->m_pGrid->patchlist.SaveToFile();
 		}
 
-		if (pDoc->m_pGrid->patchlist.size() > 0)
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-		else
-			m_pDlgTarget->m_POI = NULL;
-
-		m_pDlgTarget->Invalidate();
-
-		this->Invalidate();
 		
 	}
 

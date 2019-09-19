@@ -24,7 +24,7 @@ class Target : public CDialogEx
 	CD2DPointF				xbox_cross;			// controller's current cursor location
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
-	bool					m_bMouseEnable;		// toggle mouse operation
+	bool					calibrating;		// true during calibration
 	double					ppd_client;			// pixel per degree on client screen
 	int						fieldsize;			// fieldsize in pixel on client screen
 	int						discretion;			// distance in pixel to raster corners during calibration

@@ -2,6 +2,7 @@
 #include "Controller.h"
 #include "Target.h"
 #include "IGUIDEDoc.h"
+#include "IGUIDE.h"
 #include "GamePad.h"
 
 Controller::Controller()
@@ -84,12 +85,10 @@ UINT GamePadThread(LPVOID pParam) {
 				if (state.IsAPressed()) {
 					parent->state.fired++;
 					PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
-				}
-
-				// sleep as long as 'A' is in pressed state
-				while (state.IsAPressed()){
-					state = m_pGamePad->GetState(0);
-					Sleep(10);
+					while (state.IsAPressed()) {
+						Sleep(10);
+						state = m_pGamePad->GetState(0);
+					}
 				}
 
 				while (state.IsDPadDownPressed() || state.IsDPadLeftPressed() || state.IsDPadRightPressed() || state.IsDPadUpPressed()) {
@@ -108,25 +107,31 @@ UINT GamePadThread(LPVOID pParam) {
 					if (state.IsDPadRightPressed())
 						parent->state.LX += 1;
 
-					Sleep(parent->state.accel);
-					ATLTRACE(_T("This is state.accel: %d\n"), parent->state.accel);
-					
 					PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around...
+
+					Sleep(parent->state.accel);
 
 					state = m_pGamePad->GetState(0);
 
 				}
 
+
 			}
 
 			else {
-				int answer = AfxMessageBox(L"Gamepad not found!\nFall back to mouse?", MB_YESNOCANCEL);
+
+				CIGUIDEApp* IGUIDE = (CIGUIDEApp*)AfxGetApp();
+				int answer = IGUIDE->m_pMainWnd->MessageBox(L"Gamepad not found! Please check connection.\nFall back to mouse?", L"Attention", MB_ICONHAND | MB_YESNOCANCEL);
+
 				if (answer == IDYES) {
+
 					parent->m_bActive = false;
 					parent->m_bRunning = false;
 
 					PostMessage(mainWnd, MOUSE_FALLBACK, 0, 0);
+
 				}
+
 				if (answer == IDCANCEL) {
 
 					parent->m_bActive = false;
@@ -140,16 +145,14 @@ UINT GamePadThread(LPVOID pParam) {
 			// reset accellerator
 			if (parent->state == localState && parent->state.accel < 100) {
 				parent->state.accel = 100;
-				ATLTRACE(_T("This is state.accel reset to 100"));
 			}
 
 
 		}
 
-	delete m_pGamePad;
-
 	}
 
+	delete m_pGamePad;
 
 	return 0;
 

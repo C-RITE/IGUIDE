@@ -28,6 +28,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_bVisible = true;
 	show_cross = false;
 	discretion = 10;
+	calibrating = false;
 
 }
 
@@ -35,6 +36,7 @@ Target::~Target()
 {
 
 	delete m_POI;
+
 }
 
 BEGIN_MESSAGE_MAP(Target, CDialogEx)
@@ -56,21 +58,21 @@ void Target::calcFieldSize() {
 }
 
 void Target::setCross() {
-	
+
 	if (pDoc->m_Screens.size() > 0) {
 		CRect cRect = (CRect)pDoc->m_pSelectedScreen->area;
-		
+
 		// place first cross on top-left corner of the raster
 		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
-		
+
 		// add discretion
 		xbox_cross.x -= discretion;
 		xbox_cross.y -= discretion;
 
 	}
-	
+
 	show_cross = true;
-	
+
 }
 
 void Target::getFixationTarget() {
@@ -78,7 +80,7 @@ void Target::getFixationTarget() {
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
 		delete m_pFixationTarget;
 
-	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0,	0), TRUE);
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
 
 }
 
@@ -87,7 +89,6 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 
 	// transform coordinates for fixation target (rotate and scale)
 	// current calculation assumes that target view is counter-rotating
-	// flip signs of Edge 'k' to customize
 
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
@@ -98,14 +99,17 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	ppd_client = (1 / pDoc->m_raster.size) * pDoc->m_raster.meanEdge;
 
 	Edge k;
+
 	k.q.x = -centerOffset_x;
-	if (pDoc->m_FlipVertical) {
+
+	if (pDoc->m_FlipVertical == L"True") {
+		k.q.y = centerOffset_y;
+	}
+
+	else {
 		k.q.y = -centerOffset_y;
 	}
-	else {
-		k.q.y = centerOffset_y;
-		
-	}
+
 	alpha = pDoc->m_raster.meanAlpha;
 	beta = 360 - pDoc->ComputeOrientationAngle(k);
 	gamma = beta - alpha;
@@ -153,9 +157,11 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// custom fixation target
 		if (m_POI && m_pFixationTarget->IsValid()) {
 			CD2DSizeF size = m_pFixationTarget->GetSize();
-			CD2DPointF center{ (m_POI->left + m_POI->right) / 2,
+			CD2DPointF center{
+				(m_POI->left + m_POI->right) / 2,
 				(m_POI->bottom + m_POI->top) / 2,
 			};
+
 			pRenderTarget->DrawBitmap(m_pFixationTarget, CD2DRectF(
 				center.x - (size.width / 2 * scalingFactor),
 				center.y - (size.height / 2 * scalingFactor),
@@ -181,25 +187,36 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 			// draw white crosses to user define FOV
 			for (size_t i = 0; i < pDoc->m_raster.corner.size(); i++) {
-				pRenderTarget->DrawLine(CD2DPointF(pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y - 7),
-					CD2DPointF(pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y + 7),
+
+				pRenderTarget->DrawLine
+					(CD2DPointF(
+						pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y - 7),
+					CD2DPointF(
+						pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y + 7),
 					m_pBrushWhite,
 					1,
 					NULL);
-				pRenderTarget->DrawLine(CD2DPointF(pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y + 7),
-					CD2DPointF(pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y - 7),
+				
+				pRenderTarget->DrawLine(
+					CD2DPointF(
+						pDoc->m_raster.corner[i].x - 7, pDoc->m_raster.corner[i].y + 7),
+					CD2DPointF(
+						pDoc->m_raster.corner[i].x + 7, pDoc->m_raster.corner[i].y - 7),
 					m_pBrushWhite,
 					1,
 					NULL);
+
 			}
 
 		}
 
 	}
+	
 
-	// draw cross while moving around with pov hat
+	// draw cross for calibration while moving around with D-pad
 
 	if (show_cross) {
+
 		// points outlining the cross
 		CD2DPointF a(xbox_cross.x - 7, xbox_cross.y - 7);
 		CD2DPointF b(xbox_cross.x + 7, xbox_cross.y + 7);
@@ -213,6 +230,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->DrawLine(CD2DPointF(c.x + state.LX, c.y + state.LY),
 			CD2DPointF(d.x + state.LX, d.y + state.LY),
 			m_pBrushWhite, 1, NULL);
+
 	}
 
 	return 0;
@@ -223,16 +241,24 @@ void Target::restartCalibration() {
 
 	free(m_POI);
 	m_POI = NULL;
+	pDoc->m_raster.mid = { 0, 0 };
 	pDoc->m_raster.meanAlpha = 0;
 	pDoc->m_raster.meanEdge = 0;
 	pDoc->m_raster.corner.clear();
 	pDoc->m_raster.perimeter.clear();
 	pDoc->m_pGrid->ClearPatchlist();
-	
+
+	calibrating = true;
+
+	if (pDoc->m_InputController == L"Gamepad")
+		setCross();
+
 }
 
 void Target::finishCalibration() {
 
+	show_cross = false;
+	calibrating = false;
 	CRect mainWnd;
 	CPoint center;
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -240,7 +266,7 @@ void Target::finishCalibration() {
 	center = mainWnd.CenterPoint();
 	pView->OnLButtonUp(0, center);
 	pView->SetFocus();
-
+	
 }
 
 void Target::OnGamePadCalibration() {
@@ -254,23 +280,23 @@ void Target::OnGamePadCalibration() {
 
 	case 0:
 		// reset it all
-		setCross();
-		OnLButtonDown(0x00FF, CPoint(0, 0));
+		OnLButtonDown(0, CPoint(0, 0));
 		break;
 
 	case 1:
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
-			(int)xbox_cross.y + state.LY)
-		);
+			(int)xbox_cross.y + state.LY));
+
 		xbox_cross.x += fieldsize + discretion * 2;
+
 		break;
 
 	case 2:
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		
+
 		xbox_cross.y += fieldsize + discretion * 2;
 
 		break;
@@ -286,7 +312,7 @@ void Target::OnGamePadCalibration() {
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		show_cross = false;
+
 		break;
 
 	}
@@ -302,17 +328,19 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
-	if (nFlags == 0x00FF || pDoc->m_raster.corner.size() > 3) {
+	if (pDoc->m_raster.corner.size() == 4 && !calibrating)
 		restartCalibration();
-		return;
-	}
 
-	if (pDoc->m_raster.corner.size() == 3) {
-		pDoc->m_raster.corner.push_back(d2dpoint);
-		finishCalibration();
-	}
 	else
-		pDoc->m_raster.corner.push_back(d2dpoint);
+		if (pDoc->m_raster.corner.size() < 4) {
+			pDoc->m_raster.corner.push_back(d2dpoint);
+
+			pDoc->UpdateAllViews(NULL);
+			RedrawWindow();
+
+		if (pDoc->m_raster.corner.size() == 4)
+			finishCalibration();
+		}
 
 	pDoc->UpdateAllViews(NULL);
 	RedrawWindow();
@@ -339,7 +367,7 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialogEx::OnShowWindow(bShow, nStatus);
-	
+
 	// TODO: Add your message handler code here
 
 }
