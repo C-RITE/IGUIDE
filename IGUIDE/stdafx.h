@@ -11,6 +11,7 @@
 #define NETCOM_CLOSED (WM_USER + 103)
 #define NETCOM_RECEIVED (WM_USER + 104)
 #define GAMEPAD_UPDATE (WM_USER + 105)
+#define MOUSE_FALLBACK (WM_USER + 106)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
@@ -42,15 +43,15 @@
 #include <Winsock2.h>
 #include "../NetCom/WinSock2Async.h"
 
-//#ifdef _DEBUG
-//#ifdef ATLTRACE 
-//#undef ATLTRACE
-//#undef ATLTRACE2
-//
-//#define ATLTRACE CustomTrace
-//#define ATLTRACE2 ATLTRACE
-//#endif // ATLTRACE
-//#endif // _DEBUG
-//
-//void CustomTrace(const wchar_t* format, ...);
-//void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
+#ifdef _DEBUG
+#ifdef ATLTRACE 
+#undef ATLTRACE
+#undef ATLTRACE2
+
+#define ATLTRACE CustomTrace
+#define ATLTRACE2 ATLTRACE
+#endif // ATLTRACE
+#endif // _DEBUG
+
+void CustomTrace(const wchar_t* format, ...);
+void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);

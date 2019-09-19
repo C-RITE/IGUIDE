@@ -53,14 +53,14 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	CString propName = prop->GetName();
 
 	if (propName == "RasterSize") {
-		pDoc->raster.size = vt;
+		pDoc->m_raster.size = vt;
 	}
 	if (propName == L"Size") {
 		pDoc->m_FixationTargetSize = vt;
 	}
 	if (propName == L"Color") {
 		COLORREF ref = vt;
-		pDoc->raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
+		pDoc->m_raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
 	}
 	if (propName == L"File") {
 		CString ftfile = vt.bstrVal;
@@ -76,7 +76,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		ref.Truncate(index);
 		for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
 			if (it->name == ref) {
-				pDoc->m_selectedScreen = it._Ptr;
+				pDoc->m_pSelectedScreen = it._Ptr;
 				CIGUIDEView* pView = CIGUIDEView::GetView();
 				pView->SendMessage(SCREEN_SELECTED);
 			}
@@ -219,7 +219,7 @@ void Properties::fillProperties() {
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
-	_variant_t rs(pDoc->raster.size);
+	_variant_t rs(pDoc->m_raster.size);
 	_variant_t fts(pDoc->m_FixationTargetSize);
 	_variant_t ft(pDoc->m_FixationTarget);
 	_variant_t od(pDoc->m_OutputDir);
@@ -240,9 +240,9 @@ void Properties::fillProperties() {
 	RemoteCapability->SetValue(rem);
 
 	COLORREF col = RGB(
-		(int)(pDoc->raster.color.r / (1 / 255.0)),
-		(int)(pDoc->raster.color.g / (1 / 255.0)),
-		(int)(pDoc->raster.color.b / (1 / 255.0))
+		(int)(pDoc->m_raster.color.r / (1 / 255.0)),
+		(int)(pDoc->m_raster.color.g / (1 / 255.0)),
+		(int)(pDoc->m_raster.color.b / (1 / 255.0))
 	);
 	
 	Color->SetColor(col);
@@ -254,7 +254,7 @@ void Properties::fillProperties() {
 		// never parse primary monitor, because it is dedicated to operator view
 		if (screen.number == 1)
 			FixationTargetScreen->SetValue(L"NONE");
-		else if (screen.number == pDoc->m_selectedScreen->number) {
+		else if (screen.number == pDoc->m_pSelectedScreen->number) {
 			option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
 			FixationTargetScreen->SetValue(option);
 			CIGUIDEView* pView = CIGUIDEView::GetView();
