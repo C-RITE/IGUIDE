@@ -58,7 +58,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	m_pMousePos = NULL;
-	m_raster.size = 1.28;
+	m_raster.size = 600;
 	m_raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
 	m_FixationTargetSize = 100;
@@ -183,13 +183,12 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	LPBYTE rsize;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterSize", &rsize, &nl) > 0)
-		memcpy(&m_raster.size, rsize, sizeof(double));
-
+	
+	if (AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600));
+		
 	delete calib, ptr;
 	delete rcol;
-	delete rsize;
+	
 
 	return TRUE;
 }
@@ -209,7 +208,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterSize", (LPBYTE) &m_raster.size, sizeof(double));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
 	const DWORD dataSize = static_cast<DWORD>(m_raster.corner.size() * sizeof(CD2DPointF));
 	if (m_raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&m_raster.corner[0].x, dataSize);

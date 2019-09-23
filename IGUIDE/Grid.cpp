@@ -10,11 +10,13 @@ using namespace D2D1;
 
 Grid::Grid()
 {
+	m_pBrushProp = new CD2DBrushProperties(.5f);
 	m_pPatchBrush = new CD2DSolidColorBrush(NULL, NULL);
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
+	m_pGrayBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGray), m_pBrushProp);
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
 
@@ -38,7 +40,10 @@ Grid::~Grid() {
 	delete m_pDarkGreenBrush;
 	delete m_pMagentaBrush;;
 	delete m_pPatchBrush;
+	delete m_pGrayBrush;
+	delete m_pBrushProp;
 	delete pLayer;
+
 }
 
 void Grid::DelPatch() {
@@ -72,6 +77,8 @@ void Grid::StorePatch(CD2DPointF loc) {
 
 void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
+	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+
 	AfxGetMainWnd()->GetClientRect(mainWnd);
 	center = mainWnd.CenterPoint();
 	dpp = (m_pDeltaFOD + m_pRadNerve) / (mainWnd.Width() / 2);
@@ -81,43 +88,46 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 		for (float x = center.x; x > 0; x -= 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(x, 0.0f),
+				CD2DPointF(x, 1),
 				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
 		for (float x = center.x + 1 / (float)dpp; x < mainWnd.Width(); x += 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(x, 0.0f),
+				CD2DPointF(x, 0.1f),
 				CD2DPointF(x, (float)mainWnd.Height()),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
 		for (float y = center.y; y > 0; y -= 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(0.0f, y),
+				CD2DPointF(0.1f, y),
 				CD2DPointF((float)mainWnd.Width(), y),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
 
 		for (float y = center.y + 1 / (float)dpp; y < mainWnd.Height(); y += 1 / (float)dpp)
 		{
 			pRenderTarget->DrawLine(
-				CD2DPointF(0.0f, y),
+				CD2DPointF(0.1f, y),
 				CD2DPointF((float)mainWnd.Width(), y),
-				m_pWhiteBrush,
-				0.1f
+				m_pGrayBrush,
+				1
 				);
 		}
+
 	}
+
+	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
 
 }
 
@@ -130,7 +140,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 				center.y - 1 / (float)dpp * x,
 				center.x + 1 / (float)dpp * x,
 				center.y + 1 / (float)dpp * x };
-			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f);
+			pRenderTarget->DrawEllipse(e, m_pGrayBrush, 1);
 		}
 	}
 
@@ -140,7 +150,7 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 		center.y - 1 / (float)dpp * 1.2f,
 		center.x + 1 / (float)dpp * 1.2f,
 		center.y + 1 / (float)dpp * 1.2f };
-		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .3f);
+		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
 	}
 
 	if (overlay & FOVEA){
@@ -188,15 +198,19 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 	center = mainWnd.CenterPoint();
 	CD2DRectF rect1;
 	CRect intersect;
-
+	float rsdeg; // raster size in degree visual angle
+	
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
+		
+		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize; 
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
-			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp - (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
-			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(it._Ptr->_Myval.rastersize / 2 / dpp),
-			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(it._Ptr->_Myval.rastersize / 2 / dpp)
+		rect1 = { 
+			center.x + it._Ptr->_Myval.coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(rsdeg / 2 / dpp),
+			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp - (float)(rsdeg / 2 / dpp),
+			center.x + it._Ptr->_Myval.coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(rsdeg / 2 / dpp),
+			center.y - it._Ptr->_Myval.coords.y * 1 / (float)dpp + (float)(rsdeg / 2 / dpp)
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
@@ -207,13 +221,14 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 
 	if (patchlist.size() > 0) {
 
+		rsdeg = (float)pDoc->m_raster.videodim / patchlist.back().rastersize; // raster size in degree visual angle
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
-		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(patchlist.back().rastersize / 2 / dpp),
-			center.y - patchlist.back().coords.y * 1 / (float)dpp - (float)(patchlist.back().rastersize / 2 / dpp),
-			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(patchlist.back().rastersize / 2 / dpp),
-			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(patchlist.back().rastersize / 2 / dpp)
+		rect1 = { center.x + patchlist.back().coords.x * (float)(1 / dpp) + (float)dpp * pDoc->m_raster.scale.x - (float)(rsdeg / 2 / dpp),
+			center.y - patchlist.back().coords.y * 1 / (float)dpp - (float)(rsdeg / 2 / dpp),
+			center.x + patchlist.back().coords.x * 1 / (float)dpp + (float)dpp * pDoc->m_raster.scale.x + (float)(rsdeg / 2 / dpp),
+			center.y - patchlist.back().coords.y * 1 / (float)dpp + (float)(rsdeg / 2 / dpp)
 		};
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 2);
@@ -229,8 +244,11 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 		
 		int number = 1;
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
+			
+			rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
+
 			if (it._Ptr->_Myval.locked == true) {
-				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, (float)it._Ptr->_Myval.rastersize, number);
+				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, rsdeg, number);
 				number++;
 			}
 		}
@@ -238,21 +256,20 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 	}
 
 	if (pDoc && pDoc->m_pMousePos) {
+		
+		rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->m_pMousePos->x - (float)(pDoc->m_raster.size / 2 / dpp),
-			pDoc->m_pMousePos->y - (float)(pDoc->m_raster.size / 2 / dpp),
-			pDoc->m_pMousePos->x + (float)(pDoc->m_raster.size / 2 / dpp),
-			pDoc->m_pMousePos->y + (float)(pDoc->m_raster.size / 2 / dpp)),
+			pDoc->m_pMousePos->x - (float)(rsdeg / 2 / dpp),
+			pDoc->m_pMousePos->y - (float)(rsdeg / 2 / dpp),
+			pDoc->m_pMousePos->x + (float)(rsdeg / 2 / dpp),
+			pDoc->m_pMousePos->y + (float)(rsdeg / 2 / dpp)),
 			m_pWhiteBrush,
 			.5f,
 			NULL);
 	}
 
 }
-
-
-
 
 
 void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect)

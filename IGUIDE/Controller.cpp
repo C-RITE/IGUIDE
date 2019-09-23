@@ -28,10 +28,13 @@ void Controller::reset(){
 		setFlip();
 		m_bActive = true;
 	}
-
+	
 	else {
 		m_bActive = false;
+		m_bRunning = false;
 	}
+
+	
 
 	if (m_bActive) {
 		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
