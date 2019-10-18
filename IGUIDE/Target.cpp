@@ -96,8 +96,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	double alpha, beta, gamma;
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
-	ppd_client = (1 / pDoc->m_raster.size) * pDoc->m_raster.meanEdge;
-
+	
 	Edge k;
 
 	k.q.x = -centerOffset_x;
@@ -118,8 +117,8 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	b = centerOffset_y;
 	c = sqrt(pow(a, 2) + pow(b, 2));
 
-	y = sin(gamma * pi / 180) * c * ppd_client; // calc. x shift and scale to client ppd
-	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
+	y = sin(gamma * pi / 180) * c * fieldsize; // calc. x shift and scale to client ppd
+	x = cos(gamma * pi / 180) * c * fieldsize; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
 		(pDoc->m_raster.mid.x + (float)x - 10),

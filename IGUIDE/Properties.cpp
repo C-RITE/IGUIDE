@@ -52,24 +52,29 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	CString propName = prop->GetName();
 
-	if (propName == "RasterSize") {
+	if (propName == "Raster Size") {
 		pDoc->m_raster.size = vt;
 	}
+
 	if (propName == L"Size") {
 		pDoc->m_FixationTargetSize = vt;
 	}
+
 	if (propName == L"Color") {
 		COLORREF ref = vt;
 		pDoc->m_raster.color = D2D1_COLOR_F(m_pRenderTarget->COLORREF_TO_D2DCOLOR(ref));
 	}
+
 	if (propName == L"File") {
 		CString ftfile = vt.bstrVal;
 		pDoc->m_FixationTarget = ftfile;
 	}
+
 	if (propName == L"Video Folder") {
 		CString folder = vt.bstrVal;
 		pDoc->m_OutputDir = folder;
 	}
+
 	if (propName == L"Screen") {
 		CString ref = vt.bstrVal;
 		int index = ref.ReverseFind(_T(' '));

@@ -58,10 +58,8 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	m_pMousePos = NULL;
-	m_raster.size = 600;
 	m_raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
-	m_FixationTargetSize = 100;
 	overlaySettings = 0;
 	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
@@ -148,10 +146,8 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
 
-	int FTS = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 0);
-	if (!FTS) FTS = 100;
-	m_FixationTargetSize = FTS;
-
+	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
+	
 	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
 	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
 		if (it->number == screen) {
@@ -184,7 +180,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
 	
-	if (AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600));
+	m_raster.size =  AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
 		
 	delete calib, ptr;
 	delete rcol;
