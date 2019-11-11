@@ -34,7 +34,6 @@ void Controller::reset(){
 		m_bRunning = false;
 	}
 
-	
 
 	if (m_bActive) {
 		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
@@ -50,9 +49,14 @@ void Controller::setFlip() {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	if (pDoc->m_FlipVertical == L"True")
-		flipSign = 1;
+		flipSign.y = -1;
 	else
-		flipSign = -1;
+		flipSign.y = 1;
+
+	if (pDoc->m_FlipHorizontal == L"True")
+		flipSign.x = -1;
+	else
+		flipSign.x = 1;
 
 }
 
@@ -99,21 +103,21 @@ UINT GamePadThread(LPVOID pParam) {
 						parent->state.accel -= 5;
 
 					if (state.IsDPadDownPressed())
-						parent->state.LY -= parent->flipSign;
+						parent->state.LY += parent->flipSign.y;
 
 					if (state.IsDPadUpPressed())
-						parent->state.LY += parent->flipSign;
+						parent->state.LY -= parent->flipSign.y;
 
 					if (state.IsDPadLeftPressed())
-						parent->state.LX -= 1;
+						parent->state.LX -= parent->flipSign.x;
 
 					if (state.IsDPadRightPressed())
-						parent->state.LX += 1;
+						parent->state.LX += parent->flipSign.x;
 
 					PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around...
 
 					Sleep(parent->state.accel);
-
+					
 					state = m_pGamePad->GetState(0);
 
 				}

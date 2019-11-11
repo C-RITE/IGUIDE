@@ -23,12 +23,11 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	fieldsize = 0;
 	pDoc = NULL;
+	fieldsize = 60;
 	m_bVisible = true;
 	show_cross = false;
-	discretion = 10;
-	calibrating = false;
+	discretion = 20;
 
 }
 
@@ -45,29 +44,24 @@ BEGIN_MESSAGE_MAP(Target, CDialogEx)
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
-void Target::calcFieldSize() {
-
-	double fs;
-	double pi = atan(1) * 4;			// just pi
-	double pixelpitch = 0.13725;		// pixel pitch of screen in mm
-	double d = 650;						// distance between beam splitter and screen in mm
-	fs = 2 * d * tan((pDoc->m_raster.size / 2) * (pi / 180));
-	fs /= pixelpitch;
-	fieldsize = (int)fs;
-
-}
 
 void Target::setCross() {
 
+	fieldsize = pDoc->m_raster.size / 10;
+
 	if (pDoc->m_Screens.size() > 0) {
+
 		CRect cRect = (CRect)pDoc->m_pSelectedScreen->area;
 
 		// place first cross on top-left corner of the raster
-		xbox_cross = CD2DPointF((float)(cRect.Width() / 2 - fieldsize / 2), (float)(cRect.Height() / 2 - fieldsize / 2));
+		xbox_cross = CD2DPointF(
+			(float)(cRect.Width() / 2 - ((fieldsize / 2) * pDoc->m_Controller.flipSign.x)),
+			(float)(cRect.Height() / 2 - ((fieldsize / 2) * pDoc->m_Controller.flipSign.y))
+		);
 
 		// add discretion
-		xbox_cross.x -= discretion;
-		xbox_cross.y -= discretion;
+		xbox_cross.x -= discretion * pDoc->m_Controller.flipSign.x;
+		xbox_cross.y -= discretion * pDoc->m_Controller.flipSign.y;
 
 	}
 
@@ -87,8 +81,7 @@ void Target::getFixationTarget() {
 void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 {
 
-	// transform coordinates for fixation target (rotate and scale)
-	// current calculation assumes that target view is counter-rotating
+	// transform coordinates for fixation target (rotate and scale) using subject calibration
 
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
@@ -96,10 +89,17 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	double alpha, beta, gamma;
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
+
+	ppd_client = ((float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size) * pDoc->m_raster.meanEdge;
 	
 	Edge k;
 
-	k.q.x = -centerOffset_x;
+	if (pDoc->m_FlipHorizontal == L"True") {
+		k.q.x = -centerOffset_x;
+	}
+	
+	else
+		k.q.x = centerOffset_x;
 
 	if (pDoc->m_FlipVertical == L"True") {
 		k.q.y = centerOffset_y;
@@ -117,8 +117,8 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	b = centerOffset_y;
 	c = sqrt(pow(a, 2) + pow(b, 2));
 
-	y = sin(gamma * pi / 180) * c * fieldsize; // calc. x shift and scale to client ppd
-	x = cos(gamma * pi / 180) * c * fieldsize; // calc. y shift and scale to client ppd
+	y = sin(gamma * pi / 180) * c * ppd_client; // calc. x shift and scale to client ppd
+	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
 		(pDoc->m_raster.mid.x + (float)x - 10),
@@ -246,6 +246,7 @@ void Target::restartCalibration() {
 	pDoc->m_raster.corner.clear();
 	pDoc->m_raster.perimeter.clear();
 	pDoc->m_pGrid->ClearPatchlist();
+	pDoc->m_Controller.state.fired = 0;
 
 	calibrating = true;
 
@@ -257,7 +258,6 @@ void Target::restartCalibration() {
 void Target::finishCalibration() {
 
 	show_cross = false;
-	calibrating = false;
 	CRect mainWnd;
 	CPoint center;
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -265,6 +265,8 @@ void Target::finishCalibration() {
 	center = mainWnd.CenterPoint();
 	pView->OnLButtonUp(0, center);
 	pView->SetFocus();
+
+	calibrating = false;
 	
 }
 
@@ -280,6 +282,7 @@ void Target::OnGamePadCalibration() {
 	case 0:
 		// reset it all
 		OnLButtonDown(0, CPoint(0, 0));
+
 		break;
 
 	case 1:
@@ -287,7 +290,7 @@ void Target::OnGamePadCalibration() {
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
 
-		xbox_cross.x += fieldsize + discretion * 2;
+		xbox_cross.x += (fieldsize + discretion) * pDoc->m_Controller.flipSign.x;
 
 		break;
 
@@ -296,7 +299,7 @@ void Target::OnGamePadCalibration() {
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
 
-		xbox_cross.y += fieldsize + discretion * 2;
+		xbox_cross.y += distance.getLength() * pDoc->m_Controller.flipSign.y;
 
 		break;
 
@@ -304,7 +307,9 @@ void Target::OnGamePadCalibration() {
 		OnLButtonDown(0, CPoint(
 			(int)xbox_cross.x + state.LX,
 			(int)xbox_cross.y + state.LY));
-		xbox_cross.x -= fieldsize + discretion * 2;
+
+		xbox_cross.x -= distance.getLength() * pDoc->m_Controller.flipSign.x;
+
 		break;
 
 	case 4:
@@ -322,24 +327,31 @@ void Target::OnGamePadCalibration() {
 
 void Target::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
-
+	
+	// parameter point == {0,0}: reset subject calibration by gamepad
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
-	if (pDoc->m_raster.corner.size() == 4 && !calibrating)
-		restartCalibration();
-
-	else
-		if (pDoc->m_raster.corner.size() < 4) {
+	if (pDoc->m_raster.corner.size() < 4 && point != CD2DPointF{ 0,0 }) {
 			pDoc->m_raster.corner.push_back(d2dpoint);
+			switch (pDoc->m_raster.corner.size()) {
+				case 1:
+					distance.p = point;
+					break;
+				case 2:
+					distance.q = point;
+					break;
 
+			}
 			pDoc->UpdateAllViews(NULL);
 			RedrawWindow();
 
 		if (pDoc->m_raster.corner.size() == 4)
 			finishCalibration();
 		}
+
+	else
+		restartCalibration();
 
 	pDoc->UpdateAllViews(NULL);
 	RedrawWindow();

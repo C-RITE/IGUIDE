@@ -105,10 +105,14 @@ void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (pDoc->CheckFOV()) {
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	
+	if (!LButtonIsDown && !m_pDlgTarget->calibrating)
+		return;
+
+	if (pDoc->CheckFOV())
+	{
 		pDoc->m_pGrid->StorePatch(static_cast<CD2DPointF>(point));
 	}
 	else
@@ -116,11 +120,14 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 	free(pDoc->m_pMousePos);
+
 	pDoc->m_pMousePos = NULL;
 	ShowCursor(TRUE);
 
 	m_pDlgTarget->Invalidate();
 	Invalidate();
+
+	LButtonIsDown = false;
 
 }
 
@@ -152,6 +159,8 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 	ShowCursor(FALSE);
+
+	LButtonIsDown = true;
 
 	RedrawWindow();
 
@@ -237,13 +246,13 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		
 		else {
 			if (pDoc->m_InputController == L"Gamepad" && pDoc->m_Controller.m_bRunning) {
-				m_pDlgTarget->OnLButtonDown(NULL, NULL);
 				pDoc->m_Controller.m_pThread->SuspendThread();
 			}
 			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
-			m_pDlgTarget->OnLButtonDown(NULL, NULL);
-			if (!pDoc->m_Controller.m_bRunning && pDoc->m_InputController == L"Gamepad")
+			if (pDoc->m_InputController == L"Gamepad")
 				pDoc->m_Controller.m_pThread->ResumeThread();
+			m_pDlgTarget->restartCalibration();
+			m_pDlgTarget->OnLButtonDown(0, 0);
 		}
 	
 	}

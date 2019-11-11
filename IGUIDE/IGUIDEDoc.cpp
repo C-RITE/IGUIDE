@@ -125,7 +125,11 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"OutputDir", NULL);
 	if (data.IsEmpty()) {
-		data.Format(_T("C:\\"));
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			data = homedir;
+			data.Append(_T("\\Videos\\"));
+		}
 	}
 
 	m_OutputDir = data;
@@ -156,6 +160,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	}
 
 	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
+	m_FlipHorizontal = AfxGetApp()->GetProfileString(L"Settings", L"FlipHorizontal", L"False");
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 
@@ -203,6 +208,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
 	const DWORD dataSize = static_cast<DWORD>(m_raster.corner.size() * sizeof(CD2DPointF));

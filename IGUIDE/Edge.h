@@ -11,6 +11,8 @@ public:
 	Edge();
 	Edge(CD2DPointF p, CD2DPointF q) :p(p), q(q) {};
 
+	int getLength();
+
 	~Edge();
 };
 

@@ -62,7 +62,7 @@ bool Patches::SaveToFile() {
 	int number = 1;
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CString path = pDoc->m_OutputDir;
-	filepath.Format(_T("%s\\"), path);
+	filepath.Format(_T("%s"), path);
 	CString strNumber, strDegX, strDegY, strDefocus;
 	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg),Defocus");
 

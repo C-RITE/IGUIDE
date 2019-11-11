@@ -38,6 +38,8 @@ protected:
 
 private:
 	CD2DBitmap* m_pFixationTarget;
+	bool		LButtonIsDown;	// workaround for not accidently clicking 
+								// into operator view after openfiledialog
 
 public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

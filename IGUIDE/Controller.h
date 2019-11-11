@@ -31,9 +31,9 @@ public:
 
 	ControlState		state;								// store controller states
 	void				reset();
-	void				setFlip();
+	void				setFlip();							// respect screen orientation
 	void				shutdown();
-	int					flipSign;
+	CPoint				flipSign;
 	bool				m_bRunning;							// thread runtime
 	bool				m_bActive;							// gamepad on/off
 };

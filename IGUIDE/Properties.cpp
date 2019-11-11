@@ -52,7 +52,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	CString propName = prop->GetName();
 
-	if (propName == "Raster Size") {
+	if (propName == L"Raster Size") {
 		pDoc->m_raster.size = vt;
 	}
 
@@ -108,11 +108,18 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		pDoc->m_Controller.setFlip();
 	}
 
+	if (propName == L"Flip Horizontal") {
+		pDoc->m_FlipHorizontal = vt.bstrVal;
+		pDoc->m_Controller.setFlip();
+	}
+
 	if (propName == L"Capability") {
 		pDoc->m_RemoteCtrl = vt;
 	}
 
 	pDoc->UpdateAllViews(NULL);
+
+	AfxGetApp()->m_pMainWnd->SetFocus();
 
 	return S_OK;
 
@@ -154,7 +161,7 @@ void Properties::InitPropList()
 	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.MarkModifiedProperties();
 
-	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"D:\\", NULL, _T("Choose output directory of captured video files"));
+	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"", NULL, _T("Choose output directory of captured video files"));
 	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
 	Patch = new CMFCPropertyGridProperty(L"Patch");
 	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
@@ -172,6 +179,7 @@ void Properties::InitPropList()
 	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", AOSACA_IPValue, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
 	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", ICANDI_IPValue, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
 	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", FlipVerticalValue, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
+	FlipHorizontal = new CMFCPropertyGridProperty(L"Flip Horizontal", FlipHorizontalValue, _T("Flips horizontal orientation of Target Screen"), NULL, NULL, NULL);
 	InputController = new CMFCPropertyGridProperty(L"Input Controller", InputControl, _T("Select Mouse or Gamepad Controller for Subject Calibration procedure"), NULL, NULL, NULL);
 
 	RECT Rect;
@@ -185,9 +193,10 @@ void Properties::InitPropList()
 	ICANDI->AddSubItem(VideoFolder);
 	m_wndPropList.AddProperty(TargetView);
 	TargetView->AddSubItem(FixationTargetScreen);
+	TargetView->AddSubItem(FlipVertical);
+	TargetView->AddSubItem(FlipHorizontal);
 	TargetView->AddSubItem(FixationFile);
 	TargetView->AddSubItem(FixationTargetSize);
-	TargetView->AddSubItem(FlipVertical);
 	m_wndPropList.AddProperty(SubjectCalibration);
 	SubjectCalibration->AddSubItem(InputController);
 	m_wndPropList.AddProperty(RemoteControl);
@@ -231,6 +240,7 @@ void Properties::fillProperties() {
 	_variant_t aoip(pDoc->m_AOSACA_IP);
 	_variant_t icip(pDoc->m_ICANDI_IP);
 	_variant_t fv(pDoc->m_FlipVertical);
+	_variant_t fh(pDoc->m_FlipHorizontal);
 	_variant_t rem(pDoc->m_RemoteCtrl);
 	_variant_t inpcon(pDoc->m_InputController);
 	
@@ -241,8 +251,15 @@ void Properties::fillProperties() {
 	AOSACA_IP->SetValue(aoip);
 	ICANDI_IP->SetValue(icip);
 	FlipVertical->SetValue(fv);
+	FlipHorizontal->SetValue(fh);
 	InputController->SetValue(inpcon);
 	RemoteCapability->SetValue(rem);
+
+	InputController->AllowEdit(false);
+	RemoteCapability->AllowEdit(false);
+	FixationTargetScreen->AllowEdit(false);
+	FlipVertical->AllowEdit(false);
+	FlipHorizontal->AllowEdit(false);
 
 	COLORREF col = RGB(
 		(int)(pDoc->m_raster.color.r / (1 / 255.0)),
@@ -288,9 +305,12 @@ void Properties::fillProperties() {
 		InputController->AddOption(control[i]);
 
 	FlipVertical->RemoveAllOptions(); // same as before
+	FlipHorizontal->RemoveAllOptions(); 
 	CString vert[2]{ L"True", L"False" };
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; i++) {
 		FlipVertical->AddOption(vert[i]);
+		FlipHorizontal->AddOption(vert[i]);
+	}
 
 }
 

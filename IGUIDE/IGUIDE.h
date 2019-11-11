@@ -18,6 +18,7 @@ class CIGUIDEApp : public CWinAppEx
 {
 public:
 	CIGUIDEApp();
+	static CStringW GetFileVersion();
 
 // Overrides
 public:

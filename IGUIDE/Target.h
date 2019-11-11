@@ -1,7 +1,8 @@
 #pragma once
 #include "IGUIDEView.h"
+#include "Edge.h"
 
-class Edge;
+//class Edge;
 class CIGUIDEDoc;
 
 // Target dialog
@@ -22,11 +23,12 @@ class Target : public CDialogEx
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
 	CD2DPointF				xbox_cross;			// controller's current cursor location
+	Edge					distance;			// distance between two raster corners
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
-	bool					calibrating;		// true during calibration
-	double					ppd_client;			// pixel per degree on client screen
-	int						fieldsize;			// fieldsize in pixel on client screen
+	bool					calibrating;		// calibration ongoing
+	float					ppd_client;			// pixel per degree on client screen
+	int						fieldsize;			// dummy fieldsize in pixel on client screen
 	int						discretion;			// distance in pixel to raster corners during calibration
 
 // Operations
@@ -36,7 +38,6 @@ public:
 	~Target();
 	void Pinpoint(float x, float y);
 	void getFixationTarget();
-	void calcFieldSize();
 	void setCross();
 	void OnGamePadCalibration();
 	void restartCalibration();

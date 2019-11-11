@@ -73,7 +73,7 @@ LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 	if (w == 1)
 		pView->m_pDlgTarget->OnGamePadCalibration(); // we hit a button!
 	else 
-		pView->m_pDlgTarget->RedrawWindow();		 // move the cursor..
+		pView->m_pDlgTarget->Invalidate();		 // move the cursor..
 
 	return 0;
 

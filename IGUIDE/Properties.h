@@ -85,6 +85,7 @@ public:
 	CMFCPropertyGridProperty*		AOSACA_IP;
 	CMFCPropertyGridProperty*		ICANDI_IP;
 	CMFCPropertyGridProperty*		FlipVertical;
+	CMFCPropertyGridProperty*		FlipHorizontal;
 
 private:
 	_variant_t FixationTargetValue;
@@ -95,6 +96,7 @@ private:
 	_variant_t ICANDI_IPValue;
 	_variant_t RemoteValue;
 	_variant_t FlipVerticalValue;
+	_variant_t FlipHorizontalValue;
 
 protected:
 	CFont m_fntPropList;

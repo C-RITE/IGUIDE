@@ -32,7 +32,8 @@ public:
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// AOSACA IP Address
 	CString					m_InputController;					// for subject calibration procedure
-	CString					m_FlipVertical;						// flip target screen
+	CString					m_FlipVertical;						// flip target screen in x
+	CString					m_FlipHorizontal;					// flip target screen in y
 	int						m_FixationTargetSize;				// fixation target size in percent
 	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
