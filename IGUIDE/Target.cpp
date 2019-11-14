@@ -24,9 +24,10 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
 	pDoc = NULL;
-	fieldsize = 60;
+	fieldsize = 0;
 	m_bVisible = true;
 	show_cross = false;
+	calibrating = false;
 	discretion = 20;
 
 }
@@ -46,8 +47,6 @@ END_MESSAGE_MAP()
 
 
 void Target::setCross() {
-
-	fieldsize = pDoc->m_raster.size / 10;
 
 	if (pDoc->m_Screens.size() > 0) {
 
@@ -95,11 +94,11 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	Edge k;
 
 	if (pDoc->m_FlipHorizontal == L"True") {
-		k.q.x = -centerOffset_x;
+		k.q.x = centerOffset_x;
 	}
 	
 	else
-		k.q.x = centerOffset_x;
+		k.q.x = -centerOffset_x;
 
 	if (pDoc->m_FlipVertical == L"True") {
 		k.q.y = centerOffset_y;
@@ -238,6 +237,8 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 void Target::restartCalibration() {
 
+	fieldsize = (512.f / (float)pDoc->m_raster.size) * 66.6f;
+
 	free(m_POI);
 	m_POI = NULL;
 	pDoc->m_raster.mid = { 0, 0 };
@@ -274,6 +275,8 @@ void Target::OnGamePadCalibration() {
 
 	// hijack left-mouse-button click handler to store calibration coordinates
 	// move cursor from one raster corner to the next with each click
+
+	!calibrating ? restartCalibration() : 0;
 
 	ControlState state = pDoc->m_Controller.state;
 
