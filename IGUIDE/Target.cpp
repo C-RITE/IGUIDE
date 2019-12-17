@@ -23,7 +23,6 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-	pDoc = NULL;
 	fieldsize = 60;
 	m_bVisible = true;
 	show_cross = false;
@@ -47,6 +46,10 @@ END_MESSAGE_MAP()
 
 void Target::setCross() {
 
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
 	fieldsize = pDoc->m_raster.size / 10;
 
 	if (pDoc->m_Screens.size() > 0) {
@@ -69,12 +72,16 @@ void Target::setCross() {
 
 }
 
-void Target::getFixationTarget() {
+void Target::SetFixationTarget() {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
 
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
 		delete m_pFixationTarget;
 
-	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);	
 
 }
 
@@ -82,6 +89,9 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 {
 
 	// transform coordinates for fixation target (rotate and scale) using subject calibration
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
 
 	if (!m_POI)
 		m_POI = (CD2DRectF*)malloc(sizeof(CD2DRectF));
@@ -138,6 +148,10 @@ void Target::DoDataExchange(CDataExchange* pDX)
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return -1;
+
 	ControlState state = pDoc->m_Controller.state;
 
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
@@ -238,6 +252,10 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 void Target::restartCalibration() {
 
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
 	free(m_POI);
 	m_POI = NULL;
 	pDoc->m_raster.mid = { 0, 0 };
@@ -274,6 +292,10 @@ void Target::OnGamePadCalibration() {
 
 	// hijack left-mouse-button click handler to store calibration coordinates
 	// move cursor from one raster corner to the next with each click
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
 
 	ControlState state = pDoc->m_Controller.state;
 
@@ -327,13 +349,18 @@ void Target::OnGamePadCalibration() {
 
 void Target::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	
 	// parameter point == {0,0}: reset subject calibration by gamepad
+	
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
 	CD2DPointF d2dpoint;
 	d2dpoint = static_cast<CD2DPointF>(point);
 
 	if (pDoc->m_raster.corner.size() < 4 && point != CD2DPointF{ 0,0 }) {
 			pDoc->m_raster.corner.push_back(d2dpoint);
+
 			switch (pDoc->m_raster.corner.size()) {
 				case 1:
 					distance.p = point;
@@ -341,8 +368,8 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 				case 2:
 					distance.q = point;
 					break;
-
 			}
+
 			pDoc->UpdateAllViews(NULL);
 			RedrawWindow();
 
@@ -362,6 +389,9 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 {
 
 	// TODO: Add your specialized code here and/or call the base class
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return __super::PreTranslateMessage(pMsg);
 
 	switch (pMsg->message)
 	{
@@ -373,7 +403,6 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 	return __super::PreTranslateMessage(pMsg);
 
 }
-
 
 void Target::OnShowWindow(BOOL bShow, UINT nStatus)
 {

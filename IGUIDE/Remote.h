@@ -19,7 +19,7 @@ public:
 	void init(Properties* p); // Initialize remote with values from Properties class
 	void connect();
 	void connect(Connection c);
-	void disconnect(Connection c);
+	void setIPAdress(Connection c);
 
 	Connection getPendingConnections();
 	Connection getActiveConnections();
@@ -28,6 +28,8 @@ private:
 	CString mode;
 	CString AOSACA_IP;
 	CString ICANDI_IP;
+
+	Properties* m_pProperties;
 
 	CSockClient* m_pSock_AOSACA;
 	CSockClient* m_pSock_ICANDI;

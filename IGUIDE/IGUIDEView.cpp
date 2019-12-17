@@ -64,6 +64,9 @@ CIGUIDEView * CIGUIDEView::GetView()
 {
 	CFrameWndEx * pFrame = (CFrameWndEx *)(AfxGetApp()->m_pMainWnd);
 
+	if (!pFrame)
+		return NULL;
+
 	CView * pView = pFrame->GetActiveView();
 
 	if (!pView)
@@ -195,6 +198,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 		area.Width(),
 		area.Height(),
 		NULL);
+
 	return 0;
 
 }
@@ -267,18 +271,28 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;
 	pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
 
-	m_pDlgTarget->pDoc = pDoc;
-	m_pDlgTarget->getFixationTarget();	
+	m_pDlgTarget->SetFixationTarget();
+	m_pDlgTarget->Invalidate();
 
-	if (m_pFixationTarget && m_pFixationTarget->IsValid())
-		delete m_pFixationTarget;
-
-	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
+	SetFixationTarget();
 
 	SetFocus();
 	Invalidate();
 
 	delete FOV;
+
+}
+
+void CIGUIDEView::SetFixationTarget() {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
+	if (m_pFixationTarget && m_pFixationTarget->IsValid())
+		delete m_pFixationTarget;
+
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
 
 }
 
@@ -312,154 +326,14 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	if (pRenderTarget) {
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
+		
 		pDoc->m_pFundus->Paint(pRenderTarget);
-		pDoc->m_pGrid->Paint(pRenderTarget);
-		pDoc->m_pGrid->Mark(pRenderTarget);
-		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 
-		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
-			sizeDpi.height / 8);							// font size
-		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
-			sizeDpi.height / 4);
+		pDoc->m_pGrid->DrawGrid(pRenderTarget);
+		pDoc->m_pGrid->DrawPatches(pRenderTarget);
+		pDoc->m_pGrid->DrawOptional(pRenderTarget);
+		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
 
-		if (pDoc->m_pGrid->overlay & TRACEINFO) {
-
-			CString traceText = pDoc->getTraceInfo();
-			// construct a CD2DTextLayout object which represents a block of formatted text 
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				traceText,									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width - 210, 5),
-															// place on top-right corner
-				&textLayout,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::LightGreen)));
-
-		}
-
-		if (pDoc->m_pGrid->overlay & DEFOCUS) {
-
-			CString defocus = L"DEFOCUS: ";
-			defocus.Append(pDoc->getCurrentDefocus());
-
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				defocus,									// text to be drawn
-				textFormat2,									// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(CD2DPointF(5),
-				// place on top-right corner
-				&textLayout,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::White)));
-
-		}
-
-
-		if (pDoc->m_pGrid->overlay & QUICKHELP) {
-
-			vector<CString> help = pDoc->getQuickHelp();
-
-			CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
-			CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
-			CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
-
-			CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
-			CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };
-
-			CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120};
-			pRenderTarget->FillRectangle(black_box, &BlackBrush);
-			pRenderTarget->DrawRectangle(black_box, &YellowGreenBrush);
-
-			CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
-				help[0],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
-				help[1],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
-				help[2],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-
-			pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
-				&AOSACA_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-			pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
-				&IGUIDE_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-			pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
-				&ICANDI_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-		}
-
-		// is (custom) fixation target on or off?
-		if (m_pDlgTarget->m_bVisible) {
-
-			CD2DBrushProperties prop{ .5f };
-			CD2DSolidColorBrush brush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Beige), &prop };
-			CD2DRectF upperRight{sizeTarget.width - 100,
-								50, sizeTarget.width - 50,
-								100 };
-			pRenderTarget->DrawRectangle(CD2DRectF(
-				upperRight.left-1,
-				upperRight.top-1,
-				upperRight.right+1,
-				upperRight.bottom+1),
-				&brush);
-
-			if (m_pFixationTarget && m_pFixationTarget->IsValid()) {
-				CD2DSizeF size = m_pFixationTarget->GetSize();
-				pRenderTarget->DrawBitmap(
-					m_pFixationTarget,
-					upperRight,
-					0.25f,
-					D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
-			}
-
-			else {
-
-				CD2DRectF frame(upperRight);
-				frame.left += 15;
-				frame.right -= 15;
-				frame.top += 15;
-				frame.bottom -= 15;
-				pRenderTarget->DrawEllipse(frame, &brush);
-				pRenderTarget->DrawLine(
-					CD2DPointF(frame.left, frame.top), 
-					CD2DPointF(frame.right, frame.bottom),
-					&brush);
-				pRenderTarget->DrawLine(
-					CD2DPointF(frame.right, frame.top),
-					CD2DPointF(frame.left, frame.bottom),
-					&brush);
-
-			}
-
-		}
-			   
 	}
 
 	return 0;
@@ -501,6 +375,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
+
 				case VK_UP:
 					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
 					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
@@ -541,9 +416,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				return false;
 			pDoc->m_pGrid->DelPatch();
 			pDoc->m_pGrid->patchlist.SaveToFile();
+
+			this->Invalidate();
 		}
 
-		
 	}
 
 	// other keyboard controls
@@ -572,11 +448,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 
+	// TODO: Add your specialized code here and/or call the base class
+
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);
 	return CView::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
-	// TODO: Add your specialized code here and/or call the base class
 
 }
 

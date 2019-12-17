@@ -75,7 +75,7 @@ void Grid::StorePatch(CD2DPointF loc) {
 
 }
 
-void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawGrid(CHwndRenderTarget* pRenderTarget) {
 
 	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
@@ -131,12 +131,21 @@ void Grid::Paint(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawOptional(CHwndRenderTarget* pRenderTarget) {
+
+	CIGUIDEView *pView = CIGUIDEView::GetView();
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(BLACK, 0.5f) };
+	CD2DSolidColorBrush YellowBrush{ pRenderTarget, D2D1::ColorF(YELLOW) };
+
 
 	//draw circles around the center
 	if (overlay & DEGRAD) {
 		for (float x = 0; x < 16; x++) {
-			CD2DRectF e = { center.x - 1 / (float)dpp * x,
+			CD2DRectF e = {
+				center.x - 1 / (float)dpp * x,
 				center.y - 1 / (float)dpp * x,
 				center.x + 1 / (float)dpp * x,
 				center.y + 1 / (float)dpp * x };
@@ -146,49 +155,106 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 
 	// draw circles around foveola and fovea
 	if (overlay & FOVEOLA) {
-		CD2DRectF e1 = { center.x - 1 / (float)dpp * 1.2f,
-		center.y - 1 / (float)dpp * 1.2f,
-		center.x + 1 / (float)dpp * 1.2f,
-		center.y + 1 / (float)dpp * 1.2f };
+		CD2DRectF e1 = { 
+			center.x - 1 / (float)dpp * 1.2f,
+			center.y - 1 / (float)dpp * 1.2f,
+			center.x + 1 / (float)dpp * 1.2f,
+			center.y + 1 / (float)dpp * 1.2f };
 		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
 	}
 
 	if (overlay & FOVEA){
-		CD2DRectF e2 = { center.x - 1 / (float)dpp * 6.2f,
-		center.y - 1 / (float)dpp * 6.2f,
-		center.x + 1 / (float)dpp * 6.2f,
-		center.y + 1 / (float)dpp * 6.2f };
-	pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
+		CD2DRectF e2 = { 
+			center.x - 1 / (float)dpp * 6.2f,
+			center.y - 1 / (float)dpp * 6.2f,
+			center.x + 1 / (float)dpp * 6.2f,
+			center.y + 1 / (float)dpp * 6.2f };
+		pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
 	}
 
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
-		nerve = { float(center.x + mainWnd.Width() / 2 - 5 / dpp),
-		(float)((center.y - 2.5 / dpp) - 86),
-		(float)(center.x + mainWnd.Width() / 2),
-		(float)((center.y + 2.5 / dpp) - 86) };
+		nerve = { 
+			float(center.x + mainWnd.Width() / 2 - 5 / dpp),
+			(float)((center.y - 2.5 / dpp) - 86),
+			(float)(center.x + mainWnd.Width() / 2),
+			(float)((center.y + 2.5 / dpp) - 86) };
 		pRenderTarget->DrawEllipse(nerve, m_pBlueBrush, .3f);
 	}
 
 	// draw cross in fovea
 	if (overlay & CROSSHAIR) {
-		CD2DRectF fovea(center.x - 4,
+		CD2DRectF fovea(
+			center.x - 4,
 			center.y - 4,
 			center.x + 4,
 			center.y + 4);
 
 		pRenderTarget->DrawEllipse(fovea, m_pWhiteBrush);
-		pRenderTarget->DrawLine(CD2DPointF(center.x - 8, center.y),
+		pRenderTarget->DrawLine(
+			CD2DPointF(center.x - 8, center.y),
 			CD2DPointF(center.x + 8, center.y),
 			m_pWhiteBrush);
-	pRenderTarget->DrawLine(CD2DPointF(center.x, center.y - 8),
-		CD2DPointF(center.x, center.y + 8),
-		m_pWhiteBrush);
+		pRenderTarget->DrawLine(
+			CD2DPointF(center.x, center.y - 8),
+			CD2DPointF(center.x, center.y + 8),
+			m_pWhiteBrush);
+	}
+
+	// is (custom) fixation target on or off?
+	if (pView && pView->m_pDlgTarget->m_bVisible) {
+
+		CD2DBrushProperties prop{ .5f };
+		CD2DSolidColorBrush brush{ pRenderTarget, D2D1::ColorF(YELLOW), &prop };
+
+		CD2DRectF upperRight{
+					sizeTarget.width - 100,
+					50,
+					sizeTarget.width - 50,
+					100 };
+
+		pRenderTarget->DrawRectangle(CD2DRectF(
+				upperRight.left - 1,
+				upperRight.top - 1,
+				upperRight.right + 1,
+				upperRight.bottom + 1),
+				&brush);
+
+		pRenderTarget->FillRectangle(upperRight, &BlackBrush);
+
+		if (pView->m_pFixationTarget && pView->m_pFixationTarget->IsValid()) {
+			CD2DSizeF size = pView->m_pFixationTarget->GetSize();
+			pRenderTarget->DrawBitmap(
+				pView->m_pFixationTarget,
+				upperRight,
+				0.25f,
+				D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+		}
+
+		else {
+
+			CD2DRectF frame(upperRight);
+			frame.left += 15;
+			frame.right -= 15;
+			frame.top += 15;
+			frame.bottom -= 15;
+			pRenderTarget->DrawEllipse(frame, &brush);
+			pRenderTarget->DrawLine(
+				CD2DPointF(frame.left, frame.top),
+				CD2DPointF(frame.right, frame.bottom),
+				&brush);
+			pRenderTarget->DrawLine(
+				CD2DPointF(frame.right, frame.top),
+				CD2DPointF(frame.left, frame.bottom),
+				&brush);
+
+		}
+
 	}
 
 }
 
-void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	// draw all marked locations (i.e. list of patches) in operator view
 
@@ -202,7 +268,7 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 	
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 		
-		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize; 
+		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize;
 
 		pRenderTarget->PushLayer(lpHi, *pLayer);
 
@@ -267,6 +333,115 @@ void Grid::Mark(CHwndRenderTarget* pRenderTarget) {
 			m_pWhiteBrush,
 			.5f,
 			NULL);
+	}
+
+}
+
+void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(BLACK, 0.5f) };
+	CD2DSolidColorBrush YellowBrush{ pRenderTarget, D2D1::ColorF(YELLOW) };
+
+	CD2DPointF upperLeft{ 100, 50 };
+
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 8);							// font size
+	CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 4);
+
+	if (pDoc->m_pGrid->overlay & TRACEINFO) {
+
+		CString traceText = pDoc->getTraceInfo();
+
+		// construct a CD2DTextLayout object which represents a block of formatted text 
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			traceText,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width - 210, 5),
+			// place on top-right corner
+			&textLayout,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget, D2D1::ColorF(GREEN)));
+
+	}
+
+	if (pDoc->m_pGrid->overlay & DEFOCUS) {
+
+		CD2DRectF black_box{ upperLeft.x - 5, upperLeft.y - 5, upperLeft.x + 215, upperLeft.y + 120 };
+		CString defocus = L"DEFOCUS: ";
+		defocus.Append(pDoc->getCurrentDefocus());
+
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			defocus,									// text to be drawn
+			textFormat2,								// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(CD2DPointF(5),
+			// place on top-right corner
+			&textLayout,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(YELLOW)));
+
+	}
+
+	if (pDoc->m_pGrid->overlay & QUICKHELP) {
+
+		vector<CString> help = pDoc->getQuickHelp();
+
+		CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
+		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
+		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
+
+		CD2DRectF black_box2{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120 };
+		pRenderTarget->FillRectangle(black_box2, &BlackBrush);
+		pRenderTarget->DrawRectangle(black_box2, &YellowBrush);
+
+		CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
+			help[0],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
+			help[1],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
+			help[2],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+
+		pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
+			&AOSACA_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(YELLOW)));
+
+		pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
+			&IGUIDE_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(YELLOW)));
+
+		pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
+			&ICANDI_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(YELLOW)));
+
 	}
 
 }

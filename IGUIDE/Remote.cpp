@@ -12,7 +12,6 @@ Remote::Remote()
 	m_pSock_AOSACA = NULL;
 	m_pSock_ICANDI = NULL;
 	OnCreate(NULL);
-
 }
 
 Remote::~Remote()
@@ -25,9 +24,19 @@ Remote::~Remote()
 void Remote::init(Properties* p)
 {
 	// TODO: Add your implementation code here.
+	m_pProperties = p;
 	mode = p->getRemoteCapability();
 	AOSACA_IP = p->getAOSACA_IP();
 	ICANDI_IP = p->getICANDI_IP();
+
+}
+
+void Remote::setIPAdress(Connection c) {
+
+	if (c == AOSACA)
+		AOSACA_IP = m_pProperties->getAOSACA_IP();
+	if (c == ICANDI)
+		ICANDI_IP = m_pProperties->getICANDI_IP();
 
 }
 

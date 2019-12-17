@@ -13,7 +13,8 @@ protected: // create from serialization only
 // Attributes
 public:
 	Target*				m_pDlgTarget;						// target dialog
-	static CIGUIDEView * GetView();
+	CD2DBitmap*			m_pFixationTarget;
+	static CIGUIDEView* GetView();
 	
 // Overrides
 public:
@@ -37,9 +38,9 @@ protected:
 	afx_msg LRESULT OnDraw2d(WPARAM wParam, LPARAM lParam);
 
 private:
-	CD2DBitmap* m_pFixationTarget;
 	bool		LButtonIsDown;	// workaround for not accidently clicking 
 								// into operator view after openfiledialog
+	void CIGUIDEView::SetFixationTarget();
 
 public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -52,6 +53,7 @@ public:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
 	afx_msg void OnClose();
+
 protected:
 	afx_msg LRESULT OnDisplaychange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT ChangeTargetDisplay(WPARAM w, LPARAM l);

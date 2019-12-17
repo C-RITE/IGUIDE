@@ -12,6 +12,8 @@
 #define NETCOM_RECEIVED (WM_USER + 104)
 #define GAMEPAD_UPDATE (WM_USER + 105)
 #define MOUSE_FALLBACK (WM_USER + 106)
+#define RESET_AOSACA_IP (WM_USER + 107)
+#define RESET_ICANDI_IP (WM_USER + 108)
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
@@ -39,7 +41,7 @@
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 #include <afxdlgs.h>
 
-// stuff for Application interoperability
+// stuff for Application interoperability (AOSACA / ICANDI)
 #include <Winsock2.h>
 #include "../NetCom/WinSock2Async.h"
 
@@ -55,3 +57,9 @@
 
 void CustomTrace(const wchar_t* format, ...);
 void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
+
+#define GREEN	D2D1::ColorF::DarkSeaGreen
+#define BLUE	D2D1::ColorF::Aqua
+#define YELLOW	D2D1::ColorF::PaleGoldenrod
+#define BLACK	D2D1::ColorF::Black
+#define RED		D2D1::ColorF::Red

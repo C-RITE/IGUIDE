@@ -201,16 +201,17 @@ void CIGUIDEDoc::OnCloseDocument()
 
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_pSelectedScreen->number);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
+
 	const DWORD dataSize = static_cast<DWORD>(m_raster.corner.size() * sizeof(CD2DPointF));
 	if (m_raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&m_raster.corner[0].x, dataSize);
@@ -317,6 +318,7 @@ bool CIGUIDEDoc::CheckFOV()
 		ShowCursor(TRUE);
 		return FALSE;
 	}
+
 	return TRUE;
 
 }
@@ -372,7 +374,7 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
 	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target");
-	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZero Defocus");
+	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
 	

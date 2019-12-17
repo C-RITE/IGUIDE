@@ -56,7 +56,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		pDoc->m_raster.size = vt;
 	}
 
-	if (propName == L"Size") {
+	if (propName == L"Scale") {
 		pDoc->m_FixationTargetSize = vt;
 	}
 
@@ -87,6 +87,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 			}
 		}
 	}
+
 	if (propName == L"Input Controller") {
 		CString inpcon = vt.bstrVal;
 		pDoc->m_InputController = inpcon;
@@ -96,11 +97,13 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	if (propName == L"AOSACA IP") {
 		CString aoip = vt.bstrVal;
 		pDoc->m_AOSACA_IP = aoip;
+		AfxGetMainWnd()->SendMessage(RESET_AOSACA_IP);
 	}
 
 	if (propName == L"ICANDI IP") {
 		CString icip = vt.bstrVal;
 		pDoc->m_ICANDI_IP = icip;
+		AfxGetMainWnd()->SendMessage(RESET_ICANDI_IP);
 	}
 
 	if (propName == L"Flip Vertical") {

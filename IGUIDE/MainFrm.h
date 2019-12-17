@@ -39,11 +39,11 @@ protected:  // control bar embedded members
 private:
 
 	// for communication with host apps (ICANDI / AOSACA)
-	Remote RemoteControl;
+	Remote			RemoteControl;
 
 // Generated message map functions
 protected:
-	BOOL CreateDockingWindows();
+	BOOL	CreateDockingWindows();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
@@ -56,6 +56,7 @@ public:
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+protected:
+	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
 };
-
-

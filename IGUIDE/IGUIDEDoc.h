@@ -25,7 +25,7 @@ public:
 	Screen*					m_pSelectedScreen;					// target monitor
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
-	Raster					m_raster;
+	Raster					m_raster;							// raster class
 	Calibration*			m_pDlgCalibration;					// calibration class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory

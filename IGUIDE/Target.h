@@ -17,13 +17,14 @@ class Target : public CDialogEx
 	DECLARE_DYNAMIC(Target)
 
 // Attributes
+public:
 
-	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
 	CD2DPointF				xbox_cross;			// controller's current cursor location
 	Edge					distance;			// distance between two raster corners
+
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
 	bool					calibrating;		// calibration ongoing
@@ -36,12 +37,13 @@ class Target : public CDialogEx
 public:
 	Target(CIGUIDEView* pParent = NULL);   // standard constructor
 	~Target();
+
 	void Pinpoint(float x, float y);
-	void getFixationTarget();
 	void setCross();
 	void OnGamePadCalibration();
 	void restartCalibration();
 	void finishCalibration();
+	void SetFixationTarget();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

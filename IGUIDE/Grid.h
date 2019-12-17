@@ -37,7 +37,6 @@ private:
 
 public:
 
-
 	Grid();
 	~Grid();
 
@@ -57,9 +56,11 @@ public:
 	void DelPatch();
 	void ClearPatchlist();
 	void StorePatch(CD2DPointF point);						// store patch upon click of mouse button
-	void Paint(CHwndRenderTarget* pRenderTarget);			// paint the grid
-	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
-	void Mark(CHwndRenderTarget* pRenderTarget);			// draw patches
+
+	void DrawGrid(CHwndRenderTarget* pRenderTarget);		// paint the grid
+	void DrawOptional(CHwndRenderTarget* pRenderTarget);	// draw information overlay
+	void DrawPatches(CHwndRenderTarget* pRenderTarget);		// draw patches
+	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);	// draw text
 	
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);

@@ -30,6 +30,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_AOSACA, &CMainFrame::OnUpdateLinkIndicators)
 	ON_WM_PARENTNOTIFY()
+	ON_MESSAGE(RESET_AOSACA_IP, &CMainFrame::OnResetAosacaIp)
+	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -70,10 +72,11 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 
 	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
+
 	if (w == 1)
 		pView->m_pDlgTarget->OnGamePadCalibration(); // we hit a button!
 	else 
-		pView->m_pDlgTarget->Invalidate();		 // move the cursor..
+		pView->m_pDlgTarget->Invalidate();			 // move the cursor..
 
 	return 0;
 
@@ -89,6 +92,7 @@ LRESULT CMainFrame::OnMouseFallback(WPARAM w, LPARAM l) {
 	pDoc->m_Controller.reset();
 
 	return 0;
+
 }
 
 // CMainFrame diagnostics
@@ -295,5 +299,40 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 	// pass it on
 	return CFrameWndEx::PreTranslateMessage(pMsg);
+
+}
+
+
+afx_msg LRESULT CMainFrame::OnResetAosacaIp(WPARAM wParam, LPARAM lParam)
+{
+	if (RemoteControl.getActiveConnections() == AOSACA) {
+		int answer = MessageBox(L"Remote connection to AOSACA is currently active.\nReconnect now?", L"Attention", MB_ICONHAND | MB_YESNO);
+		if (answer == IDYES) {
+			RemoteControl.setIPAdress(AOSACA);
+			RemoteControl.connect(AOSACA);
+		}
+		else
+			RemoteControl.setIPAdress(AOSACA);
+	}
+
+	return 0;
+
+}
+
+
+afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
+{
+
+	if (RemoteControl.getActiveConnections() == ICANDI) {
+		int answer = MessageBox(L"Remote connection to ICANDI is currently active.\nReconnect now?", L"Attention", MB_ICONHAND | MB_YESNO);
+		if (answer == IDYES) {
+			RemoteControl.setIPAdress(ICANDI);
+			RemoteControl.connect(ICANDI);
+		}
+		else
+			RemoteControl.setIPAdress(ICANDI);
+	}
+
+	return 0;
 
 }
