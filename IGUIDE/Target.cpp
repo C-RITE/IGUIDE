@@ -23,12 +23,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	m_pBrushWhite = new CD2DSolidColorBrush(GetRenderTarget(), ColorF(ColorF::White));
 	m_POI = NULL;
 	m_pFixationTarget = NULL;
-<<<<<<< HEAD
 	fieldsize = 60;
-=======
-	pDoc = NULL;
-	fieldsize = 0;
->>>>>>> 64ac9ad9c5d68adb194c415e9f11c7e9a2747135
 	m_bVisible = true;
 	show_cross = false;
 	calibrating = false;
@@ -52,15 +47,12 @@ END_MESSAGE_MAP()
 
 void Target::setCross() {
 
-<<<<<<< HEAD
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (!pDoc)
 		return;
 
 	fieldsize = pDoc->m_raster.size / 10;
 
-=======
->>>>>>> 64ac9ad9c5d68adb194c415e9f11c7e9a2747135
 	if (pDoc->m_Screens.size() > 0) {
 
 		CRect cRect = (CRect)pDoc->m_pSelectedScreen->area;
@@ -109,8 +101,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	double pi = atan(1) * 4;
 	double a, b, c, x, y;
 
-	ppd_client = ((float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size) * pDoc->m_raster.meanEdge;
-	
+	ppd_client = pDoc->m_raster.meanEdge / ((float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size);
 	Edge k;
 
 	if (pDoc->m_FlipHorizontal == L"True") {
@@ -261,13 +252,9 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 void Target::restartCalibration() {
 
-<<<<<<< HEAD
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (!pDoc)
 		return;
-=======
-	fieldsize = (512.f / (float)pDoc->m_raster.size) * 66.6f;
->>>>>>> 64ac9ad9c5d68adb194c415e9f11c7e9a2747135
 
 	free(m_POI);
 	m_POI = NULL;
@@ -306,13 +293,10 @@ void Target::OnGamePadCalibration() {
 	// hijack left-mouse-button click handler to store calibration coordinates
 	// move cursor from one raster corner to the next with each click
 
-<<<<<<< HEAD
+
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (!pDoc)
 		return;
-=======
-	!calibrating ? restartCalibration() : 0;
->>>>>>> 64ac9ad9c5d68adb194c415e9f11c7e9a2747135
 
 	ControlState state = pDoc->m_Controller.state;
 

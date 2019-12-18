@@ -71,7 +71,7 @@ bool Patches::SaveToFile() {
 		strNumber.Format(_T("%.3d"), number++);
 		strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coords.x);
 		strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coords.y);
-		strDefocus.Format(_T("%.2f"), it._Ptr->_Myval.defocus);
+		strDefocus.Format(_T("%s"), it._Ptr->_Myval.defocus);
 
 		sstream
 			<< it->timestamp.GetString()

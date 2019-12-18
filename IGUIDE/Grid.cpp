@@ -10,6 +10,7 @@ using namespace D2D1;
 
 Grid::Grid()
 {
+
 	m_pBrushProp = new CD2DBrushProperties(.5f);
 	m_pPatchBrush = new CD2DSolidColorBrush(NULL, NULL);
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
@@ -50,6 +51,7 @@ void Grid::DelPatch() {
 
 	if (patchlist.size() > 0)
 		patchlist.pop_back();
+
 }
 
 void Grid::ClearPatchlist() {
