@@ -275,6 +275,8 @@ void Target::restartCalibration() {
 
 void Target::finishCalibration() {
 
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
 	show_cross = false;
 	CRect mainWnd;
 	CPoint center;
@@ -283,6 +285,10 @@ void Target::finishCalibration() {
 	center = mainWnd.CenterPoint();
 	pView->OnLButtonUp(0, center);
 	pView->SetFocus();
+
+	const DWORD dataSize = static_cast<DWORD>(pDoc->m_raster.corner.size() * sizeof(CD2DPointF));
+	if (pDoc->m_raster.corner.size() == 4)
+		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&pDoc->m_raster.corner[0].x, dataSize);
 
 	calibrating = false;
 	

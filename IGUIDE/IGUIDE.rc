@@ -275,13 +275,6 @@ BEGIN
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
-    POPUP "&Window"
-    BEGIN
-        MENUITEM "&New Window",                 ID_WINDOW_NEW
-        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
-        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
-        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
-    END
     POPUP "&Help"
     BEGIN
         MENUITEM "Hotkeys\tF1",                 ID_OVERLAY_QUICKHELP
@@ -322,8 +315,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,7,1
- PRODUCTVERSION 0,5,7,1
+ FILEVERSION 0,5,8,0
+ PRODUCTVERSION 0,5,8,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -340,12 +333,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.5.7.1"
+            VALUE "FileVersion", "0.5.8.0"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2019 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.5.7.1"
+            VALUE "ProductVersion", "0.5.8.0"
         END
     END
     BLOCK "VarFileInfo"

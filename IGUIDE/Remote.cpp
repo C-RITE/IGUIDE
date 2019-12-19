@@ -240,6 +240,7 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
 
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	int ret;
 
 	if (pMsg->message == WM_KEYDOWN && m_pSock_ICANDI) {
@@ -274,10 +275,12 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 		case 0x6B:
 			msg = '+';
 			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | DEFOCUS;
 			break;
 		case 0x6D:
 			msg = '-';
 			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
+			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | DEFOCUS;
 			break;
 		case VK_NUMPAD0:
 			msg = '0';

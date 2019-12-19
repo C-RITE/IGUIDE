@@ -414,8 +414,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
 				return false;
-			pDoc->m_pGrid->DelPatch();
-			pDoc->m_pGrid->patchlist.SaveToFile();
+			if (pDoc->m_pGrid->patchlist.back().locked == false) {
+				pDoc->m_pGrid->DelPatch();
+				pDoc->m_pGrid->patchlist.SaveToFile();
+			}
 
 			this->Invalidate();
 		}

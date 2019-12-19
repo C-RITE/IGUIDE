@@ -125,7 +125,7 @@ UINT GamePadThread(LPVOID pParam) {
 
 			}
 
-			else {
+			else if (parent->m_bActive){
 
 				CIGUIDEApp* IGUIDE = (CIGUIDEApp*)AfxGetApp();
 				int answer = IGUIDE->m_pMainWnd->MessageBox(L"Gamepad not found! Please check connection.\nFall back to mouse?", L"Attention", MB_ICONHAND | MB_YESNOCANCEL);

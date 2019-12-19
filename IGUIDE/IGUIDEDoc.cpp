@@ -143,12 +143,15 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"ICANDI IP", NULL);
 	if (data.IsEmpty()) {
-		data.Format(_T("192.168.0.2"));
+		data.Format(_T("127.0.0.1"));
 	}
 
 	m_ICANDI_IP = data;
 
-	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 0);
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", -1);
+	if (m_pGrid->overlay == -1) {
+		m_pGrid->overlay = 3;
+	}
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
 	
@@ -161,9 +164,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
 	m_FlipHorizontal = AfxGetApp()->GetProfileString(L"Settings", L"FlipHorizontal", L"False");
-
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
-
 	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 
 	UINT nl;
@@ -184,14 +185,13 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	
 	m_raster.size =  AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
 		
 	delete calib, ptr;
 	delete rcol;
 	
-
 	return TRUE;
+
 }
 
 void CIGUIDEDoc::OnCloseDocument()
@@ -211,11 +211,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-
-	const DWORD dataSize = static_cast<DWORD>(m_raster.corner.size() * sizeof(CD2DPointF));
-	if (m_raster.corner.size() == 4)
-		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&m_raster.corner[0].x, dataSize);
-
+	
 	D2D1_COLOR_F rcol = m_raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
 
