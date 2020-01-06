@@ -454,38 +454,46 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
 	CString xCoords, yCoords;
-	CD2DSizeF sizeTarget(rect.Width(), 10);
+	CD2DSizeF sizeTarget(50,50);
 	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
 		sizeDpi.height /7);							// font size
 
-	xCoords.Format(L"%.1f", xPos);
+	CSize marginX;
+	CSize marginY;
+
+	float x_rnd = roundf(xPos * 10) / 10;
+	if (x_rnd == -0.0)
+		x_rnd = 0.0;
+
+	if (x_rnd <= -10)
+		marginX = { 35, 0 };
+	else if (x_rnd < 0 | x_rnd >= 10)
+		marginX = { 28, 0 };
+	else if (x_rnd >= 0)
+		marginX = { 20, 0 };
+
+	float y_rnd = roundf(yPos * 10) / 10;
+	if (y_rnd == -0.0)
+		y_rnd = 0.0;
+	
+	if (y_rnd <= -10)
+		marginY = { 40, 4 };
+	else if (y_rnd < 0 | y_rnd >= 10)
+		marginY = { 33, 4 };
+	else if (y_rnd >= 0)
+		marginY = { 25, 4 };
+
+	xCoords.Format(L"%.1f", x_rnd);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		xCoords,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
-	CSize marginX;
-	CSize marginY;
-
-	if (xPos >= 10.0f)
-		marginX = { 28, 0 };
-	else if (xPos >= 0.f)
-		marginX = { 20, 0 };
-	else if (xPos <= -10.f)
-		marginX = { 35, 0 };
-	else if (xPos < 0.f)
-		marginX = { 28, 0 };
-
-	if (yPos > 0)
-		marginY = { 25, 4 };
-	else
-		marginY = { 33, 4 };
-	
 	pRenderTarget->DrawTextLayout(rect.BottomRight() - marginX, &textLayout, m_pWhiteBrush);
 
-	yCoords.Format(L"%.1f", yPos);
+	yCoords.Format(L"%.1f", y_rnd);
 	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
 		yCoords,									// text to be drawn
 		textFormat,									// text format
