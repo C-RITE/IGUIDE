@@ -469,7 +469,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 
 	if (x_rnd <= -10)
 		marginX = { 35, 0 };
-	else if (x_rnd < 0 | x_rnd >= 10)
+	else if ((x_rnd < 0) | (x_rnd >= 10))
 		marginX = { 28, 0 };
 	else if (x_rnd >= 0)
 		marginX = { 20, 0 };
@@ -480,7 +480,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 	
 	if (y_rnd <= -10)
 		marginY = { 40, 4 };
-	else if (y_rnd < 0 | y_rnd >= 10)
+	else if ((y_rnd < 0) | (y_rnd >= 10))
 		marginY = { 33, 4 };
 	else if (y_rnd >= 0)
 		marginY = { 25, 4 };
