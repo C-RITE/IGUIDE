@@ -155,25 +155,6 @@ void Grid::DrawOptional(CHwndRenderTarget* pRenderTarget) {
 		}
 	}
 
-	// draw circles around foveola and fovea
-	if (overlay & FOVEOLA) {
-		CD2DRectF e1 = { 
-			center.x - 1 / (float)dpp * 1.2f,
-			center.y - 1 / (float)dpp * 1.2f,
-			center.x + 1 / (float)dpp * 1.2f,
-			center.y + 1 / (float)dpp * 1.2f };
-		pRenderTarget->DrawEllipse(e1, m_pRedBrush, .5f);
-	}
-
-	if (overlay & FOVEA){
-		CD2DRectF e2 = { 
-			center.x - 1 / (float)dpp * 6.2f,
-			center.y - 1 / (float)dpp * 6.2f,
-			center.x + 1 / (float)dpp * 6.2f,
-			center.y + 1 / (float)dpp * 6.2f };
-		pRenderTarget->DrawEllipse(e2, m_pRedBrush, .3f);
-	}
-
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
 		nerve = { 
@@ -259,6 +240,9 @@ void Grid::DrawOptional(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	// draw all marked locations (i.e. list of patches) in operator view
+
+	if (!(overlay & PATCHES))
+		return;
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	

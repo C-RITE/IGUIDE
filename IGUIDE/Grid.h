@@ -7,8 +7,8 @@ enum Overlay
 {
 	GRID = 1,
 	DEGRAD = 2,
-	FOVEA = 4,
-	FOVEOLA = 8,
+	PATCHES = 4,
+	RESERVED = 8,
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,

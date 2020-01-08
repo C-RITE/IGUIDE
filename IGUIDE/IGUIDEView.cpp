@@ -178,9 +178,6 @@ void CIGUIDEView::OnInitialUpdate()
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	pDoc->m_Controller.reset();
-
-	
 }
 
 LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {

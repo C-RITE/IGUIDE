@@ -30,7 +30,7 @@ public:
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address
-	CString					m_ICANDI_IP;						// AOSACA IP Address
+	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure
 	CString					m_FlipVertical;						// flip target screen in x
 	CString					m_FlipHorizontal;					// flip target screen in y
@@ -39,8 +39,9 @@ public:
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 
 private:
-	DWORD					overlaySettings;
-	CString					defocus;
+	DWORD					overlaySettings;					// used as buffer for toggle options
+	bool					overlayVisible;						// visibility status of overlays
+	CString					defocus;							// AOSACA defocus
 
 // Operations
 public:
@@ -94,8 +95,8 @@ public:
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayRadius();
 	afx_msg void OnUpdateOverlayRadius(CCmdUI *pCmdUI);
-	afx_msg void OnOverlayFovea();
-	afx_msg void OnUpdateOverlayFovea(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayPatches();
+	afx_msg void OnUpdateOverlayPatches(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayDefocus();
 	afx_msg void OnUpdateOverlayDefocus(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayOpticdisc();

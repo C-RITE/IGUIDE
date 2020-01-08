@@ -309,7 +309,7 @@ afx_msg LRESULT CMainFrame::OnResetAosacaIp(WPARAM wParam, LPARAM lParam)
 	Connection pending = RemoteControl.getPendingConnections();
 	Connection active = RemoteControl.getActiveConnections();
 
-	if (pending == (AOSACA || BOTH) || active == (AOSACA || BOTH)) {
+	if ((pending == AOSACA || pending == BOTH) || (active == AOSACA || active == BOTH)) {
 		int answer = MessageBox(L"Remote connection to AOSACA is currently pending or active.\nReset connection now?", L"Attention", MB_ICONHAND | MB_YESNO);
 		if (answer == IDYES) {
 			RemoteControl.setIPAdress(AOSACA);
@@ -331,7 +331,7 @@ afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
 	Connection pending = RemoteControl.getPendingConnections();
 	Connection active = RemoteControl.getActiveConnections();
 
-	if (pending == (ICANDI || BOTH) || active == (ICANDI | BOTH )) {
+	if ((pending == ICANDI || pending == BOTH) || (active == ICANDI || active == BOTH )) {
 		int answer = MessageBox(L"Remote connection to ICANDI is currently pending or active.\nReset connection now?", L"Attention", MB_ICONHAND | MB_YESNO);
 		if (answer == IDYES) {
 			RemoteControl.setIPAdress(ICANDI);

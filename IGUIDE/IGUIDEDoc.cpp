@@ -32,8 +32,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
 	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnUpdateOverlayRadius)
-	ON_COMMAND(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnOverlayFovea)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnUpdateOverlayFovea)
+	ON_COMMAND(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnOverlayPatches)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnUpdateOverlayPatches)
 	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnOverlayOpticdisc)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnUpdateOverlayOpticdisc)
 	ON_COMMAND(ID_OVERLAY_CROSSHAIR, &CIGUIDEDoc::OnOverlayCrosshair)
@@ -65,6 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
 	getScreens();
+	overlayVisible = true;
 
 }
 
@@ -150,7 +151,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", -1);
 	if (m_pGrid->overlay == -1) {
-		m_pGrid->overlay = 3;
+		m_pGrid->overlay = 7;
 	}
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
@@ -164,7 +165,6 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
 	m_FlipHorizontal = AfxGetApp()->GetProfileString(L"Settings", L"FlipHorizontal", L"False");
-	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
 	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 
 	UINT nl;
@@ -180,6 +180,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		}
 		calib = ptr;
 	}
+
+	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
+	if (m_InputController == L"Gamepad" && m_raster.corner.size() > 0)
+		m_Controller.m_bActive = false;
 
 	LPBYTE rcol;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
@@ -579,22 +583,22 @@ void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
 }
 
 
-void CIGUIDEDoc::OnOverlayFovea()
+void CIGUIDEDoc::OnOverlayPatches()
 {
 	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & FOVEA)
-		m_pGrid->overlay = m_pGrid->overlay & ~FOVEA & ~FOVEOLA;
+	if (m_pGrid->overlay & PATCHES)
+		m_pGrid->overlay = m_pGrid->overlay & (~PATCHES);
 	else
-		m_pGrid->overlay = m_pGrid->overlay | FOVEA | FOVEOLA;
+		m_pGrid->overlay = m_pGrid->overlay | PATCHES;
 
 	UpdateAllViews(NULL);
 }
 
 
-void CIGUIDEDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayPatches(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & FOVEA);
+	pCmdUI->SetCheck(m_pGrid->overlay & PATCHES);
 }
 
 void CIGUIDEDoc::OnOverlayDefocus()
@@ -696,12 +700,16 @@ void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 void CIGUIDEDoc::OnOverlayQuickhelp()
 {
 	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & QUICKHELP)
+	if (m_pGrid->overlay & QUICKHELP) {
 		m_pGrid->overlay = m_pGrid->overlay & (~QUICKHELP);
-	else
+		overlaySettings = overlaySettings & (~QUICKHELP);
+	}
+	else {
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
-
+		overlaySettings = overlaySettings | QUICKHELP;
+	}
 	UpdateAllViews(NULL);
+
 }
 
 
@@ -714,21 +722,32 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 void CIGUIDEDoc::ToggleOverlay()
 {
 	// TODO: Add your implementation code here.
-	if (m_pGrid->overlay > QUICKHELP) {
-		overlaySettings = m_pGrid->overlay - QUICKHELP;
-		m_pGrid->overlay = QUICKHELP;
+	if (overlayVisible) {
+		if ((m_pGrid->overlay & QUICKHELP) && (m_pGrid->overlay & FUNDUS)) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP | FUNDUS;
+		}
+		else if (m_pGrid->overlay & FUNDUS) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = FUNDUS;
+		}
+		else if (m_pGrid->overlay & QUICKHELP) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP;
+		}
+		else {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = 0;
+		}
 		UpdateAllViews(NULL);
+		overlayVisible = false;
 		return;
 	}
 
-	else if (m_pGrid->overlay & ~QUICKHELP) {
-		overlaySettings = m_pGrid->overlay;
-		m_pGrid->overlay = 0;
+	else {
+		m_pGrid->overlay = overlaySettings;
 		UpdateAllViews(NULL);
-		return;
+		overlayVisible = true;
 	}
-	
-	m_pGrid->overlay += overlaySettings;
 
-	UpdateAllViews(NULL);
 }
