@@ -380,6 +380,14 @@ bool CWinSock2Async::SetupEvents( SOCKET newSocket )
 		return false;
 	}
 
+	// Set timeout
+	int iTimeout = 3000;
+	setsockopt(m_Sd,
+		SOL_SOCKET,
+		SO_RCVTIMEO,
+		(const char *)&iTimeout,
+		sizeof(iTimeout));
+
 	//Attach the event to the socket
 	int nError = WSAEventSelect( m_Sd, m_WSAEvent, 
 		FD_ACCEPT | FD_CONNECT| FD_READ | FD_WRITE | FD_CLOSE );

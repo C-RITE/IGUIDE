@@ -93,8 +93,6 @@ public:
 
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
-	afx_msg void OnOverlayRadius();
-	afx_msg void OnUpdateOverlayRadius(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayPatches();
 	afx_msg void OnUpdateOverlayPatches(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayDefocus();

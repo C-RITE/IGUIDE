@@ -30,8 +30,6 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEDoc::OnFundusImport)
 	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
-	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnUpdateOverlayRadius)
 	ON_COMMAND(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnOverlayPatches)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnUpdateOverlayPatches)
 	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnOverlayOpticdisc)
@@ -135,6 +133,16 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_OutputDir = data;
 
+	data = AfxGetApp()->GetProfileString(L"Settings", L"FundusFolder", NULL);
+	if (data.IsEmpty()) {
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			data = homedir;
+		}
+	}
+
+	m_pFundus->mru_folder = data;
+
 	data = AfxGetApp()->GetProfileString(L"Settings", L"AOSACA IP", NULL);
 	if (data.IsEmpty()) {
 		data.Format(_T("192.168.0.1"));
@@ -209,6 +217,7 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FundusFolder", m_pFundus->mru_folder);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
@@ -562,26 +571,6 @@ void CIGUIDEDoc::OnUpdateOverlayGrid(CCmdUI *pCmdUI)
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & GRID);
 }
-
-
-void CIGUIDEDoc::OnOverlayRadius()
-{
-	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & DEGRAD)
-		m_pGrid->overlay = m_pGrid->overlay & (~DEGRAD);
-	else
-		m_pGrid->overlay = m_pGrid->overlay | DEGRAD;
-
-	UpdateAllViews(NULL);
-}
-
-
-void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
-{
-	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
-}
-
 
 void CIGUIDEDoc::OnOverlayPatches()
 {

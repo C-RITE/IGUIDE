@@ -6,9 +6,9 @@
 enum Overlay
 {
 	GRID = 1,
-	DEGRAD = 2,
+	RESERVED = 2,
 	PATCHES = 4,
-	RESERVED = 8,
+	RESERVED2 = 8,
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,

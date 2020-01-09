@@ -265,7 +265,6 @@ BEGIN
         POPUP "Overlay"
         BEGIN
             MENUITEM "Grid",                        ID_OVERLAY_GRID, CHECKED
-            MENUITEM "Radius",                      ID_OVERLAY_RADIUS
             MENUITEM "Patches",                     ID_OVERLAY_PATCHES
             MENUITEM "Optic Disc",                  ID_OVERLAY_OPTICDISC
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR

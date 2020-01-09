@@ -21,8 +21,7 @@
 #define ID_EDIT_PROPERTIES              32775
 #define ID_FILE_TEST                    32778
 #define ID_OVERLAY_GRID                 32779
-#define ID_OVERLAY_RADIUS               32780
-#define ID_OVERLAY_PATCHES                32781
+#define ID_OVERLAY_PATCHES              32781
 #define ID_OVERLAY_FOVEOLA              32782
 #define ID_OVERLAY_CROSSHAIR            32783
 #define ID_OVERLAY_FUNDUS               32784

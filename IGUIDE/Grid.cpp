@@ -127,6 +127,16 @@ void Grid::DrawGrid(CHwndRenderTarget* pRenderTarget) {
 				);
 		}
 
+		//draw circles around the center
+		for (float x = 0; x < 16; x++) {
+			CD2DRectF e = {
+				center.x - 1 / (float)dpp * x,
+				center.y - 1 / (float)dpp * x,
+				center.x + 1 / (float)dpp * x,
+				center.y + 1 / (float)dpp * x };
+			pRenderTarget->DrawEllipse(e, m_pGrayBrush, 1);
+		}
+
 	}
 
 	pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
@@ -141,19 +151,6 @@ void Grid::DrawOptional(CHwndRenderTarget* pRenderTarget) {
 
 	CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(BLACK, 0.5f) };
 	CD2DSolidColorBrush YellowBrush{ pRenderTarget, D2D1::ColorF(YELLOW) };
-
-
-	//draw circles around the center
-	if (overlay & DEGRAD) {
-		for (float x = 0; x < 16; x++) {
-			CD2DRectF e = {
-				center.x - 1 / (float)dpp * x,
-				center.y - 1 / (float)dpp * x,
-				center.x + 1 / (float)dpp * x,
-				center.y + 1 / (float)dpp * x };
-			pRenderTarget->DrawEllipse(e, m_pGrayBrush, 1);
-		}
-	}
 
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
