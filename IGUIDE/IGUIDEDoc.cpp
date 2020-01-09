@@ -190,8 +190,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	}
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
-	if (m_InputController == L"Gamepad" && m_raster.corner.size() > 0)
-		m_Controller.m_bActive = false;
+	if (m_raster.corner.size() > 0) {
+		if (m_InputController == L"Gamepad")
+			m_Controller.m_bActive = false;
+	}
 
 	LPBYTE rcol;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
@@ -323,7 +325,11 @@ bool CIGUIDEDoc::CheckFOV()
 {
 
 	if (m_raster.corner.size() < 4) {
-		AfxMessageBox(_T("Please draw raster corners (clockwise) in Target View window first!"), MB_OK);
+		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
+
+		if (answer == IDYES)
+			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F4, 1);
+
 		ShowCursor(TRUE);
 		return FALSE;
 	}
@@ -374,6 +380,7 @@ CString CIGUIDEDoc::getTraceInfo() {
 
 	if (m_pGrid->overlay & TRACEINFO)
 		return trace;
+
 	return NULL;
 
 }
@@ -382,7 +389,7 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F4>\t(Re-)Calibrate Subject");
 	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);

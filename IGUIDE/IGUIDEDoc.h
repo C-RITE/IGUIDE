@@ -26,7 +26,7 @@ public:
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Raster					m_raster;							// raster class
-	Calibration*			m_pDlgCalibration;					// calibration class
+	Calibration*			m_pDlgCalibration;					// fundus calibration dialog class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address

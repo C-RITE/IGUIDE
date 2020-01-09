@@ -28,6 +28,7 @@ public:
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
 	bool					calibrating;		// calibration ongoing
+	bool					locked;				// defy accidental mouse / gamepad input
 	float					ppd_client;			// pixel per degree on client screen
 	int						fieldsize;			// dummy fieldsize in pixel on client screen
 	int						discretion;			// distance in pixel to raster corners during calibration

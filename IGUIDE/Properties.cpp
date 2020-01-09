@@ -91,8 +91,6 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	if (propName == L"Input Controller") {
 		CString inpcon = vt.bstrVal;
 		pDoc->m_InputController = inpcon;
-		pDoc->m_Controller.reset();
-
 	}
 
 	if (propName == L"AOSACA IP") {

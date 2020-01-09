@@ -246,7 +246,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		}
 		
 		else {
-			if (pDoc->m_InputController == L"Gamepad" && pDoc->m_Controller.m_bRunning) {
+			if (pDoc->m_InputController == L"Gamepad" && pDoc->m_Controller.m_bActive) {
 				pDoc->m_Controller.m_pThread->SuspendThread();
 			}
 			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
@@ -425,6 +425,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
+
 		case VK_F1:
 			pDoc->OnOverlayQuickhelp();
 			break;
@@ -435,6 +436,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F3:
 			ToggleFixationTarget();
+			break;
+
+		case VK_F4:
+			if (m_pDlgTarget->calibrating == false) {
+				m_pDlgTarget->restartCalibration();
+			}
 			break;
 		}
 

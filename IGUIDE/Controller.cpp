@@ -9,7 +9,6 @@ Controller::Controller()
 {
 
 	m_pThread = NULL;
-	m_bRunning = false;
 	m_bActive = false;
 	state.fired = -1;
 	state.accel = 100;
@@ -24,22 +23,15 @@ void Controller::reset(){
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
-	if (pDoc->m_InputController == L"Gamepad") {
-		setFlip();
+	setFlip();
+	
+	if (pDoc->m_InputController == L"Gamepad" && !m_bActive) {
+		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, NULL, NULL);
 		m_bActive = true;
 	}
-	
-	else {
-		m_bActive = false;
-		m_bRunning = false;
-	}
 
-
-	if (m_bActive) {
-		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
-		m_bRunning = true;
+	else if (m_pThread)
 		m_pThread->ResumeThread();
-	}
 
 }
 
@@ -63,8 +55,9 @@ void Controller::setFlip() {
 void Controller::shutdown() {
 	
 	m_bActive = false;
-	m_bRunning = false;
+
 	if (m_pThread) {
+		m_pThread->ResumeThread();
 		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
 	}
 
@@ -79,8 +72,6 @@ UINT GamePadThread(LPVOID pParam) {
 	ControlState localState;
 	
 	HWND mainWnd = AfxGetMainWnd()->GetSafeHwnd();
-
-	while (parent->m_bRunning) {
 
 		while (parent->m_bActive) {
 
@@ -133,7 +124,6 @@ UINT GamePadThread(LPVOID pParam) {
 				if (answer == IDYES) {
 
 					parent->m_bActive = false;
-					parent->m_bRunning = false;
 
 					PostMessage(mainWnd, MOUSE_FALLBACK, 0, 0);
 
@@ -142,7 +132,6 @@ UINT GamePadThread(LPVOID pParam) {
 				if (answer == IDCANCEL) {
 
 					parent->m_bActive = false;
-					parent->m_bRunning = false;
 					
 				}
 
@@ -155,7 +144,6 @@ UINT GamePadThread(LPVOID pParam) {
 			}
 
 
-		}
 
 	}
 

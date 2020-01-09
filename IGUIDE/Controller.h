@@ -34,7 +34,6 @@ public:
 	void				setFlip();							// respect screen orientation
 	void				shutdown();
 	CPoint				flipSign;
-	bool				m_bRunning;							// thread runtime
 	bool				m_bActive;							// gamepad on/off
 };
 

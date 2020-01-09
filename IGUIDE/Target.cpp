@@ -28,7 +28,7 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	show_cross = false;
 	calibrating = false;
 	discretion = 20;
-
+	locked = true;
 }
 
 Target::~Target()
@@ -266,10 +266,13 @@ void Target::restartCalibration() {
 	pDoc->m_pGrid->ClearPatchlist();
 	pDoc->m_Controller.state.fired = 0;
 
+	locked = false;
 	calibrating = true;
 
-	if (pDoc->m_InputController == L"Gamepad")
+	if (pDoc->m_InputController == L"Gamepad") {
+		pDoc->m_Controller.reset();
 		setCross();
+	}
 
 }
 
@@ -290,7 +293,12 @@ void Target::finishCalibration() {
 	if (pDoc->m_raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&pDoc->m_raster.corner[0].x, dataSize);
 
+	if (pDoc->m_Controller.m_bActive)
+		//pDoc->m_Controller.m_pThread->SuspendThread();
+		pDoc->m_Controller.shutdown();
+
 	calibrating = false;
+	locked = true;
 	
 }
 
@@ -357,6 +365,8 @@ void Target::OnGamePadCalibration() {
 void Target::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// parameter point == {0,0}: reset subject calibration by gamepad
+	if (locked)
+		return;
 	
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (!pDoc)
