@@ -10,6 +10,17 @@ Edge::Edge():
 {
 }
 
+int Edge::getLength() {
+	
+	double a = p.x - q.x;
+	double b = p.y - q.y;
+
+	int c = sqrt(a*a + b * b);
+
+	return c;
+
+}
+
 
 Edge::~Edge()
 {

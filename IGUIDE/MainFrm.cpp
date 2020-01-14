@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "MainFrm.h"
 #include "IGUIDE.h"
+#include "IGUIDEDoc.h"
 
 
 #ifdef _DEBUG
@@ -20,6 +21,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
 	ON_MESSAGE(WM_DISPLAYCHANGE, &CMainFrame::OnDisplayChange)
 	ON_MESSAGE(GAMEPAD_UPDATE, OnGamePadUpdate)
+	ON_MESSAGE(MOUSE_FALLBACK, OnMouseFallback)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
@@ -29,6 +31,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_AOSACA, &CMainFrame::OnUpdateLinkIndicators)
 	ON_WM_PARENTNOTIFY()
+	ON_MESSAGE(RESET_AOSACA_IP, &CMainFrame::OnResetAosacaIp)
+	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -52,6 +56,10 @@ CMainFrame::~CMainFrame()
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
+
+	// insert all properties into list
+	m_DlgProperties.fillProperties();
+
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability
 
@@ -74,15 +82,28 @@ afx_msg LRESULT CMainFrame::OnDisplayChange(WPARAM wParam, LPARAM lParam) {
 LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 
 	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
+
 	if (w == 1)
 		pView->m_pDlgTarget->OnGamePadCalibration(); // we hit a button!
 	else 
-		pView->m_pDlgTarget->RedrawWindow();		 // move the cursor..
+		pView->m_pDlgTarget->Invalidate();			 // move the cursor..
 
 	return 0;
 
 }
 
+
+LRESULT CMainFrame::OnMouseFallback(WPARAM w, LPARAM l) {
+	
+	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)pView->GetDocument();
+	pDoc->m_InputController = L"Mouse";
+	m_DlgProperties.fillProperties();
+	pDoc->m_Controller.reset();
+
+	return 0;
+
+}
 
 // CMainFrame diagnostics
 
@@ -290,5 +311,49 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 	// pass it on
 	return CFrameWndEx::PreTranslateMessage(pMsg);
+
+}
+
+
+afx_msg LRESULT CMainFrame::OnResetAosacaIp(WPARAM wParam, LPARAM lParam)
+{
+
+	Connection pending = RemoteControl.getPendingConnections();
+	Connection active = RemoteControl.getActiveConnections();
+
+	if ((pending == AOSACA || pending == BOTH) || (active == AOSACA || active == BOTH)) {
+		int answer = MessageBox(L"Remote connection to AOSACA is currently pending or active.\nReset connection now?", L"Attention", MB_ICONHAND | MB_YESNO);
+		if (answer == IDYES) {
+			RemoteControl.setIPAdress(AOSACA);
+			RemoteControl.connect(AOSACA);
+		}
+	}
+
+	else
+		RemoteControl.setIPAdress(AOSACA);
+
+return 0;
+
+}
+
+
+afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
+{
+
+	Connection pending = RemoteControl.getPendingConnections();
+	Connection active = RemoteControl.getActiveConnections();
+
+	if ((pending == ICANDI || pending == BOTH) || (active == ICANDI || active == BOTH )) {
+		int answer = MessageBox(L"Remote connection to ICANDI is currently pending or active.\nReset connection now?", L"Attention", MB_ICONHAND | MB_YESNO);
+		if (answer == IDYES) {
+			RemoteControl.setIPAdress(ICANDI);
+			RemoteControl.connect(ICANDI);
+		}
+	}
+
+	else
+		RemoteControl.setIPAdress(ICANDI);
+
+return 0;
 
 }

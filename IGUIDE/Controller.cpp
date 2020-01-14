@@ -2,15 +2,16 @@
 #include "Controller.h"
 #include "Target.h"
 #include "IGUIDEDoc.h"
+#include "IGUIDE.h"
 #include "GamePad.h"
 
 Controller::Controller()
 {
 
 	m_pThread = NULL;
-	m_bRunning = false;
 	m_bActive = false;
 	state.fired = -1;
+	state.accel = 100;
 
 }
 
@@ -22,32 +23,42 @@ void Controller::reset(){
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 
-	if (pDoc->m_InputController == L"Gamepad") {
+	setFlip();
+	
+	if (pDoc->m_InputController == L"Gamepad" && !m_bActive) {
+		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, NULL, NULL);
 		m_bActive = true;
 	}
 
-	else {
-		m_bActive = false;
-	}
-
-	flipSign = pDoc->m_FlipVertical;
-	
-	if (m_bActive && m_pThread == NULL) {
-		m_pThread = AfxBeginThread(GamePadThread, this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
-		m_pThread->m_bAutoDelete = false;
-		m_bRunning = true;
+	else if (m_pThread)
 		m_pThread->ResumeThread();
-	}
+
+}
+
+
+void Controller::setFlip() {
+	
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+	if (pDoc->m_FlipVertical == L"True")
+		flipSign.y = -1;
+	else
+		flipSign.y = 1;
+
+	if (pDoc->m_FlipHorizontal == L"True")
+		flipSign.x = -1;
+	else
+		flipSign.x = 1;
 
 }
 
 void Controller::shutdown() {
 	
 	m_bActive = false;
-	m_bRunning = false;
+
 	if (m_pThread) {
+		m_pThread->ResumeThread();
 		WaitForSingleObject(m_pThread->m_hThread, INFINITE);
-		delete m_pThread;
 	}
 
 }
@@ -59,10 +70,8 @@ UINT GamePadThread(LPVOID pParam) {
 	m_pGamePad = new DirectX::GamePad;
 	DirectX::GamePad::State state;
 	ControlState localState;
-
+	
 	HWND mainWnd = AfxGetMainWnd()->GetSafeHwnd();
-
-	while (parent->m_bRunning) {
 
 		while (parent->m_bActive) {
 
@@ -71,41 +80,70 @@ UINT GamePadThread(LPVOID pParam) {
 
 			if (state.IsConnected()) {
 
-				if (state.IsAPressed())
+				if (state.IsAPressed()) {
 					parent->state.fired++;
-
-				if (state.IsDPadDownPressed()) {
-					parent->state.LY += (parent->flipSign * 1);
+					PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
+					while (state.IsAPressed()) {
+						Sleep(10);
+						state = m_pGamePad->GetState(0);
+					}
 				}
 
-				if (state.IsDPadUpPressed()) {
-					(parent->state.LY -= parent->flipSign * 1);
+				while (state.IsDPadDownPressed() || state.IsDPadLeftPressed() || state.IsDPadRightPressed() || state.IsDPadUpPressed()) {
+					if (parent->state.accel > 5) 
+						parent->state.accel -= 5;
+
+					if (state.IsDPadDownPressed())
+						parent->state.LY += parent->flipSign.y;
+
+					if (state.IsDPadUpPressed())
+						parent->state.LY -= parent->flipSign.y;
+
+					if (state.IsDPadLeftPressed())
+						parent->state.LX -= parent->flipSign.x;
+
+					if (state.IsDPadRightPressed())
+						parent->state.LX += parent->flipSign.x;
+
+					PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around...
+
+					Sleep(parent->state.accel);
+					
+					state = m_pGamePad->GetState(0);
+
 				}
 
-				if (state.IsDPadLeftPressed())
-					parent->state.LX -= 1;
-
-				if (state.IsDPadRightPressed()) 
-					parent->state.LX += 1;
 
 			}
 
-			if (parent->state == localState) 
-				continue;
+			else if (parent->m_bActive){
 
-			while (state.buttons.a){
-				Sleep(10);
-				state = m_pGamePad->GetState(0);
+				CIGUIDEApp* IGUIDE = (CIGUIDEApp*)AfxGetApp();
+				int answer = IGUIDE->m_pMainWnd->MessageBox(L"Gamepad not found! Please check connection.\nFall back to mouse?", L"Attention", MB_ICONHAND | MB_YESNOCANCEL);
+
+				if (answer == IDYES) {
+
+					parent->m_bActive = false;
+
+					PostMessage(mainWnd, MOUSE_FALLBACK, 0, 0);
+
+				}
+
+				if (answer == IDCANCEL) {
+
+					parent->m_bActive = false;
+					
+				}
+
 			}
 
-			if (parent->state.fired > localState.fired) 
-				PostMessage(mainWnd, GAMEPAD_UPDATE, 1, 0);	// we hit the fire button!
-			else {
-				PostMessage(mainWnd, GAMEPAD_UPDATE, 0, 0); // we just moved around.
-				Sleep(100);
+			// controller back to initial state
+			// reset accellerator
+			if (parent->state == localState && parent->state.accel < 100) {
+				parent->state.accel = 100;
 			}
 
-		}
+
 
 	}
 

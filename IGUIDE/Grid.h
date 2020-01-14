@@ -4,9 +4,9 @@
 enum Overlay
 {
 	GRID = 1,
-	DEGRAD = 2,
-	FOVEA = 4,
-	FOVEOLA = 8,
+	RESERVED = 2,
+	PATCHES = 4,
+	RESERVED2 = 8,
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,
@@ -39,7 +39,6 @@ private:
 
 public:
 
-
 	Grid();
 	~Grid();
 
@@ -51,10 +50,10 @@ public:
 
 	void DelPatch();
 	void ClearPatchlist();
-	void StorePatch(CPoint point, float zoom);					// store patch upon click of mouse button
-	void DrawOverlay(CHwndRenderTarget* pRenderTarget);			// draw information overlay
-	void Mark(CHwndRenderTarget* pRenderTarget);			// draw patches
-	
+	void StorePatch(CPoint point);							// store patch upon click of mouse button
+	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
+	void DrawPatches(CHwndRenderTarget* pRenderTarget);		// draw patches
+	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);	// draw text
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);	// construct the grid
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);

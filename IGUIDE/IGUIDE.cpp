@@ -97,9 +97,11 @@ BOOL CIGUIDEApp::InitInstance()
 	m_pMainWnd->UpdateWindow();
 
 	// call DragAcceptFiles only if there's a suffix
-	//  In an SDI app, this should occur after ProcessShellCommand
+	// In an SDI app, this should occur after ProcessShellCommand
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
+
+	WriteProfileString(L"Settings", L"Version", GetFileVersion());
 
 	return TRUE;
 }
@@ -156,22 +158,9 @@ void CIGUIDEApp::OnAppAbout()
 	aboutDlg.DoModal();
 }
 
-// CIGUIDEApp message handlers
 
+CStringW CIGUIDEApp::GetFileVersion() {
 
-void CAboutDlg::OnStnClickedAo()
-{
-	// TODO: Add your control notification handler code here
-	(32 >= (int)ShellExecute(NULL, L"open", L"http://ao.ukbonn.de", NULL, NULL, SW_SHOWNORMAL));
-}
-
-
-
-BOOL CAboutDlg::OnInitDialog()
-{
-	CDialogEx::OnInitDialog();
-
-	// TODO:  Add extra initialization here
 	wchar_t filename[130];
 	GetModuleFileName(NULL, filename, 128);
 
@@ -199,11 +188,30 @@ BOOL CAboutDlg::OnInitDialog()
 
 	CStringW str;
 
-	str.Format(L"Version: %d.%d.%d.%d\n", dwLeftMost, dwSecondLeft,
+	str.Format(L"%d.%d.%d.%d\n", dwLeftMost, dwSecondLeft,
 		dwSecondRight, dwRightMost);
 
+	return str;
+
+}
+
+void CAboutDlg::OnStnClickedAo()
+{
+	// TODO: Add your control notification handler code here
+	(32 >= (int)ShellExecute(NULL, L"open", L"http://ao.ukbonn.de", NULL, NULL, SW_SHOWNORMAL));
+}
+
+
+BOOL CAboutDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  Add extra initialization here
+	CString version(L"Version: ");
+	version.Append(CIGUIDEApp::GetFileVersion());
+
 	CWnd *label = GetDlgItem(IDC_VERSION);
-	label->SetWindowTextW(str);
+	label->SetWindowTextW(version);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE

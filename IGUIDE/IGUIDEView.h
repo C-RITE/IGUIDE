@@ -15,6 +15,8 @@ protected: // create from serialization only
 public:
 	static CIGUIDEView* GetView();
 	Target*				m_pDlgTarget;						// target dialog
+	CD2DBitmap*			m_pFixationTarget;
+	static CIGUIDEView* GetView();
 
 // Overrides
 
@@ -49,6 +51,11 @@ private:
 	CPoint					mouseZoom;							// zoom origin
 	bool					mouseTraveled;						// travel discriminator
 	float					zoom;								// zoom factor
+	bool		LButtonIsDown;	// workaround for not accidently clicking 
+								// into operator view after openfiledialog
+
+	void CIGUIDEView::SetFixationTarget();
+
 
 public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

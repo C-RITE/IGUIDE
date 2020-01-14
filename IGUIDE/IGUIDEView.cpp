@@ -135,28 +135,39 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	
+	if (!LButtonIsDown && !m_pDlgTarget->calibrating)
+		return;
 
-	if (pDoc->CheckFOV()) {
-		pDoc->m_pGrid->StorePatch(point, zoom);
+	if (pDoc->CheckFOV())
+	{
+		pDoc->m_pGrid->StorePatch(static_cast<CD2DPointF>(point));
 	}
 
 	else
 		return;
 
 	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-	m_pDlgTarget->Invalidate();
 
+	free(pDoc->m_pMousePos);
+	pDoc->m_pMousePos = NULL;
+	ShowCursor(TRUE);
 	RedrawWindow();
+
+	LButtonIsDown = false;
 
 }
 
 void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	
-	/*if (mousePos)
-		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->raster.corner.size() == 4)) {
-			mousePos->SetPoint(point.x, point.y);
+
+	/*
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	if (pDoc->m_pMousePos)
+		if ((GetKeyState(VK_LBUTTON) < 0) & (pDoc->m_raster.corner.size() == 4)) {
+			pDoc->m_pMousePos->SetPoint(point.x, point.y);
 			RedrawWindow();
 		}*/
 
@@ -172,19 +183,31 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
-	
+
+
 	if ((zoom + zDelta / 100) >= 1) {
 		zoom += zDelta / 100;
+
+		CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+		if (!pDoc->m_pMousePos && pDoc->CheckFOV()) {
+			pDoc->m_pMousePos = (CPoint*)malloc(sizeof(CPoint));
+			pDoc->m_pMousePos->SetPoint(pt.x, pt.y);
+
+		}
+
+
+		mouseZoom = pt;
+
+		origin = { center.x + mouseDist.x / zoom, center.y + mouseDist.y / zoom };
+
+		scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), origin);
+
+		LButtonIsDown = true;
+
+		RedrawWindow();
 	}
 
-	mouseZoom = pt;
-
-	origin = { center.x + mouseDist.x / zoom, center.y + mouseDist.y / zoom };
-
-	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), origin);
-
-	RedrawWindow();
-	
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 
 }
@@ -203,17 +226,13 @@ void CIGUIDEView::OnInitialUpdate()
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 
-	pDoc->m_Controller.reset();
-
 }
 
 LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	m_pDlgTarget->ShowWindow(TRUE);
-	
-	CRect area = (CRect)pDoc->m_selectedScreen->area;
+	CRect area = (CRect)pDoc->m_pSelectedScreen->area;
 	CRect wRect;
 	
 	m_pDlgTarget->SetWindowPos(&this->wndBottom,
@@ -222,7 +241,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 		area.Width(),
 		area.Height(),
 		NULL);
-	
+
 	return 0;
 
 }
@@ -239,38 +258,46 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	AfxGetMainWnd()->GetClientRect(&clientRect);
 
 	// make edges from corners
-	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
+	if (pDoc->m_raster.corner.size() == 4 && pDoc->m_raster.meanEdge == 0) {
 		for (int i = 0; i < 3; i++) {
 			Edge k;
-			k.p = pDoc->raster.corner[i];
-			k.q = pDoc->raster.corner[i + 1];
-			pDoc->raster.perimeter.push_back(k);
+			k.p = pDoc->m_raster.corner[i];
+			k.q = pDoc->m_raster.corner[i + 1];
+			pDoc->m_raster.perimeter.push_back(k);
 		}
 		for (int i = 0; i < 4; i++)
-			FOV[i] = pDoc->raster.corner[i];
-		pDoc->raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
+			FOV[i] = pDoc->m_raster.corner[i];
+		pDoc->m_raster.mid = pDoc->compute2DPolygonCentroid(FOV, 4);
 		Edge k;
-		k.p = pDoc->raster.corner[3];
-		k.q = pDoc->raster.corner[0];
-		pDoc->raster.perimeter.push_back(k);
+		k.p = pDoc->m_raster.corner[3];
+		k.q = pDoc->m_raster.corner[0];
+		pDoc->m_raster.perimeter.push_back(k);
 	}
 
 	// calculate length of edges, mean edge length and angle
-	if (pDoc->raster.corner.size() == 4 && pDoc->raster.meanEdge == 0) {
+	if (pDoc->m_raster.corner.size() == 4 && pDoc->m_raster.meanEdge == 0) {
 		pDoc->ComputeDisplacementAngles();
+
 		if (pDoc->CheckCalibrationValidity()) {
-			for (size_t i = 0; i < pDoc->raster.perimeter.size(); i++) {
-				pDoc->raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->raster.perimeter[i]);
-				pDoc->raster.meanEdge += pDoc->raster.perimeter[i].length;
-				pDoc->raster.meanAlpha += pDoc->raster.perimeter[i].alpha;
+			for (size_t i = 0; i < pDoc->m_raster.perimeter.size(); i++) {
+				pDoc->m_raster.perimeter[i].length = pDoc->CalcEdgeLength(pDoc->m_raster.perimeter[i]);
+				pDoc->m_raster.meanEdge += pDoc->m_raster.perimeter[i].length;
+				pDoc->m_raster.meanAlpha += pDoc->m_raster.perimeter[i].alpha;
 			}
 
-			pDoc->raster.meanEdge /= 4;
-			pDoc->raster.meanAlpha /= 4;
+			pDoc->m_raster.meanEdge /= 4;
+			pDoc->m_raster.meanAlpha /= 4;
 		}
+		
 		else {
+			if (pDoc->m_InputController == L"Gamepad" && pDoc->m_Controller.m_bActive) {
+				pDoc->m_Controller.m_pThread->SuspendThread();
+			}
 			AfxMessageBox(L"Calibration failed. Please retry!", MB_OK | MB_ICONSTOP);
-			m_pDlgTarget->OnLButtonDown(NULL, NULL);
+			if (pDoc->m_InputController == L"Gamepad")
+				pDoc->m_Controller.m_pThread->ResumeThread();
+			m_pDlgTarget->restartCalibration();
+			m_pDlgTarget->OnLButtonDown(0, 0);
 		}
 	
 	}
@@ -282,18 +309,29 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
-	m_pDlgTarget->pDoc = pDoc;
-	m_pDlgTarget->getFixationTarget();	
 
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
 		delete m_pFixationTarget;
 
-	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
+	SetFixationTarget();
 
 	SetFocus();
 	Invalidate();
 
 	delete FOV;
+
+}
+
+void CIGUIDEView::SetFixationTarget() {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	if (!pDoc)
+		return;
+
+	if (m_pFixationTarget && m_pFixationTarget->IsValid())
+		delete m_pFixationTarget;
+
+	m_pFixationTarget = new CD2DBitmap(GetRenderTarget(), pDoc->m_FixationTarget, CD2DSizeU(0, 0), TRUE);
 
 }
 
@@ -333,7 +371,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	if (pRenderTarget) {
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
-		
+
 		if (pDoc->m_pGrid->m_pGridGeom) {
 
 			pRenderTarget->SetTransform(scale);
@@ -491,7 +529,14 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			}
 
 		}
-		
+
+		pDoc->m_pFundus->Paint(pRenderTarget);
+
+		pDoc->m_pGrid->DrawGrid(pRenderTarget);
+		pDoc->m_pGrid->DrawPatches(pRenderTarget);
+		pDoc->m_pGrid->DrawOptional(pRenderTarget);
+		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
+
 	}
 
 	return 0;
@@ -515,27 +560,37 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
-			case VK_UP:
-				pDoc->m_pGrid->patchlist.back().coords.y += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_DOWN:
-				pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_LEFT:
-				pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_RIGHT:
-				pDoc->m_pGrid->patchlist.back().coords.x += .1f;
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-				break;
-			case VK_SPACE:
-				pDoc->m_pGrid->patchlist.lockIn();
-				break;
+
+				case VK_UP:
+					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_DOWN:
+					pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_LEFT:
+					pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_RIGHT:
+					pDoc->m_pGrid->patchlist.back().coords.x += .1f;
+					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					break;
+				case VK_SPACE:
+					pDoc->m_pGrid->patchlist.lockIn();
+					break;
 
 			}
+
+			if (pDoc->m_pGrid->patchlist.size() > 0)
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+			else
+				m_pDlgTarget->m_POI = NULL;
+
+			m_pDlgTarget->Invalidate();
+
+			this->Invalidate();
 
 		}
 
@@ -544,25 +599,21 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_RBUTTON) {
 			if (pMsg->message == WM_MOUSEMOVE)
 				return false;
-			pDoc->m_pGrid->DelPatch();
-			pDoc->m_pGrid->patchlist.SaveToFile();
+			if (pDoc->m_pGrid->patchlist.back().locked == false) {
+				pDoc->m_pGrid->DelPatch();
+				pDoc->m_pGrid->patchlist.SaveToFile();
+			}
+
+			this->Invalidate();
 		}
 
-		if (pDoc->m_pGrid->patchlist.size() > 0)
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-		else
-			m_pDlgTarget->m_POI = NULL;
-
-		m_pDlgTarget->Invalidate();
-
-		this->Invalidate();
-		
 	}
 
 	// other keyboard controls
 
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
+
 		case VK_F1:
 			pDoc->OnOverlayQuickhelp();
 			break;
@@ -573,6 +624,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F3:
 			ToggleFixationTarget();
+			break;
+
+		case VK_F4:
+			if (m_pDlgTarget->calibrating == false) {
+				m_pDlgTarget->restartCalibration();
+			}
 			break;
 		}
 
@@ -586,6 +643,7 @@ BOOL CIGUIDEView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 {
 
 	// TODO: Add your specialized code here and/or call the base class
+
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	m_pDlgTarget = new Target();
 	m_pDlgTarget->Create(IDD_TARGET, pParentWnd);

@@ -16,8 +16,7 @@ class Properties : public CDockablePane
 
 		}
 
-		// we also want the window focus to go back to main frame 
-		// after hitting return and not having changed anything
+		// we also want the window focus to go back to main frame after hitting return
 
 		virtual BOOL MyCMFCPropertyGridCtrl::PreTranslateMessage(MSG* pMsg)
 		{
@@ -55,17 +54,19 @@ public:
 
 	void setPropertyValues();
 	void refreshDisplayProperties();
+	void AdjustLayout();
+	void fillProperties();
 
 	CMFCPropertyGridProperty*		Patch;
 	CMFCPropertyGridProperty*		RasterSize;
 	CMFCPropertyGridProperty*		PhysParam;
-	CMFCPropertyGridFileProperty*	FixationFile;
-	CMFCPropertyGridProperty*		FixationSize;
-	CMFCPropertyGridProperty*		FixationScreen;
+	CMFCPropertyGridProperty*		FixationTargetSize;
+	CMFCPropertyGridProperty*		FixationTargetScreen;
 	CMFCPropertyGridColorProperty*	Color;
 	CMFCPropertyGridProperty*		ICANDI;
 	CMFCPropertyGridProperty*		TargetView;
 	CMFCPropertyGridFileProperty*	VideoFolder;
+	CMFCPropertyGridFileProperty*	FixationFile;
 	CMFCPropertyGridProperty*		SubjectCalibration;
 	CMFCPropertyGridProperty*		InputController;
 	CMFCPropertyGridProperty*		RemoteControl;
@@ -73,29 +74,28 @@ public:
 	CMFCPropertyGridProperty*		AOSACA_IP;
 	CMFCPropertyGridProperty*		ICANDI_IP;
 	CMFCPropertyGridProperty*		FlipVertical;
+	CMFCPropertyGridProperty*		FlipHorizontal;
 
 	void InitPropList();
 
 private:
-	_variant_t FixationTargetSizeValue;
-	_variant_t FixationTargetFilenameValue;
+	_variant_t FixationTargetValue;
 	_variant_t RasterSizeValue;
-	_variant_t VideoFolderValue;
-	_variant_t FixationScreenValue;
-	_variant_t InputControllerValue;
-	_variant_t AOSACA_IP_Value;
-	_variant_t ICANDI_IP_Value;
-	_variant_t RemoteControlValue;
+	_variant_t ScreenValue;
+	_variant_t InputControl;
+	_variant_t AOSACA_IPValue;
+	_variant_t ICANDI_IPValue;
+	_variant_t RemoteValue;
 	_variant_t FlipVerticalValue;
-	_variant_t PatchColorValue;
-	
-	bool isValidIpAddress(_variant_t ipAddr);
+	_variant_t FlipHorizontalValue;
 
 	CFont					m_fntPropList;
 	MyCMFCPropertyGridCtrl	m_wndPropList;
 
+
 protected:
-	afx_msg int OnCreate(LPCREATESTRUCT lp);
+
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
 

@@ -30,10 +30,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEDoc::OnFundusImport)
 	ON_COMMAND(ID_OVERLAY_GRID, &CIGUIDEDoc::OnOverlayGrid)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_GRID, &CIGUIDEDoc::OnUpdateOverlayGrid)
-	ON_COMMAND(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnOverlayRadius)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_RADIUS, &CIGUIDEDoc::OnUpdateOverlayRadius)
-	ON_COMMAND(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnOverlayFovea)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_FOVEA, &CIGUIDEDoc::OnUpdateOverlayFovea)
+	ON_COMMAND(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnOverlayPatches)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_PATCHES, &CIGUIDEDoc::OnUpdateOverlayPatches)
 	ON_COMMAND(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnOverlayOpticdisc)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_OPTICDISC, &CIGUIDEDoc::OnUpdateOverlayOpticdisc)
 	ON_COMMAND(ID_OVERLAY_CROSSHAIR, &CIGUIDEDoc::OnOverlayCrosshair)
@@ -57,16 +55,15 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
-
-	raster.size = 600;
-	raster.meanAlpha = 0;
+	m_pMousePos = NULL;
+	m_raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
-	m_FixationTargetSize = 100;
 	overlaySettings = 0;
 	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
 	getScreens();
+	overlayVisible = true;
 
 }
 
@@ -89,7 +86,15 @@ bool CIGUIDEDoc::getScreens() {
 
 }
 
+CIGUIDEDoc::~CIGUIDEDoc()
+{
+	m_Controller.shutdown();
+	delete m_pGrid;
+	delete m_pFundus;
+	delete m_pMousePos;
+	delete m_pDlgCalibration;
 
+}
 // Get Doc, made for other classes that need access to attributes
 
 CIGUIDEDoc* CIGUIDEDoc::GetDoc()
@@ -122,6 +127,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
 			data = homedir;
+			data.Append(_T("\\Pictures\\"));
 		}
 	}
 
@@ -132,10 +138,21 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		WCHAR homedir[MAX_PATH];
 		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
 			data = homedir;
+			data.Append(_T("\\Videos\\"));
 		}
 	}
 
 	m_OutputDir = data;
+
+	data = AfxGetApp()->GetProfileString(L"Settings", L"FundusFolder", NULL);
+	if (data.IsEmpty()) {
+		WCHAR homedir[MAX_PATH];
+		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
+			data = homedir;
+		}
+	}
+
+	m_pFundus->mru_folder = data;
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"AOSACA IP", NULL);
 	if (data.IsEmpty()) {
@@ -146,36 +163,27 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	data = AfxGetApp()->GetProfileString(L"Settings", L"ICANDI IP", NULL);
 	if (data.IsEmpty()) {
-		data.Format(_T("192.168.0.2"));
+		data.Format(_T("127.0.0.1"));
 	}
 
 	m_ICANDI_IP = data;
 
-	data = AfxGetApp()->GetProfileString(L"Settings", L"MRUFundus", NULL);
-	if (data.IsEmpty()) {
-		WCHAR homedir[MAX_PATH];
-		if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, homedir))) {
-			data = homedir;
-		}
+	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", -1);
+	if (m_pGrid->overlay == -1) {
+		m_pGrid->overlay = 7;
 	}
-
-	m_pFundus->mru_folder = data;
-
-	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", 33);
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
 	
 	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
 	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
 		if (it->number == screen) {
-			m_selectedScreen = it._Ptr;
+			m_pSelectedScreen = it._Ptr;
 		}
 	}
 
-	m_FlipVertical = AfxGetApp()->GetProfileInt(L"Settings", L"FlipVertical", 1);
-
-	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
-
+	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
+	m_FlipHorizontal = AfxGetApp()->GetProfileString(L"Settings", L"FlipHorizontal", L"False");
 	m_RemoteCtrl = AfxGetApp()->GetProfileString(L"Settings", L"RemoteControl", L"NONE");
 
 	UINT nl;
@@ -186,22 +194,29 @@ BOOL CIGUIDEDoc::OnNewDocument()
 		ptr = calib;
 		for (size_t t = 0; t < nl / sz; t++) {
 			data = (CD2DPointF*)calib;
-			raster.corner.push_back(data);
+			m_raster.corner.push_back(data);
 			calib += sz;
 		}
 		calib = ptr;
 	}
 
+	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
+	if (m_raster.corner.size() > 0) {
+		if (m_InputController == L"Gamepad")
+			m_Controller.m_bActive = false;
+	}
+
 	LPBYTE rcol;
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
-		memcpy(&raster.color, rcol, sizeof(D2D1_COLOR_F));
+		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", raster.size);
-
+	m_raster.size =  AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
+		
 	delete calib, ptr;
 	delete rcol;
-
+	
 	return TRUE;
+
 }
 
 void CIGUIDEDoc::OnCloseDocument()
@@ -210,22 +225,20 @@ void CIGUIDEDoc::OnCloseDocument()
 	// TODO: Add your message handler code here
 
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_selectedScreen->number);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_pSelectedScreen->number);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
+	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
 	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FundusFolder", m_pFundus->mru_folder);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"Controller", m_InputController);
-	AfxGetApp()->WriteProfileString(L"Settings", L"MRUFundus", m_pFundus->mru_folder);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FlipVertical", m_FlipVertical);
+	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
-	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", raster.size);
-	const DWORD dataSize = static_cast<DWORD>(raster.corner.size() * sizeof(CD2DPointF));
-	if (raster.corner.size() == 4)
-		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&raster.corner[0].x, dataSize);
-
-	D2D1_COLOR_F rcol = raster.color;
+	
+	D2D1_COLOR_F rcol = m_raster.color;
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&rcol, sizeof(rcol));
 
 	CDocument::OnCloseDocument();
@@ -322,11 +335,16 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 bool CIGUIDEDoc::CheckFOV()
 {
 
-	if (raster.corner.size() < 4) {
-		AfxMessageBox(_T("Please draw raster corners (clockwise) in Target View window first!"), MB_OK);
+	if (m_raster.corner.size() < 4) {
+		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
+
+		if (answer == IDYES)
+			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F4, 1);
+
 		ShowCursor(TRUE);
 		return FALSE;
 	}
+
 	return TRUE;
 
 }
@@ -361,19 +379,22 @@ CString CIGUIDEDoc::getTraceInfo() {
 	double dist = center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
 	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
-		raster.meanAlpha,
+		m_raster.meanAlpha,
 		beta,
-		raster.meanAlpha + beta,
-		raster.size,
-		raster.scale.x,
-		raster.scale.y,
+		m_raster.meanAlpha + beta,
+		m_raster.size,
+		m_raster.scale.x,
+		m_raster.scale.y,
 		dist,
+
 		PPD,
-		raster.meanEdge/raster.size
+		m_raster.meanEdge/m_raster.size
+
 	);
 
 	if (m_pGrid->overlay & TRACEINFO)
 		return trace;
+
 	return NULL;
 
 }
@@ -382,8 +403,8 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target");
-	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZero Defocus");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F4>\t(Re-)Calibrate Subject");
+	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
 	
@@ -489,20 +510,20 @@ double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 	ATLTRACE(_T("\n"));
-	Edge k = raster.perimeter[0];
+	Edge k = m_raster.perimeter[0];
 	double theta = ComputeOrientationAngle(k);
 
-	for (size_t i = 0; i < raster.perimeter.size(); i++) {
-		raster.perimeter[i].alpha = ComputeDisplacementAngle(raster.perimeter[i]);
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++) {
+		m_raster.perimeter[i].alpha = ComputeDisplacementAngle(m_raster.perimeter[i]);
 		if (theta > 90 && theta <= 180)
-			raster.perimeter[i].alpha = 180 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 180 - m_raster.perimeter[i].alpha;
 		if (theta > 180 && theta <= 270)
-			raster.perimeter[i].alpha = 270 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 270 - m_raster.perimeter[i].alpha;
 		if (theta > 270 && theta <= 360)
-			raster.perimeter[i].alpha = 360 - raster.perimeter[i].alpha;
+			m_raster.perimeter[i].alpha = 360 - m_raster.perimeter[i].alpha;
 	}
-		for (size_t i = 0; i < raster.perimeter.size(); i++)
-			ATLTRACE(_T("alpha is %f\n"), raster.perimeter[i].alpha);
+		for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+			ATLTRACE(_T("alpha is %f\n"), m_raster.perimeter[i].alpha);
 
 }
 
@@ -511,15 +532,15 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 
 	//calc mean of all angles
 	double sum = 0;
-	for (size_t i = 0; i < raster.perimeter.size(); i++)
-		sum += raster.perimeter[i].alpha;
-	double mean = sum / raster.perimeter.size();
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+		sum += m_raster.perimeter[i].alpha;
+	double mean = sum / m_raster.perimeter.size();
 	
 	//calc variance
 	double temp = 0;
-	for (size_t i = 0; i < raster.perimeter.size(); i++)
-		temp += (raster.perimeter[i].alpha - mean)*(raster.perimeter[i].alpha - mean);
-	double var = temp / raster.perimeter.size();
+	for (size_t i = 0; i < m_raster.perimeter.size(); i++)
+		temp += (m_raster.perimeter[i].alpha - mean)*(m_raster.perimeter[i].alpha - mean);
+	double var = temp / m_raster.perimeter.size();
 
 	//calc standard deviation
 	double stddev = sqrt(var);
@@ -572,49 +593,29 @@ void CIGUIDEDoc::OnUpdateOverlayGrid(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(m_pGrid->overlay & GRID);
 }
 
-
-void CIGUIDEDoc::OnOverlayRadius()
+void CIGUIDEDoc::OnOverlayPatches()
 {
 	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & DEGRAD)
-		m_pGrid->overlay = m_pGrid->overlay & (~DEGRAD);
+	if (m_pGrid->overlay & PATCHES)
+		m_pGrid->overlay = m_pGrid->overlay & (~PATCHES);
 	else
-		m_pGrid->overlay = m_pGrid->overlay | DEGRAD;
+		m_pGrid->overlay = m_pGrid->overlay | PATCHES;
 
 	UpdateAllViews(NULL);
 }
 
 
-void CIGUIDEDoc::OnUpdateOverlayRadius(CCmdUI *pCmdUI)
+void CIGUIDEDoc::OnUpdateOverlayPatches(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & DEGRAD);
-}
-
-
-void CIGUIDEDoc::OnOverlayFovea()
-{
-	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & FOVEA)
-		m_pGrid->overlay = m_pGrid->overlay & ~FOVEA & ~FOVEOLA;
-	else
-		m_pGrid->overlay = m_pGrid->overlay | FOVEA | FOVEOLA;
-
-	UpdateAllViews(NULL);
-}
-
-
-void CIGUIDEDoc::OnUpdateOverlayFovea(CCmdUI *pCmdUI)
-{
-	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & FOVEA);
+	pCmdUI->SetCheck(m_pGrid->overlay & PATCHES);
 }
 
 void CIGUIDEDoc::OnOverlayDefocus()
 {
 	// TODO: Add your command handler code here
 	if (m_pGrid->overlay & DEFOCUS)
-		m_pGrid->overlay = m_pGrid->overlay & (~DEFOCUS);
+		m_pGrid->overlay = m_pGrid->overlay & ~DEFOCUS;
 	else
 		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
 
@@ -709,12 +710,16 @@ void CIGUIDEDoc::OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI)
 void CIGUIDEDoc::OnOverlayQuickhelp()
 {
 	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & QUICKHELP)
+	if (m_pGrid->overlay & QUICKHELP) {
 		m_pGrid->overlay = m_pGrid->overlay & (~QUICKHELP);
-	else
+		overlaySettings = overlaySettings & (~QUICKHELP);
+	}
+	else {
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
-
+		overlaySettings = overlaySettings | QUICKHELP;
+	}
 	UpdateAllViews(NULL);
+
 }
 
 
@@ -727,24 +732,32 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 void CIGUIDEDoc::ToggleOverlay()
 {
 	// TODO: Add your implementation code here.
-
-	if (m_pGrid->overlay == 0 || m_pGrid->overlay == QUICKHELP) {
-		m_pGrid->overlay = overlaySettings;
+	if (overlayVisible) {
+		if ((m_pGrid->overlay & QUICKHELP) && (m_pGrid->overlay & FUNDUS)) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP | FUNDUS;
+		}
+		else if (m_pGrid->overlay & FUNDUS) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = FUNDUS;
+		}
+		else if (m_pGrid->overlay & QUICKHELP) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP;
+		}
+		else {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = 0;
+		}
 		UpdateAllViews(NULL);
+		overlayVisible = false;
 		return;
 	}
 
-	if (m_pGrid->overlay & QUICKHELP) {
-		overlaySettings = m_pGrid->overlay;
-		m_pGrid->overlay = QUICKHELP;
+	else {
+		m_pGrid->overlay = overlaySettings;
+		UpdateAllViews(NULL);
+		overlayVisible = true;
 	}
-	else
-	{
-		overlaySettings = m_pGrid->overlay;
-		m_pGrid->overlay = 0;
-
-	}
-
-	UpdateAllViews(NULL);
 
 }

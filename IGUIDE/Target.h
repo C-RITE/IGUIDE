@@ -1,7 +1,8 @@
 #pragma once
 #include "IGUIDEView.h"
+#include "Edge.h"
 
-class Edge;
+//class Edge;
 class CIGUIDEDoc;
 
 // Target dialog
@@ -16,29 +17,34 @@ class Target : public CDialogEx
 	DECLARE_DYNAMIC(Target)
 
 // Attributes
+public:
 
-	CIGUIDEDoc*				pDoc;				// pointer to corresponding doc
 	CD2DSolidColorBrush*	m_pBrushWhite;		// white brush
 	CD2DRectF*				m_POI;				// fixation target area
 	CD2DBitmap*				m_pFixationTarget;	// custom target
 	CD2DPointF				xbox_cross;			// controller's current cursor location
+	Edge					distance;			// distance between two raster corners
+
 	bool					m_bVisible;			// for toggling the fixation target
 	bool					show_cross;			// cross visibility
-	bool					m_bMouseEnable;		// toggle mouse operation
-	double					ppd_client;			// pixel per degree on client screen
-	int						fieldsize;			// fieldsize 'dummy' constant for simplifying xbox
-												// calibration process
+	bool					calibrating;		// calibration ongoing
+	bool					locked;				// defy accidental mouse / gamepad input
+	float					ppd_client;			// pixel per degree on client screen
+	int						fieldsize;			// dummy fieldsize in pixel on client screen
+	int						discretion;			// distance in pixel to raster corners during calibration
 
 // Operations
 
 public:
 	Target(CIGUIDEView* pParent = NULL);   // standard constructor
 	~Target();
+
 	void Pinpoint(float x, float y);
-	void getFixationTarget();
 	void setCross();
 	void OnGamePadCalibration();
+	void restartCalibration();
 	void finishCalibration();
+	void SetFixationTarget();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
