@@ -382,9 +382,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			);
 		}
 
-
-
-		pDoc->m_pGrid->Mark(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
@@ -531,10 +528,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		}
 
 		pDoc->m_pFundus->Paint(pRenderTarget);
-
-		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
-		pDoc->m_pGrid->DrawOptional(pRenderTarget);
 		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
 
 	}

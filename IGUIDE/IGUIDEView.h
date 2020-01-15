@@ -15,8 +15,6 @@ protected: // create from serialization only
 public:
 	static CIGUIDEView* GetView();
 	Target*				m_pDlgTarget;						// target dialog
-	CD2DBitmap*			m_pFixationTarget;
-	static CIGUIDEView* GetView();
 
 // Overrides
 

@@ -67,15 +67,6 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 }
 
-CIGUIDEDoc::~CIGUIDEDoc()
-{
-	m_Controller.shutdown();
-	delete m_pGrid;
-	delete m_pFundus;
-	delete m_pDlgCalibration;
-
-}
-
 bool CIGUIDEDoc::getScreens() {
 
 	Monitors monitors;

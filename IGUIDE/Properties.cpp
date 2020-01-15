@@ -40,21 +40,45 @@ BEGIN_MESSAGE_MAP(Properties, CDockablePane)
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 END_MESSAGE_MAP()
 
-int Properties::OnCreate(LPCREATESTRUCT lp)
+
+int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CDockablePane::OnCreate(lp) == -1)
+
+	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	DWORD style = WS_CHILD | WS_VISIBLE;
 
 	CRect rectDummy;
 	rectDummy.SetRectEmpty();
 
-	if (!m_wndPropList.Create(style, rectDummy, this, IDC_PROPERTIES))
-		TRACE(L"Unable to create Property List");
-	
+
+	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
+	{
+		TRACE0("Failed to create Properties Grid \n");
+		return -1;      // fail to create
+	}
+
+
 	m_wndPropList.SetFont(&m_fntPropList);
+	InitPropList();
+	AdjustLayout();
 
 	return 0;
+
+}
+
+
+void Properties::AdjustLayout()
+{
+	if (GetSafeHwnd() == NULL)
+	{
+		return;
+	}
+
+	CRect rectClient, rectCombo;
+	GetClientRect(rectClient);
+	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+	m_wndPropList.SetFont(&m_fntPropList);
+
 }
 
 
@@ -152,19 +176,6 @@ void Properties::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void Properties::OnSize(UINT nType, int cx, int cy)
-{
-
-	if (GetSafeHwnd() == NULL)
-	{
-		return;
-	}
-
-	CDockablePane::OnSize(nType, cx, cy);
-	m_wndPropList.SetWindowPos(NULL, 0, 0, cx, cy, SWP_NOACTIVATE | SWP_NOZORDER);
-
-}
-
 void Properties::InitPropList()
 {
 	
@@ -224,29 +235,6 @@ void Properties::InitPropList()
 	RemoteControl->AddSubItem(AOSACA_IP);
 	RemoteControl->AddSubItem(ICANDI_IP);
 	
-
-}
-
-int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-
-	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	CRect rectDummy;
-	rectDummy.SetRectEmpty();
-
-
-	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
-	{
-		TRACE0("Failed to create Properties Grid \n");
-		return -1;      // fail to create
-	}
-
-	InitPropList();
-	AdjustLayout();
-
-	return 0;
 
 }
 

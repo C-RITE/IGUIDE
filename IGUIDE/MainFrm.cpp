@@ -19,7 +19,6 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(DOC_IS_READY, OnDocumentReady)
-	ON_MESSAGE(WM_DISPLAYCHANGE, &CMainFrame::OnDisplayChange)
 	ON_MESSAGE(GAMEPAD_UPDATE, OnGamePadUpdate)
 	ON_MESSAGE(MOUSE_FALLBACK, OnMouseFallback)
 	ON_WM_CREATE()
@@ -63,18 +62,9 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability
 
-	m_DlgProperties.InitPropList();
 	RemoteControl.init(&m_DlgProperties);
 	RemoteControl.connect();
 
-	return 0L;
-
-}
-
-afx_msg LRESULT CMainFrame::OnDisplayChange(WPARAM wParam, LPARAM lParam) {
-
-	m_DlgProperties.refreshDisplayProperties();
-	
 	return 0L;
 
 }

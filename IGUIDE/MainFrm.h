@@ -56,7 +56,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
-	afx_msg LRESULT OnDisplayChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
 	afx_msg LRESULT OnMouseFallback(WPARAM w, LPARAM l);
 

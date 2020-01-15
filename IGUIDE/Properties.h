@@ -52,10 +52,9 @@ public:
 	Properties();   // standard constructor
 	~Properties();
 
-	void setPropertyValues();
-	void refreshDisplayProperties();
 	void AdjustLayout();
 	void fillProperties();
+	void InitPropList();
 
 	CMFCPropertyGridProperty*		Patch;
 	CMFCPropertyGridProperty*		RasterSize;
@@ -75,8 +74,6 @@ public:
 	CMFCPropertyGridProperty*		ICANDI_IP;
 	CMFCPropertyGridProperty*		FlipVertical;
 	CMFCPropertyGridProperty*		FlipHorizontal;
-
-	void InitPropList();
 
 private:
 	_variant_t FixationTargetValue;
