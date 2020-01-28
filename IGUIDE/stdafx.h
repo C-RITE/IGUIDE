@@ -15,11 +15,14 @@
 #define RESET_AOSACA_IP (WM_USER + 107)
 #define RESET_ICANDI_IP (WM_USER + 108)
 
-#define CANVAS		360								// Visual Area
-#define CENTER		CANVAS / 2						// Visual Area Center
-#define DPP			0.1								// 10 pixels = 1 degree
-#define PPD			1 / DPP							// inverse of DPP
-#define LANES		(unsigned int)(CANVAS * DPP)	// helper for grid drawing
+#define CANVAS			360								// Visual Area
+#define CENTER			CANVAS / 2						// Visual Area Center
+#define DPP				0.1								// 10 pixels = 1 degree
+#define PPD				1 / DPP							// inverse of DPP
+#define LANES			(unsigned int)(CANVAS * DPP)	// helper for grid drawing
+
+#define MIN_ZOOM		0.01f //not yet integrated
+#define MAX_ZOOM		100.0f
 
 // definition source: https://de.wikipedia.org/wiki/Fovea_centralis#/media/Datei:Macula.svg
 #define _DELTA_D		15				// Assumed distance between foveal center and optic disc

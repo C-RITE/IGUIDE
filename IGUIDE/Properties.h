@@ -49,6 +49,7 @@ class Properties : public CDockablePane
 	};
 
 public:
+
 	Properties();   // standard constructor
 	~Properties();
 
@@ -76,6 +77,7 @@ public:
 	CMFCPropertyGridProperty*		FlipHorizontal;
 
 private:
+
 	_variant_t FixationTargetValue;
 	_variant_t RasterSizeValue;
 	_variant_t ScreenValue;
@@ -101,6 +103,7 @@ DECLARE_MESSAGE_MAP()
 
 
 public:
+
 	CString getRemoteCapability();
 	CString getAOSACA_IP();
 	CString getICANDI_IP();

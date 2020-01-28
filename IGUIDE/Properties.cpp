@@ -179,7 +179,6 @@ void Properties::OnSize(UINT nType, int cx, int cy)
 void Properties::InitPropList()
 {
 	
-	
 	m_wndPropList.SetCustomColors(	RGB(50, 50, 50),	// Background
 									RGB(255, 255, 255),	// Text
 									RGB(50, 50, 50),	// GroupBackground
@@ -235,7 +234,6 @@ void Properties::InitPropList()
 	RemoteControl->AddSubItem(AOSACA_IP);
 	RemoteControl->AddSubItem(ICANDI_IP);
 	
-
 }
 
 void Properties::fillProperties() {

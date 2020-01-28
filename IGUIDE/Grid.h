@@ -33,9 +33,7 @@ private:
 
 	CD2DBrushProperties*	m_pBrushProp;
 	CD2DLayer*				m_pLayer1;
-
 	D2D1_LAYER_PARAMETERS	lpHi;
-
 
 public:
 
@@ -45,16 +43,16 @@ public:
 	DWORD					overlay;						// for different view styles
 	Patches					patchlist;						// storage for all rasters
 	CD2DRectF				nerve;							// optic disc
-	CRect					mainWnd;						// client area of operator view
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
 
 	void DelPatch();
 	void ClearPatchlist();
-	void StorePatch(CPoint point);							// store patch upon click of mouse button
-	void DrawOverlay(CHwndRenderTarget* pRenderTarget);		// draw information overlay
-	void DrawPatches(CHwndRenderTarget* pRenderTarget);		// draw patches
-	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);	// draw text
-	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);	// construct the grid
+	void StorePatch(CPoint point);									// store patch upon click of mouse button
+	void DrawOverlay(CHwndRenderTarget* pRenderTarget);				// draw information overlay
+	void DrawPatches(CHwndRenderTarget* pRenderTarget);				// draw patches
+	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);			// draw text
+	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);		// construct the grid
+	void DrawCircles(CHwndRenderTarget* pRenderTarget);				// draw circles around center
 	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);
 

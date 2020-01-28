@@ -8,27 +8,7 @@ class Properties;
 
 class CMainFrame : public CFrameWndEx
 {
-
-public:
 	   
-	static
-	CPoint CMainFrame::GetCenterOffset()
-	{
-		CRect rect;
-		if (!AfxGetMainWnd())
-			return CPoint(0, 0);
-		AfxGetMainWnd()->GetClientRect(&rect);
-		CPoint clientCenter = rect.CenterPoint();
-		return CPoint(-CENTER + clientCenter.x,
-			-CENTER + clientCenter.y);
-	}
-
-	static
-	CPoint CMainFrame::GetCenter()
-	{
-		return CPoint{ CENTER, CENTER };
-	}
-	
 protected:
 	CMainFrame();
 	DECLARE_DYNCREATE(CMainFrame)
@@ -65,8 +45,8 @@ public:
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 protected:
 	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
 };
-

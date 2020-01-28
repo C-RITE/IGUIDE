@@ -359,8 +359,8 @@ CString CIGUIDEDoc::getTraceInfo() {
 	Edge k;
 
 	CIGUIDEView* view = CIGUIDEView::GetView();
-	CD2DPointF center = view->GetRelativeCenter();;
-
+	CD2DPointF center(CANVAS / 2, CANVAS / 2);
+	
 	if (!m_pGrid->patchlist.empty()) {
 		k.q.x = m_pGrid->patchlist.back().coords.x;
 		k.q.y = m_pGrid->patchlist.back().coords.y;
@@ -369,7 +369,7 @@ CString CIGUIDEDoc::getTraceInfo() {
 	double beta = 360 - ComputeOrientationAngle(k);
 	double dist = center.x - ((m_pGrid->nerve.right - m_pGrid->nerve.left) / 2);
 
-	trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f",
+	/*trace.Format(L"alpha:\t\t%f (deg)\nbeta:\t\t%f (deg)\ngamma:\t\t%f (deg)\nsize:\t\t%f (deg)\nscale.x:\t%f\nscale.y:\t%f\nfov2disc:\t%f (px)\nhost ppd:\t%f\nclient ppd:\t%f\nmousepos:\tx:%f,y:%f",
 		m_raster.meanAlpha,
 		beta,
 		m_raster.meanAlpha + beta,
@@ -377,11 +377,14 @@ CString CIGUIDEDoc::getTraceInfo() {
 		m_raster.scale.x,
 		m_raster.scale.y,
 		dist,
-
 		PPD,
-		m_raster.meanEdge/m_raster.size
+		m_raster.meanEdge/m_raster.size,
+	);*/
 
-	);
+	CD2DPointF mousepos = view->getMousePos();
+	CD2DPointF mousedist = view->getMouseDist();
+
+	trace.Format(L"mouse_X:\t%f\nmouse_Y:\t%f\nmouse_dst_X:\t%f\nmouse_dst_Y:\t%f", mousepos.x, mousepos.y, mousedist.x, mousedist.y);
 
 	if (m_pGrid->overlay & TRACEINFO)
 		return trace;
@@ -415,7 +418,7 @@ CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int 
 
 					// For all vertices
 	int i = 0;
-	for (i = 0; i<vertexCount; ++i)
+	for (i = 0; i < vertexCount; ++i)
 	{
 		x0 = vertices[i].x;
 		y0 = vertices[i].y;
