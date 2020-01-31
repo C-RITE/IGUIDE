@@ -37,6 +37,7 @@ public:
 	int						m_FixationTargetSize;				// fixation target size in percent
 	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
+	bool					calibrationComplete;				// true if calibration is valid
 
 private:
 	DWORD					overlaySettings;					// used as buffer for toggle options

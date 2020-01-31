@@ -67,13 +67,14 @@ void Grid::ClearPatchlist() {
 
 void Grid::StorePatch(CPoint loc) {
 
+	// store patches in degrees from fovea
+
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CIGUIDEView* view = CIGUIDEView::GetView();
-	CD2DPointF center = (CANVAS / 2, CANVAS / 2);
 
 	Patch patch;
-	patch.coords.x = ((center.x - loc.x) * DPP);
-	patch.coords.y = ((center.y - loc.y) * DPP);
+	patch.coords.x = (loc.x - CANVAS / 2);
+	patch.coords.y = (loc.y - CANVAS / 2);
 	patch.color = pDoc->m_raster.color;
 	patch.rastersize = pDoc->m_raster.size;
 	patch.locked = false;
@@ -198,33 +199,26 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 	CRect intersect;
 	float zoom = pView->getZoomFactor();
 
-	CD2DPointF center(CANVAS / 2, CANVAS / 2);
-	center.x *= (1 / zoom);
-	center.y *= (1 / zoom);
-
 
 	float rsdeg; // raster size in degree visual angle
-	
+
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 
 		if (it == patchlist.end())
 			break;
 		
 		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize;
-		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
 
 		rect1 = {
 
-			(float)(center.x - it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD),
-			(float)(center.y - it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD),
-			(float)(center.x - it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD),
-			(float)(center.y - it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD)
+			(float)(it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD),
+			(float)(it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD),
+			(float)(it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD),
+			(float)(it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD)
 		};
-
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
-		pRenderTarget->PopLayer();
 
 	}
 
@@ -233,11 +227,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		rsdeg = (float)pDoc->m_raster.videodim / patchlist.back().rastersize;
 
 		rect1 = {
-			(float)(center.x - patchlist.back().coords.x * PPD - rsdeg / 2 * PPD),
-			(float)(center.y - patchlist.back().coords.y * PPD - rsdeg / 2 * PPD),
-			(float)(center.x - patchlist.back().coords.x * PPD + rsdeg / 2 * PPD),
-			(float)(center.y - patchlist.back().coords.y * PPD + rsdeg / 2 * PPD)
-
+			(float)(patchlist.back().coords.x * PPD - rsdeg / 2 * PPD),
+			(float)(patchlist.back().coords.y * PPD - rsdeg / 2 * PPD),
+			(float)(patchlist.back().coords.x * PPD + rsdeg / 2 * PPD),
+			(float)(patchlist.back().coords.y * PPD + rsdeg / 2 * PPD)
 		};
 		
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
@@ -265,15 +258,18 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	if (pDoc && pDoc->m_pMousePos) {
+
+	// while left button pressed: hover over grid with raster outline
+	if (pView->mouseHovering() & pDoc->calibrationComplete) {
 		
 		rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+		CD2DPointF mousePos = pView->getMousePos();
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			pDoc->m_pMousePos->x - (float)(rsdeg / 2 / DPP),
-			pDoc->m_pMousePos->y - (float)(rsdeg / 2 / DPP),
-			pDoc->m_pMousePos->x + (float)(rsdeg / 2 / DPP),
-			pDoc->m_pMousePos->y + (float)(rsdeg / 2 / DPP)),
+			mousePos.x - (float)(rsdeg / 2 / DPP),
+			mousePos.y - (float)(rsdeg / 2 / DPP),
+			mousePos.x + (float)(rsdeg / 2 / DPP),
+			mousePos.y + (float)(rsdeg / 2 / DPP)),
 			m_pWhiteBrush,
 			.5f,
 			NULL);

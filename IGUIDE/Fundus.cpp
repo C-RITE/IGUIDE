@@ -38,7 +38,7 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 			calibCenter.x - center.x,
 			calibCenter.y - center.y);
 		pRenderTarget->SetTransform(scale);
-		pRenderTarget->DrawBitmap(picture, CD2DRectF(0,0, size.width, size.height));
+		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width, size.height));
 		pRenderTarget->SetTransform(identity);
 	}
 

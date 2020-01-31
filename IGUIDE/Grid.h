@@ -30,7 +30,6 @@ private:
 		*m_pMagentaBrush,
 		*m_pPatchBrush;
 
-
 	CD2DBrushProperties*	m_pBrushProp;
 	CD2DLayer*				m_pLayer1;
 	D2D1_LAYER_PARAMETERS	lpHi;

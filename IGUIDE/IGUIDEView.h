@@ -22,23 +22,31 @@ protected:
 // Implementation
 public:
 
-	virtual ~CIGUIDEView();
-	void ToggleFixationTarget();
-
 	CD2DPointF getMousePos() { 
 		return mousePos;
-	};
+	}
 
 	CD2DPointF getMouseDist() {
 		return mouseDist;
-	};
+	}
+
+	CD2DPointF getMouseStart() {
+		return mouseStart;
+	}
+
+	bool mouseHovering() {
+		return hover;
+	}
 
 	float getZoomFactor() {
 		return zoom;
 	}
 
+	virtual				~CIGUIDEView();
+	void				ToggleFixationTarget();
+
 	static CIGUIDEView* GetView();
-	Target*				m_pDlgTarget;						// target dialog
+	Target*				m_pDlgTarget;							// target dialog
 
 
 // Attributes
@@ -48,8 +56,10 @@ private:
 	D2D1_MATRIX_3X2_F		scale;
 	D2D1_MATRIX_3X2_F		translate;
 	CPoint					mousePos;							// current mouse location
+	CPoint					mouseStart;							// starting point
 	CPoint					mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
+	bool					hover;								// mouse hovering over grid for raster positioning
 	bool					LButtonIsDown;						// workaround for not accidently clicking 
 																// into operator view after openfiledialog
 

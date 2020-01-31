@@ -55,19 +55,20 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
-	m_pMousePos = NULL;
-	m_raster.meanAlpha = 0;
 	m_pDlgCalibration = new Calibration();
+	m_raster.meanAlpha = 0;
 	overlaySettings = 0;
 	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
 	getScreens();
 	overlayVisible = true;
+	calibrationComplete = false;
 
 }
 
-bool CIGUIDEDoc::getScreens() {
+bool CIGUIDEDoc::getScreens() 
+{
 
 	Monitors monitors;
 	if (m_Screens.size() > 0)	// change in display configuration requires empty vector
@@ -82,7 +83,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	m_Controller.shutdown();
 	delete m_pGrid;
 	delete m_pFundus;
-	delete m_pMousePos;
 	delete m_pDlgCalibration;
 
 }
@@ -189,6 +189,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 			calib += sz;
 		}
 		calib = ptr;
+		CheckCalibrationValidity();
 	}
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
@@ -383,8 +384,9 @@ CString CIGUIDEDoc::getTraceInfo() {
 
 	CD2DPointF mousepos = view->getMousePos();
 	CD2DPointF mousedist = view->getMouseDist();
+	CD2DPointF mousestart = view->getMouseStart();
 
-	trace.Format(L"mouse_X:\t%f\nmouse_Y:\t%f\nmouse_dst_X:\t%f\nmouse_dst_Y:\t%f", mousepos.x, mousepos.y, mousedist.x, mousedist.y);
+	trace.Format(L"mouse_X:\t%f\nmouse_Y:\t%f\nmouse_start_X:\t%f\nmouse_start_Y:\t%f\nmouse_dst_X:\t%f\nmouse_dst_Y:\t%f", mousepos.x, mousepos.y, mousestart.x, mousestart.y, mousedist.x, mousedist.y);
 
 	if (m_pGrid->overlay & TRACEINFO)
 		return trace;
@@ -541,7 +543,8 @@ bool CIGUIDEDoc::CheckCalibrationValidity()
 
 	if (stddev > 5)
 		return false;
-	return true;
+	
+	return calibrationComplete = true;
 
 }
 
