@@ -213,8 +213,9 @@ void CIGUIDEView::OnInitialUpdate()
 
 	zoom = 2;
 
-	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
 	CD2DSizeF size(D2D1::SizeF((clientWindow.Width() / 2) - CANVAS / 2, (clientWindow.Height() / 2) - CANVAS / 2));
+	
+	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
 	translate = D2D1::Matrix3x2F::Translation(size.width * (1 / zoom), size.height * (1 / zoom));
 
 	mouseDist.x += size.width;
@@ -382,8 +383,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		
 		pDoc->m_pGrid->DrawCircles(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
-		pDoc->m_pFundus->Paint(pRenderTarget);
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
+		pDoc->m_pFundus->Paint(pRenderTarget);
 
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 

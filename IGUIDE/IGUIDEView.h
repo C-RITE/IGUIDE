@@ -39,7 +39,7 @@ public:
 	}
 
 	float getZoomFactor() {
-		return zoom;
+		return 1 / zoom;
 	}
 
 	virtual				~CIGUIDEView();

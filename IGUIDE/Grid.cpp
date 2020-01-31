@@ -70,11 +70,22 @@ void Grid::StorePatch(CPoint loc) {
 	// store patches in degrees from fovea
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CIGUIDEView* view = CIGUIDEView::GetView();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	float zoom = pView->getZoomFactor();
+	CD2DPointF mouseDist = pView->getMouseDist();
+	CD2DPointF transLoc;
+	
+	transLoc.x = ((loc.x - mouseDist.x) - CANVAS / 2) * DPP;
+	transLoc.y = ((loc.y - mouseDist.y) - CANVAS / 2) * DPP;
+
+	transLoc.x *= zoom;
+	transLoc.y *= zoom;
 
 	Patch patch;
-	patch.coords.x = (loc.x - CANVAS / 2);
-	patch.coords.y = (loc.y - CANVAS / 2);
+
+	patch.coords.x = transLoc.x;
+	patch.coords.y = transLoc.y;
 	patch.color = pDoc->m_raster.color;
 	patch.rastersize = pDoc->m_raster.size;
 	patch.locked = false;
@@ -158,7 +169,9 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 		a.y = CANVAS / 2 - _OPTIC_DISC / DPP - _DELTA_DY / DPP;
 		b.x = CANVAS / 2 + _DELTA_D * PPD + _OPTIC_DISC / DPP;
 		b.y = CANVAS / 2 - _OPTIC_DISC / DPP - _DELTA_DY / DPP;
+
 		r = { a.x, a.y, b.x, b.y };
+
 		pRenderTarget->DrawEllipse(r, m_pBlueBrush, .2f);
 
 	}
@@ -170,7 +183,9 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 		a.y = CANVAS / 2 - 5;
 		b.x = CANVAS / 2 + 5;
 		b.y = CANVAS / 2 + 5;
+
 		r = { a.x, a.y, b.x, b.y };
+
 		pRenderTarget->DrawEllipse(r, m_pWhiteBrush, .1f);
 
 		pRenderTarget->DrawLine(CD2DPointF(CANVAS / 2 - 8, CANVAS / 2),
@@ -197,7 +212,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	CD2DRectF rect1;
 	CRect intersect;
-	float zoom = pView->getZoomFactor();
+	CD2DSizeF zoom = pView->getZoomFactor();
 
 
 	float rsdeg; // raster size in degree visual angle
@@ -211,10 +226,11 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		rect1 = {
 
-			(float)(it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD),
-			(float)(it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD),
-			(float)(it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD),
-			(float)(it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD)
+			(float)(it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
@@ -227,10 +243,12 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		rsdeg = (float)pDoc->m_raster.videodim / patchlist.back().rastersize;
 
 		rect1 = {
-			(float)(patchlist.back().coords.x * PPD - rsdeg / 2 * PPD),
-			(float)(patchlist.back().coords.y * PPD - rsdeg / 2 * PPD),
-			(float)(patchlist.back().coords.x * PPD + rsdeg / 2 * PPD),
-			(float)(patchlist.back().coords.y * PPD + rsdeg / 2 * PPD)
+
+			(float)(patchlist.back().coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+
 		};
 		
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
