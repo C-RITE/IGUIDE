@@ -45,9 +45,10 @@ END_MESSAGE_MAP()
 
 CIGUIDEView::CIGUIDEView()
 {
-	hover = false;
+
 	m_pDlgTarget = NULL;
 	m_pFixationTarget = NULL;
+	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
 	
 }
 
@@ -55,6 +56,7 @@ CIGUIDEView::~CIGUIDEView()
 {
 
 	delete m_pDlgTarget;
+	delete m_pWhiteBrush;
 
 }
 
@@ -106,11 +108,8 @@ void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	//if (GetAsyncKeyState(VK_LCONTROL))
-		mouseStart = point;
 
-		hover = true;
-		RedrawWindow();
+		mouseStart = point;
 
 }
 
@@ -118,42 +117,45 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	
+	if (!LButtonIsDown && !m_pDlgTarget->calibrating){
+		LButtonIsDown = false;
+		return;
+	}
+
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	
 	// calculate mouse travel distance
-	mouseDist += mousePos - mouseStart;
-
-	if (!LButtonIsDown && !m_pDlgTarget->calibrating){
-		LButtonIsDown = false;
+	
+	if (nFlags & MK_CONTROL) {
+		mouseDist += mousePos - mouseStart;
 		return;
 	}
 
 	if (pDoc->CheckFOV())
 	{
 		pDoc->m_pGrid->StorePatch(point);
+		float x = pDoc->m_pGrid->patchlist.back().coords.x * zoom;
+		float y = pDoc->m_pGrid->patchlist.back().coords.y * zoom;
+		m_pDlgTarget->Pinpoint(x,y);
+		RedrawWindow();
+		m_pDlgTarget->RedrawWindow();
 	}
-
-	else
-		return;
-
-	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-
-	hover = false;
-
-	RedrawWindow();
 
 }
 
 void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	SetFocus();
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
 	mousePos = point;
 
 	// pan if control key and left mouse button are pressed simultaneously
 	if (nFlags & MK_CONTROL && nFlags & MK_LBUTTON) {
-
+		
 		CD2DSizeF offset(mousePos - mouseStart + mouseDist);
 		offset.width *= (1 / zoom);
 		offset.height *= (1 / zoom);
@@ -162,17 +164,11 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 		
 	}
 
-	else if (nFlags & MK_LBUTTON) {
-		RedrawWindow();
-	}
-
 #ifdef DEBUG
 	RedrawWindow();
 #endif // DEBUG
 
-
 }
-
 
 BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
@@ -239,6 +235,8 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 		area.Width(),
 		area.Height(),
 		NULL);
+
+	m_pDlgTarget->ShowWindow(SW_SHOW);
 
 	return 0;
 
@@ -307,7 +305,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
-
 	if (m_pFixationTarget && m_pFixationTarget->IsValid())
 		delete m_pFixationTarget;
 
@@ -365,10 +362,13 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	// TODO: add draw code for native data here
 	if (pRenderTarget) {
 
+		CD2DPointF mouseLoc = mousePos;
+	
 		// combine transforms
 		pRenderTarget->SetTransform(translate * scale);
 
 		pRenderTarget->Clear(ColorF(ColorF::Black));
+		pDoc->m_pFundus->Paint(pRenderTarget);
 
 		if (pDoc->m_pGrid->m_pGridGeom) {
 
@@ -384,22 +384,23 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawCircles(pRenderTarget);
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
-		pDoc->m_pFundus->Paint(pRenderTarget);
 
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+		pDoc->m_pGrid->DrawPatchField(pRenderTarget, mouseLoc);
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
-			sizeDpi.height / 8);						// font size
-		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
+		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
+			_T("Consolas"),									// font family name
+			sizeDpi.height / 8);							// font size
+		CD2DTextFormat textFormat2(pRenderTarget,			// pointer to the render target
+			_T("Consolas"),									// font family name
 			sizeDpi.height / 4);
 
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
 
 			CString traceText = pDoc->getTraceInfo();
+
 			// construct a CD2DTextLayout object which represents a block of formatted text 
 			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 				traceText,									// text to be drawn
@@ -529,7 +530,9 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			}
 
 		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
+
 		}
+
 	}
 
 	return 0;

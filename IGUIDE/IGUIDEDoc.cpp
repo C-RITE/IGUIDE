@@ -74,6 +74,7 @@ bool CIGUIDEDoc::getScreens()
 	if (m_Screens.size() > 0)	// change in display configuration requires empty vector
 		m_Screens.clear();
 	m_Screens = monitors.getScreens();
+
 	return true;
 
 }
@@ -189,7 +190,8 @@ BOOL CIGUIDEDoc::OnNewDocument()
 			calib += sz;
 		}
 		calib = ptr;
-		CheckCalibrationValidity();
+		if(CheckCalibrationValidity())
+			UpdateAllViews(NULL);
 	}
 
 	m_InputController = AfxGetApp()->GetProfileString(L"Settings", L"Controller", L"Mouse");
@@ -328,6 +330,7 @@ bool CIGUIDEDoc::CheckFOV()
 {
 
 	if (m_raster.corner.size() < 4) {
+
 		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
 
 		if (answer == IDYES)
@@ -335,6 +338,7 @@ bool CIGUIDEDoc::CheckFOV()
 
 		ShowCursor(TRUE);
 		return FALSE;
+
 	}
 
 	return TRUE;

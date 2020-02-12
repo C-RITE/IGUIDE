@@ -29,10 +29,12 @@ Target::Target(CIGUIDEView* pParent /*=NULL*/)
 	calibrating = false;
 	discretion = 20;
 	locked = true;
+
 }
 
 Target::~Target()
 {
+
 	delete m_POI;
 
 }
@@ -167,7 +169,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			scalingFactor = (float)pDoc->m_FixationTargetSize / 100;
 
 		// custom fixation target
-		if (m_POI && m_pFixationTarget->IsValid()) {
+		if (m_POI && m_pFixationTarget) {
 			CD2DSizeF size = m_pFixationTarget->GetSize();
 			CD2DPointF center{
 				(m_POI->left + m_POI->right) / 2,

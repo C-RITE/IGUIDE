@@ -161,8 +161,6 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	pDoc->UpdateAllViews(NULL);
 
-	AfxGetApp()->m_pMainWnd->SetFocus();
-
 	return S_OK;
 
 }
@@ -280,6 +278,7 @@ void Properties::fillProperties() {
 
 	// fill monitor property
 	for (auto& screen : pDoc->m_Screens) {
+
 		// never parse primary monitor, because it is dedicated to operator view
 		if (screen.number == 1)
 			FixationTargetScreen->SetValue(L"NONE");
@@ -289,6 +288,7 @@ void Properties::fillProperties() {
 			CIGUIDEView* pView = CIGUIDEView::GetView();
 			pView->SendMessage(SCREEN_SELECTED);
 		}
+
 	}
 	
 	FixationTargetScreen->RemoveAllOptions();	// need for removal if fillProperties() is called more than once

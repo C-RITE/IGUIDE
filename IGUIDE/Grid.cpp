@@ -67,7 +67,8 @@ void Grid::ClearPatchlist() {
 
 void Grid::StorePatch(CPoint loc) {
 
-	// store patches in degrees from fovea
+	// store patches as degrees from fovea
+	// along with color, rastersize and defocus
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -203,7 +204,6 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	// draw all marked locations (i.e. list of patches) in operator view
-	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	if (!(overlay & PATCHES))
 		return;
@@ -212,7 +212,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	CD2DRectF rect1;
 	CRect intersect;
-	CD2DSizeF zoom = pView->getZoomFactor();
 
 
 	float rsdeg; // raster size in degree visual angle
@@ -264,7 +263,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 			
-
 			rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
 
 			if (it._Ptr->_Myval.locked == true) {
@@ -276,20 +274,27 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
+}
 
-	// while left button pressed: hover over grid with raster outline
-	if (pView->mouseHovering() & pDoc->calibrationComplete) {
-		
-		rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-		CD2DPointF mousePos = pView->getMousePos();
+void Grid::DrawPatchField(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
+
+	// show patchfield(s) around the mouse pointer
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	if (pDoc->calibrationComplete) {
+
+		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
+		float zoom = 1 / pView->getZoomFactor();
 
 		pRenderTarget->DrawRectangle(CD2DRectF(
-			mousePos.x - (float)(rsdeg / 2 / DPP),
-			mousePos.y - (float)(rsdeg / 2 / DPP),
-			mousePos.x + (float)(rsdeg / 2 / DPP),
-			mousePos.y + (float)(rsdeg / 2 / DPP)),
+			loc.x - (float)zoom * (rsdeg / 2 / DPP),
+			loc.y - (float)zoom * (rsdeg / 2 / DPP),
+			loc.x + (float)zoom * (rsdeg / 2 / DPP),
+			loc.y + (float)zoom * (rsdeg / 2 / DPP)),
 			m_pWhiteBrush,
-			.5f,
+			.1f,
 			NULL);
 
 	}

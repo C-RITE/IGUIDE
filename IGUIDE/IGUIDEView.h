@@ -22,20 +22,16 @@ protected:
 // Implementation
 public:
 
-	CD2DPointF getMousePos() { 
+	CPoint getMousePos() { 
 		return mousePos;
 	}
 
-	CD2DPointF getMouseDist() {
+	CPoint getMouseDist() {
 		return mouseDist;
 	}
 
-	CD2DPointF getMouseStart() {
+	CPoint getMouseStart() {
 		return mouseStart;
-	}
-
-	bool mouseHovering() {
-		return hover;
 	}
 
 	float getZoomFactor() {
@@ -44,6 +40,8 @@ public:
 
 	virtual				~CIGUIDEView();
 	void				ToggleFixationTarget();
+
+	CD2DSolidColorBrush* m_pWhiteBrush;
 
 	static CIGUIDEView* GetView();
 	Target*				m_pDlgTarget;							// target dialog
@@ -59,11 +57,11 @@ private:
 	CPoint					mouseStart;							// starting point
 	CPoint					mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
-	bool					hover;								// mouse hovering over grid for raster positioning
 	bool					LButtonIsDown;						// workaround for not accidently clicking 
 																// into operator view after openfiledialog
 
 	void CIGUIDEView::SetFixationTarget();
+
 
 // Generated message map functions
 
