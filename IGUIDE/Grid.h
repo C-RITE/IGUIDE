@@ -33,6 +33,7 @@ private:
 	CD2DBrushProperties*	m_pBrushProp;
 	CD2DLayer*				m_pLayer1;
 	D2D1_LAYER_PARAMETERS	lpHi;
+	D2D1_LAYER_PARAMETERS	lpLo;
 
 public:
 
@@ -46,14 +47,15 @@ public:
 
 	void DelPatch();
 	void ClearPatchlist();
+	CD2DPointF PixelToDegree(CPoint point);									// calculate degrees from fovea from pixel coordinates
 	void StorePatch(CPoint point);											// store patch upon click of mouse button
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
 	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);					// draw text
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center
-	void DrawPatchField(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse cursor
-	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect);
+	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse cursor
+	void ShowCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, CD2DRectF rect);
 	void ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number);
 
 };

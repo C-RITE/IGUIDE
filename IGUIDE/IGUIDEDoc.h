@@ -61,6 +61,8 @@ public:
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
 
+	void					OnFundusImport();
+
 	// Overrides
 public:
 	virtual BOOL OnNewDocument();
@@ -90,7 +92,6 @@ protected:
 #endif // SHARED_HANDLERS
 
 public:
-	afx_msg void OnFundusImport();
 
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);

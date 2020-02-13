@@ -106,18 +106,18 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	Edge k;
 
 	if (pDoc->m_FlipHorizontal == L"True") {
-		k.q.x = centerOffset_x;
+		k.q.x = - centerOffset_x;
 	}
 	
 	else
-		k.q.x = -centerOffset_x;
+		k.q.x = centerOffset_x;
 
 	if (pDoc->m_FlipVertical == L"True") {
-		k.q.y = centerOffset_y;
+		k.q.y = - centerOffset_y;
 	}
 
 	else {
-		k.q.y = -centerOffset_y;
+		k.q.y = centerOffset_y;
 	}
 
 	alpha = pDoc->m_raster.meanAlpha;

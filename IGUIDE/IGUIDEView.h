@@ -69,6 +69,7 @@ private:
 	
 public:
 
+	void ResetTransformationMatrices();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 
 protected:
@@ -87,4 +88,6 @@ protected:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
 
+public:
+	afx_msg void OnFundusImport();
 };

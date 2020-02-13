@@ -28,6 +28,8 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
+
+
 void Patches::lockIn(){
 	CString systime;
 	Patch dummy = this->back();

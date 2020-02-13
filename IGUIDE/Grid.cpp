@@ -16,7 +16,7 @@ Grid::Grid()
 	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
 	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
 	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
-	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
+	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
 	m_pGrayBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGray));
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
@@ -25,15 +25,28 @@ Grid::Grid()
 
 	m_pGridGeom = NULL;
 
-	// layer for patch-opacity
+	// layer for high opacity
 	lpHi = {
 		D2D1::InfiniteRect(),
 		NULL,
-		D2D1_ANTIALIAS_MODE_ALIASED,
+		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
 		D2D1::IdentityMatrix(),
-		1.0,
+		.4f,
 		NULL,
 		D2D1_LAYER_OPTIONS_NONE
+	};
+
+	// layer for low opacity
+	lpLo = {
+
+		D2D1::InfiniteRect(),
+		NULL,
+		D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
+		D2D1::IdentityMatrix(),
+		1,
+		NULL,
+		D2D1_LAYER_OPTIONS_NONE
+
 	};
 
 }
@@ -65,10 +78,7 @@ void Grid::ClearPatchlist() {
 
 }
 
-void Grid::StorePatch(CPoint loc) {
-
-	// store patches as degrees from fovea
-	// along with color, rastersize and defocus
+CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -76,13 +86,26 @@ void Grid::StorePatch(CPoint loc) {
 	float zoom = pView->getZoomFactor();
 	CD2DPointF mouseDist = pView->getMouseDist();
 	CD2DPointF transLoc;
-	
-	transLoc.x = ((loc.x - mouseDist.x) - CANVAS / 2) * DPP;
-	transLoc.y = ((loc.y - mouseDist.y) - CANVAS / 2) * DPP;
+
+	transLoc.x = ((point.x - mouseDist.x) - CANVAS / 2) * DPP;
+	transLoc.y = ((point.y - mouseDist.y) - CANVAS / 2) * DPP;
 
 	transLoc.x *= zoom;
 	transLoc.y *= zoom;
 
+	return transLoc;
+
+}
+
+void Grid::StorePatch(CPoint loc) {
+
+	// store patches as degrees from fovea
+	// along with color, rastersize and defocus
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+	CD2DPointF transLoc = PixelToDegree(loc);
+	
 	Patch patch;
 
 	patch.coords.x = transLoc.x;
@@ -153,7 +176,7 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 	for (int f = 0; f < RANGE; f++) {
 		CD2DRectF r{ a[f].x, a[f].y, b[f].x, b[f].y };
 		CD2DEllipse e(r);
-		pRenderTarget->DrawEllipse(e, m_pGrayBrush, .1f, NULL);
+		pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f, NULL);
 		
 	}
 
@@ -223,6 +246,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		
 		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize;
 
+		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
+
 		rect1 = {
 
 			(float)(it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
@@ -234,12 +259,15 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
 		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
+		pRenderTarget->PopLayer();
 
 	}
 
 	if (patchlist.size() > 0) {
 
 		rsdeg = (float)pDoc->m_raster.videodim / patchlist.back().rastersize;
+
+		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
 
 		rect1 = {
 
@@ -250,14 +278,19 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		};
 		
-		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, 1);
+		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, .2f);
 
 		CD2DEllipse center(&rect1);
 		center.radiusX = center.radiusY = .5;
 		
-		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .5);
+		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .1f);
 
-		ShowCoordinates(pRenderTarget, patchlist.back().coords.x, patchlist.back().coords.y, rect1);	
+		pRenderTarget->PopLayer();
+
+		ShowCoordinates(
+			pRenderTarget,
+			patchlist.back().coords,
+			rect1);	
 				
 		int number = 1;
 
@@ -276,9 +309,9 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawPatchField(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
+void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
-	// show patchfield(s) around the mouse pointer
+	// show cursor around the mouse pointer
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -287,15 +320,22 @@ void Grid::DrawPatchField(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
 		float zoom = 1 / pView->getZoomFactor();
+		
+		pRenderTarget->PushLayer(lpLo, *m_pLayer1);
+		
+		CD2DRectF rect1{
+			loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.y + (float)(zoom * (rsdeg / 2 / DPP))
+		};
 
-		pRenderTarget->DrawRectangle(CD2DRectF(
-			loc.x - (float)zoom * (rsdeg / 2 / DPP),
-			loc.y - (float)zoom * (rsdeg / 2 / DPP),
-			loc.x + (float)zoom * (rsdeg / 2 / DPP),
-			loc.y + (float)zoom * (rsdeg / 2 / DPP)),
-			m_pWhiteBrush,
-			.1f,
-			NULL);
+
+		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, .5f, NULL);
+
+		ShowCoordinates(pRenderTarget, PixelToDegree(loc), rect1);
+
+		pRenderTarget->PopLayer();
 
 	}
 
@@ -411,21 +451,26 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 }
 
 
-void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, CRect rect)
+void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF rect)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	float zoom = pView->getZoomFactor();
 
 	CString xCoords, yCoords;
-	CD2DSizeF sizeTarget(50,50);
+
+	CD2DSizeF sizeTarget(50 / zoom, 50 / zoom);
 	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
 	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
-		sizeDpi.height /7);							// font size
+		sizeDpi.height / 7 );						// font size
 
-	CSize marginX;
-	CSize marginY;
+	CD2DPointF marginX;
+	CD2DPointF marginY;
 
-	float x_rnd = roundf(xPos * 10) / 10;
+	float x_rnd = roundf(pos.x * 10) / 10;
 	if (x_rnd == -0.0)
 		x_rnd = 0.0;
 
@@ -436,7 +481,7 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 	else if (x_rnd >= 0)
 		marginX = { 20, 0 };
 
-	float y_rnd = roundf(yPos * 10) / 10;
+	float y_rnd = roundf(pos.y * 10) / 10;
 	if (y_rnd == -0.0)
 		y_rnd = 0.0;
 	
@@ -447,13 +492,22 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 	else if (y_rnd >= 0)
 		marginY = { 25, 4 };
 
+	marginX.x *= zoom;
+	marginX.y *= zoom;
+
+	marginY.x *= zoom;
+	marginY.y *= zoom;
+
 	xCoords.Format(L"%.1f", x_rnd);
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		xCoords,									// text to be drawn
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
-	pRenderTarget->DrawTextLayout(rect.BottomRight() - marginX, &textLayout, m_pWhiteBrush);
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(rect.right - marginX.x, rect.bottom - marginX.y),
+		&textLayout,
+		m_pWhiteBrush);
 
 	yCoords.Format(L"%.1f", y_rnd);
 	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
@@ -461,7 +515,10 @@ void Grid::ShowCoordinates(CHwndRenderTarget* pRenderTarget, float xPos, float y
 		textFormat,									// text format
 		sizeTarget);								// size of the layout box
 
-	pRenderTarget->DrawTextLayout(rect.TopLeft() - marginY, &textLayout2, m_pWhiteBrush);
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(rect.left - marginY.x, rect.top - marginY.y),
+		&textLayout2,
+		m_pWhiteBrush);
 
 }
 

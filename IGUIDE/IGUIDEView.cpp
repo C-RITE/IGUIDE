@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_MESSAGE(SCREEN_SELECTED, &CIGUIDEView::ChangeTargetDisplay)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SIZE()
+	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEView::OnFundusImport)
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -48,8 +49,8 @@ CIGUIDEView::CIGUIDEView()
 
 	m_pDlgTarget = NULL;
 	m_pFixationTarget = NULL;
-	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::White));
-	
+	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
+
 }
 
 CIGUIDEView::~CIGUIDEView()
@@ -135,11 +136,13 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{
 		pDoc->m_pGrid->StorePatch(point);
-		float x = pDoc->m_pGrid->patchlist.back().coords.x * zoom;
-		float y = pDoc->m_pGrid->patchlist.back().coords.y * zoom;
-		m_pDlgTarget->Pinpoint(x,y);
-		RedrawWindow();
+
+		m_pDlgTarget->Pinpoint(
+			pDoc->m_pGrid->patchlist.back().coords.x,
+			pDoc->m_pGrid->patchlist.back().coords.y);
+
 		m_pDlgTarget->RedrawWindow();
+		RedrawWindow();
 	}
 
 }
@@ -160,13 +163,10 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 		offset.width *= (1 / zoom);
 		offset.height *= (1 / zoom);
 		translate = D2D1::Matrix3x2F::Translation(offset);
-		RedrawWindow();
 		
 	}
 
-#ifdef DEBUG
 	RedrawWindow();
-#endif // DEBUG
 
 }
 
@@ -202,23 +202,29 @@ void CIGUIDEView::OnInitialUpdate()
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 
+	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
+	
+	ResetTransformationMatrices();
+
+	// TODO: Add your specialized code here and/or call the base class
+	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
+
+}
+
+void CIGUIDEView::ResetTransformationMatrices() {
+
 	CRect clientWindow;
 	GetClientRect(&clientWindow);
-
-	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
 
 	zoom = 2;
 
 	CD2DSizeF size(D2D1::SizeF((clientWindow.Width() / 2) - CANVAS / 2, (clientWindow.Height() / 2) - CANVAS / 2));
-	
+
 	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
 	translate = D2D1::Matrix3x2F::Translation(size.width * (1 / zoom), size.height * (1 / zoom));
-
-	mouseDist.x += size.width;
-	mouseDist.y += size.height;
 	
-	// TODO: Add your specialized code here and/or call the base class
-	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
+	mouseDist.x = size.width;
+	mouseDist.y = size.height;
 
 }
 
@@ -305,11 +311,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
-	if (m_pFixationTarget && m_pFixationTarget->IsValid())
-		delete m_pFixationTarget;
-
 	SetFixationTarget();
-
 	SetFocus();
 	Invalidate();
 
@@ -364,18 +366,18 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		CD2DPointF mouseLoc = mousePos;
 	
-		// combine transforms
-		pRenderTarget->SetTransform(translate * scale);
-
+		// clear background
 		pRenderTarget->Clear(ColorF(ColorF::Black));
-		pDoc->m_pFundus->Paint(pRenderTarget);
+
+		// combine transforms
+		pDoc->m_pFundus->Paint(pRenderTarget, scale, translate);
+		pRenderTarget->SetTransform(translate * scale);
 
 		if (pDoc->m_pGrid->m_pGridGeom) {
 
 			pRenderTarget->DrawGeometry(
 				pDoc->m_pGrid->m_pGridGeom,
-				&CD2DSolidColorBrush(pRenderTarget,
-				D2D1::ColorF(D2D1::ColorF::WhiteSmoke)),
+				m_pWhiteBrush,
 				.1f
 			);
 
@@ -385,8 +387,11 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
 
+		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-		pDoc->m_pGrid->DrawPatchField(pRenderTarget, mouseLoc);
+
+
+		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
@@ -558,20 +563,28 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			switch (pMsg->wParam) {
 
 				case VK_UP:
-					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
-					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
+					m_pDlgTarget->Pinpoint(
+						pDoc->m_pGrid->patchlist.back().coords.x,
+						pDoc->m_pGrid->patchlist.back().coords.y);
 					break;
 				case VK_DOWN:
-					pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
-					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
+					m_pDlgTarget->Pinpoint(
+						pDoc->m_pGrid->patchlist.back().coords.x,
+						pDoc->m_pGrid->patchlist.back().coords.y);
 					break;
 				case VK_LEFT:
 					pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
-					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					m_pDlgTarget->Pinpoint(
+						pDoc->m_pGrid->patchlist.back().coords.x,
+						pDoc->m_pGrid->patchlist.back().coords.y);
 					break;
 				case VK_RIGHT:
 					pDoc->m_pGrid->patchlist.back().coords.x += .1f;
-					m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+					m_pDlgTarget->Pinpoint(
+						pDoc->m_pGrid->patchlist.back().coords.x,
+						pDoc->m_pGrid->patchlist.back().coords.y);
 					break;
 				case VK_SPACE:
 					pDoc->m_pGrid->patchlist.lockIn();
@@ -681,5 +694,16 @@ void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 {
 
 	CView::OnSize(nType, cx, cy);
+
+}
+
+
+void CIGUIDEView::OnFundusImport()
+{
+	// TODO: Add your command handler code here
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	pDoc->OnFundusImport();
+	ResetTransformationMatrices();
 
 }
