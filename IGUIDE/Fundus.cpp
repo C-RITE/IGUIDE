@@ -14,27 +14,36 @@ Fundus::~Fundus()
 {
 }
 
-void Fundus::Paint(CHwndRenderTarget* pRenderTarget, D2D1_MATRIX_3X2_F scaleView, D2D1_MATRIX_3X2_F translateView)
+void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 {
 	CIGUIDEView* view = CIGUIDEView::GetView();
-	//CD2DPointF center = (CANVAS / 2, CANVAS / 2);
+	CD2DPointF gridCenter{ CANVAS / 2 , CANVAS / 2 };
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
+		
 		double ppdimage = (pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor) / _DELTA_D;
-		float factor = (float)(PPD / ppdimage);
-		float sfactor = pDoc->m_pDlgCalibration->m_sFactor;
+		float scalingFactor = (float)(PPD / ppdimage);
 
 		CD2DPointF calibCenter (pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x, pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y);
-		CD2DSizeF size = picture->GetSize();
+		CD2DSizeF pictureSize = picture->GetSize();
 
-		D2D1_MATRIX_3X2_F scale = D2D1::Matrix3x2F::Scale(
-			D2D1::Size(factor, factor),
-			D2D1::Point2F(0, 0));
+		calibCenter.x = calibCenter.x * pDoc->m_pDlgCalibration->m_sFactor;
+		calibCenter.y = calibCenter.y * pDoc->m_pDlgCalibration->m_sFactor;
 
-		pRenderTarget->SetTransform(scale);
-		pRenderTarget->DrawBitmap(picture, CD2DRectF(0, 0, size.width, size.height));
+		CD2DSizeF scaledFundus{ scalingFactor * pictureSize.width, scalingFactor * pictureSize.height };
+		
+		float xPos, yPos;
+		xPos = gridCenter.x - (calibCenter.x * scalingFactor);
+		yPos = gridCenter.y - (calibCenter.y * scalingFactor);
+
+		pRenderTarget->DrawBitmap(
+			picture,
+			CD2DRectF(
+				xPos, yPos,
+				scaledFundus.width + xPos,
+				scaledFundus.height + yPos)	);
 
 	}
 

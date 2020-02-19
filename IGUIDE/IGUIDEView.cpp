@@ -74,7 +74,6 @@ CIGUIDEView* CIGUIDEView::GetView()
 	if (!pView)
 		return NULL;
 
-
 	// Fail if view is of wrong kind
 	// (this could occur with splitter windows, or additional
 	// views on a single document
@@ -370,8 +369,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 
 		// combine transforms
-		pDoc->m_pFundus->Paint(pRenderTarget, scale, translate);
 		pRenderTarget->SetTransform(translate * scale);
+		pDoc->m_pFundus->Paint(pRenderTarget);
 
 		if (pDoc->m_pGrid->m_pGridGeom) {
 
@@ -389,7 +388,6 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-
 
 		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
 

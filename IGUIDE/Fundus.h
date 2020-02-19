@@ -7,10 +7,7 @@ class Fundus
 public:
 	Fundus();
 	~Fundus();
-	void Paint(
-		CHwndRenderTarget* pRenderTarget,
-		D2D1_MATRIX_3X2_F scaleView,
-		D2D1_MATRIX_3X2_F translateView);
+	void Paint(CHwndRenderTarget* pRenderTarget);
 
 	CD2DBitmap*						picture;			// the fundus as bitmap
 	CStringW						filename;			// name of fundus file
