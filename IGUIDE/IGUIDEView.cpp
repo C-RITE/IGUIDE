@@ -640,9 +640,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		}
 
 
-		// move patch in any direction and lock with space key
+		// move patch in any direction and lock with space key except when patch is locked
 
-		if (pMsg->message == WM_KEYDOWN) {
+		if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
 			switch (pMsg->wParam) {
 
 				case VK_UP:

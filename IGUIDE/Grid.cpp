@@ -192,13 +192,13 @@ void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
 	// draw optic nerve as blue circle
 	if (overlay & OPTICDISC) {
 		a.x = CANVAS / 2 + _DELTA_D * PPD - _OPTIC_DISC / DPP;
-		a.y = CANVAS / 2 - _OPTIC_DISC / DPP - _DELTA_DY / DPP;
+		a.y = CANVAS / 2 - _DELTA_DY / DPP - _OPTIC_DISC / DPP;
 		b.x = CANVAS / 2 + _DELTA_D * PPD + _OPTIC_DISC / DPP;
-		b.y = CANVAS / 2 - _OPTIC_DISC / DPP - _DELTA_DY / DPP;
+		b.y = CANVAS / 2 - _DELTA_DY / DPP + _OPTIC_DISC / DPP;
 
 		r = { a.x, a.y, b.x, b.y };
 
-		pRenderTarget->DrawEllipse(r, m_pBlueBrush, .2f);
+		pRenderTarget->DrawEllipse(r, m_pBlueBrush, .3f);
 
 	}
 
@@ -382,6 +382,9 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 }
 
 void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
+	
+	if (!showCursor)
+		return;
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CString vidText;
