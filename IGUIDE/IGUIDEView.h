@@ -26,6 +26,10 @@ public:
 		return mousePos;
 	}
 
+	CPoint getGridCenter(){
+		return CPoint (mouseDist.x + CANVAS / 2, mouseDist.y + CANVAS / 2);
+	}
+
 	CPoint getMouseDist() {
 		return mouseDist;
 	}
@@ -50,18 +54,15 @@ public:
 // Attributes
 private:
 
-	CD2DBitmap*				m_pFixationTarget;
+	CD2DBitmap*				m_pFixationTarget;					// need 2 instances of these (in view and grid class)
 	D2D1_MATRIX_3X2_F		scale;
 	D2D1_MATRIX_3X2_F		translate;
 	CPoint					mousePos;							// current mouse location
 	CPoint					mouseStart;							// starting point
 	CPoint					mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
-	bool					LButtonIsDown;						// workaround for not accidently clicking 
 																// into operator view after openfiledialog
-
-	void CIGUIDEView::SetFixationTarget();
-
+	bool					m_bMouseTracking;					// track mouse movements outside operator view
 
 // Generated message map functions
 
@@ -69,8 +70,12 @@ private:
 	
 public:
 
+	bool					m_lButtonIsDown;					// workaround for not accidently clicking 
 	void ResetTransformationMatrices();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+
+private:
+	void CIGUIDEView::SetFixationTarget();
 
 protected:
 	
@@ -90,4 +95,5 @@ protected:
 
 public:
 	afx_msg void OnFundusImport();
+	afx_msg void OnMouseLeave();
 };

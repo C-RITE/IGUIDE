@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEView::OnFundusImport)
+	ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -50,6 +51,8 @@ CIGUIDEView::CIGUIDEView()
 	m_pDlgTarget = NULL;
 	m_pFixationTarget = NULL;
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
+	m_bMouseTracking = false;
+	m_lButtonIsDown = false;
 
 }
 
@@ -109,7 +112,14 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 		mouseStart = point;
+
+		if (nFlags & MK_CONTROL) {
+			::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+			pDoc->m_pGrid->showCoords = false;
+			pDoc->m_pGrid->showCursor = false;
+		}
 
 }
 
@@ -118,8 +128,9 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	
-	if (!LButtonIsDown && !m_pDlgTarget->calibrating){
-		LButtonIsDown = false;
+	if (m_lButtonIsDown)
+	{
+		m_lButtonIsDown = false;
 		return;
 	}
 
@@ -127,8 +138,12 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	
 	// calculate mouse travel distance
 	
-	if (nFlags & MK_CONTROL) {
+	if (nFlags & MK_CONTROL) 
+	{
 		mouseDist += mousePos - mouseStart;
+		pDoc->m_pGrid->showCoords = true;
+		pDoc->m_pGrid->showCursor = true;
+		Invalidate();
 		return;
 	}
 
@@ -149,19 +164,37 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-	SetFocus();
-
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	SetFocus();
+	
+	if (!m_bMouseTracking) {
+
+		TRACKMOUSEEVENT tme;
+		tme.cbSize = sizeof(tme);
+		tme.hwndTrack = this->m_hWnd;
+		tme.dwFlags = TME_HOVER | TME_LEAVE;
+		tme.dwHoverTime = HOVER_DEFAULT;
+		TrackMouseEvent(&tme);
+		m_bMouseTracking = true;
+
+	}
+
+	if (!m_pDlgTarget->calibrating)
+		pDoc->m_pGrid->showCursor = true;
 
 	mousePos = point;
 
 	// pan if control key and left mouse button are pressed simultaneously
 	if (nFlags & MK_CONTROL && nFlags & MK_LBUTTON) {
-		
+
 		CD2DSizeF offset(mousePos - mouseStart + mouseDist);
 		offset.width *= (1 / zoom);
 		offset.height *= (1 / zoom);
 		translate = D2D1::Matrix3x2F::Translation(offset);
+
+		::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+		pDoc->m_pGrid->showCoords = false;
+		pDoc->m_pGrid->showCursor = false;
 		
 	}
 
@@ -205,6 +238,9 @@ void CIGUIDEView::OnInitialUpdate()
 	
 	ResetTransformationMatrices();
 
+	SetFixationTarget();
+
+
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
 
@@ -242,6 +278,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 		NULL);
 
 	m_pDlgTarget->ShowWindow(SW_SHOW);
+	m_pDlgTarget->SetFixationTarget();
 
 	return 0;
 
@@ -310,8 +347,16 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
+	//pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;
+	//pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
+
 	SetFixationTarget();
+
+	m_pDlgTarget->SetFixationTarget();
+	m_pDlgTarget->Invalidate();
+
 	SetFocus();
+
 	Invalidate();
 
 	delete FOV;
@@ -370,25 +415,34 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		// combine transforms
 		pRenderTarget->SetTransform(translate * scale);
+
+		// draw fundus
 		pDoc->m_pFundus->Paint(pRenderTarget);
 
-		if (pDoc->m_pGrid->m_pGridGeom) {
+		if (pDoc->m_pGrid->overlay & GRID) {
+			if (pDoc->m_pGrid->m_pGridGeom) {
 
-			pRenderTarget->DrawGeometry(
-				pDoc->m_pGrid->m_pGridGeom,
-				m_pWhiteBrush,
-				.1f
-			);
+				pRenderTarget->DrawGeometry(
+					pDoc->m_pGrid->m_pGridGeom,
+					m_pWhiteBrush,
+					.1f
+				);
 
+			}
+
+			pDoc->m_pGrid->DrawCircles(pRenderTarget);
 		}
-		
-		pDoc->m_pGrid->DrawCircles(pRenderTarget);
+
+		// draw accesoires (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
+
+		// draw patches
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
 
 		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
+		// draw cursor around mousepointer
 		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -400,6 +454,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			_T("Consolas"),									// font family name
 			sizeDpi.height / 4);
 
+
+		// for debug purposes only
 		if (pDoc->m_pGrid->overlay & TRACEINFO) {
 
 			CString traceText = pDoc->getTraceInfo();
@@ -419,6 +475,7 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		}
 
+		// draw defocus value from AOSACA
 		if (pDoc->m_pGrid->overlay & DEFOCUS) {
 
 			CString defocus = L"DEFOCUS: ";
@@ -438,6 +495,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 		}
 
+
+		// draw quickhelp
 		if (pDoc->m_pGrid->overlay & QUICKHELP) {
 
 			vector<CString> help = pDoc->getQuickHelp();
@@ -552,11 +611,37 @@ void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	// keyboard controls depending on drawn patches
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
 	if (pDoc->m_pGrid->patchlist.size() > 0) {
 		
+		// delete last patch with right mouse button
+
+		if (pMsg->wParam == VK_RBUTTON) {
+
+			if (pMsg->message == WM_MOUSEMOVE)
+				return false;
+			
+			if (pDoc->m_pGrid->patchlist.back().locked == false) {
+				pDoc->m_pGrid->DelPatch();
+				pDoc->m_pGrid->patchlist.SaveToFile();
+			}
+
+			if (pDoc->m_pGrid->patchlist.size() > 0)
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+			else
+				m_pDlgTarget->m_POI = NULL;
+
+			m_pDlgTarget->Invalidate();
+			this->Invalidate();
+
+		}
+
+
+		// move patch in any direction and lock with space key
+
 		if (pMsg->message == WM_KEYDOWN) {
 			switch (pMsg->wParam) {
 
@@ -589,30 +674,13 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 					break;
 
 			}
-
-			if (pDoc->m_pGrid->patchlist.size() > 0)
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
-			else
-				m_pDlgTarget->m_POI = NULL;
-
+			
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 			m_pDlgTarget->Invalidate();
-
 			this->Invalidate();
 
 		}
 
-		// delete last patch with right mouse button
-
-		if (pMsg->wParam == VK_RBUTTON) {
-			if (pMsg->message == WM_MOUSEMOVE)
-				return false;
-			if (pDoc->m_pGrid->patchlist.back().locked == false) {
-				pDoc->m_pGrid->DelPatch();
-				pDoc->m_pGrid->patchlist.SaveToFile();
-			}
-
-			this->Invalidate();
-		}
 
 	}
 
@@ -623,21 +691,27 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F1:
 			pDoc->OnOverlayQuickhelp();
+			Invalidate();
 			break;
 
 		case VK_F2:
 			pDoc->ToggleOverlay();
+			Invalidate();
 			break;
 
 		case VK_F3:
 			ToggleFixationTarget();
+			Invalidate();
 			break;
 
-		case VK_F4:
+		case VK_F12:
 			if (m_pDlgTarget->calibrating == false) {
+				pDoc->m_pGrid->showCursor = false;
+				Invalidate();
 				m_pDlgTarget->restartCalibration();
 			}
 			break;
+
 		}
 
 	}
@@ -703,5 +777,19 @@ void CIGUIDEView::OnFundusImport()
 
 	pDoc->OnFundusImport();
 	ResetTransformationMatrices();
+
+}
+
+
+void CIGUIDEView::OnMouseLeave()
+{
+	// TODO: Add your message handler code here and/or call default
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	
+	pDoc->m_pGrid->showCursor = false;
+	m_bMouseTracking = false;
+	Invalidate();
+
+	CView::OnMouseLeave();
 
 }

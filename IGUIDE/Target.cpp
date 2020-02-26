@@ -106,11 +106,11 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	Edge k;
 
 	if (pDoc->m_FlipHorizontal == L"True") {
-		k.q.x = - centerOffset_x;
+		k.q.x = centerOffset_x;
 	}
 	
 	else
-		k.q.x = centerOffset_x;
+		k.q.x = - centerOffset_x;
 
 	if (pDoc->m_FlipVertical == L"True") {
 		k.q.y = - centerOffset_y;
@@ -169,7 +169,8 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			scalingFactor = (float)pDoc->m_FixationTargetSize / 100;
 
 		// custom fixation target
-		if (m_POI && m_pFixationTarget) {
+		if (m_POI && m_pFixationTarget->IsValid()) {
+
 			CD2DSizeF size = m_pFixationTarget->GetSize();
 			CD2DPointF center{
 				(m_POI->left + m_POI->right) / 2,
@@ -184,10 +185,12 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 				1.0f,
 				D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
 			);
+
 		}
 
 		// default fixation target
 		else if (m_POI) {
+
 			pRenderTarget->DrawEllipse(*m_POI, m_pBrushWhite, 1, NULL);
 			pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->top - 4),
 				CD2DPointF(m_POI->right + 4, m_POI->bottom + 4),
@@ -195,6 +198,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 			pRenderTarget->DrawLine(CD2DPointF(m_POI->left - 4, m_POI->bottom + 4),
 				CD2DPointF(m_POI->right + 4, m_POI->top - 4),
 				m_pBrushWhite);
+
 		}
 
 		else if (pDoc) {
@@ -269,36 +273,37 @@ void Target::restartCalibration() {
 
 	locked = false;
 	calibrating = true;
+	show_cross = false;
 
 	if (pDoc->m_InputController == L"Gamepad") {
 		pDoc->m_Controller.reset();
 		setCross();
 	}
 
+	Invalidate();
+
 }
 
 void Target::finishCalibration() {
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-
-	show_cross = false;
-	CRect mainWnd;
-	CPoint center;
 	CIGUIDEView* pView = CIGUIDEView::GetView();
-	AfxGetMainWnd()->GetClientRect(mainWnd);
-	center = mainWnd.CenterPoint();
+	
+	CPoint center = pView->getGridCenter();
+	
 	pView->OnLButtonUp(0, center);
 	pView->SetFocus();
 
 	const DWORD dataSize = static_cast<DWORD>(pDoc->m_raster.corner.size() * sizeof(CD2DPointF));
+
 	if (pDoc->m_raster.corner.size() == 4)
 		AfxGetApp()->WriteProfileBinary(L"Settings", L"Calibration", (LPBYTE)&pDoc->m_raster.corner[0].x, dataSize);
 
 	if (pDoc->m_Controller.m_bActive)
-		//pDoc->m_Controller.m_pThread->SuspendThread();
 		pDoc->m_Controller.shutdown();
 
 	calibrating = false;
+	show_cross = false;
 	locked = true;
 	
 }

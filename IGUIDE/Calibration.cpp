@@ -133,7 +133,6 @@ BOOL D2DStatic::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 }
 
 
-
 // Calibration dialog
 
 IMPLEMENT_DYNAMIC(Calibration, CDialog)

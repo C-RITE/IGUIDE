@@ -86,10 +86,10 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pDlgCalibration;
 
 }
-// Get Doc, made for other classes that need access to attributes
 
 CIGUIDEDoc* CIGUIDEDoc::GetDoc()
 {
+	// Get Doc, made for other classes that need access to attributes
 	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
 
 	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
@@ -333,7 +333,7 @@ bool CIGUIDEDoc::CheckFOV()
 		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
 
 		if (answer == IDYES)
-			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F4, 1);
+			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F12, 1);
 
 		ShowCursor(TRUE);
 		return FALSE;
@@ -402,7 +402,7 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F4>\t(Re-)Calibrate Subject");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F12>\t(Re-)Calibrate Subject");
 	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
@@ -718,8 +718,7 @@ void CIGUIDEDoc::OnOverlayQuickhelp()
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
 		overlaySettings = overlaySettings | QUICKHELP;
 	}
-	UpdateAllViews(NULL);
-
+	
 }
 
 
@@ -749,14 +748,14 @@ void CIGUIDEDoc::ToggleOverlay()
 			overlaySettings = m_pGrid->overlay;
 			m_pGrid->overlay = 0;
 		}
-		UpdateAllViews(NULL);
+		//UpdateAllViews(NULL);
 		overlayVisible = false;
 		return;
 	}
 
 	else {
 		m_pGrid->overlay = overlaySettings;
-		UpdateAllViews(NULL);
+		//UpdateAllViews(NULL);
 		overlayVisible = true;
 	}
 

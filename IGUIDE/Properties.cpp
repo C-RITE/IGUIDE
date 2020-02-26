@@ -81,7 +81,6 @@ void Properties::AdjustLayout()
 
 }
 
-
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
@@ -190,7 +189,7 @@ void Properties::InitPropList()
 	m_wndPropList.MarkModifiedProperties();
 
 	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"", NULL, _T("Choose output directory of captured video files"));
-	FixationFile = new CMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
+	FixationFile = new MyCMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
 	Patch = new CMFCPropertyGridProperty(L"Patch");
 	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
@@ -203,7 +202,7 @@ void Properties::InitPropList()
 	FixationTargetSize = new CMFCPropertyGridProperty(L"Scale", FixationTargetValue, _T("Scale the size of the custom fixation target in percent (%)"), NULL, NULL, NULL);
 	SubjectCalibration = new CMFCPropertyGridProperty(L"Subject Calibration");
 	RemoteControl = new CMFCPropertyGridProperty(L"Remote Control");
-	RemoteCapability = new CMFCPropertyGridProperty(L"Capability", RemoteValue, _T("Enable or Disable Remote Control Function"), NULL, NULL, NULL);
+	RemoteCapability = new CMFCPropertyGridProperty(L"Capability", RemoteValue, _T("Change Remote Control Function"), NULL, NULL, NULL);
 	AOSACA_IP = new CMFCPropertyGridProperty(L"AOSACA IP", AOSACA_IPValue, _T("IP Address of computer running AOSACA, port 1500"), NULL, NULL, NULL);
 	ICANDI_IP = new CMFCPropertyGridProperty(L"ICANDI IP", ICANDI_IPValue, _T("IP Address of computer running ICANDI, port 1400"), NULL, NULL, NULL);
 	FlipVertical = new CMFCPropertyGridProperty(L"Flip Vertical", FlipVerticalValue, _T("Flips vertical orientation of Target Screen"), NULL, NULL, NULL);
@@ -302,7 +301,7 @@ void Properties::fillProperties() {
 	}
 	
 	RemoteCapability->RemoveAllOptions();	// need for removal if fillProperties() is called more than once
-	CString capability[4]{ L"NONE", L"AOSACA", L"ICANDI", L"FULL"};
+	CString capability[4]{ L"NONE", L"AOSACA", L"ICANDI", L"BOTH"};
 	for (int i = 0; i < 4; i++)
 		RemoteCapability->AddOption(capability[i]);
 

@@ -17,6 +17,7 @@ Controller::Controller()
 
 Controller::~Controller()
 {
+	shutdown();
 }
 
 void Controller::reset(){

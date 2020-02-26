@@ -24,6 +24,9 @@ Grid::Grid()
 	m_pLayer1 = new CD2DLayer(NULL);	// opacity layer parameters
 	m_pGridGeom = NULL;
 
+	showCoords = true;
+	showCursor = true;
+
 	// layer for high opacity
 	lpHi = {
 		D2D1::InfiniteRect(),
@@ -237,7 +240,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 	CD2DRectF lastPatch;
 	CRect intersect;
 
-
 	float rsdeg; // raster size in degree visual angle
 
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
@@ -287,43 +289,64 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .1f);
 		pRenderTarget->PopLayer();
 				
-		int number = 1;
-
-		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
-			
-			rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
-
-			if (it._Ptr->_Myval.locked == true) {
-				ShowVidNumber(pRenderTarget, it._Ptr->_Myval.coords.x, it._Ptr->_Myval.coords.y, rsdeg, number);
-				number++;
-			}
-
-		}
-
-		pRenderTarget->PushLayer(lpLo, *m_pLayer1);
+		// calculate position of text in real pixelspace
+		
+		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 		
 		float zoom = 1 / pView->getZoomFactor();
 		CD2DSizeF mouseDist = pView->getMouseDist();
 		mouseDist.width *= 1 / zoom;
 		mouseDist.height *= 1 / zoom;
+
+		// show coords in real pixelspace
+
+		if (showCoords) {
+
+			pRenderTarget->PushLayer(lpLo, *m_pLayer1);
+
+			lastPatch = {
+
+				(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2)
+
+			};
+
+			if (patchlist.back().locked == false)
+				DrawCoordinates(
+					pRenderTarget,
+					patchlist.back().coords,
+					lastPatch);
+
+			pRenderTarget->PopLayer();
+
+		}
 		
-		lastPatch = {
+		// show vid number in real pixelspace
 
-			(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
-			(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
-			(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2),
-			(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2)
+		int number = 1;
 
-		};
+		CD2DPointF pos;
 
-		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
+
+			rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
 			
-		DrawCoordinates(
-				pRenderTarget,
-				patchlist.back().coords,
-				lastPatch);
+			if (it._Ptr->_Myval.locked == true) {
 
-		pRenderTarget->PopLayer();
+				pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
+				pos.y =	(float)(zoom * (mouseDist.height + it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
+
+				DrawVidNumber(pRenderTarget,
+					pos,
+					number);
+
+				number++;
+
+			}
+
+		}
 
 	}
 
@@ -332,6 +355,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 	// show cursor around the mouse pointer
+	if (!showCursor)
+		return;
 
 	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -353,6 +378,31 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
+
+}
+
+void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
+
+	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CString vidText;
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
+
+	vidText.Format(L"%d", number);
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		vidText,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		pos,
+		&textLayout,
+		m_pWhiteBrush);
 
 }
 
@@ -525,31 +575,5 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 				D2D1::ColorF(YELLOW)));
 
 	}
-
-}
-
-
-void Grid::ShowVidNumber(CHwndRenderTarget* pRenderTarget, float xPos, float yPos, float rastersize, int number) {
-	
-
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CString vidText;
-
-	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-		_T("Consolas"),								// font family name
-		sizeDpi.height / 9);						// font size
-
-	vidText.Format(L"%d", number);
-	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-		vidText,									// text to be drawn
-		textFormat,									// text format
-		sizeTarget);								// size of the layout box
-
-	pRenderTarget->DrawTextLayout(
-		CD2DPointF((xPos * 1 / (float)DPP + CANVAS / 2) - (rastersize / 2 * 1 / (float)DPP), (yPos * -1 / (float)DPP + CANVAS / 2) - (rastersize / 2 * 1 / (float)DPP)),
-		&textLayout,
-		m_pWhiteBrush);
 
 }

@@ -1,8 +1,22 @@
 #pragma once
+#include "IGUIDEView.h"
 
 class Properties : public CDockablePane
 {
 	// Override PropertyGrid base class for some customization
+
+	class MyCMFCPropertyGridFileProperty : public CMFCPropertyGridFileProperty {
+		using CMFCPropertyGridFileProperty::CMFCPropertyGridFileProperty;
+
+		virtual void OnClickButton(CPoint p) {
+			CIGUIDEView* pView = CIGUIDEView::GetView();
+			pView->m_lButtonIsDown = true;
+
+			// call base class
+			CMFCPropertyGridFileProperty::OnClickButton(p);
+		}
+
+	};
 
 	class MyCMFCPropertyGridCtrl : public CMFCPropertyGridCtrl {
 	public:
@@ -12,6 +26,7 @@ class Properties : public CDockablePane
 		virtual void AdjustLayout()
 		{
 			m_nLeftColumnWidth = 100;
+			m_nDescrHeight = 100;
 			CMFCPropertyGridCtrl::AdjustLayout();
 
 		}
@@ -48,6 +63,7 @@ class Properties : public CDockablePane
 	
 	};
 
+
 public:
 
 	Properties();   // standard constructor
@@ -66,7 +82,7 @@ public:
 	CMFCPropertyGridProperty*		ICANDI;
 	CMFCPropertyGridProperty*		TargetView;
 	CMFCPropertyGridFileProperty*	VideoFolder;
-	CMFCPropertyGridFileProperty*	FixationFile;
+	MyCMFCPropertyGridFileProperty*	FixationFile;
 	CMFCPropertyGridProperty*		SubjectCalibration;
 	CMFCPropertyGridProperty*		InputController;
 	CMFCPropertyGridProperty*		RemoteControl;
