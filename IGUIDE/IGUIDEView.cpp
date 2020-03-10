@@ -419,19 +419,8 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw fundus
 		pDoc->m_pFundus->Paint(pRenderTarget);
 
-		if (pDoc->m_pGrid->overlay & GRID) {
-			if (pDoc->m_pGrid->m_pGridGeom) {
-
-				pRenderTarget->DrawGeometry(
-					pDoc->m_pGrid->m_pGridGeom,
-					m_pWhiteBrush,
-					.1f
-				);
-
-			}
-
-			pDoc->m_pGrid->DrawCircles(pRenderTarget);
-		}
+		// draw Grid
+		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 
 		// draw accesoires (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
@@ -445,155 +434,20 @@ afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw cursor around mousepointer
 		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
 
-		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
-			_T("Consolas"),									// font family name
-			sizeDpi.height / 8);							// font size
-		CD2DTextFormat textFormat2(pRenderTarget,			// pointer to the render target
-			_T("Consolas"),									// font family name
-			sizeDpi.height / 4);
-
-
-		// for debug purposes only
-		if (pDoc->m_pGrid->overlay & TRACEINFO) {
-
-			CString traceText = pDoc->getTraceInfo();
-
-			// construct a CD2DTextLayout object which represents a block of formatted text 
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				traceText,									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(
-				CD2DPointF(sizeTarget.width - 210, 5),		// place on top-right corner
-				&textLayout,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::LightGreen)));
-
-		}
+		// draw debug info
+		pDoc->m_pGrid->DrawDebug(pRenderTarget);
 
 		// draw defocus value from AOSACA
-		if (pDoc->m_pGrid->overlay & DEFOCUS) {
-
-			CString defocus = L"DEFOCUS: ";
-			defocus.Append(pDoc->getCurrentDefocus());
-
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				defocus,									// text to be drawn
-				textFormat2,									// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(CD2DPointF(5),
-				// place on top-right corner
-				&textLayout,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::White)));
-
-		}
-
+		pDoc->m_pGrid->DrawDefocus(pRenderTarget);
 
 		// draw quickhelp
-		if (pDoc->m_pGrid->overlay & QUICKHELP) {
-
-			vector<CString> help = pDoc->getQuickHelp();
-
-			CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
-			CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
-			CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
-
-			CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
-			CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };
-
-			CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120};
-			pRenderTarget->FillRectangle(black_box, &BlackBrush);
-			pRenderTarget->DrawRectangle(black_box, &YellowGreenBrush);
-
-			CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
-				help[0],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
-				help[1],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
-				help[2],									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
-
-			pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
-				&AOSACA_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-			pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
-				&IGUIDE_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-			pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
-				&ICANDI_help,								// text layout object
-				&CD2DSolidColorBrush						// brush used for text
-				(pRenderTarget,
-					D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
-		}
-
-		// is (custom) fixation target on or off?
-		if (m_pDlgTarget->m_bVisible) {
-
-			CD2DBrushProperties prop{ .5f };
-			CD2DSolidColorBrush brush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Beige), &prop };
-			CD2DRectF upperRight{sizeTarget.width - 100,
-								50, sizeTarget.width - 50,
-								100 };
-			pRenderTarget->DrawRectangle(CD2DRectF(
-				upperRight.left-1,
-				upperRight.top-1,
-				upperRight.right+1,
-				upperRight.bottom+1),
-				&brush);
-
-			if (m_pFixationTarget && m_pFixationTarget->IsValid()) {
-				CD2DSizeF size = m_pFixationTarget->GetSize();
-				pRenderTarget->DrawBitmap(
-					m_pFixationTarget,
-					upperRight,
-					0.25f,
-					D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
-			}
+		pDoc->m_pGrid->DrawQuickHelp(pRenderTarget);
 		
-			else {
-			// use default fixation target
-
-				CD2DRectF frame(upperRight);
-				frame.left += 15;
-				frame.right -= 15;
-				frame.top += 15;
-				frame.bottom -= 15;
-				pRenderTarget->DrawEllipse(frame, &brush);
-				pRenderTarget->DrawLine(
-					CD2DPointF(frame.left, frame.top), 
-					CD2DPointF(frame.right, frame.bottom),
-					&brush);
-				pRenderTarget->DrawLine(
-					CD2DPointF(frame.right, frame.top),
-					CD2DPointF(frame.left, frame.bottom),
-					&brush);
-
-			}
+		// is (custom) fixation target on or off?
+		if (m_pDlgTarget->m_bVisible)
+			pDoc->m_pGrid->DrawTarget(pRenderTarget, m_pFixationTarget);
 
 		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
-
-		}
 
 	}
 

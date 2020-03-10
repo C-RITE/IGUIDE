@@ -54,11 +54,16 @@ public:
 	void StorePatch(CPoint point);											// store patch upon click of mouse button
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);						// draw information overlay
-	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
+	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center
+	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
+	void DrawDebug(CHwndRenderTarget* pRenderTarget);						// draw debug info
+	void DrawDefocus(CHwndRenderTarget* pRenderTarget);						// draw defocus
+	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);					// draw quick help
+	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);	// draw target
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse pointer
+	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);					// draw text
 	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates of cursor and last patch
 	void DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
-	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);					// draw text
 
 };

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define ASSERT_VALID_D2D_OBJECT(pObj) ASSERT_VALID(pObj); if ((NULL == pObj) || !pObj->IsValid()) return;
+
 #define DOC_IS_READY (WM_USER + 100)
 #define SCREEN_SELECTED (WM_USER + 101)
 #define NETCOM_ERROR (WM_USER + 102)
@@ -81,4 +83,3 @@ void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
 #define YELLOW	D2D1::ColorF::PaleGoldenrod
 #define BLACK	D2D1::ColorF::Black
 #define RED		D2D1::ColorF::Red
-

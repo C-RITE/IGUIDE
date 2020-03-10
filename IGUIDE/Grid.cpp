@@ -124,7 +124,7 @@ void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 
 	// grid geometry creation
 
-	m_pGridGeom = new CD2DPathGeometry(pRenderTarget, 1);
+	m_pGridGeom = new CD2DPathGeometry(pRenderTarget);
 	m_pGridGeom->Create(pRenderTarget);
 
 	CD2DGeometrySink GridGeomSink(*m_pGridGeom);
@@ -157,6 +157,22 @@ void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
+}
+
+void Grid::DrawGrid(CHwndRenderTarget* pRenderTarget) {
+
+	ASSERT_VALID_D2D_OBJECT(m_pGridGeom);
+
+	if (overlay & GRID) {
+		pRenderTarget->DrawGeometry(
+			m_pGridGeom,
+			m_pWhiteBrush,
+			.1f);
+
+		DrawCircles(pRenderTarget);
+
+	}
+	
 }
 
 void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
@@ -408,6 +424,186 @@ void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int n
 		m_pWhiteBrush);
 
 }
+
+void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
+
+	// for debug purposes only
+	if (TRACEINFO) {
+
+		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+		
+		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
+			_T("Consolas"),									// font family name
+			sizeDpi.height / 8);							// font size
+
+		CString traceText = pDoc->getTraceInfo();
+
+		// construct a CD2DTextLayout object which represents a block of formatted text 
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			traceText,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(sizeTarget.width - 210, 5),		// place on top-right corner
+			&textLayout,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(D2D1::ColorF::LightGreen)));
+
+	}
+
+}
+
+void Grid::DrawDefocus(CHwndRenderTarget* pRenderTarget) {
+
+	if (DEFOCUS) {
+		
+		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+		
+		CD2DTextFormat textFormat2(pRenderTarget,			// pointer to the render target
+			_T("Consolas"),									// font family name
+			sizeDpi.height / 4);
+
+
+		CString defocus = L"DEFOCUS: ";
+		defocus.Append(pDoc->getCurrentDefocus());
+
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			defocus,									// text to be drawn
+			textFormat2,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(CD2DPointF(5),
+			// place on top-right corner
+			&textLayout,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(D2D1::ColorF::White)));
+
+	}
+
+
+}
+
+void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
+
+	if (QUICKHELP) {
+
+		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+
+		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+		vector<CString> help = pDoc->getQuickHelp();
+
+		CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
+		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
+		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
+
+		CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
+		CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };
+
+		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
+			_T("Consolas"),									// font family name
+			sizeDpi.height / 8);							// font size
+
+		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120 };
+		pRenderTarget->FillRectangle(black_box, &BlackBrush);
+		pRenderTarget->DrawRectangle(black_box, &YellowGreenBrush);
+
+		CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
+			help[0],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
+			help[1],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
+			help[2],									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
+			&AOSACA_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+		pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
+			&IGUIDE_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+		pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
+			&ICANDI_help,								// text layout object
+			&CD2DSolidColorBrush						// brush used for text
+			(pRenderTarget,
+				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+
+	}
+
+
+}
+
+void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTarget) {
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DBrushProperties prop{ .5f };
+	CD2DSolidColorBrush brush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Beige), &prop };
+	CD2DRectF upperRight{ sizeTarget.width - 100,
+						50, sizeTarget.width - 50,
+						100 };
+	pRenderTarget->DrawRectangle(CD2DRectF(
+		upperRight.left - 1,
+		upperRight.top - 1,
+		upperRight.right + 1,
+		upperRight.bottom + 1),
+		&brush);
+
+	if (pFixationTarget && pFixationTarget->IsValid()) {
+		CD2DSizeF size = pFixationTarget->GetSize();
+		pRenderTarget->DrawBitmap(
+			pFixationTarget,
+			upperRight,
+			0.25f,
+			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+	}
+
+	else {
+		// use default fixation target
+
+		CD2DRectF frame(upperRight);
+		frame.left += 15;
+		frame.right -= 15;
+		frame.top += 15;
+		frame.bottom -= 15;
+		pRenderTarget->DrawEllipse(frame, &brush);
+		pRenderTarget->DrawLine(
+			CD2DPointF(frame.left, frame.top),
+			CD2DPointF(frame.right, frame.bottom),
+			&brush);
+		pRenderTarget->DrawLine(
+			CD2DPointF(frame.right, frame.top),
+			CD2DPointF(frame.left, frame.bottom),
+			&brush);
+
+	}
+
+}
+
 
 void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
 
