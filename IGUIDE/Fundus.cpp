@@ -19,7 +19,7 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 	CIGUIDEView* view = CIGUIDEView::GetView();
 	CD2DPointF gridCenter{ CANVAS / 2 , CANVAS / 2 };
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
 		

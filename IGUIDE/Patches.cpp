@@ -62,7 +62,7 @@ bool Patches::SaveToFile() {
 
 	wstringstream sstream;
 	int number = 1;
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString path = pDoc->m_OutputDir;
 	filepath.Format(_T("%s"), path);
 	CString strNumber, strDegX, strDegY, strDefocus;

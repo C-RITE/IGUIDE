@@ -24,6 +24,9 @@ public:
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+	virtual BOOL StoreWindowPlacement(const CRect& rectNormalPosition,
+		int nFlags,
+		int nShowCmd);
 
 // Implementation
 	afx_msg void OnAppAbout();

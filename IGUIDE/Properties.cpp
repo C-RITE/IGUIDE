@@ -7,6 +7,7 @@
 #include "IGUIDEDoc.h"
 #include "IGUIDEView.h"
 #include "afxdialogex.h"
+#include "MainFrm.h"
 #include <Shlobj.h>
 
 Properties::Properties()
@@ -83,7 +84,7 @@ void Properties::AdjustLayout()
 
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
@@ -235,7 +236,7 @@ void Properties::InitPropList()
 
 void Properties::fillProperties() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	_variant_t rs(pDoc->m_raster.size);
 	_variant_t fts(pDoc->m_FixationTargetSize);

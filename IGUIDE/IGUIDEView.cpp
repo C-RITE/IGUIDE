@@ -135,6 +135,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	pDoc->m_pGrid->showCursor = false;
 	
 	// calculate mouse travel distance
 	
@@ -231,15 +233,9 @@ void CIGUIDEView::OnInitialUpdate()
 
 	ModifyStyleEx(WS_EX_CLIENTEDGE, NULL);
 	
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
-
-	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
-	
 	ResetTransformationMatrices();
 
 	SetFixationTarget();
-
 
 	// TODO: Add your specialized code here and/or call the base class
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY);
@@ -365,7 +361,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 
 void CIGUIDEView::SetFixationTarget() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -385,19 +381,20 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Enable D2D support for this window:
 	EnableD2DSupport();
 
-	// TODO:  Add your specialized creation code here
-	//Invalidate();
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+	CHwndRenderTarget* pRenderTarget = GetRenderTarget();
 
+	pDoc->m_pGrid->CreateD2DResources(pRenderTarget);
+	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
+   
 	return 0;
 
 }
 
 // CIGUIDEView drawing
 
-afx_msg LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
+LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	if (!GetView())
-		return 1;
 
 	CHwndRenderTarget* pRenderTarget = (CHwndRenderTarget*)lParam;
 	ASSERT_VALID(pRenderTarget);	
@@ -534,7 +531,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			this->Invalidate();
 
 		}
-
 
 	}
 

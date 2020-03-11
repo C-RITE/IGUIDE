@@ -4,6 +4,7 @@
 #include "IGUIDEDoc.h"
 #include "IGUIDE.h"
 #include "GamePad.h"
+#include "MainFrm.h"
 
 Controller::Controller()
 {
@@ -22,7 +23,7 @@ Controller::~Controller()
 
 void Controller::reset(){
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	setFlip();
 	
@@ -39,7 +40,7 @@ void Controller::reset(){
 
 void Controller::setFlip() {
 	
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	if (pDoc->m_FlipVertical == L"True")
 		flipSign.y = -1;

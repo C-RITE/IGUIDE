@@ -52,7 +52,10 @@ public:
 	void DelPatch();
 	void ClearPatchlist();
 	void StorePatch(CPoint point);											// store patch upon click of mouse button
+
+	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
+
 	void DrawOverlay(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center

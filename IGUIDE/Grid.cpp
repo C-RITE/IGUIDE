@@ -9,19 +9,78 @@
 
 using namespace D2D1;
 
-Grid::Grid()
-{
-	// create own pallette
-	m_pPatchBrush = new CD2DSolidColorBrush(NULL, NULL);
-	m_pDarkRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkRed));
-	m_pRedBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Red));
-	m_pBlueBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::RoyalBlue));
-	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
-	m_pGrayBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGray));
-	m_pDarkGreenBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::DarkGreen));
-	m_pMagentaBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::Magenta));
+Grid::Grid(){
+}
 
-	m_pLayer1 = new CD2DLayer(NULL);	// opacity layer parameters
+Grid::~Grid() {
+}
+
+void Grid::DelPatch() {
+
+	if (patchlist.size() > 0)
+		patchlist.pop_back();
+
+}
+
+void Grid::ClearPatchlist() {
+
+	patchlist.clear();
+
+}
+
+CD2DPointF Grid::PixelToDegree(CPoint point) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	float zoom = pView->getZoomFactor();
+	CD2DPointF mouseDist = pView->getMouseDist();
+	CD2DPointF transLoc;
+
+	transLoc.x = ((point.x - mouseDist.x) - CANVAS / 2) * DPP;
+	transLoc.y = ((point.y - mouseDist.y) - CANVAS / 2) * DPP;
+
+	transLoc.x *= zoom;
+	transLoc.y *= zoom;
+
+	return transLoc;
+
+}
+
+void Grid::StorePatch(CPoint loc) {
+
+	// store patches as degrees from fovea
+	// along with color, rastersize and defocus
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
+	CD2DPointF transLoc = PixelToDegree(loc);
+	
+	Patch patch;
+
+	patch.coords.x = transLoc.x;
+	patch.coords.y = transLoc.y;
+	patch.color = pDoc->m_raster.color;
+	patch.rastersize = pDoc->m_raster.size;
+	patch.locked = false;
+	patch.defocus = pDoc->getCurrentDefocus();
+	patchlist.push_back(patch);
+
+}
+
+void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
+
+	// create own pallette
+	m_pPatchBrush = new CD2DSolidColorBrush(pRenderTarget, NULL);
+	m_pDarkRedBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkRed));
+	m_pRedBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Red));
+	m_pBlueBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::RoyalBlue));
+	m_pWhiteBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::LightGray));
+	m_pGrayBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGray));
+	m_pDarkGreenBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGreen));
+	m_pMagentaBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Magenta));
+
+	m_pLayer1 = new CD2DLayer(pRenderTarget);	// opacity layer parameters
 	m_pGridGeom = NULL;
 
 	showCoords = true;
@@ -50,75 +109,8 @@ Grid::Grid()
 		D2D1_LAYER_OPTIONS_NONE
 
 	};
-
 }
 
-Grid::~Grid() {
-
-	delete m_pDarkRedBrush;
-	delete m_pRedBrush;
-	delete m_pWhiteBrush;
-	delete m_pBlueBrush;
-	delete m_pDarkGreenBrush;
-	delete m_pMagentaBrush;;
-	delete m_pPatchBrush;
-	delete m_pGrayBrush;
-	delete m_pLayer1;
-
-}
-
-void Grid::DelPatch() {
-
-	if (patchlist.size() > 0)
-		patchlist.pop_back();
-
-}
-
-void Grid::ClearPatchlist() {
-
-	patchlist.clear();
-
-}
-
-CD2DPointF Grid::PixelToDegree(CPoint point) {
-
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
-
-	float zoom = pView->getZoomFactor();
-	CD2DPointF mouseDist = pView->getMouseDist();
-	CD2DPointF transLoc;
-
-	transLoc.x = ((point.x - mouseDist.x) - CANVAS / 2) * DPP;
-	transLoc.y = ((point.y - mouseDist.y) - CANVAS / 2) * DPP;
-
-	transLoc.x *= zoom;
-	transLoc.y *= zoom;
-
-	return transLoc;
-
-}
-
-void Grid::StorePatch(CPoint loc) {
-
-	// store patches as degrees from fovea
-	// along with color, rastersize and defocus
-
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
-
-	CD2DPointF transLoc = PixelToDegree(loc);
-	
-	Patch patch;
-
-	patch.coords.x = transLoc.x;
-	patch.coords.y = transLoc.y;
-	patch.color = pDoc->m_raster.color;
-	patch.rastersize = pDoc->m_raster.size;
-	patch.locked = false;
-	patch.defocus = pDoc->getCurrentDefocus();
-	patchlist.push_back(patch);
-
-}
 
 void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 
@@ -160,8 +152,6 @@ void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 }
 
 void Grid::DrawGrid(CHwndRenderTarget* pRenderTarget) {
-
-	ASSERT_VALID_D2D_OBJECT(m_pGridGeom);
 
 	if (overlay & GRID) {
 		pRenderTarget->DrawGeometry(
@@ -249,7 +239,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 	if (!(overlay & PATCHES))
 		return;
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CD2DRectF rect1;
@@ -374,7 +364,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 	if (!showCursor)
 		return;
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	if (pDoc->calibrationComplete) {
@@ -402,7 +392,7 @@ void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int n
 	if (!showCursor)
 		return;
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString vidText;
 
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -428,9 +418,9 @@ void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int n
 void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
 
 	// for debug purposes only
-	if (TRACEINFO) {
+	if (overlay & TRACEINFO) {
 
-		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
@@ -460,9 +450,9 @@ void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawDefocus(CHwndRenderTarget* pRenderTarget) {
 
-	if (DEFOCUS) {
+	if (overlay & DEFOCUS) {
 		
-		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
@@ -494,9 +484,9 @@ void Grid::DrawDefocus(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 
-	if (QUICKHELP) {
+	if (overlay & QUICKHELP) {
 
-		CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
@@ -607,7 +597,7 @@ void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTar
 
 void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CString xCoords, yCoords;
@@ -670,7 +660,7 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 
 void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -689,7 +679,7 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 4);
 
-	if (pDoc->m_pGrid->overlay & TRACEINFO) {
+	if (overlay & TRACEINFO) {
 
 		CString traceText = pDoc->getTraceInfo();
 
@@ -707,7 +697,7 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	if (pDoc->m_pGrid->overlay & DEFOCUS) {
+	if (overlay & DEFOCUS) {
 
 		CD2DRectF black_box{ upperLeft.x - 5, upperLeft.y - 5, upperLeft.x + 215, upperLeft.y + 120 };
 		CString defocus = L"DEFOCUS: ";
@@ -727,7 +717,7 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	if (pDoc->m_pGrid->overlay & QUICKHELP) {
+	if (overlay & QUICKHELP) {
 
 		vector<CString> help = pDoc->getQuickHelp();
 

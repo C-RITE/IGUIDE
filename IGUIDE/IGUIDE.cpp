@@ -112,6 +112,14 @@ int CIGUIDEApp::ExitInstance()
 	return CWinAppEx::ExitInstance();
 }
 
+BOOL CIGUIDEApp::StoreWindowPlacement(const CRect& rectNormalPosition, int nFlags, int nShowCmd)
+{
+	// overriding this to modify showwindow value
+	nShowCmd = 0;
+	return CWinAppEx::StoreWindowPlacement(rectNormalPosition, nFlags, nShowCmd);
+
+}
+
 // CIGUIDEApp message handlers
 
 

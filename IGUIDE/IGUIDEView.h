@@ -71,8 +71,8 @@ private:
 public:
 
 	bool					m_lButtonIsDown;					// workaround for not accidently clicking 
-	void ResetTransformationMatrices();
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	void					ResetTransformationMatrices();
+	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
 
 private:
 	void CIGUIDEView::SetFixationTarget();
@@ -96,4 +96,5 @@ protected:
 public:
 	afx_msg void OnFundusImport();
 	afx_msg void OnMouseLeave();
+
 };

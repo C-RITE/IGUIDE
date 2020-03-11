@@ -87,19 +87,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 
 }
 
-CIGUIDEDoc* CIGUIDEDoc::GetDoc()
-{
-	// Get Doc, made for other classes that need access to attributes
-	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
-
-	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
-	CDocument* doc = pFrame->GetActiveDocument();
-	if (doc)
-		return (CIGUIDEDoc*)doc;
-	else
-		return NULL;
-	
-}
 
 BOOL CIGUIDEDoc::OnNewDocument()
 {
@@ -203,7 +190,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	if (AfxGetApp()->GetProfileBinary(L"Settings", L"RasterColor", &rcol, &nl) > 0)
 		memcpy(&m_raster.color, rcol, sizeof(D2D1_COLOR_F));
 
-	m_raster.size =  AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
+	m_raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
 		
 	delete calib, ptr;
 	delete rcol;
@@ -714,6 +701,7 @@ void CIGUIDEDoc::OnOverlayQuickhelp()
 		m_pGrid->overlay = m_pGrid->overlay & (~QUICKHELP);
 		overlaySettings = overlaySettings & (~QUICKHELP);
 	}
+
 	else {
 		m_pGrid->overlay = m_pGrid->overlay | QUICKHELP;
 		overlaySettings = overlaySettings | QUICKHELP;

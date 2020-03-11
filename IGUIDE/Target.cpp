@@ -48,7 +48,7 @@ END_MESSAGE_MAP()
 
 void Target::setCross() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -76,7 +76,7 @@ void Target::setCross() {
 
 void Target::SetFixationTarget() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -91,7 +91,7 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 {
 
 	// transform coordinates for fixation target (rotate and scale) using subject calibration
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -149,7 +149,7 @@ void Target::DoDataExchange(CDataExchange* pDX)
 
 afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return -1;
 
@@ -257,7 +257,7 @@ afx_msg LRESULT Target::OnDraw2d(WPARAM wParam, LPARAM lParam)
 
 void Target::restartCalibration() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -286,7 +286,7 @@ void Target::restartCalibration() {
 
 void Target::finishCalibration() {
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 	
 	CPoint center = pView->getGridCenter();
@@ -314,7 +314,7 @@ void Target::OnGamePadCalibration() {
 	// move cursor from one raster corner to the next with each click
 
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -374,7 +374,7 @@ void Target::OnLButtonDown(UINT nFlags, CPoint point)
 	if (locked)
 		return;
 	
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
 
@@ -412,7 +412,7 @@ BOOL Target::PreTranslateMessage(MSG* pMsg)
 {
 
 	// TODO: Add your specialized code here and/or call the base class
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return __super::PreTranslateMessage(pMsg);
 

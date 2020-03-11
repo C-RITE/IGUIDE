@@ -46,7 +46,7 @@ private:
 
 // Operations
 public:
-	static CIGUIDEDoc *		GetDoc();
+
 	bool CheckFOV();
 	float					CalcEdgeLength(Edge k);
 	CD2DPointF				compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);

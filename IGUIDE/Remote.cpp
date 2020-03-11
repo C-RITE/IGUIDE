@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "MainFrm.h"
 #include "Remote.h"
 
 BEGIN_MESSAGE_MAP(Remote, CWnd)
@@ -222,7 +223,7 @@ LRESULT Remote::ConnectionClosed(WPARAM w, LPARAM l) {
 
 LRESULT Remote::DataReceived(WPARAM w, LPARAM l)
 {
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	
 	CString* command = (CString*)w;
 	CString* value = (CString*)l;
@@ -240,7 +241,7 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
 
-	CIGUIDEDoc* pDoc = CIGUIDEDoc::GetDoc();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	int ret;
 
 	if (pMsg->message == WM_KEYDOWN && m_pSock_ICANDI) {

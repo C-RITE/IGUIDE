@@ -5,8 +5,6 @@
 
 #pragma once
 
-#define ASSERT_VALID_D2D_OBJECT(pObj) ASSERT_VALID(pObj); if ((NULL == pObj) || !pObj->IsValid()) return;
-
 #define DOC_IS_READY (WM_USER + 100)
 #define SCREEN_SELECTED (WM_USER + 101)
 #define NETCOM_ERROR (WM_USER + 102)

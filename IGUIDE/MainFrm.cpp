@@ -24,7 +24,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
-	ON_WM_CLOSE()
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
@@ -54,8 +53,7 @@ CMainFrame::~CMainFrame()
 }
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
-
-
+	
 	// insert all properties into list
 	m_DlgProperties.fillProperties();
 
@@ -66,6 +64,20 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	RemoteControl.connect();
 
 	return 0L;
+
+}
+
+CIGUIDEDoc* CMainFrame::GetDoc()
+{
+	// Get Doc, made for other classes that need access to attributes
+	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
+
+	CFrameWndEx * pFrame = (CFrameWndEx*)AfxGetApp()->GetMainWnd();
+	CDocument* doc = pFrame->GetActiveDocument();
+	if (doc)
+		return (CIGUIDEDoc*)doc;
+	else
+		return NULL;
 
 }
 
