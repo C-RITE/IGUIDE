@@ -26,7 +26,11 @@
 #define ID_OVERLAY_FOVEOLA              32782
 #define ID_OVERLAY_CROSSHAIR            32783
 #define ID_OVERLAY_FUNDUS               32784
+
+#ifdef DEBUG
 #define ID_OVERLAY_TRACEINFO            32785
+#endif // DEBUG
+
 #define ID_OVERLAY_OPTICDISC            32786
 #define IDR_PROPERTIES                  32787
 #define ID_OVERLAY_QUICKHELP            32789

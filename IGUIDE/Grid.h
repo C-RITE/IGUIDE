@@ -47,7 +47,8 @@ public:
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
-	CD2DPointF	PixelToDegree(CPoint point);				// calculate degrees from fovea from pixel coordinates
+	
+	CD2DPointF				PixelToDegree(CPoint point);	// calculate degrees from fovea from pixel coordinates
 
 	void DelPatch();
 	void ClearPatchlist();

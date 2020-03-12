@@ -269,7 +269,9 @@ BEGIN
             MENUITEM "Optic Disc",                  ID_OVERLAY_OPTICDISC
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
+#ifdef DEBUG
             MENUITEM "Trace Info",                  ID_OVERLAY_TRACEINFO
+#endif
             MENUITEM "Defocus",                     ID_OVERLAY_DEFOCUS
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR

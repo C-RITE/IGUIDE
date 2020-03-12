@@ -432,8 +432,9 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
 
 		// draw debug info
+#ifdef DEBUG
 		pDoc->m_pGrid->DrawDebug(pRenderTarget);
-
+#endif
 		// draw defocus value from AOSACA
 		pDoc->m_pGrid->DrawDefocus(pRenderTarget);
 

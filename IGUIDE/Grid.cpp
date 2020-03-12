@@ -34,6 +34,7 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	float zoom = pView->getZoomFactor();
+
 	CD2DPointF mouseDist = pView->getMouseDist();
 	CD2DPointF transLoc;
 
@@ -389,8 +390,6 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
 	
-	if (!showCursor)
-		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString vidText;
@@ -678,24 +677,6 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 	CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 4);
-
-	if (overlay & TRACEINFO) {
-
-		CString traceText = pDoc->getTraceInfo();
-
-		// construct a CD2DTextLayout object which represents a block of formatted text 
-		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			traceText,									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
-
-		pRenderTarget->DrawTextLayout(CD2DPointF(sizeTarget.width - 210, 5),
-			// place on top-right corner
-			&textLayout,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget, D2D1::ColorF(GREEN)));
-
-	}
 
 	if (overlay & DEFOCUS) {
 
