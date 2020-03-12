@@ -45,8 +45,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 
 	ON_COMMAND(ID_OVERLAY_QUICKHELP, &CIGUIDEDoc::OnOverlayQuickhelp)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_QUICKHELP, &CIGUIDEDoc::OnUpdateOverlayQuickhelp)
-	ON_COMMAND(ID_OVERLAY_DEFOCUS, &CIGUIDEDoc::OnOverlayDefocus)
-	ON_UPDATE_COMMAND_UI(ID_OVERLAY_DEFOCUS, &CIGUIDEDoc::OnUpdateOverlayDefocus)
+	ON_COMMAND(ID_OVERLAY_LOCATION, &CIGUIDEDoc::OnOverlayLocation)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_LOCATION, &CIGUIDEDoc::OnUpdateOverlayLocation)
 END_MESSAGE_MAP()
 
 
@@ -60,10 +60,11 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pFundus = new Fundus();
 	m_pDlgCalibration = new Calibration();
 	m_raster.meanAlpha = 0;
-	overlaySettings = 0;
-	defocus = L"0";
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
+
+	overlaySettings = 0;
+	defocus = L"0";
 	getScreens();
 	overlayVisible = true;
 	calibrationComplete = false;
@@ -595,29 +596,10 @@ void CIGUIDEDoc::OnOverlayPatches()
 	UpdateAllViews(NULL);
 }
 
-
 void CIGUIDEDoc::OnUpdateOverlayPatches(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & PATCHES);
-}
-
-void CIGUIDEDoc::OnOverlayDefocus()
-{
-	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & DEFOCUS)
-		m_pGrid->overlay = m_pGrid->overlay & ~DEFOCUS;
-	else
-		m_pGrid->overlay = m_pGrid->overlay | DEFOCUS;
-
-	UpdateAllViews(NULL);
-}
-
-
-void CIGUIDEDoc::OnUpdateOverlayDefocus(CCmdUI *pCmdUI)
-{
-	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_pGrid->overlay & DEFOCUS);
 }
 
 
@@ -711,6 +693,27 @@ void CIGUIDEDoc::OnOverlayQuickhelp()
 		overlaySettings = overlaySettings | QUICKHELP;
 	}
 	
+}
+
+void CIGUIDEDoc::OnUpdateOverlayLocation(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & LOCATION);
+}
+
+void CIGUIDEDoc::OnOverlayLocation()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & LOCATION) {
+		m_pGrid->overlay = m_pGrid->overlay & (~LOCATION);
+		overlaySettings = overlaySettings & (~LOCATION);
+	}
+
+	else {
+		m_pGrid->overlay = m_pGrid->overlay | LOCATION;
+		overlaySettings = overlaySettings | LOCATION;
+	}
+
 }
 
 

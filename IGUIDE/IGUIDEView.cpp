@@ -145,6 +145,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		mouseDist += mousePos - mouseStart;
 		pDoc->m_pGrid->showCoords = true;
 		pDoc->m_pGrid->showCursor = true;
+		pDoc->m_pGrid->isPanning = false;
 		Invalidate();
 		return;
 	}
@@ -197,6 +198,7 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 		::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
 		pDoc->m_pGrid->showCoords = false;
 		pDoc->m_pGrid->showCursor = false;
+		pDoc->m_pGrid->isPanning = true;
 		
 	}
 
@@ -419,8 +421,8 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw Grid
 		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 
-		// draw accesoires (optic disc, crosshair, etc..)
-		pDoc->m_pGrid->DrawOverlay(pRenderTarget);
+		// draw accessoires (optic disc, crosshair, etc..)
+		pDoc->m_pGrid->DrawExtras(pRenderTarget);
 
 		// draw patches
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
@@ -435,8 +437,8 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 #ifdef DEBUG
 		pDoc->m_pGrid->DrawDebug(pRenderTarget);
 #endif
-		// draw defocus value from AOSACA
-		pDoc->m_pGrid->DrawDefocus(pRenderTarget);
+		// draw current patch location and defocus value from AOSACA
+		pDoc->m_pGrid->DrawLocation(pRenderTarget);
 
 		// draw quickhelp
 		pDoc->m_pGrid->DrawQuickHelp(pRenderTarget);

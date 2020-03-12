@@ -276,12 +276,12 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 		case 0x6B:
 			msg = '+';
 			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | DEFOCUS;
+			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | LOCATION;
 			break;
 		case 0x6D:
 			msg = '-';
 			ret = m_pSock_AOSACA->Send(&msg, 1, 0);
-			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | DEFOCUS;
+			pDoc->m_pGrid->overlay = pDoc->m_pGrid->overlay | LOCATION;
 			break;
 		case VK_NUMPAD0:
 			msg = '0';

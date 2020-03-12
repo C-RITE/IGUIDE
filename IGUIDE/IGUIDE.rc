@@ -269,10 +269,7 @@ BEGIN
             MENUITEM "Optic Disc",                  ID_OVERLAY_OPTICDISC
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
-#ifdef DEBUG
-            MENUITEM "Trace Info",                  ID_OVERLAY_TRACEINFO
-#endif
-            MENUITEM "Defocus",                     ID_OVERLAY_DEFOCUS
+            MENUITEM "Location",                    ID_OVERLAY_LOCATION
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
@@ -316,8 +313,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,2,3
- PRODUCTVERSION 0,6,2,3
+ FILEVERSION 0,6,2,5
+ PRODUCTVERSION 0,6,2,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -334,12 +331,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.2.3"
+            VALUE "FileVersion", "0.6.2.5"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.2.3"
+            VALUE "ProductVersion", "0.6.2.5"
         END
     END
     BLOCK "VarFileInfo"

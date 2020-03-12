@@ -97,8 +97,6 @@ public:
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayPatches();
 	afx_msg void OnUpdateOverlayPatches(CCmdUI *pCmdUI);
-	afx_msg void OnOverlayDefocus();
-	afx_msg void OnUpdateOverlayDefocus(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayOpticdisc();
 	afx_msg void OnUpdateOverlayOpticdisc(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayCrosshair();
@@ -109,6 +107,8 @@ public:
 	afx_msg void OnUpdateOverlayTraceinfo(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayQuickhelp();
 	afx_msg void OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI);
+	afx_msg void OnOverlayLocation();
+	afx_msg void OnUpdateOverlayLocation(CCmdUI *pCmdUI);
 	
 	void ToggleOverlay();
 	virtual void OnCloseDocument();

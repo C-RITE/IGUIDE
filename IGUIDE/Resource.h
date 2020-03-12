@@ -15,7 +15,7 @@
 #define IDI_ICON2                       333
 #define IDI_CROSSHAIR                   333
 #define IDC_STATIC_CAL                  1002
-#define IDC_PROPERTIES					1003
+#define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
 #define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772
@@ -26,15 +26,11 @@
 #define ID_OVERLAY_FOVEOLA              32782
 #define ID_OVERLAY_CROSSHAIR            32783
 #define ID_OVERLAY_FUNDUS               32784
-
-#ifdef DEBUG
-#define ID_OVERLAY_TRACEINFO            32785
-#endif // DEBUG
-
+#define ID_OVERLAY_TRACEINFO			32785
 #define ID_OVERLAY_OPTICDISC            32786
 #define IDR_PROPERTIES                  32787
 #define ID_OVERLAY_QUICKHELP            32789
-#define ID_OVERLAY_DEFOCUS              32795
+#define ID_OVERLAY_LOCATION             32795
 #define IDS_PROPERTIES_WND              57346
 
 // Next default values for new objects
@@ -42,7 +38,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         32796
+#define _APS_NEXT_COMMAND_VALUE         32798
 #define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           313
 #endif

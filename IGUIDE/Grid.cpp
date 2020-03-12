@@ -10,6 +10,8 @@
 using namespace D2D1;
 
 Grid::Grid(){
+
+	isPanning = false;
 }
 
 Grid::~Grid() {
@@ -191,7 +193,7 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawOverlay(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawExtras(CHwndRenderTarget* pRenderTarget) {
 
 	CD2DPointF a, b;
 	CD2DRectF r;
@@ -253,7 +255,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		if (it == patchlist.end())
 			break;
-		
+
 		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize;
 
 		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
@@ -287,19 +289,19 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 			(float)(patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
-		
+
 		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, .2f);
 
 		CD2DEllipse center(&rect1);
 		center.radiusX = center.radiusY = .5;
-		
+
 		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .1f);
 		pRenderTarget->PopLayer();
-				
+
 		// calculate position of text in real pixelspace
-		
+
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-		
+
 		float zoom = 1 / pView->getZoomFactor();
 		CD2DSizeF mouseDist = pView->getMouseDist();
 		mouseDist.width *= 1 / zoom;
@@ -329,29 +331,33 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 			pRenderTarget->PopLayer();
 
 		}
-		
+
 		// show vid number in real pixelspace
 
-		int number = 1;
+		if (!isPanning) {
 
-		CD2DPointF pos;
+			int number = 1;
 
-		for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
+				CD2DPointF pos;
 
-			rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
-			
-			if (it._Ptr->_Myval.locked == true) {
+				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 
-				pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
-				pos.y =	(float)(zoom * (mouseDist.height + it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
+					rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
 
-				DrawVidNumber(pRenderTarget,
-					pos,
-					number);
+						if (it._Ptr->_Myval.locked == true) {
 
-				number++;
+							pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.y = (float)(zoom * (mouseDist.height + it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
 
-			}
+							DrawVidNumber(pRenderTarget,
+								pos,
+								number);
+
+							number++;
+
+						}
+
+				}
 
 		}
 
@@ -447,37 +453,39 @@ void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawDefocus(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 
-	if (overlay & DEFOCUS) {
-		
+	if (overlay & LOCATION) {
+
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-		
-		CD2DTextFormat textFormat2(pRenderTarget,			// pointer to the render target
-			_T("Consolas"),									// font family name
+
+		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
+			_T("Consolas"),								// font family name
 			sizeDpi.height / 4);
 
+		CD2DPointF upperLeft{ 100, 50 };
 
-		CString defocus = L"DEFOCUS: ";
-		defocus.Append(pDoc->getCurrentDefocus());
+		CD2DRectF black_box{ upperLeft.x - 5, upperLeft.y - 5, upperLeft.x + 215, upperLeft.y + 120 };
+		CString coords;
 
+		coords.Format(L"LOC(deg): x=%.1f y=%.1f d=", currentPos.x, currentPos.y);
+		coords.Append(pDoc->getCurrentDefocus());
+	
 		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			defocus,									// text to be drawn
-			textFormat2,									// text format
+			coords,										// text to be drawn
+			textFormat2,								// text format
 			sizeTarget);								// size of the layout box
 
 		pRenderTarget->DrawTextLayout(CD2DPointF(5),
-			// place on top-right corner
 			&textLayout,								// text layout object
 			&CD2DSolidColorBrush						// brush used for text
 			(pRenderTarget,
-				D2D1::ColorF(D2D1::ColorF::White)));
+				D2D1::ColorF(YELLOW)));
 
 	}
-
 
 }
 
@@ -599,6 +607,7 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
+	currentPos = pos;
 	CString xCoords, yCoords;
 
 	CD2DSizeF sizeTarget(40, 10);
@@ -655,6 +664,7 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 		&textLayout2,
 		m_pWhiteBrush);
 
+
 }
 
 void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
@@ -677,26 +687,6 @@ void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
 	CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 4);
-
-	if (overlay & DEFOCUS) {
-
-		CD2DRectF black_box{ upperLeft.x - 5, upperLeft.y - 5, upperLeft.x + 215, upperLeft.y + 120 };
-		CString defocus = L"DEFOCUS: ";
-		defocus.Append(pDoc->getCurrentDefocus());
-
-		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			defocus,									// text to be drawn
-			textFormat2,								// text format
-			sizeTarget);								// size of the layout box
-
-		pRenderTarget->DrawTextLayout(CD2DPointF(5),
-			// place on top-right corner
-			&textLayout,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(YELLOW)));
-
-	}
 
 	if (overlay & QUICKHELP) {
 

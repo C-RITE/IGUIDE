@@ -4,15 +4,15 @@
 enum Overlay
 {
 	GRID = 1,
-	RESERVED = 2,
+	LOCATION = 2,
 	PATCHES = 4,
-	RESERVED2 = 8,
+	RESERVED = 8,
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,
 	FUNDUS = 128,
 	QUICKHELP = 256,
-	DEFOCUS = 512
+	RESERVED2 = 512
 };
 	
 
@@ -42,6 +42,8 @@ public:
 
 	bool					showCursor;						// toggle cursor visibility
 	bool					showCoords;						// toggle coords visibility
+	bool					isPanning;						// toggle vidnumber visibility
+	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all rasters
 	CD2DRectF				nerve;							// optic disc
@@ -57,12 +59,12 @@ public:
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
 
-	void DrawOverlay(CHwndRenderTarget* pRenderTarget);						// draw information overlay
+	void DrawExtras(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
 	void DrawDebug(CHwndRenderTarget* pRenderTarget);						// draw debug info
-	void DrawDefocus(CHwndRenderTarget* pRenderTarget);						// draw defocus
+	void DrawLocation(CHwndRenderTarget* pRenderTarget);					// draw defocus
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);					// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);	// draw target
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse pointer
