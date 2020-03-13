@@ -16,7 +16,6 @@ class Patches : public std::list<Patch>
 
 public:
 	Patches();
-	~Patches();
 	CString			filepath;
 	CString			filename;
 	

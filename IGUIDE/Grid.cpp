@@ -522,7 +522,7 @@ void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 			m_pGoldenBrush);							// brush used for text
 
 		pRenderTarget->DrawTextLayout(
-			CD2DPointF(upper_left.x + 275, upper_left.y + 8),
+			CD2DPointF(upper_left.x + 270, upper_left.y + 8),
 			&textLayout4,								// text layout object
 			m_pGoldenBrush);							// brush used for text
 			

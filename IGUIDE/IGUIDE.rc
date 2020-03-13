@@ -270,6 +270,9 @@ BEGIN
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
             MENUITEM "Location",                    ID_OVERLAY_LOCATION
+#ifdef _DEBUG
+			MENUITEM "Debug"						ID_OVERLAY_TRACEINFO
+#endif
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END

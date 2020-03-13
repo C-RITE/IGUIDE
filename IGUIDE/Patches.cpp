@@ -11,11 +11,6 @@ Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALS
 {
 }
 
-
-Patches::~Patches()
-{
-}
-
 void Patches::GetSysTime(CString &buf) {
 
 	time_t rawtime;
@@ -31,20 +26,20 @@ void Patches::GetSysTime(CString &buf) {
 
 
 void Patches::lockIn(){
+
 	CString systime;
-	//Patch dummy = this->back();
 	GetSysTime(systime);
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
 	cleanup();
 	SaveToFile();
-	//this->push_back(dummy);
+
 }
 
 void Patches::untouch() {
 
-		fileTouched = false;
-		filename = "IGUIDE.csv";
+	fileTouched = false;
+	filename = "IGUIDE.csv";
 
 }
 
@@ -132,4 +127,5 @@ bool Patches::SaveToFile() {
 	}
 
 	return TRUE;
+
 }
