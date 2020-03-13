@@ -28,7 +28,10 @@ private:
 		*m_pGrayBrush,
 		*m_pDarkGreenBrush,
 		*m_pMagentaBrush,
-		*m_pPatchBrush;
+		*m_pPatchBrush,
+		*m_pBlackBrush,
+		*m_pYellowBrush,
+		*m_pGoldenBrush;
 
 	CD2DBrushProperties*	m_pBrushProp;
 	CD2DLayer*				m_pLayer1;

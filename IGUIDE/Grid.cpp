@@ -82,6 +82,9 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 	m_pGrayBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGray));
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Magenta));
+	m_pBlackBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Black, 0.5f));
+	m_pYellowBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Yellow));
+	m_pGoldenBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::PaleGoldenrod));
 
 	m_pLayer1 = new CD2DLayer(pRenderTarget);	// opacity layer parameters
 	m_pGridGeom = NULL;
@@ -455,6 +458,8 @@ void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 
+	// draw additional text box in overlay for display of coordinates and defocus value from AOSACA
+
 	if (overlay & LOCATION) {
 
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -462,29 +467,65 @@ void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 		CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 
-		CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
+		CD2DPointF upper_middle{ sizeTarget.width / 2, 25 };
+		CD2DPointF upper_left{ upper_middle.x - 180, 25 };
+		CD2DPointF upper_right{ upper_middle.x + 180, 25 };
+
+		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
 			_T("Consolas"),								// font family name
-			sizeDpi.height / 4);
+			sizeDpi.height / 5);
 
-		CD2DPointF upperLeft{ 100, 50 };
+		CD2DRectF black_box{ upper_left.x, upper_left.y, upper_right.x, upper_right.y + 40 };
+		pRenderTarget->FillRectangle(black_box, m_pBlackBrush);
+		pRenderTarget->DrawRectangle(black_box, m_pGoldenBrush);
 
-		CD2DRectF black_box{ upperLeft.x - 5, upperLeft.y - 5, upperLeft.x + 215, upperLeft.y + 120 };
-		CString coords;
+		CString coordsCaption(L" LOC(deg):");
+		CString coordsX, coordsY, defocus;
 
-		coords.Format(L"LOC(deg): x=%.1f y=%.1f d=", currentPos.x, currentPos.y);
-		coords.Append(pDoc->getCurrentDefocus());
+		coordsX.Format(L"x=%.1f", currentPos.x);
+		coordsY.Format(L"y=%.1f", currentPos.y);
+		defocus.Format(L"z=%.2f", pDoc->getCurrentDefocus());
 	
-		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			coords,										// text to be drawn
-			textFormat2,								// text format
+		CD2DTextLayout textLayout1(pRenderTarget,		// pointer to the render target 
+			coordsCaption,								// text to be drawn
+			textFormat,									// text format
 			sizeTarget);								// size of the layout box
 
-		pRenderTarget->DrawTextLayout(CD2DPointF(5),
-			&textLayout,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(YELLOW)));
+		CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
+			coordsX,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
 
+		CD2DTextLayout textLayout3(pRenderTarget,		// pointer to the render target 
+			coordsY,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		CD2DTextLayout textLayout4(pRenderTarget,		// pointer to the render target 
+			defocus,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(upper_left.x, upper_left.y + 8),
+			&textLayout1,								// text layout object
+			m_pGoldenBrush);							// brush used for text
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(upper_left.x + 110, upper_left.y + 8),
+			&textLayout2,								// text layout object
+			m_pGoldenBrush);							// brush used for text
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(upper_left.x + 190, upper_left.y + 8),
+			&textLayout3,								// text layout object
+			m_pGoldenBrush);							// brush used for text
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(upper_left.x + 275, upper_left.y + 8),
+			&textLayout4,								// text layout object
+			m_pGoldenBrush);							// brush used for text
+			
 	}
 
 }
@@ -504,16 +545,14 @@ void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
 		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
 
-		CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::Black, 0.5f) };
-		CD2DSolidColorBrush YellowGreenBrush{ pRenderTarget, D2D1::ColorF(D2D1::ColorF::PaleGoldenrod) };
-
 		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
 			_T("Consolas"),									// font family name
 			sizeDpi.height / 8);							// font size
 
 		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120 };
-		pRenderTarget->FillRectangle(black_box, &BlackBrush);
-		pRenderTarget->DrawRectangle(black_box, &YellowGreenBrush);
+		
+		pRenderTarget->FillRectangle(black_box, m_pBlackBrush);
+		pRenderTarget->DrawRectangle(black_box, m_pGoldenBrush);
 
 		CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
 			help[0],									// text to be drawn
@@ -532,24 +571,17 @@ void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 
 		pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
 			&AOSACA_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
+			m_pGoldenBrush);							// brush used for text
 
 		pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
 			&IGUIDE_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
+			m_pGoldenBrush);							// brush used for text
+			
 		pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
 			&ICANDI_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(D2D1::ColorF::PaleGoldenrod)));
-
+			m_pGoldenBrush);							// brush used for text
+			
 	}
-
 
 }
 
@@ -603,6 +635,8 @@ void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTar
 
 
 void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
+
+	// draw coordinates around mouse cursor
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -663,77 +697,5 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 		CD2DPointF(loc.left - marginY.x, loc.top - marginY.y),
 		&textLayout2,
 		m_pWhiteBrush);
-
-
-}
-
-void Grid::DrawTextInfo(CHwndRenderTarget* pRenderTarget) {
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	if (!pDoc)
-		return;
-
-	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-
-	CD2DSolidColorBrush BlackBrush{ pRenderTarget, D2D1::ColorF(BLACK, 0.5f) };
-	CD2DSolidColorBrush YellowBrush{ pRenderTarget, D2D1::ColorF(YELLOW) };
-
-	CD2DPointF upperLeft{ 100, 50 };
-
-	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-		_T("Consolas"),								// font family name
-		sizeDpi.height / 8);							// font size
-	CD2DTextFormat textFormat2(pRenderTarget,		// pointer to the render target
-		_T("Consolas"),								// font family name
-		sizeDpi.height / 4);
-
-	if (overlay & QUICKHELP) {
-
-		vector<CString> help = pDoc->getQuickHelp();
-
-		CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
-		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
-		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
-
-		CD2DRectF black_box2{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120 };
-		pRenderTarget->FillRectangle(black_box2, &BlackBrush);
-		pRenderTarget->DrawRectangle(black_box2, &YellowBrush);
-
-		CD2DTextLayout AOSACA_help(pRenderTarget,		// pointer to the render target 
-			help[0],									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
-
-		CD2DTextLayout IGUIDE_help(pRenderTarget,		// pointer to the render target 
-			help[1],									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
-
-		CD2DTextLayout ICANDI_help(pRenderTarget,		// pointer to the render target 
-			help[2],									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
-
-
-		pRenderTarget->DrawTextLayout(down_left,		// top-left corner of the text 
-			&AOSACA_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(YELLOW)));
-
-		pRenderTarget->DrawTextLayout(down_middle,		// top-left corner of the text 
-			&IGUIDE_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(YELLOW)));
-
-		pRenderTarget->DrawTextLayout(down_right,		// top-left corner of the text 
-			&ICANDI_help,								// text layout object
-			&CD2DSolidColorBrush						// brush used for text
-			(pRenderTarget,
-				D2D1::ColorF(YELLOW)));
-
-	}
 
 }

@@ -447,8 +447,6 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		if (m_pDlgTarget->m_bVisible)
 			pDoc->m_pGrid->DrawTarget(pRenderTarget, m_pFixationTarget);
 
-		pDoc->m_pGrid->DrawTextInfo(pRenderTarget);
-
 	}
 
 	return 0;
