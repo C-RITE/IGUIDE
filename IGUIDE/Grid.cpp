@@ -484,7 +484,7 @@ void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 
 		coordsX.Format(L"x=%.1f", currentPos.x);
 		coordsY.Format(L"y=%.1f", currentPos.y);
-		defocus.Format(L"z=%.2f", pDoc->getCurrentDefocus());
+		defocus.Format(L"z=%s", pDoc->getCurrentDefocus());
 	
 		CD2DTextLayout textLayout1(pRenderTarget,		// pointer to the render target 
 			coordsCaption,								// text to be drawn
