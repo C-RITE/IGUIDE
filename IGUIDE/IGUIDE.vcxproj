@@ -138,7 +138,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>version.lib;xinput.lib</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;xinput.lib;ntdll.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
