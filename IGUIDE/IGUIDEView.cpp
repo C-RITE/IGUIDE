@@ -341,8 +341,14 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	ASSERT_VALID(pRenderTarget);
 
 	if (!pDoc->m_pFundus->filename.IsEmpty()) {
-		pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, pDoc->m_pFundus->filename);
-		pDoc->m_pFundus->picture->Create(pRenderTarget);
+		pDoc->m_pFundus->fundusIMG.Load(pDoc->m_pFundus->filename);
+		pDoc->m_pFundus->fundus = (HBITMAP)pDoc->m_pFundus->fundusIMG;
+		pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, pDoc->m_pFundus->fundus, 1);
+		pDoc->m_pFundus->fundusIMG.Destroy();
+	}
+	else {
+		pDoc->m_pFundus->fundus = (HBITMAP)pDoc->m_pFundus->fundusIMG;
+		pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, pDoc->m_pFundus->fundus, 1);
 	}
 
 	//pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;

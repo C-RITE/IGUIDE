@@ -20,13 +20,14 @@ void Fundus::Paint(CHwndRenderTarget* pRenderTarget)
 	CD2DPointF gridCenter{ CANVAS / 2 , CANVAS / 2 };
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
 	if (picture && calibration && (pDoc->m_pGrid->overlay & FUNDUS))
 	{
 		
-		double ppdimage = (pDoc->m_pDlgCalibration->m_D2DStatic.k.length * pDoc->m_pDlgCalibration->m_sFactor) / _DELTA_D;
+		double ppdimage = (pDoc->m_pFundus->calibResult.length * pDoc->m_pDlgCalibration->m_sFactor) / _DELTA_D;
 		float scalingFactor = (float)(PPD / ppdimage);
 
-		CD2DPointF calibCenter (pDoc->m_pDlgCalibration->m_D2DStatic.k.p.x, pDoc->m_pDlgCalibration->m_D2DStatic.k.p.y);
+		CD2DPointF calibCenter (pDoc->m_pFundus->calibResult.p.x, pDoc->m_pFundus->calibResult.p.y);
 		CD2DSizeF pictureSize = picture->GetSize();
 
 		calibCenter.x = calibCenter.x * pDoc->m_pDlgCalibration->m_sFactor;

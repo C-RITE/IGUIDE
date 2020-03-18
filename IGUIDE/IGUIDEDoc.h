@@ -67,6 +67,8 @@ public:
 public:
 	virtual BOOL OnNewDocument();
 	virtual void Serialize(CArchive& ar);
+	void ImageArchive(CImage* pImage, CArchive& ar);
+	void FundusCalibArchive(CArchive& ar);
 
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();
