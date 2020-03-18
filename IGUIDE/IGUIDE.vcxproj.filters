@@ -174,4 +174,27 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="res\MDONE.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\mloop1.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\mloop2.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\MROLLOV1.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\MROLLOV2.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\MSELECT1.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="res\MSELECT2.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+  </ItemGroup>
 </Project>

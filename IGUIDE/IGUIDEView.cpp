@@ -11,6 +11,7 @@
 #include "MainFrm.h"
 #include "IGUIDEView.h"
 #include "IGUIDEDoc.h"
+#include "Audio.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -527,6 +528,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			}
 			
+
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
 			m_pDlgTarget->Invalidate();
 			this->Invalidate();

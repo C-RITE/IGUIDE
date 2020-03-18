@@ -270,9 +270,6 @@ BEGIN
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
             MENUITEM "Location",                    ID_OVERLAY_LOCATION
-#ifdef _DEBUG
-			MENUITEM "Debug"						ID_OVERLAY_TRACEINFO
-#endif
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
@@ -347,6 +344,26 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// WAVE
+//
+
+IDR_WAVE1               WAVE                    "res\\MDONE.WAV"
+
+IDR_WAVE2               WAVE                    "res\\mloop1.wav"
+
+IDR_WAVE3               WAVE                    "res\\mloop2.wav"
+
+IDR_WAVE4               WAVE                    "res\\MROLLOV1.WAV"
+
+IDR_WAVE5               WAVE                    "res\\MROLLOV2.WAV"
+
+IDR_WAVE6               WAVE                    "res\\MSELECT1.WAV"
+
+IDR_WAVE7               WAVE                    "res\\MSELECT2.WAV"
 
 
 /////////////////////////////////////////////////////////////////////////////

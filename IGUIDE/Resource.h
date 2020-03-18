@@ -14,6 +14,13 @@
 #define IDB_AO                          327
 #define IDI_ICON2                       333
 #define IDI_CROSSHAIR                   333
+#define IDR_WAVE1                       346
+#define IDR_WAVE2                       347
+#define IDR_WAVE3                       348
+#define IDR_WAVE4                       349
+#define IDR_WAVE5                       350
+#define IDR_WAVE6                       351
+#define IDR_WAVE7                       352
 #define IDC_STATIC_CAL                  1002
 #define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
@@ -26,7 +33,7 @@
 #define ID_OVERLAY_FOVEOLA              32782
 #define ID_OVERLAY_CROSSHAIR            32783
 #define ID_OVERLAY_FUNDUS               32784
-#define ID_OVERLAY_TRACEINFO			32785
+#define ID_OVERLAY_TRACEINFO            32785
 #define ID_OVERLAY_OPTICDISC            32786
 #define IDR_PROPERTIES                  32787
 #define ID_OVERLAY_QUICKHELP            32789
@@ -37,7 +44,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        346
+#define _APS_NEXT_RESOURCE_VALUE        353
 #define _APS_NEXT_COMMAND_VALUE         32798
 #define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           313
