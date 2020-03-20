@@ -11,7 +11,6 @@
 #include "MainFrm.h"
 #include "IGUIDEView.h"
 #include "IGUIDEDoc.h"
-#include "Audio.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -389,6 +388,8 @@ int CIGUIDEView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	pDoc->m_pGrid->CreateD2DResources(pRenderTarget);
 	pDoc->m_pGrid->CreateGridGeometry(pRenderTarget);
+
+	soundFX.initSound();
    
 	return 0;
 

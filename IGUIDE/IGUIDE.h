@@ -9,7 +9,6 @@
 
 #include "resource.h"       // main symbols
 
-
 // CIGUIDEApp:
 // See IGUIDE.cpp for the implementation of this class
 //
@@ -24,7 +23,8 @@ public:
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
-	virtual BOOL StoreWindowPlacement(const CRect& rectNormalPosition,
+	virtual BOOL StoreWindowPlacement(
+		const CRect& rectNormalPosition,
 		int nFlags,
 		int nShowCmd);
 

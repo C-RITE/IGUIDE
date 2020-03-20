@@ -2,6 +2,7 @@
 // IGUIDEView.h : interface of the CIGUIDEView class
 
 #pragma once
+#include "Sfx.h"
 class Target;
 
 class CIGUIDEView : public CView
@@ -54,6 +55,7 @@ public:
 // Attributes
 private:
 
+	Sfx						soundFX;							// for audio output
 	CD2DBitmap*				m_pFixationTarget;					// need 2 instances of these (in view and grid class)
 	D2D1_MATRIX_3X2_F		scale;
 	D2D1_MATRIX_3X2_F		translate;
@@ -72,6 +74,7 @@ public:
 
 	bool					m_lButtonIsDown;					// workaround for not accidently clicking 
 	void					ResetTransformationMatrices();
+
 	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
 
 private:

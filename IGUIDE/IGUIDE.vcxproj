@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{81A6AFD9-6CC5-4032-AF8D-226FA32F1C62}</ProjectGuid>
     <RootNamespace>IGUIDE</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
     <ProjectName>IGUIDE</ProjectName>
   </PropertyGroup>
@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -44,7 +44,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -138,7 +138,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>version.lib;xinput.lib</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;xinput.lib;ntdll.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -232,6 +232,7 @@
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Remote.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Sfx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Patches.h" />
     <ClInclude Include="Target.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="Remote.cpp" />
+    <ClCompile Include="Sfx.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
