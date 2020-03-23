@@ -103,6 +103,21 @@ void SoundEffect::Initialize(
 */
 //---------------------------------------------------------------------- 
 
+VOID* SoundEffect::LoadWavFromResource() {
+
+    // Loading WAVE file as a resource
+    HRSRC hResInfo;
+    HGLOBAL hResData;
+    DWORD dwSize;
+    
+    hResInfo = FindResourceW(NULL, MAKEINTRESOURCE(IDR_WAVE1), L"WAVE");
+    hResData = LoadResource(GetModuleHandle(NULL), hResInfo);
+    dwSize = SizeofResource(GetModuleHandle(NULL), hResInfo);
+    
+    return LockResource(hResData);
+
+}
+
 void SoundEffect::PlaySound()
 {
    
@@ -122,23 +137,14 @@ void SoundEffect::PlaySound()
     //    );
 
 
-    // Loading WAVE file as a resource
-    HRSRC hResInfo;
-    HGLOBAL hResData;
-    DWORD dwSize;
-    VOID* pvRes;
-
-    hResInfo = FindResourceW(NULL, MAKEINTRESOURCE(IDR_WAVE1), L"WAVE");
-    hResData = LoadResource(GetModuleHandle(NULL), hResInfo);
-    dwSize = SizeofResource(GetModuleHandle(NULL), hResInfo);
-    pvRes = LockResource(hResData);
+    
 
     // populate WAVEFORMAT structure
     WAVEFORMATEX wfx = { 0 };
     DWORD dwChunkSize;
     DWORD dwChunkPosition;
 
-    wchar_t* strFileName = _T("res\\MDONE.WAV");
+    wchar_t* strFileName = _T("res\\mloop1.WAV");
 
     // Open the file
     HANDLE hFile = CreateFile(

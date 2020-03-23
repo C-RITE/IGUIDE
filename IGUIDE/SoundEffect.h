@@ -15,6 +15,7 @@ public:
        BYTE* soundData);*/
 
     void PlaySound();
+    VOID* LoadWavFromResource();
 
 private:
     
