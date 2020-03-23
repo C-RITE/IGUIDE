@@ -103,14 +103,14 @@ void SoundEffect::Initialize(
 */
 //---------------------------------------------------------------------- 
 
-VOID* SoundEffect::LoadWavFromResource() {
+VOID* SoundEffect::LoadWavFromResource(int IDRESOURCE) {
 
     // Loading WAVE file as a resource
     HRSRC hResInfo;
     HGLOBAL hResData;
     DWORD dwSize;
     
-    hResInfo = FindResourceW(NULL, MAKEINTRESOURCE(IDR_WAVE1), L"WAVE");
+    hResInfo = FindResourceW(NULL, MAKEINTRESOURCE(IDRESOURCE), L"WAVE");
     hResData = LoadResource(GetModuleHandle(NULL), hResInfo);
     dwSize = SizeofResource(GetModuleHandle(NULL), hResInfo);
     
