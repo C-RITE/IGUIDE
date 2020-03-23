@@ -103,7 +103,7 @@ void SoundEffect::Initialize(
 */
 //---------------------------------------------------------------------- 
 
-VOID* SoundEffect::LoadWavFromResource(int IDRESOURCE) {
+LPVOID SoundEffect::LoadWavFromResource(int IDRESOURCE) {
 
     // Loading WAVE file as a resource
     HRSRC hResInfo;
@@ -141,35 +141,27 @@ void SoundEffect::PlaySound()
 
     // populate WAVEFORMAT structure
     WAVEFORMATEX wfx = { 0 };
+
     DWORD dwChunkSize;
     DWORD dwChunkPosition;
 
-    wchar_t* strFileName = _T("res\\mloop1.WAV");
+    LPVOID wavResource = LoadWavFromResource(IDR_WAVE3);
 
-    // Open the file
-    HANDLE hFile = CreateFile(
-        strFileName,
-        GENERIC_READ,
-        FILE_SHARE_READ,
-        NULL,
-        OPEN_EXISTING,
-        0,
-        NULL);
-
-    FindChunk(hFile, fourccFMT, dwChunkSize, dwChunkPosition);
-    ReadChunkData(hFile, &wfx, dwChunkSize, dwChunkPosition);
+    FindChunk(wavResource, fourccFMT, dwChunkSize, dwChunkPosition);
+    ReadChunkData(wavResource, &wfx, dwChunkSize, dwChunkPosition);
 
     // populate audio buffer
     XAUDIO2_BUFFER buffer = { 0 };
 
-    FindChunk(hFile, fourccDATA, dwChunkSize, dwChunkPosition);
+    FindChunk(wavResource, fourccDATA, dwChunkSize, dwChunkPosition);
+    
     m_soundData = new BYTE[dwChunkSize];
-    ReadChunkData(hFile, m_soundData, dwChunkSize, dwChunkPosition);
+
+    ReadChunkData(wavResource, m_soundData, dwChunkSize, dwChunkPosition);
 
     buffer.AudioBytes = dwChunkSize;
     buffer.pAudioData = m_soundData;
     buffer.Flags = XAUDIO2_END_OF_STREAM;
-
 
     // Create a source voice for this sound effect. 
     DX::ThrowIfFailed(
@@ -182,75 +174,73 @@ void SoundEffect::PlaySound()
     // Queue the memory buffer for playback and start the voice. 
         pSourceVoice->SubmitSourceBuffer(&buffer);
 
-    DX::ThrowIfFailed(
-        pSourceVoice->Start()
+        DX::ThrowIfFailed(
+            pSourceVoice->Start()
         );
 
 }
 
-HRESULT SoundEffect::FindChunk(HANDLE hFile, DWORD fourcc, DWORD& dwChunkSize, DWORD& dwChunkDataPosition)
+HRESULT SoundEffect::FindChunk(LPVOID RIFF, DWORD fourcc, DWORD& dwChunkSize, DWORD& dwChunkDataPosition)
 {
 
-    HRESULT hr = S_OK;
-    if (INVALID_SET_FILE_POINTER == SetFilePointer(hFile, 0, NULL, FILE_BEGIN))
-        return HRESULT_FROM_WIN32(GetLastError());
+	DWORD dwChunkType;
+	DWORD dwChunkDataSize;
+	DWORD dwRIFFDataSize = 0;
+	DWORD bytesRead = 0;
+	DWORD dwOffset = 0;
 
-    DWORD dwChunkType;
-    DWORD dwChunkDataSize;
-    DWORD dwRIFFDataSize = 0;
-    DWORD dwFileType;
-    DWORD bytesRead = 0;
-    DWORD dwOffset = 0;
+    BYTE* riff = static_cast<BYTE*>(RIFF);
+	
+    memcpy(&dwChunkType, riff, sizeof(DWORD));
+    dwOffset += sizeof(DWORD);
+	memcpy(&dwChunkDataSize, riff + dwOffset, sizeof(DWORD));
 
-    while (hr == S_OK)
-    {
-        DWORD dwRead;
-        if (0 == ReadFile(hFile, &dwChunkType, sizeof(DWORD), &dwRead, NULL))
-            hr = HRESULT_FROM_WIN32(GetLastError());
+	switch (dwChunkType)
+	{
+	case fourccRIFF:
+		dwRIFFDataSize = dwChunkDataSize;
+		dwChunkDataSize = 4;
+		break;
+	}
 
-        if (0 == ReadFile(hFile, &dwChunkDataSize, sizeof(DWORD), &dwRead, NULL))
-            hr = HRESULT_FROM_WIN32(GetLastError());
+	while (bytesRead < dwRIFFDataSize) {
 
-        switch (dwChunkType)
-        {
-        case fourccRIFF:
-            dwRIFFDataSize = dwChunkDataSize;
-            dwChunkDataSize = 4;
-            if (0 == ReadFile(hFile, &dwFileType, sizeof(DWORD), &dwRead, NULL))
-                hr = HRESULT_FROM_WIN32(GetLastError());
-            break;
+		memcpy(&dwChunkType, riff + dwOffset, sizeof(DWORD));
 
-        default:
-            if (INVALID_SET_FILE_POINTER == SetFilePointer(hFile, dwChunkDataSize, NULL, FILE_CURRENT))
-                return HRESULT_FROM_WIN32(GetLastError());
-        }
+		if (dwChunkType == fourcc)
+		{
+			switch (fourcc) {
 
-        dwOffset += sizeof(DWORD) * 2;
+			case fourccFMT:
+				dwChunkSize = dwChunkDataSize * 4;
+				dwChunkDataPosition = dwOffset + dwChunkDataSize * 2;
+				break;
 
-        if (dwChunkType == fourcc)
-        {
-            dwChunkSize = dwChunkDataSize;
-            dwChunkDataPosition = dwOffset;
-            return S_OK;
-        }
+			case fourccDATA:
+                memcpy(&dwChunkSize, riff + dwOffset + sizeof(DWORD), dwChunkDataSize);
+				dwChunkDataPosition = dwOffset + sizeof(DWORD) * 2;
+				break;
 
-        dwOffset += dwChunkDataSize;
+			}
 
-        if (bytesRead >= dwRIFFDataSize) return S_FALSE;
+     		return S_OK;
 
-    }
+		}
 
-    return S_OK;
+		dwOffset += sizeof(DWORD);
+		bytesRead += dwChunkDataSize;
+
+	}
+
+	return S_OK;
 
 }
 
-HRESULT SoundEffect::ReadChunkData(HANDLE hFile, void* buffer, DWORD buffersize, DWORD bufferoffset)
+HRESULT SoundEffect::ReadChunkData(LPVOID RIFF, void* buffer, DWORD buffersize, DWORD bufferoffset)
 {
-    HRESULT hr = S_OK;
-    if (INVALID_SET_FILE_POINTER == SetFilePointer(hFile, bufferoffset, NULL, FILE_BEGIN))
-        return HRESULT_FROM_WIN32(GetLastError());
-    DWORD dwRead;
-    if (0 == ReadFile(hFile, buffer, buffersize, &dwRead, NULL))
-        hr = HRESULT_FROM_WIN32(GetLastError());
-    return hr;
+    BYTE* riff = static_cast<BYTE*>(RIFF);
+    memcpy(buffer, riff + bufferoffset, buffersize);
+
+    return S_OK;
+
 }

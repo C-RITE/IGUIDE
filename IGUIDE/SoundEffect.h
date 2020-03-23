@@ -15,7 +15,7 @@ public:
        BYTE* soundData);*/
 
     void PlaySound();
-    VOID* LoadWavFromResource(int IDRESOURCE);
+    LPVOID LoadWavFromResource(int IDRESOURCE);
 
 private:
     
@@ -23,11 +23,11 @@ private:
     IXAudio2MasteringVoice* pMasteringVoice;
     IXAudio2SourceVoice*    pSourceVoice;
 
-    bool                    m_audioAvailable;
     BYTE*                   m_soundData;
+    bool                    m_audioAvailable;
 
-    HRESULT ReadChunkData(HANDLE hFile, void* buffer, DWORD buffersize, DWORD bufferoffset);
-    HRESULT FindChunk(HANDLE hFile, DWORD fourcc, DWORD& dwChunkSize, DWORD& dwChunkDataPosition);
+    HRESULT ReadChunkData(LPVOID RIFF, void* buffer, DWORD buffersize, DWORD bufferoffset);
+    HRESULT FindChunk(LPVOID RIFF, DWORD fourcc, DWORD& dwChunkSize, DWORD& dwChunkDataPosition);
 
 };
 
