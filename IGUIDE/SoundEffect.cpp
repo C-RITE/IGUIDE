@@ -59,6 +59,8 @@ SoundEffect::SoundEffect() :
 
 SoundEffect::~SoundEffect() {
 
+    delete m_soundData;
+    
 }
 
 //---------------------------------------------------------------------- 
@@ -155,11 +157,11 @@ void SoundEffect::PlaySound()
     XAUDIO2_BUFFER buffer = { 0 };
 
     FindChunk(hFile, fourccDATA, dwChunkSize, dwChunkPosition);
-    BYTE* pDataBuffer = new BYTE[dwChunkSize];
-    ReadChunkData(hFile, pDataBuffer, dwChunkSize, dwChunkPosition);
+    m_soundData = new BYTE[dwChunkSize];
+    ReadChunkData(hFile, m_soundData, dwChunkSize, dwChunkPosition);
 
     buffer.AudioBytes = dwChunkSize;
-    buffer.pAudioData = pDataBuffer;
+    buffer.pAudioData = m_soundData;
     buffer.Flags = XAUDIO2_END_OF_STREAM;
 
 
