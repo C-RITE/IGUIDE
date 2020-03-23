@@ -2,7 +2,7 @@
 // IGUIDEView.h : interface of the CIGUIDEView class
 
 #pragma once
-#include "Sfx.h"
+#include "SoundEffect.h"
 class Target;
 
 class CIGUIDEView : public CView
@@ -55,7 +55,10 @@ public:
 // Attributes
 private:
 
-	Sfx						soundFX;							// for audio output
+	SoundEffect				sound;								// for sound output
+
+
+
 	CD2DBitmap*				m_pFixationTarget;					// need 2 instances of these (in view and grid class)
 	D2D1_MATRIX_3X2_F		scale;
 	D2D1_MATRIX_3X2_F		translate;

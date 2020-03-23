@@ -36,7 +36,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
-      <AdditionalDependencies>version.lib;Ntdll.lib;DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;Ntdll.lib;DirectXTK.lib;winmm.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Midl>
@@ -233,6 +233,7 @@
     <ClInclude Include="Remote.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sfx.h" />
+    <ClInclude Include="SoundEffect.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Patches.h" />
     <ClInclude Include="Target.h" />
@@ -266,6 +267,7 @@
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="Remote.cpp" />
     <ClCompile Include="Sfx.cpp" />
+    <ClCompile Include="SoundEffect.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -302,7 +304,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets')" />
+    <Import Project="..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
@@ -313,6 +315,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2019.5.31.1\build\native\directxtk_desktop_2015.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2019.12.17.1\build\native\directxtk_desktop_2015.targets'))" />
   </Target>
 </Project>

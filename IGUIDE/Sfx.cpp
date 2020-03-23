@@ -18,9 +18,28 @@ void Sfx::initSound() {
 	m_audioTimerAcc = 10.f;
 	m_retryDefault = false;
 
-	m_soundEffect = std::make_unique<SoundEffect>(m_audEngine.get(), L"C:\\Users\\Michen\\source\\repos\\IGUIDE\\IGUIDE\\res\\mloop1.wav");
+	// Loading WAVE file as a resource
+	HRSRC hResInfo;
+	HGLOBAL hResData;
+	DWORD dwSize;
+	VOID* pvRes;
+	hResInfo = FindResourceW(NULL, MAKEINTRESOURCE(IDR_WAVE1), L"WAVE");
+	hResData = LoadResource(GetModuleHandle(NULL), hResInfo);
+	dwSize = SizeofResource(GetModuleHandle(NULL), hResInfo);
+	pvRes = LockResource(hResData);
+
+	WAVEFORMATEX wfx;
+	wfx.wFormatTag = WAVE_FORMAT_PCM;
+	wfx.nChannels = 1;
+	wfx.nSamplesPerSec = 22050;
+
+	CHAR* m_pResourceBuffer = new CHAR[dwSize];
+	memcpy(m_pResourceBuffer, pvRes, dwSize);
+
+	m_soundEffect = std::make_unique<SoundEffect>(m_audEngine.get(), L"");
+	
 	m_effect1 = m_soundEffect->CreateInstance();
 
 	m_effect1->Play(true);
-	
+
 }
