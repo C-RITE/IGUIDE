@@ -270,9 +270,6 @@ BEGIN
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
             MENUITEM "Location",                    ID_OVERLAY_LOCATION
-#ifdef _DEBUG
-			MENUITEM "Debug"						ID_OVERLAY_TRACEINFO
-#endif
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
@@ -316,8 +313,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,2,6
- PRODUCTVERSION 0,6,2,6
+ FILEVERSION 0,6,2,7
+ PRODUCTVERSION 0,6,2,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -334,12 +331,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.2.6"
+            VALUE "FileVersion", "0.6.2.7"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.2.6"
+            VALUE "ProductVersion", "0.6.2.7"
         END
     END
     BLOCK "VarFileInfo"

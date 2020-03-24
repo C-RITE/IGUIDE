@@ -122,6 +122,9 @@ bool Patches::SaveToFile() {
 
 		fileTouched = FALSE;
 		filename = "IGUIDE.csv";
+
+		pe->Delete();
+
 		return FALSE;
 
 	}
