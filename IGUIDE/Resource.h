@@ -19,6 +19,8 @@
 #define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
 #define IDC_LIST1                       1010
+#define IDC_LISTMONITOR                 1010
+#define IDC_MONITORLIST                 1010
 #define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775

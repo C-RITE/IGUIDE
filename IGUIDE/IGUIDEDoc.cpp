@@ -147,7 +147,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
 	
-	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
+	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", -1);
 	for (auto it = m_Monitors.m_Devices.begin(); it != m_Monitors.m_Devices.end(); it++) {
 		if (it->number == screen) {
 			m_Monitors.m_pSelectedDevice = it._Ptr;
@@ -317,7 +317,7 @@ bool CIGUIDEDoc::CheckFOV()
 		if (answer == IDYES) {
 			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F12, 1);
 			if (!m_Monitors.m_pSelectedDevice) {
-				m_Monitors.select();
+				m_Monitors.selectionDialog();
 				CIGUIDEView* pView = CIGUIDEView::GetView();
 				pView->SendMessage(SCREEN_SELECTED);
 			}

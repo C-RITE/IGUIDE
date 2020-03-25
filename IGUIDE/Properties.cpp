@@ -284,10 +284,7 @@ void Properties::fillProperties() {
 		// fill monitor property
 		for (auto& screen : pDoc->m_Monitors.m_Devices) {
 
-			// never parse primary monitor, because it is dedicated to operator view
-			if (screen.number == 1)
-				FixationTargetScreen->SetValue(L"NONE");
-			else if (screen.number == pDoc->m_Monitors.m_pSelectedDevice->number) {
+			if (screen.number == pDoc->m_Monitors.m_pSelectedDevice->number) {
 				option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
 				FixationTargetScreen->SetValue(option);
 				CIGUIDEView* pView = CIGUIDEView::GetView();

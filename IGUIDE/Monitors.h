@@ -7,7 +7,7 @@ struct Device {
 	CString display;		// the display enum
 	CPoint resolution;		// screen resolution
 	int number;				// display number
-	HMONITOR monitor;		// monitor handle
+	DWORD monitor;			// to check for primary display
 };
 
 class Monitors
@@ -18,11 +18,15 @@ public:
 	Monitors();
 	~Monitors();
 
-	void				select();
+
+	void				selectionDialog();
+	void				erasePrimaryDisplay();				// disallow primary display for target screen
 	void				refresh();
 
-	std::vector<Device>	m_Devices;							// all detected monitors
-	Device*				m_pSelectedDevice;					// target monitor
+	void				selectDeviceFromListBoxItem(CString selection);
+
+	std::vector<Device>	m_Devices;							// all detected display devices
+	Device*				m_pSelectedDevice;					// used for target view
 	Device				screen;								// used for callback to populate vector of screens
 	int					devIndex;							// used for callback device enumaration
 

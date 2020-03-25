@@ -601,7 +601,7 @@ afx_msg LRESULT CIGUIDEView::OnDisplayChange(WPARAM wParam, LPARAM lParam)
 
 	m_pDlgTarget->ShowWindow(SW_HIDE);
 	pDoc->m_Monitors.refresh();
-	pDoc->m_Monitors.select();
+	pDoc->m_Monitors.selectionDialog();
 	
 	return 0L;
 
