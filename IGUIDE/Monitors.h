@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-struct Screen {
+struct Device {
 	RECT area;				// display area in pixels;
 	CString name;			// display identifier
 	CString display;		// the display enum
@@ -15,14 +15,17 @@ class Monitors
 
 public:
 
-	Screen screen;
-	int devIndex;
-
 	Monitors();
 	~Monitors();
 
-	std::vector<Screen> getScreens() { return screens; };
-	std::vector<Screen> screens;
-	
-};
+	void				select();
+	void				refresh();
 
+	std::vector<Device>	m_Devices;							// all detected monitors
+	Device*				m_pSelectedDevice;					// target monitor
+	Device				screen;								// used for callback to populate vector of screens
+	int					devIndex;							// used for callback device enumaration
+
+	std::vector<Device> getDevices() { return m_Devices; };
+
+};

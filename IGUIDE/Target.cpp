@@ -54,9 +54,9 @@ void Target::setCross() {
 
 	fieldsize = pDoc->m_raster.size / 10;
 
-	if (pDoc->m_Screens.size() > 0) {
+	if (pDoc->m_Monitors.m_Devices.size() > 0) {
 
-		CRect cRect = (CRect)pDoc->m_pSelectedScreen->area;
+		CRect cRect = (CRect)pDoc->m_Monitors.m_pSelectedDevice->area;
 
 		// place first cross on top-left corner of the raster
 		xbox_cross = CD2DPointF(

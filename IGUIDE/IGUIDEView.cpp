@@ -265,7 +265,7 @@ LRESULT CIGUIDEView::ChangeTargetDisplay(WPARAM w, LPARAM l) {
 
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	CRect area = (CRect)pDoc->m_pSelectedScreen->area;
+	CRect area = (CRect)pDoc->m_Monitors.m_pSelectedDevice->area;
 	CRect wRect;
 	
 	m_pDlgTarget->SetWindowPos(&this->wndBottom,
@@ -600,8 +600,8 @@ afx_msg LRESULT CIGUIDEView::OnDisplayChange(WPARAM wParam, LPARAM lParam)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	m_pDlgTarget->ShowWindow(SW_HIDE);
-	AfxMessageBox(L"Monitor configuration change detected.\n\nSelect a screen in Properties/Target View now!", MB_ICONWARNING);
-	pDoc->getScreens();
+	pDoc->m_Monitors.refresh();
+	pDoc->m_Monitors.select();
 	
 	return 0L;
 

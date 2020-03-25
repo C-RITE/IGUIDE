@@ -134,9 +134,6 @@ public:
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -147,11 +144,6 @@ public:
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 {
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)

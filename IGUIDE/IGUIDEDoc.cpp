@@ -65,23 +65,12 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	overlaySettings = 0;
 	defocus = L"0";
-	getScreens();
+
 	overlayVisible = true;
 	calibrationComplete = false;
-
+		
 }
 
-bool CIGUIDEDoc::getScreens() 
-{
-
-	Monitors monitors;
-	if (m_Screens.size() > 0)	// change in display configuration requires empty vector
-		m_Screens.clear();
-	m_Screens = monitors.getScreens();
-
-	return true;
-
-}
 
 CIGUIDEDoc::~CIGUIDEDoc()
 {
@@ -158,10 +147,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
 	
-	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 1);
-	for (auto it = m_Screens.begin(); it != m_Screens.end(); it++) {
+	int screen = AfxGetApp()->GetProfileInt(L"Settings", L"Display", 0);
+	for (auto it = m_Monitors.m_Devices.begin(); it != m_Monitors.m_Devices.end(); it++) {
 		if (it->number == screen) {
-			m_pSelectedScreen = it._Ptr;
+			m_Monitors.m_pSelectedDevice = it._Ptr;
 		}
 	}
 
@@ -210,7 +199,8 @@ void CIGUIDEDoc::OnCloseDocument()
 	// TODO: Add your message handler code here
 
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
-	AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_pSelectedScreen->number);
+	if (m_Monitors.m_pSelectedDevice)
+		AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_Monitors.m_pSelectedDevice->number);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
@@ -324,8 +314,14 @@ bool CIGUIDEDoc::CheckFOV()
 
 		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
 
-		if (answer == IDYES)
+		if (answer == IDYES) {
 			PostMessage(CIGUIDEView::GetView()->m_hWnd, WM_KEYDOWN, VK_F12, 1);
+			if (!m_Monitors.m_pSelectedDevice) {
+				m_Monitors.select();
+				CIGUIDEView* pView = CIGUIDEView::GetView();
+				pView->SendMessage(SCREEN_SELECTED);
+			}
+		}
 
 		ShowCursor(TRUE);
 		return FALSE;

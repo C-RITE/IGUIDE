@@ -20,9 +20,8 @@ protected: // create from serialization only
 	// Attributes
 
 public:
-	vector<Screen>			m_Screens;							// all connected monitors
+	Monitors				m_Monitors;							// output device for target view
 	Controller				m_Controller;						// controller used for subject calibration
-	Screen*					m_pSelectedScreen;					// target monitor
 	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Raster					m_raster;							// raster class

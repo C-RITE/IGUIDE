@@ -119,9 +119,9 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		CString ref = vt.bstrVal;
 		int index = ref.ReverseFind(_T(' '));
 		ref.Truncate(index);
-		for (auto it = pDoc->m_Screens.begin(); it != pDoc->m_Screens.end(); it++) {
+		for (auto it = pDoc->m_Monitors.m_Devices.begin(); it != pDoc->m_Monitors.m_Devices.end(); it++) {
 			if (it->name == ref) {
-				pDoc->m_pSelectedScreen = it._Ptr;
+				pDoc->m_Monitors.m_pSelectedDevice = it._Ptr;
 				CIGUIDEView* pView = CIGUIDEView::GetView();
 				pView->SendMessage(SCREEN_SELECTED);
 			}
@@ -276,24 +276,29 @@ void Properties::fillProperties() {
 	 
 	CString option;
 
-	// fill monitor property
-	for (auto& screen : pDoc->m_Screens) {
+	if (!pDoc->m_Monitors.m_pSelectedDevice)
+		FixationTargetScreen->SetValue(L"NONE");
 
-		// never parse primary monitor, because it is dedicated to operator view
-		if (screen.number == 1)
-			FixationTargetScreen->SetValue(L"NONE");
-		else if (screen.number == pDoc->m_pSelectedScreen->number) {
-			option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
-			FixationTargetScreen->SetValue(option);
-			CIGUIDEView* pView = CIGUIDEView::GetView();
-			pView->SendMessage(SCREEN_SELECTED);
+	else
+
+		// fill monitor property
+		for (auto& screen : pDoc->m_Monitors.m_Devices) {
+
+			// never parse primary monitor, because it is dedicated to operator view
+			if (screen.number == 1)
+				FixationTargetScreen->SetValue(L"NONE");
+			else if (screen.number == pDoc->m_Monitors.m_pSelectedDevice->number) {
+				option.Format(L"%s (%ix%i)", screen.name, screen.resolution.x, screen.resolution.y);
+				FixationTargetScreen->SetValue(option);
+				CIGUIDEView* pView = CIGUIDEView::GetView();
+				pView->SendMessage(SCREEN_SELECTED);
+			}
+
 		}
 
-	}
-	
 	FixationTargetScreen->RemoveAllOptions();	// need for removal if fillProperties() is called more than once
 
-	for (auto& screen : pDoc->m_Screens) {
+	for (auto& screen : pDoc->m_Monitors.m_Devices) {
 		// never parse primary monitor, because it is dedicated to operator view
 		if (screen.number == 1)	continue;
 		// all others: put in list
