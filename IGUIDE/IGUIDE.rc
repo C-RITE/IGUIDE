@@ -339,7 +339,7 @@ END
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 0,6,2,7
- PRODUCTVERSION 0,6,2,7
+ PRODUCTVERSION 0,6,2,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -361,7 +361,7 @@ BEGIN
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.2.7"
+            VALUE "ProductVersion", "0.6.2.8"
         END
     END
     BLOCK "VarFileInfo"
