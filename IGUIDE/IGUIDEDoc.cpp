@@ -782,7 +782,7 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 void CIGUIDEDoc::OnOverlayTargetzone()
 {
 	// TODO: Add your command handler code here
-	if (m_pGrid->overlay & CROSSHAIR)
+	if (m_pGrid->overlay & TARGETZONE)
 		m_pGrid->overlay = m_pGrid->overlay & (~TARGETZONE);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | TARGETZONE;
