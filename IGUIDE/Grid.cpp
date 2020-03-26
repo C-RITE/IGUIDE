@@ -198,15 +198,19 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawTargetZone(CHwndRenderTarget* pRenderTarget) {
 
-	CD2DPointF a, b;
-	CD2DRectF r;
-
 	if (overlay & TARGETZONE) {
 
-		a.x = CANVAS / 2 - 50;
-		a.y = CANVAS / 2 - 50;
-		b.x = CANVAS / 2 + 50;
-		b.y = CANVAS / 2 + 50;
+		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
+		CD2DPointF a, b;
+		CD2DRectF r;
+
+		CD2DRectF zone = pDoc->ComputeTargetZone();
+
+		a.x = CANVAS / 2 - zone.left * 10;
+		a.y = CANVAS / 2 - zone.top * 10;
+		b.x = CANVAS / 2 + zone.right * 10;
+		b.y = CANVAS / 2 + zone.bottom * 10;
 
 		r = { a.x, a.y, b.x, b.y };
 

@@ -46,17 +46,18 @@ private:
 // Operations
 public:
 
-	bool CheckFOV();
+	bool					CheckFOV();
 	float					CalcEdgeLength(Edge k);
 	CD2DPointF				compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
 	void					ComputeDisplacementAngles();
 	double					ComputeDisplacementAngle(Edge k);
 	double					ComputeOrientationAngle(Edge k);
+	CD2DRectF				ComputeTargetZone();
 	bool					CheckCalibrationValidity();
-	
-	bool					getScreens();
+
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
+
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
 
@@ -112,4 +113,5 @@ public:
 	afx_msg void OnUpdateOverlayLocation(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayTargetzone();
 	afx_msg void OnUpdateOverlayTargetzone(CCmdUI* pCmdUI);
+
 };
