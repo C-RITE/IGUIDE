@@ -6,7 +6,7 @@ enum Overlay
 	GRID = 1,
 	LOCATION = 2,
 	PATCHES = 4,
-	RESERVED = 8,
+	TARGETZONE = 8,
 	OPTICDISC = 16,
 	CROSSHAIR = 32,
 	TRACEINFO = 64,
@@ -71,7 +71,7 @@ public:
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);					// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);	// draw target
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse pointer
-	void DrawTextInfo(CHwndRenderTarget* pRenderTarget);					// draw text
+	void DrawTargetZone(CHwndRenderTarget* pRenderTarget);					// show borders of target visibility
 	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates of cursor and last patch
 	void DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
 

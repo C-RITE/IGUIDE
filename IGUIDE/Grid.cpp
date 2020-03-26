@@ -196,6 +196,26 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 
 }
 
+void Grid::DrawTargetZone(CHwndRenderTarget* pRenderTarget) {
+
+	CD2DPointF a, b;
+	CD2DRectF r;
+
+	if (overlay & TARGETZONE) {
+
+		a.x = CANVAS / 2 - 50;
+		a.y = CANVAS / 2 - 50;
+		b.x = CANVAS / 2 + 50;
+		b.y = CANVAS / 2 + 50;
+
+		r = { a.x, a.y, b.x, b.y };
+
+		pRenderTarget->DrawRectangle(r, m_pWhiteBrush, .1f);
+
+	}
+
+}
+
 void Grid::DrawExtras(CHwndRenderTarget* pRenderTarget) {
 
 	CD2DPointF a, b;

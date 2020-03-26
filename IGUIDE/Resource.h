@@ -35,6 +35,7 @@
 #define IDR_PROPERTIES                  32787
 #define ID_OVERLAY_QUICKHELP            32789
 #define ID_OVERLAY_LOCATION             32795
+#define ID_OVERLAY_TARGETZONE           32798
 #define IDS_PROPERTIES_WND              57346
 
 // Next default values for new objects
@@ -42,7 +43,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        349
-#define _APS_NEXT_COMMAND_VALUE         32798
+#define _APS_NEXT_COMMAND_VALUE         32799
 #define _APS_NEXT_CONTROL_VALUE         1011
 #define _APS_NEXT_SYMED_VALUE           314
 #endif

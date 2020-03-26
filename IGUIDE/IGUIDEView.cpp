@@ -424,6 +424,9 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw accessoires (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawExtras(pRenderTarget);
 
+		// draw target zone
+		pDoc->m_pGrid->DrawTargetZone(pRenderTarget);
+
 		// draw patches
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
 

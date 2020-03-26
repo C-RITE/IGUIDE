@@ -47,6 +47,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_QUICKHELP, &CIGUIDEDoc::OnUpdateOverlayQuickhelp)
 	ON_COMMAND(ID_OVERLAY_LOCATION, &CIGUIDEDoc::OnOverlayLocation)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_LOCATION, &CIGUIDEDoc::OnUpdateOverlayLocation)
+	ON_COMMAND(ID_OVERLAY_TARGETZONE, &CIGUIDEDoc::OnOverlayTargetzone)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TARGETZONE, &CIGUIDEDoc::OnUpdateOverlayTargetzone)
 END_MESSAGE_MAP()
 
 
@@ -563,6 +565,41 @@ void CIGUIDEDoc::OnFundusImport()
 	UpdateAllViews(NULL);
 }
 
+
+void CIGUIDEDoc::ToggleOverlay()
+{
+	// TODO: Add your implementation code here.
+	if (overlayVisible) {
+		if ((m_pGrid->overlay & QUICKHELP) && (m_pGrid->overlay & FUNDUS)) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP | FUNDUS;
+		}
+		else if (m_pGrid->overlay & FUNDUS) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = FUNDUS;
+		}
+		else if (m_pGrid->overlay & QUICKHELP) {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = QUICKHELP;
+		}
+		else {
+			overlaySettings = m_pGrid->overlay;
+			m_pGrid->overlay = 0;
+		}
+		//UpdateAllViews(NULL);
+		overlayVisible = false;
+		return;
+	}
+
+	else {
+		m_pGrid->overlay = overlaySettings;
+		//UpdateAllViews(NULL);
+		overlayVisible = true;
+	}
+
+}
+
+
 void CIGUIDEDoc::OnOverlayGrid()
 {
 	// TODO: Add your command handler code here
@@ -719,35 +756,20 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(m_pGrid->overlay & QUICKHELP);
 }
 
-void CIGUIDEDoc::ToggleOverlay()
+
+void CIGUIDEDoc::OnOverlayTargetzone()
 {
-	// TODO: Add your implementation code here.
-	if (overlayVisible) {
-		if ((m_pGrid->overlay & QUICKHELP) && (m_pGrid->overlay & FUNDUS)) {
-			overlaySettings = m_pGrid->overlay;
-			m_pGrid->overlay = QUICKHELP | FUNDUS;
-		}
-		else if (m_pGrid->overlay & FUNDUS) {
-			overlaySettings = m_pGrid->overlay;
-			m_pGrid->overlay = FUNDUS;
-		}
-		else if (m_pGrid->overlay & QUICKHELP) {
-			overlaySettings = m_pGrid->overlay;
-			m_pGrid->overlay = QUICKHELP;
-		}
-		else {
-			overlaySettings = m_pGrid->overlay;
-			m_pGrid->overlay = 0;
-		}
-		//UpdateAllViews(NULL);
-		overlayVisible = false;
-		return;
-	}
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & CROSSHAIR)
+		m_pGrid->overlay = m_pGrid->overlay & (~TARGETZONE);
+	else
+		m_pGrid->overlay = m_pGrid->overlay | TARGETZONE;
 
-	else {
-		m_pGrid->overlay = overlaySettings;
-		//UpdateAllViews(NULL);
-		overlayVisible = true;
-	}
+}
 
+
+void CIGUIDEDoc::OnUpdateOverlayTargetzone(CCmdUI* pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & TARGETZONE);
 }

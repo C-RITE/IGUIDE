@@ -295,6 +295,7 @@ BEGIN
             MENUITEM "Center",                      ID_OVERLAY_CROSSHAIR
             MENUITEM "Fundus",                      ID_OVERLAY_FUNDUS
             MENUITEM "Location",                    ID_OVERLAY_LOCATION
+            MENUITEM "Target Zone",                 ID_OVERLAY_TARGETZONE
         END
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END

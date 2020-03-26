@@ -65,6 +65,7 @@ public:
 	// Overrides
 public:
 	virtual BOOL OnNewDocument();
+	virtual void OnCloseDocument();
 	virtual void Serialize(CArchive& ar);
 
 #ifdef SHARED_HANDLERS
@@ -92,6 +93,7 @@ protected:
 
 public:
 
+	void ToggleOverlay();
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayPatches();
@@ -108,8 +110,6 @@ public:
 	afx_msg void OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayLocation();
 	afx_msg void OnUpdateOverlayLocation(CCmdUI *pCmdUI);
-	
-	void ToggleOverlay();
-	virtual void OnCloseDocument();
-
+	afx_msg void OnOverlayTargetzone();
+	afx_msg void OnUpdateOverlayTargetzone(CCmdUI* pCmdUI);
 };
