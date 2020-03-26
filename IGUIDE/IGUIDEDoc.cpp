@@ -518,21 +518,24 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 
 CD2DRectF CIGUIDEDoc::ComputeTargetZone() {
 
-	CD2DRectF zone;
-	
 	CD2DPointF rasterMid = m_raster.mid;
-	CD2DPointF monRes = m_Monitors.m_pSelectedDevice->resolution;
+	CD2DSizeF monRes = m_Monitors.m_pSelectedDevice->resolution;
 	
 	float edgeLength = m_raster.meanEdge;
 
 	CD2DSizeF dim;
-	dim.width = monRes.x / edgeLength;
-	dim.height = monRes.y / edgeLength;
+	dim.width = monRes.width / edgeLength;
+	dim.height = monRes.height / edgeLength;
 
-	zone.top = rasterMid.y / edgeLength;
-	zone.bottom = (monRes.y - rasterMid.y) / edgeLength;
-	zone.left = rasterMid.x / edgeLength;
-	zone.right = (monRes.x - rasterMid.x) / edgeLength;
+	CD2DSizeF offset;
+	offset.width = (monRes.width / 2 - rasterMid.x) / edgeLength;
+	offset.height = (monRes.height / 2 - rasterMid.y) / edgeLength;
+
+	CD2DRectF zone(
+		(dim.width - offset.width) / 2,
+		(dim.height - offset.height ) / 2,
+		(dim.width + offset.width) / 2,
+		(dim.height + offset.height) / 2);
 
 	return zone;
 

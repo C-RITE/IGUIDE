@@ -207,10 +207,10 @@ void Grid::DrawTargetZone(CHwndRenderTarget* pRenderTarget) {
 
 		CD2DRectF zone = pDoc->ComputeTargetZone();
 
-		a.x = CANVAS / 2 - zone.left * 10;
-		a.y = CANVAS / 2 - zone.top * 10;
-		b.x = CANVAS / 2 + zone.right * 10;
-		b.y = CANVAS / 2 + zone.bottom * 10;
+		a.x = CANVAS / 2 - zone.left * PPD;
+		a.y = CANVAS / 2 - zone.top * PPD;
+		b.x = CANVAS / 2 + zone.right * PPD;
+		b.y = CANVAS / 2 + zone.bottom * PPD;
 
 		r = { a.x, a.y, b.x, b.y };
 
