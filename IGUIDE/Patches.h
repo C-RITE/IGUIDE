@@ -3,7 +3,8 @@
 
 struct Patch {
 
-	CD2DPointF		coords;
+	CD2DPointF		coordsDEG;
+	CD2DPointF		coordsPX;
 	D2D1_COLOR_F	color;
 	CString			timestamp;
 	double			rastersize;

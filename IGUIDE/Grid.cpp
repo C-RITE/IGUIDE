@@ -57,16 +57,19 @@ void Grid::StorePatch(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	CD2DPointF transLoc = PixelToDegree(loc);
+	CD2DPointF transLoc{ PixelToDegree(loc) };
 	
 	Patch patch;
 
-	patch.coords.x = transLoc.x;
-	patch.coords.y = transLoc.y;
+	patch.coordsDEG.x = transLoc.x;
+	patch.coordsDEG.y = transLoc.y;
+	patch.coordsPX = loc.x;
+	patch.coordsPX = loc.y;
 	patch.color = pDoc->m_raster.color;
 	patch.rastersize = pDoc->m_raster.size;
 	patch.locked = false;
 	patch.defocus = pDoc->getCurrentDefocus();
+
 	patchlist.push_back(patch);
 
 }
@@ -74,13 +77,21 @@ void Grid::StorePatch(CPoint loc) {
 void Grid::makePOI(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CD2DPointF posDeg = PixelToDegree(loc);
+	CD2DPointF posDeg { PixelToDegree(loc) };
 
-	for (int i = -1; i < 1; i++) {
+	float rsdeg; // raster size in degree visual angle
+	rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
+	for (int i = -1; i < 2; i++) {
 		Patch p;
-		p.coords.x = posDeg.x + pDoc->m_raster.size * i;
-		for (int j = -1; j < 1; j++) {
-			p.coords.y = posDeg.y + pDoc->m_raster.size * j;
+		p.coordsDEG.x = posDeg.x + rsdeg * i;
+		p.coordsPX.x = loc.x + rsdeg * PPD;
+		for (int j = -1; j < 2; j++) {
+			p.coordsDEG.y = posDeg.y + rsdeg * j;
+			p.coordsPX.y = loc.y + rsdeg * PPD;
+			p.rastersize = pDoc->m_raster.size;
+			p.color = pDoc->m_raster.color;
+			p.locked = false;
 			POI.push_back(p);
 		}
 	}
@@ -305,10 +316,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		rect1 = {
 
-			(float)(it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(it._Ptr->_Myval.coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
@@ -326,10 +337,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		lastPatch = {
 
-			(float)(patchlist.back().coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(patchlist.back().coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
@@ -358,17 +369,17 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 			lastPatch = {
 
-				(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.width + patchlist.back().coords.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.height + patchlist.back().coords.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2)
+				(float)(zoom * (mouseDist.width + patchlist.back().coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.height + patchlist.back().coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.width + patchlist.back().coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2),
+				(float)(zoom * (mouseDist.height + patchlist.back().coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2)
 
 			};
 
 			if (patchlist.back().locked == false)
 				DrawCoordinates(
 					pRenderTarget,
-					patchlist.back().coords,
+					patchlist.back().coordsDEG,
 					lastPatch);
 
 			pRenderTarget->PopLayer();
@@ -389,8 +400,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 						if (it._Ptr->_Myval.locked == true) {
 
-							pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coords.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
-							pos.y = (float)(zoom * (mouseDist.height + it._Ptr->_Myval.coords.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.y = (float)(zoom * (mouseDist.height + it._Ptr->_Myval.coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2);
 
 							DrawVidNumber(pRenderTarget,
 								pos,
@@ -421,13 +432,13 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
 		float zoom = 1 / pView->getZoomFactor();
-		
-		cursor = {
-			loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.y + (float)(zoom * (rsdeg / 2 / DPP))
-		};
+
+			cursor = {
+				loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
+				loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
+				loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
+				loc.y + (float)(zoom * (rsdeg / 2 / DPP))
+			};
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 

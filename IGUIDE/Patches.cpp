@@ -68,8 +68,8 @@ bool Patches::SaveToFile() {
 	{
 
 		strNumber.Format(_T("%.3d"), number++);
-		strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coords.x);
-		strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coords.y);
+		strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.x);
+		strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.y);
 		strDefocus.Format(_T("%s"), it._Ptr->_Myval.defocus);
 
 		sstream

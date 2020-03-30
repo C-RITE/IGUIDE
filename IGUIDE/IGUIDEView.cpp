@@ -155,8 +155,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		pDoc->m_pGrid->StorePatch(point);
 
 		m_pDlgTarget->Pinpoint(
-			pDoc->m_pGrid->patchlist.back().coords.x,
-			pDoc->m_pGrid->patchlist.back().coords.y);
+			pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+			pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 
 		m_pDlgTarget->RedrawWindow();
 		RedrawWindow();
@@ -485,7 +485,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			}
 
 			if (pDoc->m_pGrid->patchlist.size() > 0)
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 			else
 				m_pDlgTarget->m_POI = NULL;
 
@@ -501,28 +501,28 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			switch (pMsg->wParam) {
 
 				case VK_UP:
-					pDoc->m_pGrid->patchlist.back().coords.y -= .1f;
+					pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
 					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coords.x,
-						pDoc->m_pGrid->patchlist.back().coords.y);
+						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 					break;
 				case VK_DOWN:
-					pDoc->m_pGrid->patchlist.back().coords.y += .1f;
+					pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
 					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coords.x,
-						pDoc->m_pGrid->patchlist.back().coords.y);
+						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 					break;
 				case VK_LEFT:
-					pDoc->m_pGrid->patchlist.back().coords.x -= .1f;
+					pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
 					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coords.x,
-						pDoc->m_pGrid->patchlist.back().coords.y);
+						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 					break;
 				case VK_RIGHT:
-					pDoc->m_pGrid->patchlist.back().coords.x += .1f;
+					pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
 					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coords.x,
-						pDoc->m_pGrid->patchlist.back().coords.y);
+						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 					break;
 				case VK_SPACE:
 					pDoc->m_pGrid->patchlist.lockIn();
@@ -530,7 +530,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			}
 			
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coords.x, pDoc->m_pGrid->patchlist.back().coords.y);
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 			m_pDlgTarget->Invalidate();
 			this->Invalidate();
 
@@ -555,6 +555,11 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F3:
 			ToggleFixationTarget();
+			Invalidate();
+			break;
+
+		case VK_F4:
+			pDoc->m_pGrid->makePOI(mousePos);
 			Invalidate();
 			break;
 

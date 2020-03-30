@@ -356,8 +356,8 @@ CString CIGUIDEDoc::getTraceInfo() {
 	CD2DPointF center(CANVAS / 2, CANVAS / 2);
 	
 	if (!m_pGrid->patchlist.empty()) {
-		k.q.x = m_pGrid->patchlist.back().coords.x;
-		k.q.y = m_pGrid->patchlist.back().coords.y;
+		k.q.x = m_pGrid->patchlist.back().coordsDEG.x;
+		k.q.y = m_pGrid->patchlist.back().coordsDEG.y;
 	}
 
 	double beta = 360 - ComputeOrientationAngle(k);
