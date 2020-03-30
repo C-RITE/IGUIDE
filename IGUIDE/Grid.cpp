@@ -71,6 +71,12 @@ void Grid::StorePatch(CPoint loc) {
 
 }
 
+void Grid::makePOI(CPoint loc) {
+
+
+
+}
+
 void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 	// create own pallette

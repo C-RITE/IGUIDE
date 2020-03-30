@@ -9,6 +9,7 @@ struct Patch {
 	double			rastersize;
 	bool			locked;
 	CString			defocus;
+
 };
 
 class Patches : public std::list<Patch>
@@ -23,9 +24,11 @@ public:
 	bool			isFileTouched() { return fileTouched; };
 	void			lockIn();
 	void			untouch();
+	void			setDiscretion(CD2DSizeF discretion);	// set distance between patches in a group (POI, ROI)
 
 private:
 	
+	CD2DSizeF		discretion;						
 	CString			timestamp;
 	bool			fileTouched;
 	void			GetSysTime(CString &buf);

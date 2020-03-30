@@ -48,7 +48,8 @@ public:
 	bool					isPanning;						// toggle vidnumber visibility
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
-	Patches					patchlist;						// storage for all rasters
+	Patches					patchlist;						// storage for all visited places
+	Patches					POI;							// storage for particular point of interest
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
@@ -58,6 +59,7 @@ public:
 	void DelPatch();
 	void ClearPatchlist();
 	void StorePatch(CPoint point);											// store patch upon click of mouse button
+	void makePOI(CPoint point);												// create a 3x3 patchlist around mousepoint
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
