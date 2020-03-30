@@ -434,7 +434,14 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
 		// draw cursor around mousepointer
+		pDoc->m_pGrid->makePOI(mouseLoc);
+		auto it = pDoc->m_pGrid->POI.begin();
+		while (it != pDoc->m_pGrid->POI.end()) {
+			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, it->coordsPX);
+			it++;
+		}
 		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
+
 
 		// draw debug info
 #ifdef DEBUG

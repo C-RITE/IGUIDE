@@ -79,16 +79,18 @@ void Grid::makePOI(CPoint loc) {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CD2DPointF posDeg { PixelToDegree(loc) };
 
+	POI.clear();
+
 	float rsdeg; // raster size in degree visual angle
 	rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
 	for (int i = -1; i < 2; i++) {
 		Patch p;
 		p.coordsDEG.x = posDeg.x + rsdeg * i;
-		p.coordsPX.x = loc.x + rsdeg * PPD;
+		p.coordsPX.x = loc.x + rsdeg * PPD * i;
 		for (int j = -1; j < 2; j++) {
 			p.coordsDEG.y = posDeg.y + rsdeg * j;
-			p.coordsPX.y = loc.y + rsdeg * PPD;
+			p.coordsPX.y = loc.y + rsdeg * PPD * j;
 			p.rastersize = pDoc->m_raster.size;
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
@@ -142,6 +144,7 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 		D2D1_LAYER_OPTIONS_NONE
 
 	};
+
 }
 
 
@@ -430,15 +433,16 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 	if (pDoc->calibrationComplete) {
 
+
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
 		float zoom = 1 / pView->getZoomFactor();
 
-			cursor = {
-				loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
-				loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
-				loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
-				loc.y + (float)(zoom * (rsdeg / 2 / DPP))
-			};
+		cursor = {
+			loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
+			loc.y + (float)(zoom * (rsdeg / 2 / DPP))
+		};
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
