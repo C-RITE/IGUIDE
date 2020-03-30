@@ -73,7 +73,17 @@ void Grid::StorePatch(CPoint loc) {
 
 void Grid::makePOI(CPoint loc) {
 
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CD2DPointF posDeg = PixelToDegree(loc);
 
+	for (int i = -1; i < 1; i++) {
+		Patch p;
+		p.coords.x = posDeg.x + pDoc->m_raster.size * i;
+		for (int j = -1; j < 1; j++) {
+			p.coords.y = posDeg.y + pDoc->m_raster.size * j;
+			POI.push_back(p);
+		}
+	}
 
 }
 

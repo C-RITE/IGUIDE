@@ -49,7 +49,7 @@ public:
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all visited places
-	Patches					POI;							// storage for particular point of interest
+	Patches					POI;							// storage for patches spanning a point of interest
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
@@ -65,7 +65,7 @@ public:
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
 
 	void DrawExtras(CHwndRenderTarget* pRenderTarget);						// draw information overlay
-	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw information overlay
+	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw grid overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
 	void DrawDebug(CHwndRenderTarget* pRenderTarget);						// draw debug info
