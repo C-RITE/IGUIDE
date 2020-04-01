@@ -1,5 +1,6 @@
 #pragma once
 #include "Patches.h"
+#include <queue>
 
 enum Overlay
 {
@@ -48,8 +49,9 @@ public:
 	bool					isPanning;						// toggle vidnumber visibility
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
-	Patches					patchlist;						// storage for all visited places
+	Patches					patchlist;						// storage for all patches
 	Patches					POI;							// storage for patches spanning a point of interest
+	std::queue<Patch>		patchjob;						// storage queue for points of interest
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
@@ -58,8 +60,10 @@ public:
 
 	void DelPatch();
 	void ClearPatchlist();
-	void StorePatch(CPoint point);											// store patch upon click of mouse button
-	void makePOI(CPoint point);												// create a 3x3 patchlist around mousepoint
+	void StorePatch(Patch p);												// store a patch
+	void makePOI(CPoint point);												// create a patchlist around mousepoint
+	void fillPatchJob();													// fill patch queue to process a POI
+	Patch doPatchJob();														// process patch queue
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
@@ -69,7 +73,8 @@ public:
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);						// draw patches
 	void DrawDebug(CHwndRenderTarget* pRenderTarget);						// draw debug info
-	void DrawLocation(CHwndRenderTarget* pRenderTarget);					// draw defocus
+	void DrawLocation(CHwndRenderTarget* pRenderTarget);					// draw coordinates and defocus of cursor
+	void DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos);		// draw point of interest
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);					// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);	// draw target
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse pointer

@@ -50,21 +50,16 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 }
 
-void Grid::StorePatch(CPoint loc) {
+void Grid::StorePatch(Patch p) {
 
-	// store patches as degrees from fovea
-	// along with color, rastersize and defocus
+	// store patches along with color, rastersize and defocus
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	CD2DPointF transLoc{ PixelToDegree(loc) };
-	
 	Patch patch;
 
-	patch.coordsDEG.x = transLoc.x;
-	patch.coordsDEG.y = transLoc.y;
-	patch.coordsPX = loc.x;
-	patch.coordsPX = loc.y;
+	patch.coordsDEG = p.coordsDEG;
+	patch.coordsPX = p.coordsPX;
 	patch.color = pDoc->m_raster.color;
 	patch.rastersize = pDoc->m_raster.size;
 	patch.locked = false;
@@ -77,26 +72,60 @@ void Grid::StorePatch(CPoint loc) {
 void Grid::makePOI(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
 	CD2DPointF posDeg { PixelToDegree(loc) };
 
 	POI.clear();
 
 	float rsdeg; // raster size in degree visual angle
 	rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+	float zoom = 1 / pView->getZoomFactor();
 
 	for (int i = -1; i < 2; i++) {
 		Patch p;
 		p.coordsDEG.x = posDeg.x + rsdeg * i;
-		p.coordsPX.x = loc.x + rsdeg * PPD * i;
+		p.coordsPX.x = loc.x + rsdeg * PPD * i * zoom;
 		for (int j = -1; j < 2; j++) {
 			p.coordsDEG.y = posDeg.y + rsdeg * j;
-			p.coordsPX.y = loc.y + rsdeg * PPD * j;
+			p.coordsPX.y = loc.y + rsdeg * PPD * j * zoom;
 			p.rastersize = pDoc->m_raster.size;
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
 			POI.push_back(p);
 		}
 	}
+
+}
+
+void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	
+	makePOI(mousePos);
+	
+	auto it = pDoc->m_pGrid->POI.begin();
+
+	while (it != pDoc->m_pGrid->POI.end()) {
+		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, it->coordsPX);
+		it++;
+	}
+
+}
+
+void Grid::fillPatchJob() {
+
+	for (auto it = POI.begin(); it != POI.end(); it++) {
+		patchjob.push(*it);
+	}
+
+}
+
+Patch Grid::doPatchJob() {
+
+	Patch p = patchjob.front();
+	patchjob.pop();
+	return p;
 
 }
 
@@ -319,10 +348,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		rect1 = {
 
-			(float)(it._Ptr->_Myval.coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
@@ -340,10 +369,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		lastPatch = {
 
-			(float)(patchlist.back().coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(patchlist.back().coordsPX.x - rsdeg / 2 ) + CANVAS / 2,
+			(float)(patchlist.back().coordsPX.y - rsdeg / 2 ) + CANVAS / 2,
+			(float)(patchlist.back().coordsPX.x + rsdeg / 2 ) + CANVAS / 2,
+			(float)(patchlist.back().coordsPX.y + rsdeg / 2 ) + CANVAS / 2
 
 		};
 
@@ -433,7 +462,6 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 	if (pDoc->calibrationComplete) {
 
-
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
 		float zoom = 1 / pView->getZoomFactor();
 
@@ -446,7 +474,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
-		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+		//DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
 
@@ -604,7 +632,7 @@ void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 			_T("Consolas"),									// font family name
 			sizeDpi.height / 8);							// font size
 
-		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 215, down_right.y + 120 };
+		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 245, down_right.y + 150 };
 		
 		pRenderTarget->FillRectangle(black_box, m_pBlackBrush);
 		pRenderTarget->DrawRectangle(black_box, m_pGoldenBrush);

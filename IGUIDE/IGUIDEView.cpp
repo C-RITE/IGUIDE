@@ -152,11 +152,10 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	if (pDoc->CheckFOV())
 	{
-		pDoc->m_pGrid->StorePatch(point);
-
-		m_pDlgTarget->Pinpoint(
-			pDoc->m_pGrid->patchlist.back().coordsDEG.x,
-			pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		pDoc->m_pGrid->fillPatchJob();
+		Patch p = pDoc->m_pGrid->doPatchJob();
+		m_pDlgTarget->Pinpoint(p);
+		pDoc->m_pGrid->patchlist.push_back(p);
 
 		m_pDlgTarget->RedrawWindow();
 		RedrawWindow();
@@ -433,15 +432,8 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
-		// draw cursor around mousepointer
-		pDoc->m_pGrid->makePOI(mouseLoc);
-		auto it = pDoc->m_pGrid->POI.begin();
-		while (it != pDoc->m_pGrid->POI.end()) {
-			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, it->coordsPX);
-			it++;
-		}
-		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mouseLoc);
-
+		// draw cursor(s) around mousepointer
+		pDoc->m_pGrid->DrawPOI(pRenderTarget, mouseLoc);
 
 		// draw debug info
 #ifdef DEBUG
@@ -491,10 +483,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				pDoc->m_pGrid->patchlist.SaveToFile();
 			}
 
-			if (pDoc->m_pGrid->patchlist.size() > 0)
+			/*if (pDoc->m_pGrid->patchlist.size() > 0)
 				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 			else
-				m_pDlgTarget->m_POI = NULL;
+				m_pDlgTarget->m_POI = NULL;*/
 
 			m_pDlgTarget->Invalidate();
 			this->Invalidate();
@@ -504,44 +496,45 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		// move patch in any direction and lock with space key except when patch is locked
 
-		if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
-			switch (pMsg->wParam) {
+		//if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
+		//	switch (pMsg->wParam) {
 
-				case VK_UP:
-					pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
-					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
-						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-					break;
-				case VK_DOWN:
-					pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
-					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
-						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-					break;
-				case VK_LEFT:
-					pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
-					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
-						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-					break;
-				case VK_RIGHT:
-					pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
-					m_pDlgTarget->Pinpoint(
-						pDoc->m_pGrid->patchlist.back().coordsDEG.x,
-						pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-					break;
-				case VK_SPACE:
-					pDoc->m_pGrid->patchlist.lockIn();
-					break;
+		//		case VK_UP:
+		//			pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
+		//			m_pDlgTarget->Pinpoint(
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		//			break;
+		//		case VK_DOWN:
+		//			pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
+		//			m_pDlgTarget->Pinpoint(
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		//			break;
+		//		case VK_LEFT:
+		//			pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
+		//			m_pDlgTarget->Pinpoint(
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		//			break;
+		//		case VK_RIGHT:
+		//			pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
+		//			m_pDlgTarget->Pinpoint(
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.x,
+		//				pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		//			break;
+		//		case VK_SPACE:
+		//			pDoc->m_pGrid->patchlist.lockIn();
+		//			pDoc->m_pGrid->patchlist.push_back(pDoc->m_pGrid->POI->pop());
+		//			break;
 
-			}
-			
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-			m_pDlgTarget->Invalidate();
-			this->Invalidate();
+		//	}
+		//	
+		//	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+		//	m_pDlgTarget->Invalidate();
+		//	this->Invalidate();
 
-		}
+		//}
 
 	}
 

@@ -2,8 +2,8 @@
 #include "IGUIDEView.h"
 #include "Edge.h"
 
-//class Edge;
 class CIGUIDEDoc;
+struct Patch;
 
 // Target dialog
 
@@ -39,7 +39,7 @@ public:
 	Target(CIGUIDEView* pParent = NULL);   // standard constructor
 	~Target();
 
-	void Pinpoint(float x, float y);
+	void Pinpoint(Patch p);
 	void setCross();
 	void OnGamePadCalibration();
 	void restartCalibration();

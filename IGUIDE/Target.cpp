@@ -87,10 +87,14 @@ void Target::SetFixationTarget() {
 
 }
 
-void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
+void Target::Pinpoint(Patch p)
 {
 
 	// transform coordinates for fixation target (rotate and scale) using subject calibration
+
+	float centerOffset_x = p.coordsDEG.x;
+	float centerOffset_y = p.coordsDEG.y; 
+
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	if (!pDoc)
 		return;
@@ -132,10 +136,10 @@ void Target::Pinpoint(float centerOffset_x, float centerOffset_y)
 	x = cos(gamma * pi / 180) * c * ppd_client; // calc. y shift and scale to client ppd
 
 	*m_POI = { CD2DRectF(
-		(pDoc->m_raster.mid.x + (float)x - 10),
-		(pDoc->m_raster.mid.y + (float)y - 10),
-		(pDoc->m_raster.mid.x + (float)x + 10),
-		(pDoc->m_raster.mid.y + (float)y + 10))
+		(pDoc->m_raster.mid.x + (float)x - 10 ),
+		(pDoc->m_raster.mid.y + (float)y - 10) ,
+		(pDoc->m_raster.mid.x + (float)x + 10) ,
+		(pDoc->m_raster.mid.y + (float)y + 10) )
 	};
 
 }
