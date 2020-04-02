@@ -153,10 +153,10 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{
 		pDoc->m_pGrid->fillPatchJob();
-		Patch p = pDoc->m_pGrid->doPatchJob();
-		m_pDlgTarget->Pinpoint(p);
-		pDoc->m_pGrid->patchlist.push_back(p);
-
+		Patch* p = pDoc->m_pGrid->doPatchJob();
+		m_pDlgTarget->Pinpoint(*p);
+		pDoc->m_pGrid->patchlist.push_back(*p);
+		delete p;
 		m_pDlgTarget->RedrawWindow();
 		RedrawWindow();
 	}
@@ -208,21 +208,29 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if ((zoom + zDelta / 100) >= 1) {
-
-		zoom += zDelta / 100;
-		
-		CD2DSizeF offset(mouseDist);
-		offset.width *= (1 / zoom);
-		offset.height *= (1 / zoom);
-
-		// zoom into last mouse position
-		scale = D2D1::Matrix3x2F::Scale(D2D1::SizeF(zoom, zoom), CD2DPointF(CANVAS/2, CANVAS/2));
-		translate = D2D1::Matrix3x2F::Translation(offset);
-
+	if (nFlags & MK_SHIFT) {
+		pDoc->m_pGrid->POISize.width += zDelta / WHEEL_DELTA;
+		pDoc->m_pGrid->POISize.height += zDelta / WHEEL_DELTA;
 	}
-	
+
+	else
+
+		if ((zoom + zDelta / 100) >= 1) {
+
+			zoom += zDelta / 100;
+
+			CD2DSizeF offset(mouseDist);
+			offset.width *= (1 / zoom);
+			offset.height *= (1 / zoom);
+
+			// zoom into last mouse position
+			scale = D2D1::Matrix3x2F::Scale(D2D1::SizeF(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
+			translate = D2D1::Matrix3x2F::Translation(offset);
+
+		}
+
 	RedrawWindow();
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
@@ -496,8 +504,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		// move patch in any direction and lock with space key except when patch is locked
 
-		//if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
-		//	switch (pMsg->wParam) {
+		if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
+			switch (pMsg->wParam) {
 
 		//		case VK_UP:
 		//			pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
@@ -523,18 +531,23 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		//				pDoc->m_pGrid->patchlist.back().coordsDEG.x,
 		//				pDoc->m_pGrid->patchlist.back().coordsDEG.y);
 		//			break;
-		//		case VK_SPACE:
-		//			pDoc->m_pGrid->patchlist.lockIn();
-		//			pDoc->m_pGrid->patchlist.push_back(pDoc->m_pGrid->POI->pop());
-		//			break;
+				case VK_SPACE:
+					pDoc->m_pGrid->patchlist.lockIn();
+					Patch* p = pDoc->m_pGrid->doPatchJob();
+					if (p) {
+						m_pDlgTarget->Pinpoint(*p);
+						pDoc->m_pGrid->patchlist.push_back(*p);
+						delete p;
+						break;
+					}
 
-		//	}
-		//	
-		//	m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
-		//	m_pDlgTarget->Invalidate();
-		//	this->Invalidate();
+			}
+			
+			//m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+			m_pDlgTarget->Invalidate();
+			this->Invalidate();
 
-		//}
+		}
 
 	}
 
@@ -555,11 +568,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_F3:
 			ToggleFixationTarget();
-			Invalidate();
-			break;
-
-		case VK_F4:
-			pDoc->m_pGrid->makePOI(mousePos);
 			Invalidate();
 			break;
 

@@ -47,11 +47,12 @@ public:
 	bool					showCursor;						// toggle cursor visibility
 	bool					showCoords;						// toggle coords visibility
 	bool					isPanning;						// toggle vidnumber visibility
+	CD2DSizeF				POISize;						// size of patch matrix
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
-	Patches					POI;							// storage for patches spanning a point of interest
-	std::queue<Patch>		patchjob;						// storage queue for points of interest
+	Patches					POI;							// storage matrix for patches spanning a POI
+	std::queue<Patch>		patchjob;						// storage queue for patch matrices
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
@@ -61,9 +62,9 @@ public:
 	void DelPatch();
 	void ClearPatchlist();
 	void StorePatch(Patch p);												// store a patch
-	void makePOI(CPoint point);												// create a patchlist around mousepoint
+	void makePOI(CPoint point, CD2DSizeF size);								// create a patchlist around mousepoint
 	void fillPatchJob();													// fill patch queue to process a POI
-	Patch doPatchJob();														// process patch queue
+	Patch* doPatchJob();													// process patch queue
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid

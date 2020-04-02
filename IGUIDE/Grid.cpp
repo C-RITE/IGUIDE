@@ -12,6 +12,8 @@ using namespace D2D1;
 Grid::Grid(){
 
 	isPanning = false;
+	POISize = { 1,1 };
+
 }
 
 Grid::~Grid() {
@@ -69,7 +71,7 @@ void Grid::StorePatch(Patch p) {
 
 }
 
-void Grid::makePOI(CPoint loc) {
+void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -78,17 +80,19 @@ void Grid::makePOI(CPoint loc) {
 
 	POI.clear();
 
-	float rsdeg; // raster size in degree visual angle
-	rsdeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	float zoom = 1 / pView->getZoomFactor();
 
-	for (int i = -1; i < 2; i++) {
+	size.width /= 2;
+	size.height /= 2;
+
+	for (float i = -size.width; i < size.width; i++) {
 		Patch p;
-		p.coordsDEG.x = posDeg.x + rsdeg * i;
-		p.coordsPX.x = loc.x + rsdeg * PPD * i * zoom;
-		for (int j = -1; j < 2; j++) {
-			p.coordsDEG.y = posDeg.y + rsdeg * j;
-			p.coordsPX.y = loc.y + rsdeg * PPD * j * zoom;
+		p.coordsDEG.x = posDeg.x + rsDeg * i;
+		p.coordsPX.x = loc.x + rsDeg * PPD * i * zoom;
+		for (int j = -size.height; j < size.height; j++) {
+			p.coordsDEG.y = posDeg.y + rsDeg * j;
+			p.coordsPX.y = loc.y + rsDeg * PPD * j * zoom;
 			p.rastersize = pDoc->m_raster.size;
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
@@ -102,7 +106,7 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	
-	makePOI(mousePos);
+	makePOI(mousePos, POISize);
 	
 	auto it = pDoc->m_pGrid->POI.begin();
 
@@ -121,10 +125,15 @@ void Grid::fillPatchJob() {
 
 }
 
-Patch Grid::doPatchJob() {
+Patch* Grid::doPatchJob() {
 
-	Patch p = patchjob.front();
-	patchjob.pop();
+	Patch* p = NULL;
+
+	if (!patchjob.empty()) {
+		p = new Patch{ patchjob.front() };
+		patchjob.pop();
+	}
+	
 	return p;
 
 }
