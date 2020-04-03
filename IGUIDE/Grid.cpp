@@ -399,8 +399,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		float zoom = 1 / pView->getZoomFactor();
 		CD2DSizeF mouseDist = pView->getMouseDist();
-		mouseDist.width *= 1 / zoom;
-		mouseDist.height *= 1 / zoom;
 
 		// show coords in real pixelspace
 
@@ -410,10 +408,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 			lastPatch = {
 
-				(float)(zoom * (mouseDist.width + patchlist.back().coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.height + patchlist.back().coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.width + patchlist.back().coordsDEG.x + rsdeg / 2 * PPD) + CANVAS / 2),
-				(float)(zoom * (mouseDist.height + patchlist.back().coordsDEG.y + rsdeg / 2 * PPD) + CANVAS / 2)
+				(float)((mouseDist.width + (zoom * patchlist.back().coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * patchlist.back().coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.width + (zoom * patchlist.back().coordsDEG.x * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * patchlist.back().coordsDEG.y * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2)
 
 			};
 
@@ -518,6 +516,7 @@ void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int n
 void Grid::DrawDebug(CHwndRenderTarget* pRenderTarget) {
 
 	// for debug purposes only
+
 	if (overlay & TRACEINFO) {
 
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -624,6 +623,8 @@ void Grid::DrawLocation(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 
+	// draw a list of hotkeys for reference on bottom window
+
 	if (overlay & QUICKHELP) {
 
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -679,6 +680,8 @@ void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTarget) {
 
+	// draw the fixation target
+
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
 	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 
@@ -728,7 +731,7 @@ void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTar
 
 void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
 
-	// draw coordinates around mouse cursor
+	// draw coordinates around patch or cursor
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
