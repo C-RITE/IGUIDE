@@ -439,8 +439,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 						if (it._Ptr->_Myval.locked == true) {
 
-							pos.x = (float)(zoom * (mouseDist.width + it._Ptr->_Myval.coordsDEG.x - rsdeg / 2 * PPD) + CANVAS / 2);
-							pos.y = (float)(zoom * (mouseDist.height + it._Ptr->_Myval.coordsDEG.y - rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->_Myval.coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->_Myval.coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 
 							DrawVidNumber(pRenderTarget,
 								pos,
