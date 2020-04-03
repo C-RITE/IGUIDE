@@ -481,7 +481,8 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
-		//DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+		if (POI.size() == 1)
+		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
 
@@ -489,6 +490,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
 	
+	// Draw video number into top left corner of locked patch
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString vidText;

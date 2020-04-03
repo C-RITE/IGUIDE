@@ -618,7 +618,6 @@ void CIGUIDEDoc::ToggleOverlay()
 
 	else {
 		m_pGrid->overlay = overlaySettings;
-		//UpdateAllViews(NULL);
 		overlayVisible = true;
 	}
 
@@ -727,6 +726,7 @@ void CIGUIDEDoc::OnOverlayTraceinfo()
 		m_pGrid->overlay = m_pGrid->overlay | TRACEINFO;
 
 	UpdateAllViews(NULL);
+
 }
 
 
@@ -772,6 +772,8 @@ void CIGUIDEDoc::OnOverlayLocation()
 		overlaySettings = overlaySettings | LOCATION;
 	}
 
+	UpdateAllViews(NULL);
+
 }
 
 
@@ -789,6 +791,8 @@ void CIGUIDEDoc::OnOverlayTargetzone()
 		m_pGrid->overlay = m_pGrid->overlay & (~TARGETZONE);
 	else
 		m_pGrid->overlay = m_pGrid->overlay | TARGETZONE;
+
+	UpdateAllViews(NULL);
 
 }
 
