@@ -9,6 +9,7 @@ struct Patch {
 	CString			timestamp;
 	double			rastersize;
 	bool			locked;
+	int				index;
 	CString			defocus;
 
 };
@@ -23,15 +24,19 @@ public:
 	
 	bool			SaveToFile();
 	bool			isFileTouched() { return fileTouched; };
-	void			lockIn();
+	BOOL			lockIn();
+	void			revertLast();
+	void			delPatch();
 	void			untouch();
-	void			setDiscretion(CD2DSizeF discretion);	// set distance between patches in a group (POI, ROI)
+	void			setOverlap(CD2DSizeF overlap);	// set distance between patches in a group (POI, ROI)
 
 private:
 	
 	CD2DSizeF		discretion;						
 	CString			timestamp;
+	Patch			last;
 	bool			fileTouched;
+	bool			finished;
 	void			GetSysTime(CString &buf);
 	void			cleanup();
 

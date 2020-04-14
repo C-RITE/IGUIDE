@@ -25,16 +25,39 @@ void Patches::GetSysTime(CString &buf) {
 
 
 
-void Patches::lockIn(){
+BOOL Patches::lockIn(){
 
 	CString systime;
 	GetSysTime(systime);
-	this->back().locked = true;
-	this->back().timestamp = systime.GetString();
-	cleanup();
-	SaveToFile();
+
+	if (this->back().locked == false) {
+		this->back().locked = true;
+		this->back().timestamp = systime.GetString();
+		cleanup();
+		SaveToFile();
+		return true;
+	}
+
+	return false;
 
 }
+
+void Patches::revertLast() {
+
+	this->push_back(last);
+	this->back().locked = false;
+
+}
+
+void Patches::delPatch() {
+
+	if (this->size() > 0) {
+		this->last = this->back();
+		this->pop_back();
+	}
+
+}
+
 
 void Patches::untouch() {
 

@@ -12,24 +12,18 @@ using namespace D2D1;
 Grid::Grid(){
 
 	isPanning = false;
-	POISize = { 1,1 };
-
+	POISize = { 1, 1 };
+	isFinished = false;
 }
 
 Grid::~Grid() {
 }
 
-void Grid::DelPatch() {
-
-	if (patchlist.size() > 0)
-		patchlist.pop_back();
-
-}
 
 void Grid::ClearPatchlist() {
 
 	patchlist.clear();
-
+	
 }
 
 CD2DPointF Grid::PixelToDegree(CPoint point) {
@@ -117,11 +111,13 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
 
 }
 
-void Grid::fillPatchJob() {
+void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 	for (auto it = POI.begin(); it != POI.end(); it++) {
 		patchjob.push(*it);
 	}
+
+	CreatePatchJobGeometry(pRenderTarget);
 
 }
 
@@ -133,7 +129,10 @@ Patch* Grid::doPatchJob() {
 		p = new Patch{ patchjob.front() };
 		patchjob.pop();
 	}
-	
+
+	else
+		isFinished = true;
+
 	return p;
 
 }
@@ -155,6 +154,7 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 	m_pLayer1 = new CD2DLayer(pRenderTarget);	// opacity layer parameters
 	m_pGridGeom = NULL;
+	m_pPatchJobGeom = NULL;
 
 	showCoords = true;
 	showCursor = true;
@@ -182,6 +182,88 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 		D2D1_LAYER_OPTIONS_NONE
 
 	};
+
+}
+
+void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
+	
+	// patchjob geometry creation
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	
+	m_pPatchJobGeom = new CD2DPathGeometry(pRenderTarget);
+	m_pPatchJobGeom->Create(pRenderTarget);
+
+	CD2DGeometrySink PatchGeomSink(*m_pPatchJobGeom);
+	CD2DPointF fromPoint, toPoint, firstPoint;
+
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
+	// x axis
+	auto it = pDoc->m_pGrid->POI.begin();
+
+	while (it != pDoc->m_pGrid->POI.end()) {
+
+		fromPoint = { 
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
+
+		if (it == pDoc->m_pGrid->POI.begin())
+			firstPoint = fromPoint;
+
+		toPoint = { (float)(fromPoint.x + rsDeg * PPD), fromPoint.y };
+
+		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		PatchGeomSink.AddLine(toPoint);
+		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		it++;
+
+	}
+
+	// draw the last line in x
+	fromPoint = { firstPoint.x, (float)(fromPoint.y + rsDeg * PPD)};
+	toPoint = { toPoint.x, (float)(toPoint.y + rsDeg * PPD) };
+
+	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+	PatchGeomSink.AddLine(toPoint);
+	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+
+
+	// y axis
+	it = pDoc->m_pGrid->POI.begin();
+
+	while (it != pDoc->m_pGrid->POI.end()) {
+
+		fromPoint = {
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
+
+		toPoint = { fromPoint.x, (float)(fromPoint.y + rsDeg * PPD) };
+
+		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		PatchGeomSink.AddLine(toPoint);
+		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		it++;
+
+	}
+
+	// draw the last line in y
+	fromPoint = { (float)(fromPoint.x + rsDeg * PPD), firstPoint.y };
+	toPoint = { fromPoint.x, (float)(firstPoint.y + sqrt(pDoc->m_pGrid->POI.size()) * rsDeg * PPD) };
+
+	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+	PatchGeomSink.AddLine(toPoint);
+	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+
+}
+
+void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
+
+	if (patchjob.size() > 0)
+		pRenderTarget->DrawGeometry(
+			m_pPatchJobGeom,
+			m_pWhiteBrush,
+			.1f);
 
 }
 
@@ -461,8 +543,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 	// show cursor around the mouse pointer
-	if (!showCursor)
-		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
