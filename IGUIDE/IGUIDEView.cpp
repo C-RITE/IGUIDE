@@ -155,7 +155,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 		pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 		
-		if (Patch* p = pDoc->m_pGrid->doPatchJob()) {
+		if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
 			m_pDlgTarget->Pinpoint(*p);
 			pDoc->m_pGrid->patchlist.push_back(*p);
 			delete p;
@@ -512,7 +512,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		// move patch in any direction and lock with space key
 
-		if (pMsg->message == WM_KEYDOWN && pDoc->m_pGrid->patchlist.back().locked == false) {
+		if (pMsg->message == WM_KEYDOWN) {
+		
+			Patch* p = NULL;
+
 			switch (pMsg->wParam) {
 
 			case VK_UP:
@@ -530,6 +533,27 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case VK_RIGHT:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
 				break;
+
+			case 'N': 
+				 p = pDoc->m_pGrid->doPatchJob(NEXT);
+					if (p) {
+						m_pDlgTarget->Pinpoint(*p);
+						pDoc->m_pGrid->patchlist.push_back(*p);
+						delete p;
+					}
+
+				break;
+
+			case 'B':
+				p = pDoc->m_pGrid->doPatchJob(PREV);
+					if (p) {
+						m_pDlgTarget->Pinpoint(*p);
+						pDoc->m_pGrid->patchlist.push_back(*p);
+						delete p;
+					}
+
+				break;
+
 			}
 
 		}
@@ -538,22 +562,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				switch (pMsg->wParam) {
 
 				case VK_SPACE:
-					if (pDoc->m_pGrid->patchlist.lockIn()) {
-
-						Patch* p = pDoc->m_pGrid->doPatchJob();
-
-						if (p) {
-							m_pDlgTarget->Pinpoint(*p);
- 							pDoc->m_pGrid->patchlist.push_back(*p);
-							delete p;
-						}
-
+					if (!pDoc->m_pGrid->patchjob.checkComplete()) {
+						if (!pDoc->m_pGrid->patchlist.commit())
+							pDoc->m_pGrid->patchlist.revertLast();
+						else
+							pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
 					}
-
-					else if (!pDoc->m_pGrid->isJobFinished()){
-						pDoc->m_pGrid->patchlist.revertLast();
-					}
-
 					break;
 
 				}

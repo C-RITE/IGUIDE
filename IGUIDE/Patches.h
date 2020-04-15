@@ -14,6 +14,13 @@ struct Patch {
 
 };
 
+enum Element
+{
+	INIT = 0,
+	NEXT = 1,
+	PREV = 2
+};
+
 class Patches : public std::list<Patch>
 {
 
@@ -24,15 +31,16 @@ public:
 	
 	bool			SaveToFile();
 	bool			isFileTouched() { return fileTouched; };
-	BOOL			lockIn();
+	bool			commit();
+	bool			checkComplete();
 	void			revertLast();
 	void			delPatch();
 	void			untouch();
-	void			setOverlap(CD2DSizeF overlap);	// set distance between patches in a group (POI, ROI)
+	void			setOverlap(CD2DSizeF overlap);	// set distance between patches in a patch matrix (POI, ROI)
 
 private:
 	
-	CD2DSizeF		discretion;						
+	CD2DSizeF		overlap;						
 	CString			timestamp;
 	Patch			last;
 	bool			fileTouched;

@@ -23,22 +23,41 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
-
-
-BOOL Patches::lockIn(){
+bool Patches::commit() {
 
 	CString systime;
 	GetSysTime(systime);
 
-	if (this->back().locked == false) {
-		this->back().locked = true;
-		this->back().timestamp = systime.GetString();
-		cleanup();
-		SaveToFile();
-		return true;
-	}
+	if (this->back().locked == true)
+		return false;
 
-	return false;
+	this->back().locked = true;
+	this->back().timestamp = systime.GetString();
+
+	last = this->back();
+
+	cleanup();
+	SaveToFile();
+
+	return true;
+
+}
+
+bool Patches::checkComplete() {
+
+	// Check if all patches are commited (i.e. locked)
+	int locked = 0;
+	bool result = false;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		if (it->locked == true)
+			locked++;
+	}
+	
+	if (locked == this->size())
+		result = true;
+
+	return result;
 
 }
 

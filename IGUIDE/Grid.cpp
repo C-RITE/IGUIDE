@@ -9,11 +9,12 @@
 
 using namespace D2D1;
 
-Grid::Grid(){
+Grid::Grid(): currentPatch(patchlist.end()){
 
 	isPanning = false;
 	POISize = { 1, 1 };
 	isFinished = false;
+
 }
 
 Grid::~Grid() {
@@ -114,24 +115,44 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
 void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 	for (auto it = POI.begin(); it != POI.end(); it++) {
-		patchjob.push(*it);
+		patchjob.push_back(*it);
 	}
 
 	CreatePatchJobGeometry(pRenderTarget);
 
 }
 
-Patch* Grid::doPatchJob() {
+Patch* Grid::doPatchJob(Element e) {
 
 	Patch* p = NULL;
 
-	if (!patchjob.empty()) {
-		p = new Patch{ patchjob.front() };
-		patchjob.pop();
-	}
+	if (!patchjob.checkComplete()) {
 
-	else
-		isFinished = true;
+		switch (e) {
+
+		case INIT:
+			currentPatch = patchjob.begin();
+			p = new Patch(*currentPatch);
+			break;
+
+		case NEXT:
+			if (currentPatch != patchjob.end()) {
+				currentPatch++;
+				if (currentPatch != patchjob.end())
+					p = new Patch(*currentPatch);
+			}
+			break;
+
+		case PREV:
+			if (currentPatch != patchjob.begin()) {
+				currentPatch--;
+				p = new Patch(*currentPatch);
+			}
+			break;
+
+		}
+
+	}
 
 	return p;
 

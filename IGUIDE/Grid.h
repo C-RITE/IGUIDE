@@ -55,8 +55,9 @@ public:
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
+	Patches::iterator		currentPatch;					// current focus on patch
 	Patches					POI;							// storage matrix for patches spanning a POI
-	std::queue<Patch>		patchjob;						// storage queue for patch matrices
+	Patches					patchjob;						// storage queue for patch matrices
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
@@ -68,8 +69,7 @@ public:
 	void StorePatch(Patch p);												// store a patch
 	void makePOI(CPoint point, CD2DSizeF size);								// create a patchlist around mousepoint
 	void fillPatchJob(CHwndRenderTarget* pRenderTarget);					// fill patch queue to process a POI
-	Patch* doPatchJob();													// process patch queue
-	bool isJobFinished() { return isFinished; };
+	Patch* doPatchJob(Element e);											// process patch queue
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
