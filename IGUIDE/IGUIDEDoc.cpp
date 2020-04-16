@@ -64,7 +64,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
-
+	m_Overlap = .1f;
 	overlaySettings = 0;
 	defocus = L"0";
 

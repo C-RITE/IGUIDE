@@ -93,7 +93,11 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 			p.visited = false;
 			POI.push_back(p);
 		}
+
 	}
+
+	// add overlap
+	POI.setOverlap(pDoc->m_Overlap);
 
 }
 

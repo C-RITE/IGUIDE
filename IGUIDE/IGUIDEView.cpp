@@ -360,6 +360,7 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	//pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
 
 	SetFixationTarget();
+	//pDoc->m_pGrid->patchjob.setOverlap(pDoc->m_Overlap);
 
 	m_pDlgTarget->SetFixationTarget();
 	m_pDlgTarget->Invalidate();
