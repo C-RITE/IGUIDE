@@ -9,8 +9,17 @@ struct Patch {
 	CString			timestamp;
 	double			rastersize;
 	bool			locked;
+	bool			visited;
+	int				index;
 	CString			defocus;
 
+};
+
+enum Element
+{
+	INIT = 0,
+	NEXT = 1,
+	PREV = 2
 };
 
 class Patches : public std::list<Patch>
@@ -23,15 +32,22 @@ public:
 	
 	bool			SaveToFile();
 	bool			isFileTouched() { return fileTouched; };
-	void			lockIn();
+	bool			isFinished() { return finished; };
+	bool			commit();
+	bool			checkComplete();
+	void			revertLast();
+	void			delPatch();
 	void			untouch();
-	void			setDiscretion(CD2DSizeF discretion);	// set distance between patches in a group (POI, ROI)
+	void			setOverlap(CD2DSizeF overlap);	// set distance between patches in a patch matrix (POI, ROI)
 
 private:
 	
-	CD2DSizeF		discretion;						
+	CD2DSizeF		overlap;						
 	CString			timestamp;
+	Patch			last;
+	int				index;
 	bool			fileTouched;
+	bool			finished;
 	void			GetSysTime(CString &buf);
 	void			cleanup();
 

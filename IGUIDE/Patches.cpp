@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE)
+Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
 {
 }
 
@@ -23,18 +23,64 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
-
-
-void Patches::lockIn(){
+bool Patches::commit() {
 
 	CString systime;
 	GetSysTime(systime);
+
+	if (this->back().locked == true)
+		return false;
+
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
+
+	this->back().index = index;
+	index++;
+
+	last = this->back();
+
 	cleanup();
 	SaveToFile();
 
+	return true;
+
 }
+
+bool Patches::checkComplete() {
+
+	// Check if all patches are commited (i.e. locked)
+	finished = false;
+	int locked = 0;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		if (it->locked == true)
+			locked++;
+	}
+	
+	if (locked == this->size()) {
+		finished = true;
+	}
+
+	return finished;
+
+}
+
+void Patches::revertLast() {
+
+	this->push_back(last);
+	this->back().locked = false;
+
+}
+
+void Patches::delPatch() {
+
+	if (this->size() > 0) {
+		this->last = this->back();
+		this->pop_back();
+	}
+
+}
+
 
 void Patches::untouch() {
 
