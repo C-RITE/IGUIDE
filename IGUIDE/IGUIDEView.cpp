@@ -509,11 +509,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		}
 
-
 		// move patch in any direction and lock with space key
 
 		if (pMsg->message == WM_KEYDOWN) {
-		
+
 			Patch* p = NULL;
 
 			switch (pMsg->wParam) {
@@ -534,83 +533,73 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
 				break;
 
-			case 'N': 
-				 p = pDoc->m_pGrid->doPatchJob(NEXT);
-					if (p) {
-						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.push_back(*p);
-						delete p;
+			case VK_SPACE:
+				if (!pDoc->m_pGrid->patchjob.checkComplete()) {
+					if (!pDoc->m_pGrid->patchlist.commit())
+						pDoc->m_pGrid->patchlist.revertLast();
+					else {
+						pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
+						pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
 					}
+				}
+				else pDoc->m_pGrid->patchjob.clear();
+				break;
 
+			case 'N':
+				p = pDoc->m_pGrid->doPatchJob(NEXT);
+				if (p) {
+					m_pDlgTarget->Pinpoint(*p);
+					pDoc->m_pGrid->patchlist.push_back(*p);
+					delete p;
+				}
 				break;
 
 			case 'B':
 				p = pDoc->m_pGrid->doPatchJob(PREV);
-					if (p) {
-						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.push_back(*p);
-						delete p;
-					}
+				if (p) {
+					m_pDlgTarget->Pinpoint(*p);
+					pDoc->m_pGrid->patchlist.push_back(*p);
+					delete p;
+				}
+				break;
 
+			}
+
+			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+			m_pDlgTarget->Invalidate();
+
+		}
+
+	}
+		// other keyboard controls
+
+		if (pMsg->message == WM_KEYDOWN) {
+			switch (pMsg->wParam) {
+
+			case VK_F1:
+				pDoc->OnOverlayQuickhelp();
+				break;
+
+			case VK_F2:
+				pDoc->ToggleOverlay();
+				break;
+
+			case VK_F3:
+				ToggleFixationTarget();
+				break;
+
+			case VK_F12:
+				if (m_pDlgTarget->calibrating == false) {
+					pDoc->m_pGrid->showCursor = false;
+					m_pDlgTarget->restartCalibration();
+				}
 				break;
 
 			}
 
 		}
 
-			if (pMsg->message == WM_KEYDOWN){
-				switch (pMsg->wParam) {
-
-				case VK_SPACE:
-					if (!pDoc->m_pGrid->patchjob.checkComplete()) {
-						if (!pDoc->m_pGrid->patchlist.commit())
-							pDoc->m_pGrid->patchlist.revertLast();
-						else
-							pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
-					}
-					break;
-
-				}
-
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
-			m_pDlgTarget->Invalidate();
-			this->Invalidate();
-
-		}
-
-	}
-
-	// other keyboard controls
-
-	if (pMsg->message == WM_KEYDOWN) {
-		switch (pMsg->wParam) {
-
-		case VK_F1:
-			pDoc->OnOverlayQuickhelp();
-			Invalidate();
-			break;
-
-		case VK_F2:
-			pDoc->ToggleOverlay();
-			Invalidate();
-			break;
-
-		case VK_F3:
-			ToggleFixationTarget();
-			Invalidate();
-			break;
-
-		case VK_F12:
-			if (m_pDlgTarget->calibrating == false) {
-				pDoc->m_pGrid->showCursor = false;
-				Invalidate();
-				m_pDlgTarget->restartCalibration();
-			}
-			break;
-
-		}
-
-	}
+		this->Invalidate();
 
 	return CView::PreTranslateMessage(pMsg);
 

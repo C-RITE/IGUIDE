@@ -43,6 +43,7 @@ private:
 	CD2DSizeF		overlap;						
 	CString			timestamp;
 	Patch			last;
+	int				index;
 	bool			fileTouched;
 	bool			finished;
 	void			GetSysTime(CString &buf);

@@ -88,6 +88,6 @@ public:
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc);	// draw patch outline around mouse pointer
 	void DrawTargetZone(CHwndRenderTarget* pRenderTarget);					// show borders of target visibility
 	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates of cursor and last patch
-	void DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
+	void DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
 
 };

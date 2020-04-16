@@ -138,8 +138,9 @@ Patch* Grid::doPatchJob(Element e) {
 		case NEXT:
 			if (currentPatch != patchjob.end()) {
 				currentPatch++;
-				if (currentPatch != patchjob.end())
+				if (currentPatch != patchjob.end()) {
 					p = new Patch(*currentPatch);
+				}
 			}
 			break;
 
@@ -468,7 +469,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
-		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
+		if (it._Ptr->_Myval.locked)
+			pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 
 	}
@@ -532,8 +534,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		if (!isPanning) {
 
-			int number = 1;
-
 				CD2DPointF pos;
 
 				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
@@ -545,11 +545,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->_Myval.coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->_Myval.coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 
-							DrawVidNumber(pRenderTarget,
+							DrawVidIndex(
+								pRenderTarget,
 								pos,
-								number);
-
-							number++;
+								it._Ptr->_Myval.index);
 
 						}
 
@@ -589,7 +588,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 }
 
-void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
+void Grid::DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
 	
 	// Draw video number into top left corner of locked patch
 
