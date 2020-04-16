@@ -91,6 +91,7 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 			p.rastersize = pDoc->m_raster.size;
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
+			p.visited = false;
 			POI.push_back(p);
 		}
 	}
@@ -469,7 +470,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
-		if (it._Ptr->_Myval.locked)
+		if (it._Ptr->_Myval.locked && !it._Ptr->_Myval.visited)
 			pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 

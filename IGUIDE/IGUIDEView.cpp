@@ -548,6 +548,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case 'N':
 				p = pDoc->m_pGrid->doPatchJob(NEXT);
 				if (p) {
+					if (p->locked)
+						p->visited = true;
 					m_pDlgTarget->Pinpoint(*p);
 					pDoc->m_pGrid->patchlist.push_back(*p);
 					delete p;
@@ -557,6 +559,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case 'B':
 				p = pDoc->m_pGrid->doPatchJob(PREV);
 				if (p) {
+					if (p->locked)
+						p->visited = true;
 					m_pDlgTarget->Pinpoint(*p);
 					pDoc->m_pGrid->patchlist.push_back(*p);
 					delete p;

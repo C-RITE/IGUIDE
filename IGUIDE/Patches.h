@@ -9,6 +9,7 @@ struct Patch {
 	CString			timestamp;
 	double			rastersize;
 	bool			locked;
+	bool			visited;
 	int				index;
 	CString			defocus;
 
