@@ -13,7 +13,6 @@ Grid::Grid(): currentPatch(patchlist.end()){
 
 	isPanning = false;
 	POISize = { 1, 1 };
-	isFinished = false;
 
 }
 

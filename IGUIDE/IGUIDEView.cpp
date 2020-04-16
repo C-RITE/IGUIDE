@@ -485,7 +485,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	// keyboard controls depending on drawn patches
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (pDoc->m_pGrid->patchlist.size() > 0) {
+	if (pDoc->m_pGrid->patchlist.size() > 0)
+	{
 
 		// delete last patch with right mouse button
 
@@ -510,10 +511,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		}
 
 		// move patch in any direction and lock with space key
+		Patch* p = NULL;
 
-		if (pMsg->message == WM_KEYDOWN) {
-
-			Patch* p = NULL;
+		if (pMsg->message == WM_KEYDOWN && !pDoc->m_pGrid->patchlist.back().locked) {
 
 			switch (pMsg->wParam) {
 
@@ -533,16 +533,21 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
 				break;
 
+			}
+
+		}
+
+		if (pMsg->message == WM_KEYDOWN) {
+
+			switch (pMsg->wParam) {
+
 			case VK_SPACE:
-				if (!pDoc->m_pGrid->patchjob.checkComplete()) {
-					if (!pDoc->m_pGrid->patchlist.commit())
-						pDoc->m_pGrid->patchlist.revertLast();
-					else {
-						pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
-						pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
-					}
+				if (!pDoc->m_pGrid->patchlist.commit())
+					pDoc->m_pGrid->patchlist.revertLast();
+				else {
+					pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
+					pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
 				}
-				else pDoc->m_pGrid->patchjob.clear();
 				break;
 
 			case 'N':
@@ -571,39 +576,50 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
 			m_pDlgTarget->Invalidate();
-
 		}
 
-	}
-		// other keyboard controls
+		if (pMsg->message == WM_KEYUP) {
 
-		if (pMsg->message == WM_KEYDOWN) {
-			switch (pMsg->wParam) {
-
-			case VK_F1:
-				pDoc->OnOverlayQuickhelp();
-				break;
-
-			case VK_F2:
-				pDoc->ToggleOverlay();
-				break;
-
-			case VK_F3:
-				ToggleFixationTarget();
-				break;
-
-			case VK_F12:
-				if (m_pDlgTarget->calibrating == false) {
-					pDoc->m_pGrid->showCursor = false;
-					m_pDlgTarget->restartCalibration();
-				}
-				break;
-
+			switch (pMsg->wParam)
+			{
+			case VK_SPACE:
+				if (pDoc->m_pGrid->patchjob.checkComplete())
+					pDoc->m_pGrid->patchjob.clear();
 			}
 
 		}
 
-		this->Invalidate();
+	}
+
+	// other keyboard controls
+
+	if (pMsg->message == WM_KEYDOWN) {
+		switch (pMsg->wParam) {
+
+		case VK_F1:
+			pDoc->OnOverlayQuickhelp();
+			break;
+
+		case VK_F2:
+			pDoc->ToggleOverlay();
+			break;
+
+		case VK_F3:
+			ToggleFixationTarget();
+			break;
+
+		case VK_F12:
+			if (m_pDlgTarget->calibrating == false) {
+				pDoc->m_pGrid->showCursor = false;
+				m_pDlgTarget->restartCalibration();
+			}
+			break;
+
+		}
+
+	}
+
+	this->Invalidate();
 
 	return CView::PreTranslateMessage(pMsg);
 

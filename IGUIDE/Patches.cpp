@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE), finished(FALSE), index(1)
+Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
 {
 }
 
@@ -49,6 +49,7 @@ bool Patches::commit() {
 bool Patches::checkComplete() {
 
 	// Check if all patches are commited (i.e. locked)
+	finished = false;
 	int locked = 0;
 
 	for (auto it = this->begin(); it != this->end(); it++) {

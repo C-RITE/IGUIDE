@@ -47,7 +47,6 @@ public:
 	bool					showCursor;						// toggle cursor visibility
 	bool					showCoords;						// toggle coords visibility
 	bool					isPanning;						// toggle vidnumber visibility
-	bool					isFinished;						// patch job is done
 
 public:
 

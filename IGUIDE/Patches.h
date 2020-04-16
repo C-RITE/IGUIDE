@@ -32,6 +32,7 @@ public:
 	
 	bool			SaveToFile();
 	bool			isFileTouched() { return fileTouched; };
+	bool			isFinished() { return finished; };
 	bool			commit();
 	bool			checkComplete();
 	void			revertLast();
