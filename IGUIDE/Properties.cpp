@@ -96,6 +96,10 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		pDoc->m_raster.size = vt;
 	}
 
+	if (propName == L"Overlap") {
+		pDoc->m_Overlap = vt;
+	}
+
 	if (propName == L"Scale") {
 		pDoc->m_FixationTargetSize = vt;
 	}
@@ -192,7 +196,8 @@ void Properties::InitPropList()
 	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"", NULL, _T("Choose output directory of captured video files"));
 	FixationFile = new MyCMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
 	Patch = new CMFCPropertyGridProperty(L"Patch");
-	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Choose the raster size in degrees"), NULL, NULL, NULL);
+	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Set the raster size in degrees"), NULL, NULL, NULL);
+	Overlap = new CMFCPropertyGridProperty(L"Overlap", OverlapValue, _T("Set the the overlap value of neighboring patches in degrees"), NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
 	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
 	Color->EnableOtherButton(L"Other..");
@@ -217,6 +222,7 @@ void Properties::InitPropList()
 	PhysParam->AddSubItem(RasterSize);
 	m_wndPropList.AddProperty(Patch);
 	Patch->AddSubItem(Color);
+	Patch->AddSubItem(Overlap);
 	m_wndPropList.AddProperty(ICANDI);
 	ICANDI->AddSubItem(VideoFolder);
 	m_wndPropList.AddProperty(TargetView);
@@ -239,6 +245,7 @@ void Properties::fillProperties() {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	_variant_t rs(pDoc->m_raster.size);
+	_variant_t ol(pDoc->m_Overlap);
 	_variant_t fts(pDoc->m_FixationTargetSize);
 	_variant_t ft(pDoc->m_FixationTarget);
 	_variant_t od(pDoc->m_OutputDir);
@@ -251,6 +258,7 @@ void Properties::fillProperties() {
 	
 	VideoFolder->SetValue(od);
 	RasterSize->SetValue(rs);
+	Overlap->SetValue(ol);
 	FixationTargetSize->SetValue(fts);
 	FixationFile->SetValue(ft);
 	AOSACA_IP->SetValue(aoip);

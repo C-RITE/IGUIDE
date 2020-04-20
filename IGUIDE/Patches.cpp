@@ -81,6 +81,24 @@ void Patches::delPatch() {
 
 }
 
+void Patches::setOverlap(float overlap, float rsDeg) {
+
+	CD2DPointF mid; // middle of POI matrix
+
+	float delta_x, delta_y;
+
+	mid.x = (this->front().coordsDEG.x + this->back().coordsDEG.x) / 2;
+	mid.y = (this->front().coordsDEG.y + this->back().coordsDEG.y) / 2;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		delta_x = (mid.x - it->coordsDEG.x) * (overlap / rsDeg);
+		delta_y = (mid.y - it->coordsDEG.y) * (overlap / rsDeg);
+		it._Ptr->_Myval.coordsDEG.x += delta_x;
+		it._Ptr->_Myval.coordsDEG.y += delta_y;
+	}
+
+}
+
 
 void Patches::untouch() {
 
@@ -97,6 +115,7 @@ void Patches::cleanup() {
 		else
 			it++;
 	}
+
 }
 
 bool Patches::SaveToFile() {

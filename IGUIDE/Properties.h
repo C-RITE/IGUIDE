@@ -75,6 +75,7 @@ public:
 
 	CMFCPropertyGridProperty*		Patch;
 	CMFCPropertyGridProperty*		RasterSize;
+	CMFCPropertyGridProperty*		Overlap;
 	CMFCPropertyGridProperty*		PhysParam;
 	CMFCPropertyGridProperty*		FixationTargetSize;
 	CMFCPropertyGridProperty*		FixationTargetScreen;
@@ -96,6 +97,7 @@ private:
 
 	_variant_t FixationTargetValue;
 	_variant_t RasterSizeValue;
+	_variant_t OverlapValue;
 	_variant_t ScreenValue;
 	_variant_t InputControl;
 	_variant_t AOSACA_IPValue;
