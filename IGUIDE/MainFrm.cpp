@@ -303,15 +303,19 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	CWnd* active = GetActiveView();
-	CWnd* focus = GetFocus();
-	
-	// route keyboard input to remote control
-	// but only if the view has focus (not property pane, etc.)
-	if (active == focus)
-		RemoteControl.PreTranslateMessage(pMsg);
+	if (RemoteControl.getActiveConnections() > 0) {
 
-	// pass it on
+		CWnd* active = GetActiveView();
+		CWnd* focus = GetFocus();
+
+		// route keyboard input to remote control
+		// but only if the view has focus (not property pane, etc.)
+		if (active == focus)
+			RemoteControl.PreTranslateMessage(pMsg);
+
+	}
+
+	// call base class
 	return CFrameWndEx::PreTranslateMessage(pMsg);
 
 }

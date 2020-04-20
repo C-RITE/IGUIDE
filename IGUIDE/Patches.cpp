@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(FALSE)
+Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
 {
 }
 
@@ -23,18 +23,82 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
-
-
-void Patches::lockIn(){
+bool Patches::commit() {
 
 	CString systime;
 	GetSysTime(systime);
+
+	if (this->back().locked == true)
+		return false;
+
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
+
+	this->back().index = index;
+	index++;
+
+	last = this->back();
+
 	cleanup();
 	SaveToFile();
 
+	return true;
+
 }
+
+bool Patches::checkComplete() {
+
+	// Check if all patches are commited (i.e. locked)
+	finished = false;
+	int locked = 0;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		if (it->locked == true)
+			locked++;
+	}
+	
+	if (locked == this->size()) {
+		finished = true;
+	}
+
+	return finished;
+
+}
+
+void Patches::revertLast() {
+
+	this->push_back(last);
+	this->back().locked = false;
+
+}
+
+void Patches::delPatch() {
+
+	if (this->size() > 0) {
+		this->last = this->back();
+		this->pop_back();
+	}
+
+}
+
+void Patches::setOverlap(float overlap, float rsDeg) {
+
+	CD2DPointF mid; // middle of POI matrix
+
+	float delta_x, delta_y;
+
+	mid.x = (this->front().coordsDEG.x + this->back().coordsDEG.x) / 2;
+	mid.y = (this->front().coordsDEG.y + this->back().coordsDEG.y) / 2;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		delta_x = (mid.x - it->coordsDEG.x) * (overlap / rsDeg);
+		delta_y = (mid.y - it->coordsDEG.y) * (overlap / rsDeg);
+		it._Ptr->_Myval.coordsDEG.x += delta_x;
+		it._Ptr->_Myval.coordsDEG.y += delta_y;
+	}
+
+}
+
 
 void Patches::untouch() {
 
@@ -51,6 +115,7 @@ void Patches::cleanup() {
 		else
 			it++;
 	}
+
 }
 
 bool Patches::SaveToFile() {

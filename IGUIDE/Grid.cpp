@@ -9,27 +9,21 @@
 
 using namespace D2D1;
 
-Grid::Grid(){
+Grid::Grid(): currentPatch(patchlist.end()){
 
 	isPanning = false;
-	POISize = { 1,1 };
+	POISize = { 1, 1 };
 
 }
 
 Grid::~Grid() {
 }
 
-void Grid::DelPatch() {
-
-	if (patchlist.size() > 0)
-		patchlist.pop_back();
-
-}
 
 void Grid::ClearPatchlist() {
 
 	patchlist.clear();
-
+	
 }
 
 CD2DPointF Grid::PixelToDegree(CPoint point) {
@@ -96,9 +90,15 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 			p.rastersize = pDoc->m_raster.size;
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
+			p.visited = false;
 			POI.push_back(p);
 		}
+
 	}
+
+	// add overlap
+	if (POI.size() > 1)
+		POI.setOverlap(pDoc->m_Overlap, rsDeg);
 
 }
 
@@ -117,23 +117,51 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
 
 }
 
-void Grid::fillPatchJob() {
+void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 	for (auto it = POI.begin(); it != POI.end(); it++) {
-		patchjob.push(*it);
+		patchjob.push_back(*it);
 	}
+
+	if (POI.size() > 1)
+		CreatePatchJobGeometry(pRenderTarget);
 
 }
 
-Patch* Grid::doPatchJob() {
+Patch* Grid::doPatchJob(Element e) {
 
 	Patch* p = NULL;
 
-	if (!patchjob.empty()) {
-		p = new Patch{ patchjob.front() };
-		patchjob.pop();
+	if (!patchjob.checkComplete()) {
+
+		switch (e) {
+
+		case INIT:
+			currentPatch = patchjob.begin();
+			p = new Patch(*currentPatch);
+			break;
+
+		case NEXT:
+			if (currentPatch != patchjob.end()) {
+				currentPatch++;
+				if (currentPatch != patchjob.end())
+					p = new Patch(*currentPatch);
+				else
+					currentPatch--;
+			}
+			break;
+
+		case PREV:
+			if (currentPatch != patchjob.begin()) {
+				currentPatch--;
+				p = new Patch(*currentPatch);
+			}
+			break;
+
+		}
+
 	}
-	
+
 	return p;
 
 }
@@ -155,6 +183,7 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 	m_pLayer1 = new CD2DLayer(pRenderTarget);	// opacity layer parameters
 	m_pGridGeom = NULL;
+	m_pPatchJobGeom = NULL;
 
 	showCoords = true;
 	showCursor = true;
@@ -182,6 +211,89 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 		D2D1_LAYER_OPTIONS_NONE
 
 	};
+
+}
+
+void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
+	
+	// patchjob geometry creation
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	
+	m_pPatchJobGeom = new CD2DPathGeometry(pRenderTarget);
+	m_pPatchJobGeom->Create(pRenderTarget);
+
+	CD2DGeometrySink PatchGeomSink(*m_pPatchJobGeom);
+	CD2DPointF fromPoint, toPoint, firstPoint;
+
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
+	// x axis
+	auto it = pDoc->m_pGrid->POI.begin();
+
+	while (it != pDoc->m_pGrid->POI.end()) {
+
+		fromPoint = { 
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2  * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2  * PPD) + CANVAS / 2
+		};
+
+		if (it == pDoc->m_pGrid->POI.begin())
+			firstPoint = fromPoint;
+
+		toPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), fromPoint.y };
+
+		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		PatchGeomSink.AddLine(toPoint);
+		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		it++;
+
+	}
+
+	// draw the last line in x
+	fromPoint = { firstPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD)};
+	toPoint = { toPoint.x, (float)(toPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
+
+	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+	PatchGeomSink.AddLine(toPoint);
+	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+
+
+	// y axis
+	it = pDoc->m_pGrid->POI.begin();
+
+	while (it != pDoc->m_pGrid->POI.end()) {
+
+		fromPoint = {
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
+
+		toPoint = { fromPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
+
+		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		PatchGeomSink.AddLine(toPoint);
+		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		it++;
+
+	}
+
+	// draw the last line in y
+	fromPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), firstPoint.y };
+	toPoint = { fromPoint.x, (float)(firstPoint.y + sqrt(pDoc->m_pGrid->POI.size()) * (rsDeg - pDoc->m_Overlap) * PPD) };
+
+	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+	PatchGeomSink.AddLine(toPoint);
+	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+
+}
+
+void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
+
+	if (patchjob.size() > 1)
+		pRenderTarget->DrawGeometry(
+			m_pPatchJobGeom,
+			m_pWhiteBrush,
+			.1f);
 
 }
 
@@ -365,7 +477,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		};
 
 		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
-		pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
+		if (it._Ptr->_Myval.locked && !it._Ptr->_Myval.visited)
+			pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 
 	}
@@ -429,8 +542,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		if (!isPanning) {
 
-			int number = 1;
-
 				CD2DPointF pos;
 
 				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
@@ -442,11 +553,10 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->_Myval.coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->_Myval.coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 
-							DrawVidNumber(pRenderTarget,
+							DrawVidIndex(
+								pRenderTarget,
 								pos,
-								number);
-
-							number++;
+								it._Ptr->_Myval.index);
 
 						}
 
@@ -461,8 +571,6 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 	// show cursor around the mouse pointer
-	if (!showCursor)
-		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -482,13 +590,13 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
 		if (POI.size() == 1)
-		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+			DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
 
 }
 
-void Grid::DrawVidNumber(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
+void Grid::DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
 	
 	// Draw video number into top left corner of locked patch
 
