@@ -97,7 +97,8 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 	}
 
 	// add overlap
-	POI.setOverlap(pDoc->m_Overlap, rsDeg);
+	if (POI.size() > 1)
+		POI.setOverlap(pDoc->m_Overlap, rsDeg);
 
 }
 
@@ -122,7 +123,8 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 		patchjob.push_back(*it);
 	}
 
-	CreatePatchJobGeometry(pRenderTarget);
+	if (POI.size() > 1)
+		CreatePatchJobGeometry(pRenderTarget);
 
 }
 
@@ -232,13 +234,14 @@ void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
 	while (it != pDoc->m_pGrid->POI.end()) {
 
 		fromPoint = { 
-			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
+			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2  * PPD) + CANVAS / 2,
+			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2  * PPD) + CANVAS / 2
+		};
 
 		if (it == pDoc->m_pGrid->POI.begin())
 			firstPoint = fromPoint;
 
-		toPoint = { (float)(fromPoint.x + rsDeg * PPD), fromPoint.y };
+		toPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), fromPoint.y };
 
 		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		PatchGeomSink.AddLine(toPoint);
@@ -248,8 +251,8 @@ void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
 	}
 
 	// draw the last line in x
-	fromPoint = { firstPoint.x, (float)(fromPoint.y + rsDeg * PPD)};
-	toPoint = { toPoint.x, (float)(toPoint.y + rsDeg * PPD) };
+	fromPoint = { firstPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD)};
+	toPoint = { toPoint.x, (float)(toPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
 
 	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 	PatchGeomSink.AddLine(toPoint);
@@ -265,7 +268,7 @@ void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
 			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
 			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
 
-		toPoint = { fromPoint.x, (float)(fromPoint.y + rsDeg * PPD) };
+		toPoint = { fromPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
 
 		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		PatchGeomSink.AddLine(toPoint);
@@ -275,8 +278,8 @@ void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
 	}
 
 	// draw the last line in y
-	fromPoint = { (float)(fromPoint.x + rsDeg * PPD), firstPoint.y };
-	toPoint = { fromPoint.x, (float)(firstPoint.y + sqrt(pDoc->m_pGrid->POI.size()) * rsDeg * PPD) };
+	fromPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), firstPoint.y };
+	toPoint = { fromPoint.x, (float)(firstPoint.y + sqrt(pDoc->m_pGrid->POI.size()) * (rsDeg - pDoc->m_Overlap) * PPD) };
 
 	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 	PatchGeomSink.AddLine(toPoint);
@@ -286,7 +289,7 @@ void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
 
-	if (patchjob.size() > 0)
+	if (patchjob.size() > 1)
 		pRenderTarget->DrawGeometry(
 			m_pPatchJobGeom,
 			m_pWhiteBrush,
@@ -587,7 +590,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
 		if (POI.size() == 1)
-		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+			DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
 

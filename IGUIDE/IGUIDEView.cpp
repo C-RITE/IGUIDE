@@ -152,18 +152,22 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	if (pDoc->CheckFOV() && pDoc->m_pGrid->patchjob.empty())
 	{	
-
 		pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
-		
-		if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
-			m_pDlgTarget->Pinpoint(*p);
-			pDoc->m_pGrid->patchlist.push_back(*p);
-			delete p;
-			m_pDlgTarget->RedrawWindow();
-			RedrawWindow();
-		}
+
+			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
+				m_pDlgTarget->Pinpoint(*p);
+				pDoc->m_pGrid->patchlist.push_back(*p);
+				delete p;
+
+			}
+
+			if (pDoc->m_pGrid->patchjob.size() == 1)
+				pDoc->m_pGrid->patchjob.clear();
 
 	}
+
+	m_pDlgTarget->RedrawWindow();
+	RedrawWindow();
 
 }
 
@@ -573,6 +577,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				}
 				break;
 
+			case VK_ESCAPE:
+				pDoc->m_pGrid->patchjob.clear();
+				break;
 			}
 
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
