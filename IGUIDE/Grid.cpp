@@ -97,7 +97,7 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 	}
 
 	// add overlap
-	POI.setOverlap(pDoc->m_Overlap);
+	POI.setOverlap(pDoc->m_Overlap, rsDeg);
 
 }
 
@@ -142,9 +142,10 @@ Patch* Grid::doPatchJob(Element e) {
 		case NEXT:
 			if (currentPatch != patchjob.end()) {
 				currentPatch++;
-				if (currentPatch != patchjob.end()) {
+				if (currentPatch != patchjob.end())
 					p = new Patch(*currentPatch);
-				}
+				else
+					currentPatch--;
 			}
 			break;
 
