@@ -124,7 +124,7 @@ void CSockClient::OnRecieve(int nError)
 	{
 	
 		chBuff[nRead] = '\0';
-		inpBuf->Format(L"%s", chBuff);
+		inpBuf->Format(L"%S",chBuff);
 		SetEvent(*netEvent);
 
 	}

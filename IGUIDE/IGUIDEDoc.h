@@ -20,6 +20,7 @@ protected: // create from serialization only
 	// Attributes
 
 public:
+
 	Monitors				m_Monitors;							// output device for target view
 	Controller				m_Controller;						// controller used for subject calibration
 	Grid*					m_pGrid;							// grid class
@@ -38,15 +39,22 @@ public:
 	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 	bool					calibrationComplete;				// true if calibration is valid
-	HANDLE*					m_hNetMsg;							// handle for incoming remote messages
-	HANDLE*					m_hThread;							// handle for incoming message thread
+
 	CString*				m_pInputBuf;						// input buffer for incoming messages
+	HANDLE*					m_hNetMsg;							// handle for netcom message events
+
 
 private:
+
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
 	CString					defocus;							// AOSACA defocus
+
 	void					createNetComThread();				// for processing incoming remote messages
+	HANDLE					m_hNetComThread;					// handle for incoming message thread
+	DWORD					m_thdID;
+		
+	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);
 
 // Operations
 public:

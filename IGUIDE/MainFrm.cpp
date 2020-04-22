@@ -55,6 +55,7 @@ CMainFrame::~CMainFrame()
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)l;
+
 	// insert all properties into list
 	m_DlgProperties.fillProperties();
 

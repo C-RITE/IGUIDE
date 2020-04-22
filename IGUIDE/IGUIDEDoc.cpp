@@ -79,6 +79,9 @@ CIGUIDEDoc::CIGUIDEDoc()
 CIGUIDEDoc::~CIGUIDEDoc()
 {
 	m_Controller.shutdown();
+	SetEvent(m_hNetMsg[2]);
+	WaitForSingleObject(m_hNetComThread, INFINITE);
+
 	delete m_pGrid;
 	delete m_pFundus;
 	delete m_pDlgCalibration;
@@ -86,43 +89,68 @@ CIGUIDEDoc::~CIGUIDEDoc()
 
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
-
+	CloseHandle(m_hNetMsg[2]);
 	delete[] m_hNetMsg;
+	CloseHandle(m_hNetComThread);
+
 }
 
 void CIGUIDEDoc::createNetComThread() {
 
-	m_hNetMsg = new HANDLE[2];
+	m_hNetMsg = new HANDLE[3];
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
+	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"EXIT_THREAD");
 	m_pInputBuf = new CString[2];
+	m_hNetComThread = ::CreateThread(NULL, 0, ThreadNetMsgProc, this, 0, &m_thdID);
 
 }
 
 
-UINT __cdecl ThreadNetMsgProc(LPVOID lpParameter)
+DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 {
 	CIGUIDEDoc *parent = (CIGUIDEDoc *)lpParameter;
 	VERIFY(parent != NULL);
+	
+	// exit thread loop when true
+	bool exit = false;
+
 	CString message, command, value;
+	const int start = 0;
+	int split;
 
 	// Wait for the event to be signaled, then parse the message
-	while (TRUE) {
-		switch (::WaitForMultipleObjects(2, parent->m_hNetMsg, FALSE, INFINITE)) {
-		case WAIT_OBJECT_0:		// AOSACA message
+	while (!exit) {
+
+		switch (::WaitForMultipleObjects(3, parent->m_hNetMsg, FALSE, INFINITE)) {
+
+		case WAIT_OBJECT_0:			// AOSACA message
 			message = parent->m_pInputBuf[0];
-			int start = 0;
-			int split = message.Find(_T("#"), start);
+			split = message.Find(_T("#"), start);
 			command = message.Mid(start, split);
 			value = message.Mid(split + 1, message.GetLength());
+			message.Empty();
+			break;
 
+
+		case WAIT_OBJECT_0 + 1:		// ICANDI message
+			message = parent->m_pInputBuf[1];
+			split = message.Find(_T("#"), start);
+			command = message.Mid(start, split);
+			value = message.Mid(split + 1, message.GetLength());
+			message.Empty();
+			break;
+
+		case WAIT_OBJECT_0 + 2:
+			exit = true;
+			break;
 		}
-	}
-	// Terminate the thread
-	::AfxEndThread(0, FALSE);
-	return 0L;
-}
 
+	}
+
+	return 0L;
+
+}
 
 BOOL CIGUIDEDoc::OnNewDocument()
 {
