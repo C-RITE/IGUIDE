@@ -4,8 +4,11 @@
 class CSockListener : public CWinSock2Async
 {
 public:
-	CSockListener();
+	CSockListener(CString*, HANDLE*);
 	~CSockListener();
+
+	CString* inpBuf;
+	HANDLE* netEvent;
 
 private:
 	void OnAccept(int nError);

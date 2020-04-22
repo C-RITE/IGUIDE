@@ -5,13 +5,16 @@
 BEGIN_MESSAGE_MAP(Remote, CWnd)
 	ON_MESSAGE(NETCOM_ERROR, ConnectionFailure)
 	ON_MESSAGE(NETCOM_CLOSED, ConnectionClosed)
-	ON_MESSAGE(NETCOM_RECEIVED, DataReceived)
 END_MESSAGE_MAP()
 
 Remote::Remote()
 {
 	m_pSock_AOSACA = NULL;
 	m_pSock_ICANDI = NULL;
+	AOSACA_inpBuf = NULL;
+	AOSACA_netEvt = NULL;
+	ICANDI_inpBuf = NULL;
+	ICANDI_netEvt = NULL;
 	OnCreate(NULL);
 }
 
@@ -21,14 +24,21 @@ Remote::~Remote()
 	delete m_pSock_AOSACA;
 }
 
-// Initialize remote with values from Properties class
-void Remote::init(Properties* p)
+// Initialize remote with values from Properties and interface to Document class
+void Remote::init(Properties* p, CString* inputBuf, HANDLE* netMsgEvent)
 {
 	// TODO: Add your implementation code here.
 	m_pProperties = p;
 	mode = p->getRemoteCapability();
+
 	AOSACA_IP = p->getAOSACA_IP();
 	ICANDI_IP = p->getICANDI_IP();
+
+	AOSACA_inpBuf = &inputBuf[0];
+	AOSACA_netEvt = &netMsgEvent[0];
+
+	ICANDI_inpBuf = &inputBuf[1];
+	ICANDI_netEvt = &netMsgEvent[1];
 
 }
 
@@ -44,6 +54,7 @@ void Remote::setIPAdress(Connection c) {
 
 void Remote::connect()
 {
+	
 	// by default, connect to what is selected in properties
 
 	if (mode == L"AOSACA" | mode == L"FULL")
@@ -58,12 +69,12 @@ void Remote::connect(Connection c)
 	// manual override
 
 	switch (c) {
-	case AOSACA:
-		Connect2AOSACA();
-		break;
-	case ICANDI:
-		Connect2ICANDI();
-		break;
+		case AOSACA:
+			Connect2AOSACA();
+			break;
+		case ICANDI:
+			Connect2ICANDI();
+			break;
 	}
 
 }
@@ -73,7 +84,7 @@ bool Remote::Connect2AOSACA()
 	// TODO: Add your implementation code here.
 
 	if (m_pSock_AOSACA == NULL) {
-		m_pSock_AOSACA = new CSockClient();
+		m_pSock_AOSACA = new CSockClient(AOSACA_inpBuf, AOSACA_netEvt);
 		CSockClient::SocketInit();
 		m_pSock_AOSACA->Create(); 
 		m_pSock_AOSACA->setParent(this);
@@ -97,7 +108,7 @@ bool Remote::Connect2ICANDI()
 	// TODO: Add your implementation code here.
 
 	if (m_pSock_ICANDI == NULL) {
-		m_pSock_ICANDI = new CSockClient();
+		m_pSock_ICANDI = new CSockClient(ICANDI_inpBuf, ICANDI_netEvt);
 		CSockClient::SocketInit();
 		m_pSock_ICANDI->Create();
 		m_pSock_ICANDI->setParent(this);
@@ -219,21 +230,6 @@ LRESULT Remote::ConnectionClosed(WPARAM w, LPARAM l) {
 
 	return 0;
 
-}
-
-LRESULT Remote::DataReceived(WPARAM w, LPARAM l)
-{
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	
-	CString* command = (CString*)w;
-	CString* value = (CString*)l;
-	
-	if (command->Compare(L"AOSACA_DEFOCUS") == 0)
-		pDoc->setDefocus(*value);
-
-	pDoc->UpdateAllViews(NULL);
-
-	return 0;
 }
 
 

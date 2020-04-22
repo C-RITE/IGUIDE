@@ -70,6 +70,8 @@ CIGUIDEDoc::CIGUIDEDoc()
 
 	overlayVisible = true;
 	calibrationComplete = false;
+
+	createNetComThread();
 		
 }
 
@@ -80,7 +82,45 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	delete m_pGrid;
 	delete m_pFundus;
 	delete m_pDlgCalibration;
+	delete[] m_pInputBuf;
 
+	CloseHandle(m_hNetMsg[0]);
+	CloseHandle(m_hNetMsg[1]);
+
+	delete[] m_hNetMsg;
+}
+
+void CIGUIDEDoc::createNetComThread() {
+
+	m_hNetMsg = new HANDLE[2];
+	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
+	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
+	m_pInputBuf = new CString[2];
+
+}
+
+
+UINT __cdecl ThreadNetMsgProc(LPVOID lpParameter)
+{
+	CIGUIDEDoc *parent = (CIGUIDEDoc *)lpParameter;
+	VERIFY(parent != NULL);
+	CString message, command, value;
+
+	// Wait for the event to be signaled, then parse the message
+	while (TRUE) {
+		switch (::WaitForMultipleObjects(2, parent->m_hNetMsg, FALSE, INFINITE)) {
+		case WAIT_OBJECT_0:		// AOSACA message
+			message = parent->m_pInputBuf[0];
+			int start = 0;
+			int split = message.Find(_T("#"), start);
+			command = message.Mid(start, split);
+			value = message.Mid(split + 1, message.GetLength());
+
+		}
+	}
+	// Terminate the thread
+	::AfxEndThread(0, FALSE);
+	return 0L;
 }
 
 
@@ -194,6 +234,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	return TRUE;
 
 }
+
 
 void CIGUIDEDoc::OnCloseDocument()
 {

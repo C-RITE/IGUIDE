@@ -54,13 +54,14 @@ CMainFrame::~CMainFrame()
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)l;
 	// insert all properties into list
 	m_DlgProperties.fillProperties();
 
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability
 
-	RemoteControl.init(&m_DlgProperties);
+	RemoteControl.init(&m_DlgProperties, pDoc->m_pInputBuf, pDoc->m_hNetMsg);
 	RemoteControl.connect();
 
 	return 0L;

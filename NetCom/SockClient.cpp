@@ -84,18 +84,16 @@ const int NUM_WSERROR_MESSAGES = sizeof(g_aErrorList) / sizeof(ErrorEntry);
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-CSockClient::CSockClient()
+CSockClient::CSockClient(CString* inputBuf, HANDLE* netMsgEvent)
 {
 	pending = false;
+	inpBuf = inputBuf;
+	netEvent = netMsgEvent;
 
-	command = new CString();
-	value = new CString();
 }
 
 CSockClient::~CSockClient()
 {
-	delete command;
-	delete value;
 }
 
 
@@ -122,21 +120,15 @@ void CSockClient::OnRecieve(int nError)
 	char chBuff[WINSOCK_READ_BUFF_SIZE + 1];
 	int nRead;
 
-	// split incoming message into command and value, determined by delimiter #
-
 	while ((nRead = Recieve(chBuff, WINSOCK_READ_BUFF_SIZE)) > 0)
 	{
 	
-		std::auto_ptr<CString> message (new CString(chBuff));
-		int start = 0;
-		int split = message->Find(_T("#"), start);
-		*command = message->Mid(start, split);
-		*value = message->Mid(split+1, message->GetLength());
+		chBuff[nRead] = '\0';
+		inpBuf->Format(L"%s", chBuff);
+		SetEvent(*netEvent);
 
 	}
 	
-	pParent->PostMessageW(NETCOM_RECEIVED, (WPARAM)command, (LPARAM)value);
-
 }
 
 void CSockClient::OnConnect(int nError)

@@ -15,7 +15,7 @@
 class CSockClient : public virtual CWinSock2Async  
 {
 public:
-	CSockClient();
+	CSockClient(CString* inputBuf, HANDLE* netMsgEvent);
 	virtual ~CSockClient();
 
 	bool pending;
@@ -28,9 +28,8 @@ private:
 	void OnClose( int nError );
 	void OnConnect(int nError);
 
-	CString* command;
-	CString* value;
-
+	CString* inpBuf;
+	HANDLE* netEvent;
 	CWnd* pParent;
 
 };

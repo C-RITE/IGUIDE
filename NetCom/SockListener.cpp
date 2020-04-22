@@ -16,9 +16,11 @@
 //      2-12-2000, 7:10:28 AM by john@mctainsh.com
 // ***************************************************************************
 
-CSockListener::CSockListener()
+CSockListener::CSockListener(CString* inputBuf, HANDLE* netMsgEvent)
 {
 	m_psockClient = NULL;
+	inpBuf = inputBuf;
+	netEvent = netMsgEvent;
 
 }
 
@@ -34,10 +36,11 @@ void CSockListener::OnAccept(int nError)
 
 	if (m_psockClient)
 		delete m_psockClient;
+		inpBuf->Empty();
 	Sleep(1);
 
 	//Create the new connection
-	m_psockClient = new CSockClient();
+	m_psockClient = new CSockClient(inpBuf, netEvent);
 
 	if (Accept(m_psockClient) == 0)
 	{

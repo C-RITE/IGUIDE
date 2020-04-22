@@ -38,15 +38,18 @@ public:
 	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 	bool					calibrationComplete;				// true if calibration is valid
+	HANDLE*					m_hNetMsg;							// handle for incoming remote messages
+	HANDLE*					m_hThread;							// handle for incoming message thread
+	CString*				m_pInputBuf;						// input buffer for incoming messages
 
 private:
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
 	CString					defocus;							// AOSACA defocus
+	void					createNetComThread();				// for processing incoming remote messages
 
 // Operations
 public:
-
 	bool					CheckFOV();
 	float					CalcEdgeLength(Edge k);
 	CD2DPointF				compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
@@ -58,6 +61,7 @@ public:
 
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
+	void					setVideoDir(CString dir) { m_OutputDir = dir; };
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
