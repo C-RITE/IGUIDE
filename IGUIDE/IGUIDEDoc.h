@@ -10,6 +10,12 @@
 #include "Monitors.h"
 #include "Controller.h"
 
+struct NetMsg {
+
+	CString property;
+	CString value;
+
+};
 
 class CIGUIDEDoc : public CDocument
 {
@@ -42,6 +48,7 @@ public:
 
 	CString*				m_pInputBuf;						// input buffer for incoming messages
 	HANDLE*					m_hNetMsg;							// handle for netcom message events
+	std::queue<NetMsg>		m_NetMsgQueue;						// net message queue for further processing
 
 
 private:
@@ -73,6 +80,7 @@ public:
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
+	CString					getOutputDir();								// where to store IGUIDE data
 
 	void					OnFundusImport();
 

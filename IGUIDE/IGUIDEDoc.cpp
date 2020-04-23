@@ -79,7 +79,8 @@ CIGUIDEDoc::CIGUIDEDoc()
 CIGUIDEDoc::~CIGUIDEDoc()
 {
 	m_Controller.shutdown();
-	SetEvent(m_hNetMsg[2]);
+
+	SetEvent(m_hNetMsg[2]); // break netcom thread loop to shutdown gracefully
 	WaitForSingleObject(m_hNetComThread, INFINITE);
 
 	delete m_pGrid;
@@ -90,6 +91,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
 	CloseHandle(m_hNetMsg[2]);
+	CloseHandle(m_hNetMsg[3]);
 	delete[] m_hNetMsg;
 	CloseHandle(m_hNetComThread);
 
@@ -97,10 +99,11 @@ CIGUIDEDoc::~CIGUIDEDoc()
 
 void CIGUIDEDoc::createNetComThread() {
 
-	m_hNetMsg = new HANDLE[3];
+	m_hNetMsg = new HANDLE[4];
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
-	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"EXIT_THREAD");
+	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
+	m_hNetMsg[3] = CreateEvent(NULL, FALSE, FALSE, L"MSGBUFFER_FILL");
 	m_pInputBuf = new CString[2];
 	m_hNetComThread = ::CreateThread(NULL, 0, ThreadNetMsgProc, this, 0, &m_thdID);
 
@@ -115,30 +118,35 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 	// exit thread loop when true
 	bool exit = false;
 
-	CString message, command, value;
+	CString input;
+	NetMsg message;
 	const int start = 0;
 	int split;
 
-	// Wait for the event to be signaled, then parse the message
+	// Wait for the event to be signaled, then parse the message into queue
 	while (!exit) {
 
 		switch (::WaitForMultipleObjects(3, parent->m_hNetMsg, FALSE, INFINITE)) {
 
 		case WAIT_OBJECT_0:			// AOSACA message
-			message = parent->m_pInputBuf[0];
-			split = message.Find(_T("#"), start);
-			command = message.Mid(start, split);
-			value = message.Mid(split + 1, message.GetLength());
-			message.Empty();
+			input = parent->m_pInputBuf[0];
+			split = input.Find(_T("#"), start);
+			message.property = input.Mid(start, split);
+			message.value = input.Mid(split + 1, input.GetLength());
+			input.Empty();
+			parent->m_NetMsgQueue.push(message);
+			SetEvent(parent->m_hNetMsg[3]);
 			break;
 
 
 		case WAIT_OBJECT_0 + 1:		// ICANDI message
-			message = parent->m_pInputBuf[1];
-			split = message.Find(_T("#"), start);
-			command = message.Mid(start, split);
-			value = message.Mid(split + 1, message.GetLength());
-			message.Empty();
+			input = parent->m_pInputBuf[1];
+			split = input.Find(_T("#"), start);
+			message.property = input.Mid(start, split);
+			message.value = input.Mid(split + 1, input.GetLength());
+			input.Empty();
+			parent->m_NetMsgQueue.push(message);
+			SetEvent(parent->m_hNetMsg[3]);
 			break;
 
 		case WAIT_OBJECT_0 + 2:
@@ -413,6 +421,29 @@ float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 	c = sqrt(pow(a, 2) + pow(b, 2));
 	
 	return c;
+
+}
+
+CString CIGUIDEDoc::getOutputDir() {
+
+	// if ICANDI connection is established, override IGUIDE output directory property
+
+	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+	Connection active = pMain->RemoteControl.getActiveConnections();
+
+	if ((active == ICANDI) | (active == BOTH)) {
+		if ((WAIT_TIMEOUT) == WaitForSingleObject(m_hNetMsg[3], NETMSG_RESPONSE_TIMEOUT))
+			return m_OutputDir;
+		else{
+			NetMsg m = m_NetMsgQueue.front();
+			if (m.property == "ICANDI_VIDEOFOLDER") {
+				m_OutputDir = m.value;
+				m_NetMsgQueue.pop();
+			}
+		}
+	}
+	
+	return m_OutputDir;
 
 }
 

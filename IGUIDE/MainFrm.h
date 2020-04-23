@@ -21,16 +21,13 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+	Remote			RemoteControl;	// for communication with host apps (ICANDI / AOSACA)
 
 protected:  // control bar embedded members
 	CMFCStatusBar   m_wndStatusBar;
 	Properties		m_DlgProperties;
 	BOOL			CreateDockingWindows();
 
-private:
-
-	// for communication with host apps (ICANDI / AOSACA)
-	Remote			RemoteControl;
 
 // Generated message map functions
 protected:

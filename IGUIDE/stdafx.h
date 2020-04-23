@@ -14,6 +14,8 @@
 #define RESET_AOSACA_IP (WM_USER + 107)
 #define RESET_ICANDI_IP (WM_USER + 108)
 
+#define NETMSG_RESPONSE_TIMEOUT 200
+
 #define CANVAS			360								// Visual Area
 #define CENTER			CANVAS / 2						// Visual Area Center
 #define DPP				0.1								// 10 pixels = 1 degree
