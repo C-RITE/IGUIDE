@@ -35,6 +35,7 @@ public:
 	Calibration*			m_pDlgCalibration;					// fundus calibration dialog class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
+	CString					m_OutputDir_ICANDI;					// ICANDI output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure

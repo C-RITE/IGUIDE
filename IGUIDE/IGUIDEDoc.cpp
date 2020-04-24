@@ -437,8 +437,9 @@ CString CIGUIDEDoc::getOutputDir() {
 		else{
 			NetMsg m = m_NetMsgQueue.front();
 			if (m.property == "ICANDI_VIDEOFOLDER") {
-				m_OutputDir = m.value;
+				m_OutputDir_ICANDI = m.value;
 				m_NetMsgQueue.pop();
+				return m_OutputDir_ICANDI;
 			}
 		}
 	}

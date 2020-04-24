@@ -116,6 +116,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	if (propName == L"Video Folder") {
 		CString folder = vt.bstrVal;
+		folder.Format(folder + "\\");
 		pDoc->m_OutputDir = folder;
 	}
 
