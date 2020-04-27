@@ -192,7 +192,7 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	if (!m_pDlgTarget->calibrating)
 		pDoc->m_pGrid->showCursor = true;
 
-	mousePos = point;
+	mousePos = Snap2Grid(point);
 
 	// pan if control key and left mouse button are pressed simultaneously
 	if (nFlags & MK_CONTROL && nFlags & MK_LBUTTON) {
@@ -210,6 +210,18 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	RedrawWindow();
+
+}
+
+CPoint CIGUIDEView::Snap2Grid(CPoint point) {
+
+	int x = point.x % (int)(1 / SNAP_INTERVAL * zoom / (PPD));
+	int y = point.y % (int)(1 / SNAP_INTERVAL * zoom / (PPD));
+
+	x = point.x - x;
+	y = point.y - y;
+
+	return CPoint{ x,y };
 
 }
 
@@ -424,8 +436,6 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 	// TODO: add draw code for native data here
 	if (pRenderTarget) {
 
-		CD2DPointF mouseLoc = mousePos;
-	
 		// clear background
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 
@@ -454,7 +464,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
 		// draw cursor(s) around mousepointer
-		pDoc->m_pGrid->DrawPOI(pRenderTarget, mouseLoc);
+		pDoc->m_pGrid->DrawPOI(pRenderTarget, mousePos);
 
 
 		// draw debug info

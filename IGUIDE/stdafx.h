@@ -15,15 +15,17 @@
 #define RESET_ICANDI_IP (WM_USER + 108)
 
 #define NETMSG_RESPONSE_TIMEOUT 200
+#define SNAP_INTERVAL	0.1F							// Snap mouse cursor to grid in degree
 
 #define CANVAS			360								// Visual Area
 #define CENTER			CANVAS / 2						// Visual Area Center
-#define DPP				0.1								// 10 pixels = 1 degree
-#define PPD				1 / DPP							// inverse of DPP
+#define DPP				0.1F							// 10 pixels = 1 degree
+#define PPD				1 / DPP							// reciprocal of DPP
 #define LANES			(unsigned int)(CANVAS * DPP)	// helper for grid drawing
+#define LANE			CANVAS / LANES					// helper for snap to grid
 
-#define MIN_ZOOM		0.01f //not yet integrated
-#define MAX_ZOOM		100.0f
+#define MIN_ZOOM		0.01F //not yet integrated
+#define MAX_ZOOM		100.0F
 
 // definition source: https://de.wikipedia.org/wiki/Fovea_centralis#/media/Datei:Macula.svg
 #define _DELTA_D		15				// Assumed distance between foveal center and optic disc
