@@ -33,8 +33,8 @@ bool Patches::commit() {
 
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
-
 	this->back().index = index;
+	this->back().area = 1;
 	index++;
 
 	last = this->back();
@@ -123,8 +123,6 @@ bool Patches::SaveToFile() {
 	wstringstream sstream;
 	int number = 1;
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CString path = pDoc->getOutputDir();
-	filepath.Format(_T("%s"), path);
 	CString strNumber, strDegX, strDegY, strDefocus;
 	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg),Defocus");
 

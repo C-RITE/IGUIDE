@@ -217,6 +217,8 @@
     <ClInclude Include="..\NetCom\SockClient.h" />
     <ClInclude Include="..\NetCom\SockListener.h" />
     <ClInclude Include="..\NetCom\WinSock2Async.h" />
+    <ClInclude Include="AreaPane.h" />
+    <ClInclude Include="AreaTreeCtrl.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Edge.h" />
@@ -227,6 +229,7 @@
     <ClInclude Include="IGUIDEView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Monitors.h" />
+    <ClInclude Include="PatchInfo.h" />
     <ClInclude Include="Properties.h" />
     <ClInclude Include="Raster.h" />
     <ClInclude Include="Remote.h" />
@@ -250,6 +253,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="AreaPane.cpp" />
+    <ClCompile Include="AreaTreeCtrl.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Edge.cpp" />
@@ -260,6 +265,7 @@
     <ClCompile Include="IGUIDEView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Monitors.cpp" />
+    <ClCompile Include="PatchInfo.cpp" />
     <ClCompile Include="Properties.cpp" />
     <ClCompile Include="Raster.cpp" />
     <ClCompile Include="Remote.cpp" />

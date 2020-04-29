@@ -2,6 +2,7 @@
 // IGUIDEView.h : interface of the CIGUIDEView class
 
 #pragma once
+#include "afxcview.h"
 class Target;
 
 class CIGUIDEView : public CView

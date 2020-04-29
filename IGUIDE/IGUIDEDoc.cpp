@@ -424,30 +424,6 @@ float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 
 }
 
-CString CIGUIDEDoc::getOutputDir() {
-
-	// if ICANDI connection is established, override IGUIDE output directory property
-
-	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
-	Connection active = pMain->RemoteControl.getActiveConnections();
-
-	if ((active == ICANDI) | (active == BOTH)) {
-		if ((WAIT_TIMEOUT) == WaitForSingleObject(m_hNetMsg[3], NETMSG_RESPONSE_TIMEOUT))
-			return m_OutputDir;
-		else{
-			NetMsg m = m_NetMsgQueue.front();
-			if (m.property == "ICANDI_VIDEOFOLDER") {
-				m_OutputDir_ICANDI = m.value;
-				m_NetMsgQueue.pop();
-				return m_OutputDir_ICANDI;
-			}
-		}
-	}
-	
-	return m_OutputDir;
-
-}
-
 CString CIGUIDEDoc::getTraceInfo() {
 
 	CString trace;

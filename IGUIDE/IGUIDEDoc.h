@@ -81,8 +81,6 @@ public:
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
-	CString					getOutputDir();								// where to store IGUIDE data
-
 	void					OnFundusImport();
 
 	// Overrides
