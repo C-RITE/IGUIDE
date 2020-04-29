@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filepath(L".\\"), filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
+Patches::Patches() : filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
 {
 }
 
@@ -40,8 +40,7 @@ bool Patches::commit() {
 	last = this->back();
 
 	cleanup();
-	SaveToFile();
-
+	
 	return true;
 
 }
@@ -118,13 +117,10 @@ void Patches::cleanup() {
 
 }
 
-bool Patches::SaveToFile() {
+bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
 	int number = 1;
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CString path = pDoc->getOutputDir();
-	filepath.Format(_T("%s"), path);
 	CString strNumber, strDegX, strDegY, strDefocus;
 	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg),Defocus");
 
@@ -168,7 +164,7 @@ bool Patches::SaveToFile() {
 	}
 
 	try {
-		CStdioFile outputFile(filepath + filename, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
+		CStdioFile outputFile(directory + filename, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
     		outputFile.WriteString(header + "\n" + sstream.str().c_str());
 		outputFile.Close();
 		fileTouched = true;

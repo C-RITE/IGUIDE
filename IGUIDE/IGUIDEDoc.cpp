@@ -91,7 +91,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
 	CloseHandle(m_hNetMsg[2]);
-	CloseHandle(m_hNetMsg[3]);
 	delete[] m_hNetMsg;
 	CloseHandle(m_hNetComThread);
 
@@ -99,11 +98,10 @@ CIGUIDEDoc::~CIGUIDEDoc()
 
 void CIGUIDEDoc::createNetComThread() {
 
-	m_hNetMsg = new HANDLE[4];
+	m_hNetMsg = new HANDLE[3];
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
 	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
-	m_hNetMsg[3] = CreateEvent(NULL, FALSE, FALSE, L"MSGBUFFER_FILL");
 	m_pInputBuf = new CString[2];
 	m_hNetComThread = ::CreateThread(NULL, 0, ThreadNetMsgProc, this, 0, &m_thdID);
 
@@ -133,20 +131,17 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 			split = input.Find(_T("#"), start);
 			message.property = input.Mid(start, split);
 			message.value = input.Mid(split + 1, input.GetLength());
+			parent->digest(message);
 			input.Empty();
-			parent->m_NetMsgQueue.push(message);
-			SetEvent(parent->m_hNetMsg[3]);
 			break;
-
 
 		case WAIT_OBJECT_0 + 1:		// ICANDI message
 			input = parent->m_pInputBuf[1];
 			split = input.Find(_T("#"), start);
 			message.property = input.Mid(start, split);
 			message.value = input.Mid(split + 1, input.GetLength());
+			parent->digest(message);
 			input.Empty();
-			parent->m_NetMsgQueue.push(message);
-			SetEvent(parent->m_hNetMsg[3]);
 			break;
 
 		case WAIT_OBJECT_0 + 2:
@@ -385,6 +380,16 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 
 // CIGUIDEDoc commands
 
+void CIGUIDEDoc::digest(NetMsg msg) {
+	
+	if (msg.property == L"ICANDI_VIDEOFOLDER") {
+		m_OutputDir = msg.value;
+		CMainFrame* main = (CMainFrame*)AfxGetApp()->m_pMainWnd;
+		SetEvent(main->m_hSaveEvent);
+	}
+
+}
+
 
 bool CIGUIDEDoc::CheckFOV()
 {
@@ -421,30 +426,6 @@ float CIGUIDEDoc::CalcEdgeLength(Edge k) {
 	c = sqrt(pow(a, 2) + pow(b, 2));
 	
 	return c;
-
-}
-
-CString CIGUIDEDoc::getOutputDir() {
-
-	// if ICANDI connection is established, override IGUIDE output directory property
-
-	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
-	Connection active = pMain->RemoteControl.getActiveConnections();
-
-	if ((active == ICANDI) | (active == BOTH)) {
-		if ((WAIT_TIMEOUT) == WaitForSingleObject(m_hNetMsg[3], NETMSG_RESPONSE_TIMEOUT))
-			return m_OutputDir;
-		else{
-			NetMsg m = m_NetMsgQueue.front();
-			if (m.property == "ICANDI_VIDEOFOLDER") {
-				m_OutputDir_ICANDI = m.value;
-				m_NetMsgQueue.pop();
-				return m_OutputDir_ICANDI;
-			}
-		}
-	}
-	
-	return m_OutputDir;
 
 }
 

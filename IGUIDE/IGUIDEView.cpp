@@ -513,7 +513,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			if (pDoc->m_pGrid->patchlist.back().locked == false) {
 				pDoc->m_pGrid->patchlist.delPatch();
-				pDoc->m_pGrid->patchlist.SaveToFile();
+				pDoc->m_pGrid->patchlist.SaveToFile(pDoc->m_OutputDir);
 			}
 
 			/*if (pDoc->m_pGrid->patchlist.size() > 0)
@@ -563,6 +563,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				else {
 					pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
 					pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
+					AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
 				}
 				break;
 

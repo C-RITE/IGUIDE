@@ -31,6 +31,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_PARENTNOTIFY()
 	ON_MESSAGE(RESET_AOSACA_IP, &CMainFrame::OnResetAosacaIp)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
+	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -44,7 +45,7 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-
+	m_hSaveEvent = CreateEvent(NULL, FALSE, FALSE, L"SAVE_FROM_IGUIDE_VIDEOFOLDER");
 }
 
 CMainFrame::~CMainFrame()
@@ -364,4 +365,24 @@ afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
 
 return 0;
 
+}
+
+DWORD WINAPI SaveThread(LPVOID pParam) {
+
+	CMainFrame* parent = (CMainFrame*)pParam;
+	Connection active = parent->RemoteControl.getActiveConnections();
+	
+	if (active == ICANDI || active == BOTH) {
+		WaitForSingleObject(parent->m_hSaveEvent, INFINITE);
+		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(parent->m_pDoc->m_OutputDir);
+	}
+	return 0;
+}
+
+afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
+{
+	m_pDoc = GetDoc();
+	m_hSaveThread = ::CreateThread(NULL, 0, SaveThread, this, 0, &m_thdID);
+
+	return 0;
 }

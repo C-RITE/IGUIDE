@@ -49,8 +49,6 @@ public:
 
 	CString*				m_pInputBuf;						// input buffer for incoming messages
 	HANDLE*					m_hNetMsg;							// handle for netcom message events
-	std::queue<NetMsg>		m_NetMsgQueue;						// net message queue for further processing
-
 
 private:
 
@@ -74,6 +72,7 @@ public:
 	double					ComputeOrientationAngle(Edge k);
 	CD2DRectF				ComputeTargetZone();
 	bool					CheckCalibrationValidity();
+	void					digest(NetMsg msg);
 
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
@@ -81,7 +80,6 @@ public:
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
-	CString					getOutputDir();								// where to store IGUIDE data
 
 	void					OnFundusImport();
 

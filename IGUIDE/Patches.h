@@ -27,10 +27,9 @@ class Patches : public std::list<Patch>
 
 public:
 	Patches();
-	CString			filepath;
 	CString			filename;
 	
-	bool			SaveToFile();
+	bool			SaveToFile(CString directory);
 	bool			isFileTouched() { return fileTouched; };
 	bool			isFinished() { return finished; };
 	bool			commit();
