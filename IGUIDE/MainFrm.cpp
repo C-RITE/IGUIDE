@@ -374,8 +374,11 @@ DWORD WINAPI SaveThread(LPVOID pParam) {
 	
 	if (active == ICANDI || active == BOTH) {
 		WaitForSingleObject(parent->m_hSaveEvent, INFINITE);
-		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(parent->m_pDoc->m_OutputDir);
+		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(parent->m_pDoc->m_OutputDir_ICANDI);
 	}
+	else
+		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(parent->m_pDoc->m_OutputDir);
+
 	return 0;
 }
 

@@ -383,7 +383,7 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 void CIGUIDEDoc::digest(NetMsg msg) {
 	
 	if (msg.property == L"ICANDI_VIDEOFOLDER") {
-		m_OutputDir = msg.value;
+		m_OutputDir_ICANDI = msg.value;
 		CMainFrame* main = (CMainFrame*)AfxGetApp()->m_pMainWnd;
 		SetEvent(main->m_hSaveEvent);
 	}
