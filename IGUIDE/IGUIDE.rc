@@ -196,6 +196,19 @@ BEGIN
     LTEXT           "Select a Monitor for Target View:",IDC_STATIC,7,7,234,11
 END
 
+IDD_PATCHINFO DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Patch Information"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+    EDITTEXT        IDC_FILENAME_EDIT,43,7,259,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_DIRECTORY_EDIT,43,26,259,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Filename:",IDC_FILENAME_STATIC,7,11,32,8
+    LTEXT           "Directory:",IDC_DIRECTORY_STATIC,7,29,33,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -221,6 +234,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 90
     END
+
+    IDD_PATCHINFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -236,6 +257,11 @@ BEGIN
 END
 
 IDD_SELECTSCREEN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PATCHINFO AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -282,8 +308,6 @@ BEGIN
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Properties\tCtrl+P",         ID_EDIT_PROPERTIES
     END
     POPUP "&View"
     BEGIN
@@ -297,6 +321,8 @@ BEGIN
             MENUITEM "Location",                    ID_OVERLAY_LOCATION
             MENUITEM "Target Zone",                 ID_OVERLAY_TARGETZONE
         END
+        MENUITEM "&Properties\tCtrl+P",         ID_VIEW_PROPERTIES
+        MENUITEM "&Areas\tCtrl-A",              ID_VIEW_AREAS
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
     POPUP "&Help"
@@ -321,7 +347,6 @@ BEGIN
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    "P",            ID_EDIT_PROPERTIES,     VIRTKEY, CONTROL, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
     "I",            ID_FILE_IMPORT,         VIRTKEY, CONTROL, NOINVERT
@@ -330,6 +355,9 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_RETURN,      ID_VIEW_AREAS,          VIRTKEY, NOINVERT
+    "P",            ID_VIEW_PROPERTIES,     VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_VIEW_AREAS,          VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -339,8 +367,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,6,2
- PRODUCTVERSION 0,6,6,2
+ FILEVERSION 0,6,4,0
+ PRODUCTVERSION 0,6,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -357,12 +385,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.6.2"
+            VALUE "FileVersion", "0.6.4.0"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.6.2"
+            VALUE "ProductVersion", "0.6.4.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -383,6 +411,7 @@ BEGIN
     ID_INDICATOR_ICANDI     "ICANDI"
     IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
     ID_INDICATOR_AOSACA     "AOSACA"
+    ID_AREA_TREE            "Show patch areas in tree style"
 END
 
 STRINGTABLE
@@ -390,6 +419,7 @@ BEGIN
     AFX_IDS_APP_TITLE       "IGUIDE"
     AFX_IDS_IDLEMESSAGE     "Ready"
     IDS_PROPERTIES_WND      "Properties"
+    IDS_AREAS_WND           "Areas"
 END
 
 STRINGTABLE

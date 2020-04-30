@@ -33,8 +33,8 @@ bool Patches::commit() {
 
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
-
 	this->back().index = index;
+	this->back().area = 1;
 	index++;
 
 	last = this->back();

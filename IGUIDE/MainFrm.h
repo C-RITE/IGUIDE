@@ -3,8 +3,7 @@
 
 #pragma once
 #include "Remote.h"
-
-class Properties;
+#include "AreaPane.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -17,6 +16,7 @@ protected:
 public:
 	virtual ~CMainFrame();
 	static	CIGUIDEDoc *			GetDoc();
+
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -26,8 +26,11 @@ public:
 	CIGUIDEDoc*		m_pDoc;
 
 protected:  // control bar embedded members
+	
 	CMFCStatusBar   m_wndStatusBar;
-	Properties		m_DlgProperties;
+	Properties		m_PropertyPane;
+	AreaPane		m_AreaPane;
+
 	BOOL			CreateDockingWindows();
 	
 	HANDLE			m_hSaveThread;
@@ -45,7 +48,8 @@ protected:
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
 
 public:
-	afx_msg void OnEditProperties();
+	afx_msg void OnViewProperties();
+	afx_msg void OnViewAreas();
 	afx_msg void OnViewStatusBar();
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
@@ -53,4 +57,8 @@ public:
 
 protected:
 	afx_msg LRESULT OnSaveIguideCsv(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPatchToAreapane(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnInitAreapane(WPARAM wParam, LPARAM lParam);
 };

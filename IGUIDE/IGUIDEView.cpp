@@ -269,6 +269,7 @@ void CIGUIDEView::OnInitialUpdate()
 	// TODO: Add your specialized code here and/or call the base class
 
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY, NULL, (LPARAM)GetDocument());
+	AfxGetMainWnd()->SendMessage(INIT_AREAPANE, NULL, NULL);
 
 }
 
@@ -373,12 +374,8 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture->Create(pRenderTarget);
 	}
 
-	//pDoc->m_pGrid->center.x = (float)clientRect.CenterPoint().x;
-	//pDoc->m_pGrid->center.y = (float)clientRect.CenterPoint().y;
-
 	SetFixationTarget();
-	//pDoc->m_pGrid->patchjob.setOverlap(pDoc->m_Overlap);
-
+	
 	m_pDlgTarget->SetFixationTarget();
 	m_pDlgTarget->Invalidate();
 
@@ -564,6 +561,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 					pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
 					pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
 					AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
+					AfxGetMainWnd()->SendMessage(
+						PATCH_TO_AREAPANE,
+						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
+						NULL);
 				}
 				break;
 

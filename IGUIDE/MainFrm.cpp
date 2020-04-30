@@ -24,7 +24,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
-	ON_COMMAND(ID_EDIT_PROPERTIES, &CMainFrame::OnEditProperties)
+	ON_COMMAND(ID_VIEW_PROPERTIES, &CMainFrame::OnViewProperties)
+	ON_COMMAND(ID_VIEW_AREAS, &CMainFrame::OnViewAreas)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_AOSACA, &CMainFrame::OnUpdateLinkIndicators)
@@ -32,6 +33,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(RESET_AOSACA_IP, &CMainFrame::OnResetAosacaIp)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
+	ON_MESSAGE(PATCH_TO_AREAPANE, &CMainFrame::OnPatchToAreapane)
+	ON_MESSAGE(INIT_AREAPANE, &CMainFrame::OnInitAreapane)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -58,12 +61,12 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)l;
 
 	// insert all properties into list
-	m_DlgProperties.fillProperties();
+	m_PropertyPane.fillProperties();
 
 	// now that all properties are in place (i.e. IP-address, etc.)
 	// we can try to establish the desired remote control capability
 
-	RemoteControl.init(&m_DlgProperties, pDoc->m_pInputBuf, pDoc->m_hNetMsg);
+	RemoteControl.init(&m_PropertyPane, pDoc->m_pInputBuf, pDoc->m_hNetMsg);
 	RemoteControl.connect();
 
 	return 0L;
@@ -103,7 +106,7 @@ LRESULT CMainFrame::OnMouseFallback(WPARAM w, LPARAM l) {
 	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)pView->GetDocument();
 	pDoc->m_InputController = L"Mouse";
-	m_DlgProperties.fillProperties();
+	m_PropertyPane.fillProperties();
 	pDoc->m_Controller.reset();
 
 	return 0;
@@ -142,9 +145,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	m_DlgProperties.EnableDocking(CBRS_ALIGN_LEFT);
-	DockPane(&m_DlgProperties);
-	
 	if (!m_wndStatusBar.Create(this))
 	{
 		TRACE0("Failed to create status bar\n");
@@ -169,31 +169,57 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL CMainFrame::CreateDockingWindows()
 {
 	BOOL bNameValid;
+	CString strDockablePane;
+
 	// Create properties window
-	CString strPropertiesWnd;
-	bNameValid = strPropertiesWnd.LoadString(IDS_PROPERTIES_WND);
+	bNameValid = strDockablePane.LoadString(IDS_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_DlgProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIESWND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
+	if (!m_PropertyPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_PROPERTIES_WND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
 	}
 
+	bNameValid = strDockablePane.LoadString(IDS_AREAS_WND);
+	ASSERT(bNameValid);
+
+	if (!m_AreaPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_AREAS_WND, WS_CHILD | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Properties window\n");
+		return FALSE; // failed to create
+	}
+
+	m_PropertyPane.EnableDocking(CBRS_ALIGN_LEFT);
+	DockPane(&m_PropertyPane);
+
+	m_AreaPane.EnableDocking(CBRS_ALIGN_RIGHT);
+	DockPane(&m_AreaPane);
+
 	return TRUE;
+
 }
 
 
-void CMainFrame::OnEditProperties()
+void CMainFrame::OnViewProperties()
 {
 	// TODO: Add your command handler code here
-	if (m_DlgProperties.IsVisible()) {
-		m_DlgProperties.ShowPane(FALSE, FALSE, TRUE);
+	if (m_PropertyPane.IsVisible()) {
+		m_PropertyPane.ShowPane(FALSE, FALSE, TRUE);
 		SetFocus();
 	}
 	else
-		m_DlgProperties.ShowPane(TRUE, FALSE, TRUE);
+		m_PropertyPane.ShowPane(TRUE, FALSE, TRUE);
 }
 
+void CMainFrame::OnViewAreas() {
+
+	if (m_AreaPane.IsVisible()) {
+		m_AreaPane.ShowPane(FALSE, FALSE, TRUE);
+		SetFocus();
+	}
+	else
+		m_AreaPane.ShowPane(TRUE, FALSE, TRUE);
+}
 
 void CMainFrame::OnViewStatusBar()
 {
@@ -387,5 +413,19 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 	m_pDoc = GetDoc();
 	m_hSaveThread = ::CreateThread(NULL, 0, SaveThread, this, 0, &m_thdID);
 
+}
+
+
+afx_msg LRESULT CMainFrame::OnPatchToAreapane(WPARAM wParam, LPARAM lParam)
+{
+	Patch* p = (Patch*)wParam;
+	m_AreaPane.add(p);
+	return 0;
+}
+
+
+afx_msg LRESULT CMainFrame::OnInitAreapane(WPARAM wParam, LPARAM lParam)
+{
+	m_AreaPane.init();
 	return 0;
 }

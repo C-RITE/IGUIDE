@@ -26,6 +26,17 @@ void Grid::ClearPatchlist() {
 	
 }
 
+Patch Grid::getPatch(int index) {
+
+	Patch p;
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++)
+		if (it->index == index)
+			p = *it;
+	
+	return p;
+
+}
+
 CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();

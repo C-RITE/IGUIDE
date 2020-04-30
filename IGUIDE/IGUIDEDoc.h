@@ -49,8 +49,7 @@ public:
 
 	CString*				m_pInputBuf;						// input buffer for incoming messages
 	HANDLE*					m_hNetMsg;							// handle for netcom message events
-
-private:
+	private:
 
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
@@ -80,7 +79,6 @@ public:
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
-
 	void					OnFundusImport();
 
 	// Overrides

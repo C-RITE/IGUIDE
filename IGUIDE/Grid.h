@@ -69,6 +69,7 @@ public:
 	void makePOI(CPoint point, CD2DSizeF size);								// create a patchlist around mousepoint
 	void fillPatchJob(CHwndRenderTarget* pRenderTarget);					// fill patch queue to process a POI
 	Patch* doPatchJob(Element e);											// process patch queue
+	Patch getPatch(int index);												// get patch by index
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
