@@ -40,14 +40,10 @@ protected:  // control bar embedded members
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
-	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
-	afx_msg LRESULT OnMouseFallback(WPARAM w, LPARAM l);
-	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
+
 
 public:
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnViewProperties();
 	afx_msg void OnViewAreas();
 	afx_msg void OnViewStatusBar();
@@ -56,6 +52,9 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
+	afx_msg LRESULT OnDocumentReady(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnGamePadUpdate(WPARAM w, LPARAM l);
+	afx_msg LRESULT OnMouseFallback(WPARAM w, LPARAM l);
 	afx_msg LRESULT OnSaveIguideCsv(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);

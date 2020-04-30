@@ -412,7 +412,7 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 {
 	m_pDoc = GetDoc();
 	m_hSaveThread = ::CreateThread(NULL, 0, SaveThread, this, 0, &m_thdID);
-
+	return 0;
 }
 
 
