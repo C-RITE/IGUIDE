@@ -57,25 +57,6 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 }
 
-void Grid::StorePatch(Patch p) {
-
-	// store patches along with color, rastersize and defocus
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-
-	Patch patch;
-
-	patch.coordsDEG = p.coordsDEG;
-	patch.coordsPX = p.coordsPX;
-	patch.color = pDoc->m_raster.color;
-	patch.rastersize = pDoc->m_raster.size;
-	patch.locked = false;
-	patch.defocus = pDoc->getCurrentDefocus();
-
-	patchlist.push_back(patch);
-
-}
-
 void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -102,6 +83,7 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 			p.color = pDoc->m_raster.color;
 			p.locked = false;
 			p.visited = false;
+			p.defocus = L"0";
 			POI.push_back(p);
 		}
 

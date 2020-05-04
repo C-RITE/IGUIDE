@@ -61,6 +61,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	m_pDlgCalibration = new Calibration();
+	m_pCurrentOutputDir = NULL;
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";

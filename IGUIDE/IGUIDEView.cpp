@@ -510,13 +510,14 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			if (pDoc->m_pGrid->patchlist.back().locked == false) {
 				pDoc->m_pGrid->patchlist.delPatch();
-				pDoc->m_pGrid->patchlist.SaveToFile(pDoc->m_OutputDir);
 			}
 
-			/*if (pDoc->m_pGrid->patchlist.size() > 0)
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back().coordsDEG.x, pDoc->m_pGrid->patchlist.back().coordsDEG.y);
+			if (pDoc->m_pGrid->patchlist.size() > 0) {
+				Patch p = pDoc->m_pGrid->patchlist.back();
+				m_pDlgTarget->Pinpoint(p);
+			}
 			else
-				m_pDlgTarget->m_POI = NULL;*/
+				m_pDlgTarget->m_POI = NULL;
 
 			m_pDlgTarget->Invalidate();
 			this->Invalidate();

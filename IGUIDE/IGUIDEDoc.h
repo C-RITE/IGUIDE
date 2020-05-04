@@ -36,6 +36,7 @@ public:
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	CString					m_OutputDir_ICANDI;					// ICANDI output directory
+	CString*				m_pCurrentOutputDir;				// pointer to current output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure
@@ -75,7 +76,6 @@ public:
 
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
-	void					setVideoDir(CString dir) { m_OutputDir = dir; };
 
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys

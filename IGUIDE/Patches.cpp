@@ -25,6 +25,7 @@ void Patches::GetSysTime(CString &buf) {
 
 bool Patches::commit() {
 
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString systime;
 	GetSysTime(systime);
 
@@ -35,6 +36,7 @@ bool Patches::commit() {
 	this->back().timestamp = systime.GetString();
 	this->back().index = index;
 	this->back().area = 1;
+	this->back().defocus = pDoc->getCurrentDefocus();
 	index++;
 
 	last = this->back();
@@ -122,7 +124,7 @@ bool Patches::SaveToFile(CString directory) {
 	wstringstream sstream;
 	int number = 1;
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("Data-Format: YEAR_MONTH_DAY_HRS_MIN_SEC, #VIDEO, POSx(deg), POSy(deg),Defocus");
+	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Area,POSx(deg),POSy(deg),Defocus");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 
@@ -137,6 +139,8 @@ bool Patches::SaveToFile(CString directory) {
 			<< it->timestamp.GetString()
 			<< ","
 			<< "v" << strNumber.GetString()
+			<< ","
+			<< it->area
 			<< ","
 			<< strDegX.GetString()
 			<< ","

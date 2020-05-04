@@ -43,7 +43,7 @@ void AreaTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	int index = 1;
 	PatchInfo patchinfo;
 	Patch p = pDoc->m_pGrid->getPatch(index);
-	patchinfo.directory = pDoc->m_OutputDir;
+	patchinfo.directory = *pDoc->m_pCurrentOutputDir;
 	patchinfo.DoModal();
 
 }
