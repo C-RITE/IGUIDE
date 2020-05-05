@@ -1,16 +1,16 @@
 #pragma once
 #include "Patches.h"
 #include <vector>
-#include "AreaTreeCtrl.h"
+#include "RegionTreeCtrl.h"
 
-class AreaPane : public CDockablePane
+class RegionPane : public CDockablePane
 {
 
-	DECLARE_DYNAMIC(AreaPane)
+	DECLARE_DYNAMIC(RegionPane)
 
 public:
-	AreaPane();
-	virtual ~AreaPane();
+	RegionPane();
+	virtual ~RegionPane();
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -20,7 +20,7 @@ public:
 
 private:
 
-	AreaTreeCtrl			m_wndTree;
+	RegionTreeCtrl			m_wndTree;
 	std::vector<HTREEITEM>	areaNodes;
 
 public:

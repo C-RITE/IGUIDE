@@ -9,7 +9,7 @@
 #define ID_INDICATOR_AOSACA             131
 #define ID_AREA_TREE                    132
 #define ID_VIEW_PROPERTIES_WND          150
-#define ID_VIEW_AREAS_WND               151
+#define ID_VIEW_REGIONS_WND             151
 #define IDD_TARGET                      310
 #define IDD_CALIBRATION                 311
 #define IDD_SELECTSCREEN                313
@@ -45,9 +45,9 @@
 #define ID_OVERLAY_LOCATION             32795
 #define ID_OVERLAY_TARGETZONE           32798
 #define ID_VIEW_PROPERTIES              32800
-#define ID_VIEW_AREAS                   32802
+#define ID_VIEW_REGIONS	                32801
 #define IDS_PROPERTIES_WND              57346
-#define IDS_AREAS_WND                   57347
+#define IDS_REGIONS_WND                 57347
 
 // Next default values for new objects
 // 

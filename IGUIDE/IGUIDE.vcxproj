@@ -217,8 +217,8 @@
     <ClInclude Include="..\NetCom\SockClient.h" />
     <ClInclude Include="..\NetCom\SockListener.h" />
     <ClInclude Include="..\NetCom\WinSock2Async.h" />
-    <ClInclude Include="AreaPane.h" />
-    <ClInclude Include="AreaTreeCtrl.h" />
+    <ClInclude Include="RegionPane.h" />
+    <ClInclude Include="RegionTreeCtrl.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Edge.h" />
@@ -253,8 +253,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="AreaPane.cpp" />
-    <ClCompile Include="AreaTreeCtrl.cpp" />
+    <ClCompile Include="RegionPane.cpp" />
+    <ClCompile Include="RegionTreeCtrl.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Edge.cpp" />

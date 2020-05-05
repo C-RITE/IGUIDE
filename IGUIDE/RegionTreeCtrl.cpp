@@ -1,38 +1,38 @@
-// AreaTreeCtrl.cpp : implementation file
+// RegionTreeCtrl.cpp : implementation file
 //
 #include "stdafx.h"
 #include "IGUIDE.h"
-#include "AreaTreeCtrl.h"
+#include "RegionTreeCtrl.h"
 #include "PatchInfo.h"
 #include "MainFrm.h"
 
 
-// AreaTreeCtrl
+// RegionTreeCtrl
 
-IMPLEMENT_DYNAMIC(AreaTreeCtrl, CTreeCtrl)
+IMPLEMENT_DYNAMIC(RegionTreeCtrl, CTreeCtrl)
 
-AreaTreeCtrl::AreaTreeCtrl()
+RegionTreeCtrl::RegionTreeCtrl()
 {
 
 }
 
-AreaTreeCtrl::~AreaTreeCtrl()
+RegionTreeCtrl::~RegionTreeCtrl()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(AreaTreeCtrl, CTreeCtrl)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, &AreaTreeCtrl::OnNMDblclk)
+BEGIN_MESSAGE_MAP(RegionTreeCtrl, CTreeCtrl)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, &RegionTreeCtrl::OnNMDblclk)
 END_MESSAGE_MAP()
 
 
 
-// AreaTreeCtrl message handlers
+// RegionTreeCtrl message handlers
 
 
 
 
-void AreaTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
+void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: Add your control notification handler code here
 	*pResult = 0;

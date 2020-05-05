@@ -269,7 +269,7 @@ void CIGUIDEView::OnInitialUpdate()
 	// TODO: Add your specialized code here and/or call the base class
 
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY, NULL, (LPARAM)GetDocument());
-	AfxGetMainWnd()->SendMessage(INIT_AREAPANE, NULL, NULL);
+	AfxGetMainWnd()->SendMessage(INIT_REGIONPANE, NULL, NULL);
 
 }
 
@@ -563,7 +563,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 					pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
 					AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
 					AfxGetMainWnd()->SendMessage(
-						PATCH_TO_AREAPANE,
+						PATCH_TO_REGIONPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
 						NULL);
 				}

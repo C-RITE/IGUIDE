@@ -25,7 +25,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_SETCURSOR()
 	ON_WM_SHOWWINDOW()
 	ON_COMMAND(ID_VIEW_PROPERTIES, &CMainFrame::OnViewProperties)
-	ON_COMMAND(ID_VIEW_AREAS, &CMainFrame::OnViewAreas)
+	ON_COMMAND(ID_VIEW_REGIONS, &CMainFrame::OnViewRegions)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, &CMainFrame::OnViewStatusBar)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_ICANDI, &CMainFrame::OnUpdateLinkIndicators)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_AOSACA, &CMainFrame::OnUpdateLinkIndicators)
@@ -33,8 +33,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(RESET_AOSACA_IP, &CMainFrame::OnResetAosacaIp)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
-	ON_MESSAGE(PATCH_TO_AREAPANE, &CMainFrame::OnPatchToAreapane)
-	ON_MESSAGE(INIT_AREAPANE, &CMainFrame::OnInitAreapane)
+	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
+	ON_MESSAGE(INIT_REGIONPANE, &CMainFrame::OnInitRegionPane)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -180,10 +180,10 @@ BOOL CMainFrame::CreateDockingWindows()
 		return FALSE; // failed to create
 	}
 
-	bNameValid = strDockablePane.LoadString(IDS_AREAS_WND);
+	bNameValid = strDockablePane.LoadString(IDS_REGIONS_WND);
 	ASSERT(bNameValid);
 
-	if (!m_AreaPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_AREAS_WND, WS_CHILD | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	if (!m_RegionPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_REGIONS_WND, WS_CHILD | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
@@ -192,8 +192,8 @@ BOOL CMainFrame::CreateDockingWindows()
 	m_PropertyPane.EnableDocking(CBRS_ALIGN_LEFT);
 	DockPane(&m_PropertyPane);
 
-	m_AreaPane.EnableDocking(CBRS_ALIGN_RIGHT);
-	DockPane(&m_AreaPane);
+	m_RegionPane.EnableDocking(CBRS_ALIGN_RIGHT);
+	DockPane(&m_RegionPane);
 
 	return TRUE;
 
@@ -211,14 +211,14 @@ void CMainFrame::OnViewProperties()
 		m_PropertyPane.ShowPane(TRUE, FALSE, TRUE);
 }
 
-void CMainFrame::OnViewAreas() {
+void CMainFrame::OnViewRegions() {
 
-	if (m_AreaPane.IsVisible()) {
-		m_AreaPane.ShowPane(FALSE, FALSE, TRUE);
+	if (m_RegionPane.IsVisible()) {
+		m_RegionPane.ShowPane(FALSE, FALSE, TRUE);
 		SetFocus();
 	}
 	else
-		m_AreaPane.ShowPane(TRUE, FALSE, TRUE);
+		m_RegionPane.ShowPane(TRUE, FALSE, TRUE);
 }
 
 void CMainFrame::OnViewStatusBar()
@@ -418,16 +418,16 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 }
 
 
-afx_msg LRESULT CMainFrame::OnPatchToAreapane(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 {
 	Patch* p = (Patch*)wParam;
-	m_AreaPane.add(p);
+	m_RegionPane.add(p);
 	return 0;
 }
 
 
-afx_msg LRESULT CMainFrame::OnInitAreapane(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CMainFrame::OnInitRegionPane(WPARAM wParam, LPARAM lParam)
 {
-	m_AreaPane.init();
+	m_RegionPane.init();
 	return 0;
 }

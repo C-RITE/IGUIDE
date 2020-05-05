@@ -2,24 +2,24 @@
 //
 #include "stdafx.h"
 #include "IGUIDE.h"
-#include "AreaPane.h"
+#include "RegionPane.h"
 #include "resource.h"
 
 
 // Area Pane
 
-IMPLEMENT_DYNAMIC(AreaPane, CDockablePane)
+IMPLEMENT_DYNAMIC(RegionPane, CDockablePane)
 
-AreaPane::AreaPane()
+RegionPane::RegionPane()
 {
 }
 
-AreaPane::~AreaPane()
+RegionPane::~RegionPane()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(AreaPane, CDockablePane)
+BEGIN_MESSAGE_MAP(RegionPane, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -27,7 +27,7 @@ END_MESSAGE_MAP()
 // Area message handlers
 
 
-int AreaPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int RegionPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CDockablePane::OnCreate(lpCreateStruct) == -1)
         return -1;
@@ -43,7 +43,7 @@ int AreaPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-void AreaPane::OnSize(UINT nType, int cx, int cy)
+void RegionPane::OnSize(UINT nType, int cx, int cy)
 {
 	CDockablePane::OnSize(nType, cx, cy);
 	
@@ -52,7 +52,7 @@ void AreaPane::OnSize(UINT nType, int cx, int cy)
 
 }
 
-void AreaPane::add(Patch* p) {
+void RegionPane::add(Patch* p) {
     
     CString patchname;
     patchname.Format(L"Patch: %d", p->index);
@@ -63,11 +63,11 @@ void AreaPane::add(Patch* p) {
 
 }
 
-void AreaPane::init() {
+void RegionPane::init() {
 
     CString strArea;
     TVINSERTSTRUCT tvInsert;
-    strArea.Format(L"Area: 1");
+    strArea.Format(L"Region 1");
     tvInsert.hParent = NULL;
     tvInsert.hInsertAfter = NULL;
     tvInsert.item.mask = TVIF_TEXT;
@@ -78,7 +78,7 @@ void AreaPane::init() {
 }
 
 
-void AreaPane::update(Patches* p)
+void RegionPane::update(Patches* p)
 {
     // TODO: Add your implementation code here.
     m_wndTree.DeleteAllItems();

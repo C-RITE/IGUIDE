@@ -14,8 +14,8 @@
 #define RESET_AOSACA_IP (WM_USER + 107)
 #define RESET_ICANDI_IP (WM_USER + 108)
 #define SAVE_IGUIDE_CSV (WM_USER + 109)
-#define	PATCH_TO_AREAPANE (WM_USER + 110)
-#define INIT_AREAPANE (WM_USER + 111)
+#define	PATCH_TO_REGIONPANE (WM_USER + 110)
+#define INIT_REGIONPANE (WM_USER + 111)
 
 #define NETMSG_RESPONSE_TIMEOUT 200
 #define SNAP_INTERVAL	0.1F							// Snap mouse cursor to grid in degree
@@ -28,7 +28,7 @@
 #define LANE			CANVAS / LANES					// helper for snap to grid
 
 #define MIN_ZOOM		0.01F //not yet integrated
-#define MAX_ZOOM		100.0F
+#define MAX_ZOOM		50F
 
 // definition source: https://de.wikipedia.org/wiki/Fovea_centralis#/media/Datei:Macula.svg
 #define _DELTA_D		15				// Assumed distance between foveal center and optic disc

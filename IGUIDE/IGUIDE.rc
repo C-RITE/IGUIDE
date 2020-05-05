@@ -322,7 +322,7 @@ BEGIN
             MENUITEM "Target Zone",                 ID_OVERLAY_TARGETZONE
         END
         MENUITEM "&Properties\tCtrl+P",         ID_VIEW_PROPERTIES
-        MENUITEM "&Areas\tCtrl-A",              ID_VIEW_AREAS
+        MENUITEM "&Regions\tCtrl+R",            ID_VIEW_REGIONS
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
     POPUP "&Help"
@@ -355,9 +355,8 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    VK_RETURN,      ID_VIEW_AREAS,          VIRTKEY, NOINVERT
     "P",            ID_VIEW_PROPERTIES,     VIRTKEY, CONTROL, NOINVERT
-    "A",            ID_VIEW_AREAS,          VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_VIEW_REGIONS,        VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -411,7 +410,7 @@ BEGIN
     ID_INDICATOR_ICANDI     "ICANDI"
     IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
     ID_INDICATOR_AOSACA     "AOSACA"
-    ID_AREA_TREE            "Show patch areas in tree style"
+    ID_AREA_TREE            "Show patch Regions in tree style"
 END
 
 STRINGTABLE
@@ -419,7 +418,7 @@ BEGIN
     AFX_IDS_APP_TITLE       "IGUIDE"
     AFX_IDS_IDLEMESSAGE     "Ready"
     IDS_PROPERTIES_WND      "Properties"
-    IDS_AREAS_WND           "Areas"
+    IDS_REGIONS_WND         "Regions"
 END
 
 STRINGTABLE

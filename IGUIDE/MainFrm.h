@@ -3,7 +3,7 @@
 
 #pragma once
 #include "Remote.h"
-#include "AreaPane.h"
+#include "RegionPane.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -29,7 +29,7 @@ protected:  // control bar embedded members
 	
 	CMFCStatusBar   m_wndStatusBar;
 	Properties		m_PropertyPane;
-	AreaPane		m_AreaPane;
+	RegionPane		m_RegionPane;
 
 	BOOL			CreateDockingWindows();
 	
@@ -45,7 +45,7 @@ protected:
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnViewProperties();
-	afx_msg void OnViewAreas();
+	afx_msg void OnViewRegions();
 	afx_msg void OnViewStatusBar();
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
@@ -58,6 +58,6 @@ protected:
 	afx_msg LRESULT OnSaveIguideCsv(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnPatchToAreapane(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnInitAreapane(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPatchToRegionPane(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnInitRegionPane(WPARAM wParam, LPARAM lParam);
 };
