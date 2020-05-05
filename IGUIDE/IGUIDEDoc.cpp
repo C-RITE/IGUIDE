@@ -65,7 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
-	m_Overlap = .1f;
+	m_Overlap = 50;
 	overlaySettings = 0;
 	defocus = L"0";
 
@@ -260,13 +260,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
 
-	LPBYTE overlap;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"Overlap", &overlap, &nl) > 0)
-		memcpy(&m_Overlap, overlap, sizeof(float));
+	m_Overlap = AfxGetApp()->GetProfileInt(L"Settings", L"Overlap", 50);
 		
 	delete calib, ptr;
 	delete rcol;
-	delete overlap;
 	
 	return TRUE;
 
@@ -293,9 +290,8 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&m_raster.color, sizeof(D2D1_COLOR_F));
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"Overlap", (LPBYTE)&m_Overlap, sizeof(float));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlap", m_Overlap);
 	
-
 	CDocument::OnCloseDocument();
 
 }

@@ -42,7 +42,7 @@ public:
 	CString					m_InputController;					// for subject calibration procedure
 	CString					m_FlipVertical;						// flip target screen in x
 	CString					m_FlipHorizontal;					// flip target screen in y
-	float					m_Overlap;							// patch overlap value in deg
+	int						m_Overlap;							// patch overlap value in percent
 	int						m_FixationTargetSize;				// fixation target size in percent
 	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings

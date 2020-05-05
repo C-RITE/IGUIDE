@@ -57,7 +57,7 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 }
 
-void Grid::makePOI(CPoint loc, CD2DSizeF size) {
+void Grid::makePOI(CPoint loc, SIZE size) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -69,14 +69,14 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	float zoom = 1 / pView->getZoomFactor();
 
-	size.width /= 2;
-	size.height /= 2;
+	size.cx /= 2;
+	size.cy /= 2;
 
-	for (float i = -size.width; i < size.width; i++) {
+	for (float i = -size.cx; i < size.cy; i++) {
 		Patch p;
 		p.coordsDEG.x = posDeg.x + rsDeg * i;
 		p.coordsPX.x = loc.x + rsDeg * PPD * i * zoom;
-		for (int j = -size.height; j < size.height; j++) {
+		for (int j = -size.cy; j < size.cy; j++) {
 			p.coordsDEG.y = posDeg.y + rsDeg * j;
 			p.coordsPX.y = loc.y + rsDeg * PPD * j * zoom;
 			p.rastersize = pDoc->m_raster.size;
@@ -98,15 +98,31 @@ void Grid::makePOI(CPoint loc, CD2DSizeF size) {
 void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+	float zoom = 1 / pView->getZoomFactor();
 	
 	makePOI(mousePos, POISize);
-	
-	auto it = pDoc->m_pGrid->POI.begin();
 
-	while (it != pDoc->m_pGrid->POI.end()) {
-		pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, it->coordsPX);
-		it++;
-	}
+	CD2DSizeF size{ (float)POISize.cx, (float)POISize.cy };
+	
+	if (size.width > 1)
+		size.width -= size.width * ((float)pDoc->m_Overlap / 100.f);
+	if (size.height > 1)
+		size.height -= size.height * ((float)pDoc->m_Overlap / 100.f);
+	
+	size.width /= 2;
+	size.height /= 2;
+
+	size.width = (size.width * rsDeg * PPD * zoom);
+	size.height = (size.height * rsDeg * PPD * zoom);
+
+	CD2DRectF rect{ mousePos.x - size.width, mousePos.y - size.height,
+					mousePos.x + size.width, mousePos.y + size.height };
+
+	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
+
 
 }
 

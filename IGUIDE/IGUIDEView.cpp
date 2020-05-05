@@ -231,8 +231,8 @@ BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (nFlags & MK_SHIFT) {
-		pDoc->m_pGrid->POISize.width += zDelta / WHEEL_DELTA;
-		pDoc->m_pGrid->POISize.height += zDelta / WHEEL_DELTA;
+		pDoc->m_pGrid->POISize.cx += zDelta / WHEEL_DELTA;
+		pDoc->m_pGrid->POISize.cy += zDelta / WHEEL_DELTA;
 	}
 
 	else

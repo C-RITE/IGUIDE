@@ -50,7 +50,7 @@ public:
 
 public:
 
-	CD2DSizeF				POISize;						// size of patch matrix
+	SIZE					POISize;						// size of patch matrix in patches
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
@@ -65,7 +65,7 @@ public:
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
 
 	void ClearPatchlist();
-	void makePOI(CPoint point, CD2DSizeF size);								// create a patchlist around mousepoint
+	void makePOI(CPoint point, SIZE size);									// create a patchlist around mousepointer											// calculate POI size in conjunction with overlap
 	void fillPatchJob(CHwndRenderTarget* pRenderTarget);					// fill patch queue to process a POI
 	Patch* doPatchJob(Element e);											// process patch queue
 	Patch getPatch(int index);												// get patch by index
@@ -73,7 +73,6 @@ public:
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);				// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);				// construct the grid
 	void CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget);			// construct the patchmatrix
-
 	void DrawExtras(CHwndRenderTarget* pRenderTarget);						// draw information overlay
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);						// draw grid overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);						// draw circles around center

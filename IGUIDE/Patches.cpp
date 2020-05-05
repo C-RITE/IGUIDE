@@ -92,8 +92,8 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 	mid.y = (this->front().coordsDEG.y + this->back().coordsDEG.y) / 2;
 
 	for (auto it = this->begin(); it != this->end(); it++) {
-		delta_x = (mid.x - it->coordsDEG.x) * (overlap / rsDeg);
-		delta_y = (mid.y - it->coordsDEG.y) * (overlap / rsDeg);
+		delta_x = (mid.x - it->coordsDEG.x) * (overlap / 100);
+		delta_y = (mid.y - it->coordsDEG.y) * (overlap / 100);
 		it._Ptr->_Myval.coordsDEG.x += delta_x;
 		it._Ptr->_Myval.coordsDEG.y += delta_y;
 	}
