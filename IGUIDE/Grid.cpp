@@ -172,12 +172,6 @@ void Grid::calcPOIsize(float zoom) {
 	(POI.back().coordsPX.y + rsDeg / 2 * PPD) - (POI.front().coordsPX.y - rsDeg / 2 * PPD)
 	};
 
-	float p = rsDeg * PPD * (float)pDoc->m_Overlap / 100;
-	float q = rsDeg * PPD * (float)pDoc->m_Overlap / 100;
-
-	POISize.width -= p;
-	POISize.height -= q;
-
 	// apply zoom
 	POISize.width *= zoom;
 	POISize.height *= zoom;
