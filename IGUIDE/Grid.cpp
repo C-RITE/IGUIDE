@@ -155,7 +155,7 @@ void Grid::makePOI(CPoint loc) {
 		}
 
 		// add overlap
-		//POI.setOverlap(pDoc->m_Overlap, rsDeg);
+		POI.setOverlap(pDoc->m_Overlap, rsDeg);
 	}
 
 }
@@ -172,17 +172,11 @@ void Grid::calcPOIsize(float zoom) {
 	(POI.back().coordsPX.y + rsDeg / 2 * PPD) - (POI.front().coordsPX.y - rsDeg / 2 * PPD)
 	};
 
-	// amount of shrink introduced by overlap in px
-	float shrinkPX_x = (float)pDoc->m_Overlap / 100 * (float)wheelNotch.cx * rsDeg * PPD;
-	float shrinkPX_y = (float)pDoc->m_Overlap / 100 * (float)wheelNotch.cy * rsDeg * PPD;
+	float p = rsDeg * PPD * (float)pDoc->m_Overlap / 100;
+	float q = rsDeg * PPD * (float)pDoc->m_Overlap / 100;
 
-	// amount of shrink introduced by overlap in percent
-	float shrink_x = shrinkPX_x / POISize.width;
-	float shrink_y = shrinkPX_y / POISize.height;
-	
-	// apply shrink
-	POISize.width *= shrink_x;
-	POISize.height *= shrink_y;
+	POISize.width -= p;
+	POISize.height -= q;
 
 	// apply zoom
 	POISize.width *= zoom;
@@ -206,9 +200,15 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 
 void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
 	for (auto it = POI.begin(); it != POI.end(); it++) {
 		patchjob.push_back(*it);
 	}
+	ATLTRACE(_T("back of patchJob (x,y)\t: %f, %f\n"), patchjob.back().coordsDEG.x + rsDeg / 2, patchjob.back().coordsDEG.x + rsDeg / 2);
+	ATLTRACE(_T("front of patchJob (x,y)\t: %f, %f\n"), patchjob.front().coordsDEG.y - rsDeg / 2, patchjob.front().coordsDEG.y - rsDeg / 2);
 
 	//if (POI.size() > 1)
 	//	CreatePatchJobGeometry(pRenderTarget);
@@ -250,7 +250,7 @@ Patch* Grid::doPatchJob(Element e) {
 	}
 
 #ifdef DEBUG
-	ATLTRACE(_T("patchjob (x,y): %f, %f\n"), p->coordsDEG.x, p->coordsDEG.y);
+//	ATLTRACE(_T("patchjob (x,y): %f, %f\n"), p->coordsDEG.x, p->coordsDEG.y);
 	
 #endif // DEBUG
 
