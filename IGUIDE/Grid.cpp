@@ -164,10 +164,23 @@ void Grid::calcPOIsize(float zoom) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
 	POISize = {
-		(POI.back().coordsPX.x - POI.front().coordsPX.x),
-		(POI.back().coordsPX.y - POI.front().coordsPX.y)
+	(POI.back().coordsPX.x + rsDeg / 2 * PPD) - (POI.front().coordsPX.x - rsDeg / 2 * PPD),
+	(POI.back().coordsPX.y + rsDeg / 2 * PPD) - (POI.front().coordsPX.y - rsDeg / 2 * PPD)
 	};
+
+	// amount of shrink introduced by overlap in px
+	float shrinkPX_x = (float)pDoc->m_Overlap / 100 * (float)wheelNotch.cx * rsDeg * PPD;
+	float shrinkPX_y = (float)pDoc->m_Overlap / 100 * (float)wheelNotch.cy * rsDeg * PPD;
+
+	// amount of shrink introduced by overlap in percent
+	float shrink_x = shrinkPX_x / POISize.width;
+	float shrink_y = shrinkPX_y / POISize.height;
+	
+	POISize.width *= shrink_x;
+	POISize.height *= shrink_y;
 
 	POISize.width *= zoom;
 	POISize.height *= zoom;
