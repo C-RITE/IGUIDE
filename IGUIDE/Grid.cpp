@@ -9,11 +9,11 @@
 
 using namespace D2D1;
 
-Grid::Grid(): currentPatch(patchlist.end()){
+Grid::Grid() : currentPatch(patchlist.end()) {
 
 	isPanning = false;
-	POISize = { 1, 1 };
-
+	wheelNotch = { 1, 1 };
+	POISize = { 0 , 0 };
 }
 
 Grid::~Grid() {
@@ -57,72 +57,134 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 }
 
-void Grid::makePOI(CPoint loc, SIZE size) {
+void Grid::controlPOI(int notch, int dim, CPoint point) {
+
+	switch (dim){
+
+		case 0:
+			wheelNotch.cx += notch;
+			wheelNotch.cy += notch;
+			break;
+
+		case 1:
+			wheelNotch.cx += notch;
+			break;
+
+		case 2:
+			wheelNotch.cy += notch;
+			break;
+	}
+
+	switch (wheelNotch.cx) {
+
+		case 0:
+			wheelNotch.cx = 1;
+			break;
+	}
+
+	switch (wheelNotch.cy) {
+
+		case 0:
+			wheelNotch.cy = 1;
+			break;
+	}
+
+	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
+		makePOI(point);
+	else
+		POI.clear();
+
+//#ifdef DEBUG
+//	ATLTRACE(_T("poi dim is: %d, %d\n"), wheelNotch.cx, wheelNotch.cy);
+//
+//#endif // DEBUG
+
+}
+
+void Grid::makePOI(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
-	CD2DPointF posDeg { PixelToDegree(loc) };
+	CD2DPointF posDeg(PixelToDegree(loc));
 
 	POI.clear();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	float zoom = 1 / pView->getZoomFactor();
 
-	size.cx /= 2;
-	size.cy /= 2;
+	if (wheelNotch.cx == 1 && wheelNotch.cy == 1) {
 
-	for (float i = -size.cx; i < size.cy; i++) {
+		// single location
 		Patch p;
-		p.coordsDEG.x = posDeg.x + rsDeg * i;
-		p.coordsPX.x = loc.x + rsDeg * PPD * i * zoom;
-		for (int j = -size.cy; j < size.cy; j++) {
-			p.coordsDEG.y = posDeg.y + rsDeg * j;
-			p.coordsPX.y = loc.y + rsDeg * PPD * j * zoom;
-			p.rastersize = pDoc->m_raster.size;
-			p.color = pDoc->m_raster.color;
-			p.locked = false;
-			p.visited = false;
-			p.defocus = L"0";
-			POI.push_back(p);
-		}
+		p.coordsDEG.x = posDeg.x;
+		p.coordsPX.x = loc.x;
+		p.coordsDEG.y = posDeg.y;
+		p.coordsPX.y = loc.y;
+		p.rastersize = pDoc->m_raster.size;
+		p.color = pDoc->m_raster.color;
+		p.locked = false;
+		p.visited = false;
+		p.defocus = L"0";
+		POI.push_back(p);
 
 	}
 
-	// add overlap
-	if (POI.size() > 1)
+	else {
+
+		// make m-by-n matrix of patches controlled by mousewheel
+		for (float i = -(float)wheelNotch.cx / 2; i < (float)wheelNotch.cx / 2; i++) {
+
+			Patch p;
+			p.coordsDEG.x = posDeg.x + rsDeg * i + rsDeg / 2;
+			p.coordsPX.x = (loc.x + rsDeg * PPD * i) + rsDeg * PPD / 2;
+
+			for (float j = -(float)wheelNotch.cy / 2; j < (float)wheelNotch.cy / 2; j++) {
+
+				p.coordsDEG.y = posDeg.y + rsDeg * j + rsDeg / 2;
+				p.coordsPX.y = (loc.y + rsDeg * PPD * j ) + rsDeg * PPD / 2;
+				p.rastersize = pDoc->m_raster.size;
+				p.color = pDoc->m_raster.color;
+				p.locked = false;
+				p.visited = false;
+				p.defocus = L"0";
+				POI.push_back(p);
+
+			}
+
+		}
+
+		// add overlap
 		POI.setOverlap(pDoc->m_Overlap, rsDeg);
+	}
 
 }
 
-void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos) {
+void Grid::calcPOIsize(float zoom) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
 
-	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-	float zoom = 1 / pView->getZoomFactor();
-	
-	makePOI(mousePos, POISize);
+	POISize = {
+		(POI.back().coordsPX.x - POI.front().coordsPX.x),
+		(POI.back().coordsPX.y - POI.front().coordsPX.y)
+	};
 
-	CD2DSizeF size{ (float)POISize.cx, (float)POISize.cy };
-	
-	if (size.width > 1)
-		size.width -= size.width * ((float)pDoc->m_Overlap / 100.f);
-	if (size.height > 1)
-		size.height -= size.height * ((float)pDoc->m_Overlap / 100.f);
-	
-	size.width /= 2;
-	size.height /= 2;
+	POISize.width *= zoom;
+	POISize.height *= zoom;
 
-	size.width = (size.width * rsDeg * PPD * zoom);
-	size.height = (size.height * rsDeg * PPD * zoom);
+}
 
-	CD2DRectF rect{ mousePos.x - size.width, mousePos.y - size.height,
-					mousePos.x + size.width, mousePos.y + size.height };
+void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom) {
+
+	calcPOIsize(zoom);
+	CD2DPointF pos(mousePos);
+
+	CD2DRectF rect{
+				pos.x - POISize.width / 2, pos.y - POISize.height / 2,
+				pos.x + POISize.width / 2, pos.y + POISize.height / 2
+	};
 
 	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
-
 
 }
 
@@ -132,8 +194,8 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 		patchjob.push_back(*it);
 	}
 
-	if (POI.size() > 1)
-		CreatePatchJobGeometry(pRenderTarget);
+	//if (POI.size() > 1)
+	//	CreatePatchJobGeometry(pRenderTarget);
 
 }
 
@@ -170,6 +232,11 @@ Patch* Grid::doPatchJob(Element e) {
 		}
 
 	}
+
+#ifdef DEBUG
+	ATLTRACE(_T("patchjob (x,y): %f, %f\n"), p->coordsDEG.x, p->coordsDEG.y);
+	
+#endif // DEBUG
 
 	return p;
 
@@ -577,7 +644,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
+void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom) {
 
 	// show cursor around the mouse pointer
 
@@ -587,7 +654,6 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 	if (pDoc->calibrationComplete) {
 
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
-		float zoom = 1 / pView->getZoomFactor();
 
 		cursor = {
 			loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
@@ -598,8 +664,7 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc) {
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
-		if (POI.size() == 1)
-			DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
 
 	}
 
