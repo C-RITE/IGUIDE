@@ -155,7 +155,7 @@ void Grid::makePOI(CPoint loc) {
 		}
 
 		// add overlap
-		POI.setOverlap(pDoc->m_Overlap, rsDeg);
+		//POI.setOverlap(pDoc->m_Overlap, rsDeg);
 	}
 
 }
@@ -166,6 +166,7 @@ void Grid::calcPOIsize(float zoom) {
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
+	// take last and first patch in list to define size of POI
 	POISize = {
 	(POI.back().coordsPX.x + rsDeg / 2 * PPD) - (POI.front().coordsPX.x - rsDeg / 2 * PPD),
 	(POI.back().coordsPX.y + rsDeg / 2 * PPD) - (POI.front().coordsPX.y - rsDeg / 2 * PPD)
@@ -179,9 +180,11 @@ void Grid::calcPOIsize(float zoom) {
 	float shrink_x = shrinkPX_x / POISize.width;
 	float shrink_y = shrinkPX_y / POISize.height;
 	
+	// apply shrink
 	POISize.width *= shrink_x;
 	POISize.height *= shrink_y;
 
+	// apply zoom
 	POISize.width *= zoom;
 	POISize.height *= zoom;
 
