@@ -75,7 +75,6 @@ public:
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);								// construct the grid
-	void CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget);							// construct the patchmatrix
 	void DrawExtras(CHwndRenderTarget* pRenderTarget);										// draw information overlay
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);										// draw grid overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);										// draw circles around center

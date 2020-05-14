@@ -455,7 +455,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 
 		// draw patchjob
-		//pDoc->m_pGrid->DrawPatchJob(pRenderTarget);
+		pDoc->m_pGrid->DrawPatchJob(pRenderTarget);
 
 		// draw extras (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawExtras(pRenderTarget);

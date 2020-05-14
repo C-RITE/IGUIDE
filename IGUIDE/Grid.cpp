@@ -75,29 +75,19 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 			break;
 	}
 
-	switch (wheelNotch.cx) {
-
-		case 0:
-			wheelNotch.cx = 1;
-			break;
+	if (wheelNotch.cx <=1) {
+		wheelNotch.cx = 1;
 	}
 
-	switch (wheelNotch.cy) {
-
-		case 0:
-			wheelNotch.cy = 1;
-			break;
+	if (wheelNotch.cy <= 1) {
+		wheelNotch.cy = 1;
 	}
+
 
 	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
 		makePOI(point);
 	else
 		POI.clear();
-
-//#ifdef DEBUG
-//	ATLTRACE(_T("poi dim is: %d, %d\n"), wheelNotch.cx, wheelNotch.cy);
-//
-//#endif // DEBUG
 
 }
 
@@ -165,7 +155,7 @@ void Grid::calcPOIsize(float zoom) {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-
+	
 	// take last and first patch in list to define size of POI
 	POISize = {
 	(POI.back().coordsPX.x + rsDeg / 2 * PPD) - (POI.front().coordsPX.x - rsDeg / 2 * PPD),
@@ -190,6 +180,28 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 
 	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
 
+	if (patchjob.size() > 0)
+		return;
+
+	CString vidText;
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
+
+	vidText.Format(L"%d", POI.size());
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		vidText,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(rect.right, rect.bottom),
+		&textLayout,
+		m_pWhiteBrush);
+
 }
 
 void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
@@ -201,11 +213,6 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 	for (auto it = POI.begin(); it != POI.end(); it++) {
 		patchjob.push_back(*it);
 	}
-	ATLTRACE(_T("back of patchJob (x,y)\t: %f, %f\n"), patchjob.back().coordsDEG.x + rsDeg / 2, patchjob.back().coordsDEG.x + rsDeg / 2);
-	ATLTRACE(_T("front of patchJob (x,y)\t: %f, %f\n"), patchjob.front().coordsDEG.y - rsDeg / 2, patchjob.front().coordsDEG.y - rsDeg / 2);
-
-	//if (POI.size() > 1)
-	//	CreatePatchJobGeometry(pRenderTarget);
 
 }
 
@@ -243,10 +250,6 @@ Patch* Grid::doPatchJob(Element e) {
 
 	}
 
-#ifdef DEBUG
-//	ATLTRACE(_T("patchjob (x,y): %f, %f\n"), p->coordsDEG.x, p->coordsDEG.y);
-	
-#endif // DEBUG
 
 	return p;
 
@@ -300,86 +303,29 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::CreatePatchJobGeometry(CHwndRenderTarget* pRenderTarget) {
-	
-	// patchjob geometry creation
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	
-	m_pPatchJobGeom = new CD2DPathGeometry(pRenderTarget);
-	m_pPatchJobGeom->Create(pRenderTarget);
-
-	CD2DGeometrySink PatchGeomSink(*m_pPatchJobGeom);
-	CD2DPointF fromPoint, toPoint, firstPoint;
-
-	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-
-	// x axis
-	auto it = pDoc->m_pGrid->POI.begin();
-
-	while (it != pDoc->m_pGrid->POI.end()) {
-
-		fromPoint = { 
-			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2  * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2  * PPD) + CANVAS / 2
-		};
-
-		if (it == pDoc->m_pGrid->POI.begin())
-			firstPoint = fromPoint;
-
-		toPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), fromPoint.y };
-
-		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-		PatchGeomSink.AddLine(toPoint);
-		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		it++;
-
-	}
-
-	// draw the last line in x
-	fromPoint = { firstPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD)};
-	toPoint = { toPoint.x, (float)(toPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
-
-	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-	PatchGeomSink.AddLine(toPoint);
-	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-
-
-	// y axis
-	it = pDoc->m_pGrid->POI.begin();
-
-	while (it != pDoc->m_pGrid->POI.end()) {
-
-		fromPoint = {
-			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
-
-		toPoint = { fromPoint.x, (float)(fromPoint.y + (rsDeg - pDoc->m_Overlap) * PPD) };
-
-		PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-		PatchGeomSink.AddLine(toPoint);
-		PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		it++;
-
-	}
-
-	// draw the last line in y
-	fromPoint = { (float)(fromPoint.x + (rsDeg - pDoc->m_Overlap) * PPD), firstPoint.y };
-	toPoint = { fromPoint.x, (float)(firstPoint.y + sqrt(pDoc->m_pGrid->POI.size()) * (rsDeg - pDoc->m_Overlap) * PPD) };
-
-	PatchGeomSink.BeginFigure(fromPoint, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-	PatchGeomSink.AddLine(toPoint);
-	PatchGeomSink.EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-
-}
-
 void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
 
-	if (patchjob.size() > 1)
-		pRenderTarget->DrawGeometry(
-			m_pPatchJobGeom,
-			m_pWhiteBrush,
-			.1f);
+	if (patchjob.size() > 1) {
+
+		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+		float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+
+		CD2DRectF rect1 = {
+
+				(float)(patchjob.front().coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(patchjob.front().coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(patchjob.back().coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(patchjob.back().coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
+
+		};
+
+
+		pRenderTarget->DrawRectangle(
+			rect1,
+			m_pDarkGreenBrush,
+			.5f);
+
+	}
 
 }
 

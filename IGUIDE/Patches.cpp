@@ -91,13 +91,6 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 	mid.x = ((this->back().coordsDEG.x + rsDeg/2) + (this->front().coordsDEG.x - rsDeg/2)) / 2;
 	mid.y = ((this->back().coordsDEG.y + rsDeg/2) + (this->front().coordsDEG.y - rsDeg/2)) / 2;
 
-#ifdef DEBUG
-	ATLTRACE(_T("back patch bottom right (x,y)\t: %f, %f\n"), this->back().coordsDEG.x + rsDeg / 2, this->back().coordsDEG.y + rsDeg / 2);
-	ATLTRACE(_T("front patch top left (x,y)\t: %f, %f\n"), this->front().coordsDEG.x - rsDeg / 2, this->front().coordsDEG.y - rsDeg / 2);
-	ATLTRACE(_T("mid of front and back (x,y)\t: %f, %f\n"), mid.x, mid.y);
-	//return;
-#endif // DEBUG
-
 	for (auto it = this->begin(); it != this->end(); it++) {
 		dxf = mid.x - it->coordsDEG.x;
 		dyf = mid.y - it->coordsDEG.y;
