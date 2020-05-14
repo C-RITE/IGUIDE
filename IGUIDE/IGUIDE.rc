@@ -367,8 +367,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,7,2
- PRODUCTVERSION 0,6,7,2
+ FILEVERSION 0,6,7,3
+ PRODUCTVERSION 0,6,7,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -385,12 +385,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.7.2"
+            VALUE "FileVersion", "0.6.7.3"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.7.2"
+            VALUE "ProductVersion", "0.6.7.3"
         END
     END
     BLOCK "VarFileInfo"
