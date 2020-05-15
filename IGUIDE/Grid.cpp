@@ -387,11 +387,12 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 
 	//draw circles around the center
 	const int RANGE = LANES / 2;
+	int c = 1;
 		
 	CD2DPointF a[RANGE];
 	CD2DPointF b[RANGE];
 
-	for (int f = 0; f < RANGE; f++) {
+	for (int f = (RANGE - 1); f > -1; f--) {
 		a[f].x = f * PPD;
 		a[f].y = f * PPD;
 		b[f].x = CANVAS - f * PPD;
@@ -399,10 +400,17 @@ void Grid::DrawCircles(CHwndRenderTarget* pRenderTarget) {
 
 	}
 
-	for (int f = 0; f < RANGE; f++) {
+	for (int f = (RANGE - 1); f > -1; f--) {
 		CD2DRectF r{ a[f].x, a[f].y, b[f].x, b[f].y };
 		CD2DEllipse e(r);
-		pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f, NULL);
+		if (c == 5) {
+			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .3f, NULL);
+			c = 1;
+		}
+		else {
+			pRenderTarget->DrawEllipse(e, m_pWhiteBrush, .1f, NULL);
+			c++;
+		}
 		
 	}
 
