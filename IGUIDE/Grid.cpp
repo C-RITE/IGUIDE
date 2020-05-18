@@ -782,15 +782,15 @@ void Grid::DrawQuickHelp(CHwndRenderTarget* pRenderTarget) {
 
 		vector<CString> help = pDoc->getQuickHelp();
 
-		CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 200 };
-		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 200 };
-		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 200 };
+		CD2DPointF down_middle{ sizeTarget.width / 2 - 100, sizeTarget.height - 250 };
+		CD2DPointF down_left{ down_middle.x - 250, sizeTarget.height - 250 };
+		CD2DPointF down_right{ down_middle.x + 250, sizeTarget.height - 250 };
 
 		CD2DTextFormat textFormat(pRenderTarget,			// pointer to the render target
 			_T("Consolas"),									// font family name
 			sizeDpi.height / 8);							// font size
 
-		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 245, down_right.y + 150 };
+		CD2DRectF black_box{ down_left.x - 5, down_left.y - 5, down_right.x + 245, down_right.y + 200 };
 		
 		pRenderTarget->FillRectangle(black_box, m_pBlackBrush);
 		pRenderTarget->DrawRectangle(black_box, m_pGoldenBrush);
