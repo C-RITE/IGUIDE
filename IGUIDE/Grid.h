@@ -28,6 +28,7 @@ private:
 		*m_pBlueBrush,
 		*m_pGrayBrush,
 		*m_pDarkGreenBrush,
+		*m_pLightGreenBrush,
 		*m_pMagentaBrush,
 		*m_pPatchBrush,
 		*m_pBlackBrush,

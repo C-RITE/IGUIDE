@@ -59,6 +59,8 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 void Grid::controlPOI(int notch, int dim, CPoint point) {
 
+	// mousewheel interface for POI sizing
+
 	switch (dim){
 
 		case 0:
@@ -92,6 +94,8 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 }
 
 void Grid::makePOI(CPoint loc) {
+
+	// create a POI and add overlap
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -265,6 +269,7 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 	m_pWhiteBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::LightGray));
 	m_pGrayBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGray));
 	m_pDarkGreenBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::DarkGreen));
+	m_pDarkGreenBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::LightGreen));
 	m_pMagentaBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Magenta));
 	m_pBlackBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Black, 0.5f));
 	m_pYellowBrush = new CD2DSolidColorBrush(pRenderTarget, ColorF(ColorF::Yellow));
@@ -538,7 +543,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		};
 
-		pRenderTarget->DrawRectangle(rect1, m_pWhiteBrush, .2f);
+		pRenderTarget->DrawRectangle(rect1, m_pDarkGreenBrush, .2f);
 
 		CD2DEllipse center(&rect1);
 		center.radiusX = center.radiusY = .5;
