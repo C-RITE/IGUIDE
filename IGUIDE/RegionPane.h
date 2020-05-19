@@ -28,7 +28,6 @@ public:
 	void init();
 	void update(Patches* p);
 	void add(Patch* p);
-
 };
 
 
