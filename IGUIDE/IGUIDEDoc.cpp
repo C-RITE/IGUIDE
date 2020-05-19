@@ -65,7 +65,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
-	m_Overlap = .1f;
+	m_Overlap = 50;
 	overlaySettings = 0;
 	defocus = L"0";
 
@@ -260,13 +260,10 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_raster.size = AfxGetApp()->GetProfileInt(L"Settings", L"RasterSize", 600);
 
-	LPBYTE overlap;
-	if (AfxGetApp()->GetProfileBinary(L"Settings", L"Overlap", &overlap, &nl) > 0)
-		memcpy(&m_Overlap, overlap, sizeof(float));
+	m_Overlap = AfxGetApp()->GetProfileInt(L"Settings", L"Overlap", 50);
 		
 	delete calib, ptr;
 	delete rcol;
-	delete overlap;
 	
 	return TRUE;
 
@@ -293,9 +290,8 @@ void CIGUIDEDoc::OnCloseDocument()
 	AfxGetApp()->WriteProfileString(L"Settings", L"FlipHorizontal", m_FlipHorizontal);
 	AfxGetApp()->WriteProfileString(L"Settings", L"RemoteControl", m_RemoteCtrl);
 	AfxGetApp()->WriteProfileBinary(L"Settings", L"RasterColor", (LPBYTE)&m_raster.color, sizeof(D2D1_COLOR_F));
-	AfxGetApp()->WriteProfileBinary(L"Settings", L"Overlap", (LPBYTE)&m_Overlap, sizeof(float));
+	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlap", m_Overlap);
 	
-
 	CDocument::OnCloseDocument();
 
 }
@@ -480,7 +476,7 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F12>\t(Re-)Calibrate Subject");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F12>\t(Re-)Calibrate Subject\n<SHIFT+MW> Grow/Shrink POI\n<SHIFT+X> Grow/Shrink POI in X\n<SHIFT+Y> Grow/Shrink POI in Y\n<N>\tnext patch\n<B>\tprevious patch\n<ESC>\tquit patchjob");
 	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
@@ -586,7 +582,6 @@ double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 
 void CIGUIDEDoc::ComputeDisplacementAngles() {
 
-	ATLTRACE(_T("\n"));
 	Edge k = m_raster.perimeter[0];
 	double theta = ComputeOrientationAngle(k);
 
@@ -599,8 +594,6 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 		if (theta > 270 && theta <= 360)
 			m_raster.perimeter[i].alpha = 360 - m_raster.perimeter[i].alpha;
 	}
-		for (size_t i = 0; i < m_raster.perimeter.size(); i++)
-			ATLTRACE(_T("alpha is %f\n"), m_raster.perimeter[i].alpha);
 
 }
 

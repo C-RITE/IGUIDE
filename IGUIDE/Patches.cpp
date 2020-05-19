@@ -86,16 +86,26 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 
 	CD2DPointF mid; // middle of POI matrix
 
-	float delta_x, delta_y;
+	float dxf, dyf;
 
-	mid.x = (this->front().coordsDEG.x + this->back().coordsDEG.x) / 2;
-	mid.y = (this->front().coordsDEG.y + this->back().coordsDEG.y) / 2;
+	mid.x = ((this->back().coordsDEG.x + rsDeg/2) + (this->front().coordsDEG.x - rsDeg/2)) / 2;
+	mid.y = ((this->back().coordsDEG.y + rsDeg/2) + (this->front().coordsDEG.y - rsDeg/2)) / 2;
 
 	for (auto it = this->begin(); it != this->end(); it++) {
-		delta_x = (mid.x - it->coordsDEG.x) * (overlap / rsDeg);
-		delta_y = (mid.y - it->coordsDEG.y) * (overlap / rsDeg);
-		it._Ptr->_Myval.coordsDEG.x += delta_x;
-		it._Ptr->_Myval.coordsDEG.y += delta_y;
+		dxf = mid.x - it->coordsDEG.x;
+		dyf = mid.y - it->coordsDEG.y;
+		it->coordsDEG.x += dxf * overlap / 100;
+		it->coordsDEG.y += dyf * overlap / 100;
+	}
+
+	mid.x = (this->back().coordsPX.x - this->front().coordsPX.x) / 2;
+	mid.y = (this->back().coordsPX.y - this->front().coordsPX.y) / 2;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		dxf = mid.x - it->coordsPX.x;
+		dyf = mid.y - it->coordsPX.y;
+		it._Ptr->_Myval.coordsPX.x += dxf * (overlap / 100);
+		it._Ptr->_Myval.coordsPX.y += dyf * (overlap / 100);
 	}
 
 }

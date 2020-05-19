@@ -38,7 +38,7 @@ public:
 	void			revertLast();
 	void			delPatch();
 	void			untouch();
-	void			setOverlap(float overlap, float rsDeg);	// set patch-overlap in deg of a patch matrix (POI, ROI)
+	void			setOverlap(float overlap, float rsDeg);	
 
 private:
 	

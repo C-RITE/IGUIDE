@@ -150,9 +150,12 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 	}
 
-	if (pDoc->CheckFOV() && pDoc->m_pGrid->patchjob.empty())
+	if (pDoc->CheckFOV())
 	{	
-		pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
+		// create patchjob
+		if (pDoc->m_pGrid->patchjob.empty() && pDoc->m_pGrid->POI.size() > 0) {
+			pDoc->m_pGrid->makePOI(mousePos);
+			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 
 			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
 				m_pDlgTarget->Pinpoint(*p);
@@ -163,6 +166,13 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 			if (pDoc->m_pGrid->patchjob.size() == 1)
 				pDoc->m_pGrid->patchjob.clear();
+		}
+
+		// add single patch
+		else {
+			pDoc->m_pGrid->addPatch(point);
+ 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+		}
 
 	}
 
@@ -192,7 +202,8 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	if (!m_pDlgTarget->calibrating)
 		pDoc->m_pGrid->showCursor = true;
 
-	mousePos = Snap2Grid(point);
+	//mousePos = Snap2Grid(point);
+	mousePos = point;
 
 	// pan if control key and left mouse button are pressed simultaneously
 	if (nFlags & MK_CONTROL && nFlags & MK_LBUTTON) {
@@ -203,6 +214,7 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 		translate = D2D1::Matrix3x2F::Translation(offset);
 
 		::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+
 		pDoc->m_pGrid->showCoords = false;
 		pDoc->m_pGrid->showCursor = false;
 		pDoc->m_pGrid->isPanning = true;
@@ -230,26 +242,32 @@ BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// TODO: Add your message handler code here and/or call default
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
+
 	if (nFlags & MK_SHIFT) {
-		pDoc->m_pGrid->POISize.width += zDelta / WHEEL_DELTA;
-		pDoc->m_pGrid->POISize.height += zDelta / WHEEL_DELTA;
+		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 0, mousePos);
+	}
+	else if (GetKeyState('Y') & 0x8000) {
+		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 2, mousePos);
+	}
+	else if (GetKeyState('X') & 0x8000) {
+		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 1, mousePos);
 	}
 
-	else
+	
+	else if ((zoom + zDelta / 100) >= 1) {
 
-		if ((zoom + zDelta / 100) >= 1) {
+		zoom += zDelta / 100;
 
-			zoom += zDelta / 100;
+		CD2DSizeF offset(mouseDist);
+		offset.width *= (1 / zoom);
+		offset.height *= (1 / zoom);
 
-			CD2DSizeF offset(mouseDist);
-			offset.width *= (1 / zoom);
-			offset.height *= (1 / zoom);
+		// zoom into last mouse position
+		scale = D2D1::Matrix3x2F::Scale(D2D1::SizeF(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
+		translate = D2D1::Matrix3x2F::Translation(offset);
 
-			// zoom into last mouse position
-			scale = D2D1::Matrix3x2F::Scale(D2D1::SizeF(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
-			translate = D2D1::Matrix3x2F::Translation(offset);
+	}
 
-		}
 
 	RedrawWindow();
 
@@ -448,7 +466,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw patchjob
 		pDoc->m_pGrid->DrawPatchJob(pRenderTarget);
 
-		// draw accessoires (optic disc, crosshair, etc..)
+		// draw extras (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawExtras(pRenderTarget);
 
 		// draw target zone
@@ -460,8 +478,11 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
-		// draw cursor(s) around mousepointer
-		pDoc->m_pGrid->DrawPOI(pRenderTarget, mousePos);
+		// draw cursor on mousepointer
+		if (pDoc->m_pGrid->POI.size() > 1)
+			pDoc->m_pGrid->DrawPOI(pRenderTarget, mousePos, zoom);
+		else
+			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mousePos, zoom);
 
 
 		// draw debug info
@@ -506,7 +527,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_RBUTTON) {
 
 			if (pMsg->message == WM_MOUSEMOVE)
-				return false;
+				return CView::PreTranslateMessage(pMsg);
 
 			if (pDoc->m_pGrid->patchlist.back().locked == false) {
 				pDoc->m_pGrid->patchlist.delPatch();
@@ -528,23 +549,27 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		Patch* p = NULL;
 
 		if (pMsg->message == WM_KEYDOWN && !pDoc->m_pGrid->patchlist.back().locked) {
-
+						
 			switch (pMsg->wParam) {
 
 			case VK_UP:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.y -= .1f * PPD;
 				break;
 
 			case VK_DOWN:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.y += .1f * PPD;
 				break;
 
 			case VK_LEFT:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.x -= .1f * PPD;
 				break;
 
 			case VK_RIGHT:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.x += .1f * PPD;
 				break;
 
 			}
@@ -566,6 +591,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 						PATCH_TO_REGIONPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
 						NULL);
+					if (pDoc->m_pGrid->patchjob.empty()) {
+						Patch p = pDoc->m_pGrid->patchlist.back();
+						p.locked = false;
+						pDoc->m_pGrid->patchlist.push_back(p);
+						m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+					}
 				}
 				break;
 

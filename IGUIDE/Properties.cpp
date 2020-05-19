@@ -198,7 +198,7 @@ void Properties::InitPropList()
 	FixationFile = new MyCMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
 	Patch = new CMFCPropertyGridProperty(L"Patch");
 	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Set the raster size in degrees"), NULL, NULL, NULL);
-	Overlap = new CMFCPropertyGridProperty(L"Overlap", OverlapValue, _T("Set the the overlap value of neighboring patches in degrees"), NULL, NULL, NULL);
+	Overlap = new CMFCPropertyGridProperty(L"Overlap", OverlapValue, _T("Set the the overlap value of neighboring patches in percent"), NULL, NULL, NULL);
 	COLORREF col = D2D1::ColorF::DarkGreen;
 	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
 	Color->EnableOtherButton(L"Other..");

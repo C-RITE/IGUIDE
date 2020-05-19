@@ -272,7 +272,7 @@ void Target::restartCalibration() {
 	pDoc->m_raster.meanEdge = 0;
 	pDoc->m_raster.corner.clear();
 	pDoc->m_raster.perimeter.clear();
-	pDoc->m_pGrid->ClearPatchlist();
+	pDoc->m_pGrid->clearPatchlist();
 	pDoc->m_Controller.state.fired = 0;
 
 	locked = false;
