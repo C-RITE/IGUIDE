@@ -862,6 +862,9 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & QUICKHELP);
+
+	UpdateAllViews(NULL);
+
 }
 
 

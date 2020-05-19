@@ -60,4 +60,6 @@ protected:
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPatchToRegionPane(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnInitRegionPane(WPARAM wParam, LPARAM lParam);
+
+
 };
