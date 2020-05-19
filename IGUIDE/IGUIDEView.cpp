@@ -150,10 +150,12 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 	}
 
-	if (pDoc->CheckFOV() && pDoc->m_pGrid->patchjob.empty())
+	if (pDoc->CheckFOV())
 	{	
-		pDoc->m_pGrid->makePOI(mousePos);
-		pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
+		// create patchjob
+		if (pDoc->m_pGrid->patchjob.empty() && pDoc->m_pGrid->POI.size() > 0) {
+			pDoc->m_pGrid->makePOI(mousePos);
+			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 
 			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
 				m_pDlgTarget->Pinpoint(*p);
@@ -164,6 +166,13 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 			if (pDoc->m_pGrid->patchjob.size() == 1)
 				pDoc->m_pGrid->patchjob.clear();
+		}
+
+		// add single patch
+		else {
+			pDoc->m_pGrid->addPatch(point);
+ 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+		}
 
 	}
 
@@ -540,23 +549,27 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		Patch* p = NULL;
 
 		if (pMsg->message == WM_KEYDOWN && !pDoc->m_pGrid->patchlist.back().locked) {
-
+						
 			switch (pMsg->wParam) {
 
 			case VK_UP:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.y -= .1f * PPD;
 				break;
 
 			case VK_DOWN:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.y += .1f * PPD;
 				break;
 
 			case VK_LEFT:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.x -= .1f * PPD;
 				break;
 
 			case VK_RIGHT:
 				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
+				pDoc->m_pGrid->patchlist.back().coordsPX.x += .1f * PPD;
 				break;
 
 			}
@@ -578,6 +591,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 						PATCH_TO_AREAPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
 						NULL);
+					if (pDoc->m_pGrid->patchjob.empty()) {
+						Patch p = pDoc->m_pGrid->patchlist.back();
+						p.locked = false;
+						pDoc->m_pGrid->patchlist.push_back(p);
+						m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+					}
 				}
 				break;
 

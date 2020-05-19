@@ -66,7 +66,8 @@ public:
 	
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
 
-	void ClearPatchlist();
+	void clearPatchlist();
+	void addPatch(CPoint point);							// store single patch in patchlist
 	void controlPOI(int notch, int dim, CPoint point);		// set POI dimensions
 	void makePOI(CPoint point);								// create a patchlist around mousepointer
 	void fillPatchJob(CHwndRenderTarget* pRenderTarget);	// fill patch queue to process a POI

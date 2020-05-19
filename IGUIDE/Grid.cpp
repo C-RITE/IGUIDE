@@ -20,7 +20,7 @@ Grid::~Grid() {
 }
 
 
-void Grid::ClearPatchlist() {
+void Grid::clearPatchlist() {
 
 	patchlist.clear();
 	
@@ -36,6 +36,27 @@ Patch Grid::getPatch(int index) {
 	return p;
 
 }
+
+void Grid::addPatch(CPoint loc) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CD2DPointF posDeg(PixelToDegree(loc));
+
+	// single location
+	Patch p;
+	p.coordsDEG.x = posDeg.x;
+	p.coordsPX.x = loc.x;
+	p.coordsDEG.y = posDeg.y;
+	p.coordsPX.y = loc.y;
+	p.rastersize = pDoc->m_raster.size;
+	p.color = pDoc->m_raster.color;
+	p.locked = false;
+	p.visited = false;
+	p.defocus = L"0";
+	patchlist.push_back(p);
+
+}
+
 
 CD2DPointF Grid::PixelToDegree(CPoint point) {
 
@@ -502,6 +523,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 	CRect intersect;
 
 	float rsdeg; // raster size in degree visual angle
+	float zoom = pView->getZoomFactor();
 
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 
@@ -536,14 +558,14 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 		lastPatch = {
 
-			(float)(patchlist.back().coordsPX.x - rsdeg / 2 ) + CANVAS / 2,
-			(float)(patchlist.back().coordsPX.y - rsdeg / 2 ) + CANVAS / 2,
-			(float)(patchlist.back().coordsPX.x + rsdeg / 2 ) + CANVAS / 2,
-			(float)(patchlist.back().coordsPX.y + rsdeg / 2 ) + CANVAS / 2
+			(float)(patchlist.back().coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(patchlist.back().coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
-		pRenderTarget->DrawRectangle(rect1, m_pDarkGreenBrush, .2f);
+		pRenderTarget->DrawRectangle(rect1, m_pDarkGreenBrush, .3f);
 
 		CD2DEllipse center(&rect1);
 		center.radiusX = center.radiusY = .5;

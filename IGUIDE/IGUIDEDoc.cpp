@@ -582,7 +582,6 @@ double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 
 void CIGUIDEDoc::ComputeDisplacementAngles() {
 
-	ATLTRACE(_T("\n"));
 	Edge k = m_raster.perimeter[0];
 	double theta = ComputeOrientationAngle(k);
 
@@ -595,8 +594,6 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 		if (theta > 270 && theta <= 360)
 			m_raster.perimeter[i].alpha = 360 - m_raster.perimeter[i].alpha;
 	}
-		for (size_t i = 0; i < m_raster.perimeter.size(); i++)
-			ATLTRACE(_T("alpha is %f\n"), m_raster.perimeter[i].alpha);
 
 }
 
