@@ -34,7 +34,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
-	ON_MESSAGE(INIT_REGIONPANE, &CMainFrame::OnInitRegionPane)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -420,14 +419,10 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 {
+	int regCount = (int)lParam;
+	if (regCount > m_RegionPane.getRegionSize())
+		m_RegionPane.update(regCount);
 	Patch* p = (Patch*)wParam;
 	m_RegionPane.add(p);
-	return 0;
-}
-
-
-afx_msg LRESULT CMainFrame::OnInitRegionPane(WPARAM wParam, LPARAM lParam)
-{
-	m_RegionPane.init();
 	return 0;
 }

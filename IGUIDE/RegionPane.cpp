@@ -35,9 +35,9 @@ int RegionPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
     DWORD style = TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT |
         WS_CHILD | WS_VISIBLE | TVS_SHOWSELALWAYS | TVS_FULLROWSELECT;
     CRect dump(0, 0, 0, 0);
-    if (!m_wndTree.Create(style, dump, this, ID_AREA_TREE))
+    if (!m_wndTree.Create(style, dump, this, ID_REGION_TREE))
         return -1;
-    
+
     return 0;
 
 }
@@ -56,50 +56,48 @@ void RegionPane::add(Patch* p) {
     
     CString patchname;
     patchname.Format(L"Patch: %d", p->index);
-    int area = p->area;
-    m_wndTree.InsertItem(patchname, areaNodes[area-1], TVI_LAST);
-    m_wndTree.Expand(areaNodes[area - 1], TVE_EXPAND);
+    int region = p->region;
+
+    if (region == 0) {
+        TVINSERTSTRUCT tvInsert;
+        tvInsert.hParent = NULL;
+        tvInsert.hInsertAfter = NULL;
+        tvInsert.item.mask = TVIF_TEXT;
+        tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
+        m_wndTree.InsertItem(&tvInsert);
+    }
+    
+    else {
+        m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
+        m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
+    }
+
     m_wndTree.UpdateData(TRUE);
 
 }
 
-void RegionPane::init() {
-
-    CString strArea;
-    TVINSERTSTRUCT tvInsert;
-    strArea.Format(L"Region 1");
-    tvInsert.hParent = NULL;
-    tvInsert.hInsertAfter = NULL;
-    tvInsert.item.mask = TVIF_TEXT;
-    tvInsert.item.pszText = (LPTSTR)(LPCTSTR)strArea;
-    HTREEITEM areaNode = m_wndTree.InsertItem(&tvInsert);
-    areaNodes.push_back(areaNode);
-
-}
-
-
-void RegionPane::update(Patches* p)
+void RegionPane::update(int regCount)
 {
     // TODO: Add your implementation code here.
-    m_wndTree.DeleteAllItems();
-
+    
     TVINSERTSTRUCT tvInsert;    
 
     // grow node tree with patchlist information
-    CString strArea;
-    int area = 0;
-    
+    CString strRegion;
+
+    strRegion.Format(L"Region: %d", regCount);
+    tvInsert.hParent = NULL;
+    tvInsert.hInsertAfter = NULL;
+    tvInsert.item.mask = TVIF_TEXT;
+    tvInsert.item.pszText = (LPTSTR)(LPCTSTR)strRegion;
+
+    HTREEITEM regionNode = m_wndTree.InsertItem(&tvInsert);
+    regionNodes.push_back(regionNode);
+
+    /*
     for (auto it = p->begin(); it != p->end(); it++) {  
  
-        strArea.Format(L"Area: %d", it->area);
-        tvInsert.hParent = NULL;
-        tvInsert.hInsertAfter = NULL;
-        tvInsert.item.mask = TVIF_TEXT;
-        tvInsert.item.pszText = (LPTSTR)(LPCTSTR)strArea;
-        if (it->area != area) {
-            
-            area++;
-        }
+
             
     }
 
@@ -108,9 +106,8 @@ void RegionPane::update(Patches* p)
 
     for (auto it = p->begin(); it != p->end(); it++) {
         patchname.Format(L"Patch: %d", it->index);
-        area = it->area;
-        m_wndTree.InsertItem(patchname, areaNodes[area-1], TVI_LAST);
+        m_wndTree.InsertItem(patchname, regionNodes[it->region -1], TVI_LAST);
 
     }
-
+    */
 }

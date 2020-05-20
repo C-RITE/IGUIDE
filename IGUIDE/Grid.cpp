@@ -14,6 +14,7 @@ Grid::Grid() : currentPatch(patchlist.end()) {
 	isPanning = false;
 	wheelNotch = { 1, 1 };
 	POISize = { 0 , 0 };
+	regCount = 0;
 }
 
 Grid::~Grid() {
@@ -238,6 +239,8 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 	for (auto it = POI.begin(); it != POI.end(); it++) {
 		patchjob.push_back(*it);
 	}
+	regCount++;
+
 
 }
 

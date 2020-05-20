@@ -287,7 +287,6 @@ void CIGUIDEView::OnInitialUpdate()
 	// TODO: Add your specialized code here and/or call the base class
 
 	AfxGetMainWnd()->SendMessage(DOC_IS_READY, NULL, (LPARAM)GetDocument());
-	AfxGetMainWnd()->SendMessage(INIT_REGIONPANE, NULL, NULL);
 
 }
 
@@ -590,7 +589,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 					AfxGetMainWnd()->SendMessage(
 						PATCH_TO_REGIONPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
-						NULL);
+						(LPARAM)pDoc->m_pGrid->regCount);
 					if (pDoc->m_pGrid->patchjob.empty()) {
 						Patch p = pDoc->m_pGrid->patchlist.back();
 						p.locked = false;

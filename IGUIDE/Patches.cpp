@@ -35,7 +35,7 @@ bool Patches::commit() {
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
 	this->back().index = index;
-	this->back().area = 1;
+	this->back().region = pDoc->m_pGrid->regCount;
 	this->back().defocus = pDoc->getCurrentDefocus();
 	index++;
 
@@ -134,7 +134,7 @@ bool Patches::SaveToFile(CString directory) {
 	wstringstream sstream;
 	int number = 1;
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Area,POSx(deg),POSy(deg),Defocus");
+	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,PatchIndex,POSx(deg),POSy(deg),Defocus");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 
@@ -150,7 +150,9 @@ bool Patches::SaveToFile(CString directory) {
 			<< ","
 			<< "v" << strNumber.GetString()
 			<< ","
-			<< it->area
+			<< it->region
+			<< ","
+			<< it->index
 			<< ","
 			<< strDegX.GetString()
 			<< ","

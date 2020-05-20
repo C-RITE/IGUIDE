@@ -7,7 +7,7 @@
 #define ID_INDICATOR_ICANDI             129
 #define IDR_IGUIDETYPE                  130
 #define ID_INDICATOR_AOSACA             131
-#define ID_AREA_TREE                    132
+#define ID_REGION_TREE                  132
 #define ID_VIEW_PROPERTIES_WND          150
 #define ID_VIEW_REGIONS_WND             151
 #define IDD_TARGET                      310

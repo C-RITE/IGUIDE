@@ -63,6 +63,8 @@ public:
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
 	CD2DPathGeometry*		m_pPatchJobGeom;				// the patchjob geometry
+
+	int						regCount;						// count the regions
 	
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
 

@@ -11,7 +11,7 @@ struct Patch {
 	bool			locked;
 	bool			visited;
 	int				index;
-	int				area;
+	int				region;
 	CString			defocus;
 
 };

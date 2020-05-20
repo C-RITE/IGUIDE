@@ -410,7 +410,7 @@ BEGIN
     ID_INDICATOR_ICANDI     "ICANDI"
     IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
     ID_INDICATOR_AOSACA     "AOSACA"
-    ID_AREA_TREE            "Show patch Regions in tree style"
+    ID_REGION_TREE          "Show patch Regions in tree style"
 END
 
 STRINGTABLE

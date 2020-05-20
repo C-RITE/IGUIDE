@@ -17,17 +17,18 @@ protected:
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	int getRegionSize() { return regionNodes.size(); };
 
 private:
 
 	RegionTreeCtrl			m_wndTree;
-	std::vector<HTREEITEM>	areaNodes;
+	std::vector<HTREEITEM>	regionNodes;
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	void init();
-	void update(Patches* p);
+	void update(int regCount);
 	void add(Patch* p);
+
 };
 
 
