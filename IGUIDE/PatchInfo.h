@@ -23,6 +23,9 @@ protected:
 public:
 	CString filename;
 	CString directory;
-	afx_msg void OnStnClickedCoordinatesStatic();
-	afx_msg void OnStnClickedXStatic();
+	CString defocus;
+	CString timestamp;
+	int vidlength;
+	float x;
+	float y;
 };

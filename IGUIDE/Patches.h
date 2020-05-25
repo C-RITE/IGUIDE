@@ -7,6 +7,7 @@ struct Patch {
 	CD2DPointF		coordsPX;
 	D2D1_COLOR_F	color;
 	CString			timestamp;
+	CString			vidfilename;
 	double			rastersize;
 	bool			locked;
 	bool			visited;

@@ -15,6 +15,11 @@ PatchInfo::PatchInfo(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_PATCHINFO, pParent)
 	, filename(_T(""))
 	, directory(_T(""))
+	, defocus(_T(""))
+	, timestamp(_T(""))
+	, vidlength(0)
+	, x(0)
+	, y(0)
 {
 
 }
@@ -27,9 +32,12 @@ void PatchInfo::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_FILENAME_EDIT, filename);
-	DDV_MaxChars(pDX, filename, 255);
 	DDX_Text(pDX, IDC_DIRECTORY_EDIT, directory);
-	DDV_MaxChars(pDX, directory, 255);
+	DDX_Text(pDX, IDC_DEFOCUS_EDIT, defocus);
+	DDX_Text(pDX, IDC_TIMESTAMP_EDIT, timestamp);
+	DDX_Text(pDX, IDC_VIDLENGTH_EDIT, vidlength);
+	DDX_Text(pDX, IDC_X_COORDINATE_EDIT, x);
+	DDX_Text(pDX, IDC_Y_COORDINATE_EDIT, y);
 }
 
 

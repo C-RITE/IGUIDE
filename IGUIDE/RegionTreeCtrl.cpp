@@ -43,6 +43,11 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	PatchInfo patchinfo;
 	Patch p = pDoc->m_pGrid->getPatch(index);
 	patchinfo.directory = *pDoc->m_pCurrentOutputDir;
+    patchinfo.filename = p.vidfilename;
+    patchinfo.defocus = p.defocus;
+    patchinfo.x = p.coordsDEG.x;
+    patchinfo.y = p.coordsDEG.y;
+    patchinfo.timestamp = p.timestamp;
 	patchinfo.DoModal();
 
 }
