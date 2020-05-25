@@ -26,8 +26,9 @@ private:
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	void update(int regCount);
-	void add(Patch* p);
+	void addRegion(int regCount);
+	void addPatch(Patch* p);
+	void update(Patch* p);
 
 };
 

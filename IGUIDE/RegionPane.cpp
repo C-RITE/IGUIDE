@@ -52,12 +52,20 @@ void RegionPane::OnSize(UINT nType, int cx, int cy)
 
 }
 
-void RegionPane::add(Patch* p) {
+void RegionPane::addPatch(Patch* p) {
     
     CString patchname;
-    patchname.Format(L"P%d: %.2f, %.2f, %s [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
+
+    // add upcoming patch job
+    if (p->index == -1)
+        patchname.Format(L"P?: %.2f, %.2f, %s [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
+    // add single patch
+    else
+        patchname.Format(L"P%d: %.2f, %.2f, %s [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
+    
     int region = p->region;
 
+    // if patch not in region, insert into root of tree
     if (region == 0) {
         TVINSERTSTRUCT tvInsert;
         tvInsert.hParent = NULL;
@@ -67,6 +75,7 @@ void RegionPane::add(Patch* p) {
         m_wndTree.InsertItem(&tvInsert);
     }
     
+    // else insert into corresponding branch of tree
     else {
         m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
@@ -76,7 +85,7 @@ void RegionPane::add(Patch* p) {
 
 }
 
-void RegionPane::update(int regCount)
+void RegionPane::addRegion(int regCount)
 {
     // TODO: Add your implementation code here.
     
@@ -110,4 +119,23 @@ void RegionPane::update(int regCount)
 
     }
     */
+}
+
+void RegionPane::update(Patch* p) {
+
+    CString patchname;
+
+    HTREEITEM hRegion = regionNodes[p->region - 1];
+   
+
+
+
+
+    TVINSERTSTRUCT tvInsert;
+    tvInsert.hParent = NULL;
+    tvInsert.hInsertAfter = NULL;
+    tvInsert.item.mask = TVIF_TEXT;
+    tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
+    m_wndTree.InsertItem(&tvInsert);
+
 }

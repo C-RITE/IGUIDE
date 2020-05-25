@@ -161,7 +161,6 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 				m_pDlgTarget->Pinpoint(*p);
 				pDoc->m_pGrid->patchlist.push_back(*p);
 				delete p;
-
 			}
 
 			if (pDoc->m_pGrid->patchjob.size() == 1)

@@ -246,7 +246,12 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 	for (auto it = POI.begin(); it != POI.end(); it++) {
 		it->region = regCount;
+		it->index = -1;								// yet unknown at this point, thus -1
 		patchjob.push_back(*it);
+		AfxGetMainWnd()->SendMessage(
+			PATCH_TO_REGIONPANE,
+			(WPARAM)&pDoc->m_pGrid->patchjob.back(),
+			(LPARAM)pDoc->m_pGrid->regCount);
 	}
 
 }
