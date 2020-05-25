@@ -29,6 +29,18 @@
 #define IDC_FILENAME_STATIC             1013
 #define IDC_DIRECTORY_STATIC            1014
 #define IDC_FILENAME_EDIT2              1015
+#define IDC_TIMESTAMP_STATIC            1015
+#define IDC_COORDINATES_STATIC          1016
+#define IDC_VIDLENGTH_STATIC            1017
+#define IDC_TIMESTAMP_EDIT              1018
+#define IDC_VIDLENGTH_EDIT              1019
+#define IDC_X_COORDINATE_EDIT           1020
+#define IDC_Y_COORDINATE_EDIT           1021
+#define IDC_DEFOCUS_EDIT                1022
+#define IDC_X_STATIC                    1023
+#define IDC_Y_STATIC                    1024
+#define IDC_Z_STATIC                    1025
+#define IDC_DEFOCUS_STATIC              1025
 #define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775
@@ -45,7 +57,7 @@
 #define ID_OVERLAY_LOCATION             32795
 #define ID_OVERLAY_TARGETZONE           32798
 #define ID_VIEW_PROPERTIES              32800
-#define ID_VIEW_REGIONS	                32801
+#define ID_VIEW_REGIONS                 32801
 #define IDS_PROPERTIES_WND              57346
 #define IDS_REGIONS_WND                 57347
 
@@ -55,7 +67,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        351
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           314
 #endif
 #endif
