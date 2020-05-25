@@ -50,6 +50,7 @@ void Grid::addPatch(CPoint loc) {
 	p.coordsDEG.y = posDeg.y;
 	p.coordsPX.y = loc.y;
 	p.rastersize = pDoc->m_raster.size;
+	p.region = 0;
 	p.color = pDoc->m_raster.color;
 	p.locked = false;
 	p.visited = false;
@@ -110,8 +111,10 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 
 	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
 		makePOI(point);
-	else
+	else {
 		POI.clear();
+		patchlist.back().region = 0;
+	}
 
 }
 
@@ -139,6 +142,7 @@ void Grid::makePOI(CPoint loc) {
 		p.coordsPX.y = loc.y;
 		p.rastersize = pDoc->m_raster.size;
 		p.color = pDoc->m_raster.color;
+		p.region = 0;
 		p.locked = false;
 		p.visited = false;
 		p.defocus = L"0";
@@ -149,6 +153,7 @@ void Grid::makePOI(CPoint loc) {
 	else {
 
 		// make m-by-n matrix of patches controlled by mousewheel
+
 		for (float i = -(float)wheelNotch.cx / 2; i < (float)wheelNotch.cx / 2; i++) {
 
 			Patch p;
@@ -164,6 +169,7 @@ void Grid::makePOI(CPoint loc) {
 				p.locked = false;
 				p.visited = false;
 				p.defocus = L"0";
+				p.region = regCount;
 				POI.push_back(p);
 
 			}
@@ -236,11 +242,12 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
-	for (auto it = POI.begin(); it != POI.end(); it++) {
-		patchjob.push_back(*it);
-	}
 	regCount++;
 
+	for (auto it = POI.begin(); it != POI.end(); it++) {
+		it->region = regCount;
+		patchjob.push_back(*it);
+	}
 
 }
 

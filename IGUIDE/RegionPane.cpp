@@ -55,7 +55,7 @@ void RegionPane::OnSize(UINT nType, int cx, int cy)
 void RegionPane::add(Patch* p) {
     
     CString patchname;
-    patchname.Format(L"P%d: [%.2f, %.2f, %s]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus);
+    patchname.Format(L"P%d: %.2f, %.2f, %s [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
     int region = p->region;
 
     if (region == 0) {
@@ -106,7 +106,7 @@ void RegionPane::update(int regCount)
 
     for (auto it = p->begin(); it != p->end(); it++) {
         patchname.Format(L"Patch: %d", it->index);
-        m_wndTree.InsertItem(patchname, regionNodes[it->region -1], TVI_LAST);
+        m_wndTree.InsertItem(patchname, regionNodes[it->region], TVI_LAST);
 
     }
     */
