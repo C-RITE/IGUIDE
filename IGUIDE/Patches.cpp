@@ -132,37 +132,35 @@ void Patches::cleanup() {
 bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
-	int number = 1;
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,PatchIndex,POSx(deg),POSy(deg),Defocus");
+	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,POSx(deg),POSy(deg),Defocus");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 
 	{
+		if (it->locked) {
+			strNumber.Format(_T("%.3d"), it->index);
+			strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.x);
+			strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.y);
+			strDefocus.Format(_T("%s"), it._Ptr->_Myval.defocus);
 
-		strNumber.Format(_T("%.3d"), number++);
-		strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.x);
-		strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.y);
-		strDefocus.Format(_T("%s"), it._Ptr->_Myval.defocus);
+			sstream
+				<< it->timestamp.GetString()
+				<< ","
+				<< "v" << strNumber.GetString()
+				<< ","
+				<< it->region
+				<< ","
+				<< strDegX.GetString()
+				<< ","
+				<< strDegY.GetString()
+				<< ","
+				<< strDefocus.GetString()
+				<< std::endl;
 
-		sstream
-			<< it->timestamp.GetString()
-			<< ","
-			<< "v" << strNumber.GetString()
-			<< ","
-			<< it->region
-			<< ","
-			<< it->index
-			<< ","
-			<< strDegX.GetString()
-			<< ","
-			<< strDegY.GetString()
-			<< ","
-			<< strDefocus.GetString()
-			<< std::endl;
+		}
 
 	}
-
 	//CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
 
 	/*if (FileDlg.DoModal() == IDOK) {

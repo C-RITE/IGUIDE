@@ -55,7 +55,7 @@ void RegionPane::OnSize(UINT nType, int cx, int cy)
 void RegionPane::add(Patch* p) {
     
     CString patchname;
-    patchname.Format(L"Patch: %d", p->index);
+    patchname.Format(L"P%d: [%.2f, %.2f, %s]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus);
     int region = p->region;
 
     if (region == 0) {
