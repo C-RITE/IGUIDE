@@ -34,7 +34,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
-	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionpane)
+	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =

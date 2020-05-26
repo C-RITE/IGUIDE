@@ -390,6 +390,10 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 		SetEvent(main->m_hSaveEvent);
 	}
 
+	if (msg.property == L"AOSACA_DEFOCUS") {
+		defocus = msg.value;
+	}
+
 }
 
 
