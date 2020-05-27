@@ -11,8 +11,8 @@ public:
 	virtual ~RegionTreeCtrl();
 
 protected:
-	COLORREF crText, crBkgrnd;
-	HBRUSH bkGnd;
+	COLORREF crTextWhite, crBkgrnd;
+	HBRUSH brBkGnd;
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -21,4 +21,25 @@ public:
 	afx_msg void OnNMCstDrw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
+
+protected:
+
+	struct Color_Font
+	{
+		COLORREF color;
+		LOGFONT  logfont;
+	};
+	CMap< void*, void*, Color_Font, Color_Font& > m_mapColorFont;
+
+public:
+
+	void SetItemFont(HTREEITEM hItem, LOGFONT& logfont);
+	void SetItemColor(HTREEITEM hItem, COLORREF color);
+	void SetItemBold(HTREEITEM hItem, BOOL bBold);
+	BOOL GetItemFont(HTREEITEM hItem, LOGFONT* plogfont);
+	BOOL GetItemBold(HTREEITEM hItem);
+	COLORREF GetItemColor(HTREEITEM hItem);
+
+public:
+	afx_msg void OnPaint();
 };

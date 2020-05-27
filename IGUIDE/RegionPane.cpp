@@ -38,6 +38,8 @@ int RegionPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
     if (!m_wndTree.Create(style, dump, this, ID_REGION_TREE))
         return -1;
 
+    m_wndTree.SetTextColor(RGB(255, 255, 255));
+
     return 0;
 
 }
@@ -57,8 +59,9 @@ void RegionPane::addPatch(Patch* p) {
     CString patchname;
 
     // add upcoming patchjob
-    if (p->index == -1)
+    if (p->index == -1) {
         patchname.Format(L"P?: %.2f, %.2f, %s [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
+    }
     // add single patch
     else
         patchname.Format(L"P%d: %.2f, %.2f, %s [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
@@ -67,13 +70,14 @@ void RegionPane::addPatch(Patch* p) {
 
     // if single patch, insert into root of tree
     TVINSERTSTRUCT tvInsert;
+
     if (region == 0) {
         tvInsert.hParent = NULL;
         tvInsert.hInsertAfter = NULL;
         tvInsert.item.mask = TVIF_TEXT;
         tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
         m_wndTree.InsertItem(&tvInsert);
-    }
+     }
     
     // else insert into corresponding branch of tree
     else if (patchindex >= 0){
@@ -81,13 +85,14 @@ void RegionPane::addPatch(Patch* p) {
         HTREEITEM elem = m_wndTree.GetNextItem(regNode, TVGN_CHILD);
         for (int i = 0; i < patchindex; i++)
             elem = m_wndTree.GetNextItem(elem, TVGN_NEXT);
-        m_wndTree.InsertItem(patchname, regNode, elem);
+        HTREEITEM insert = m_wndTree.InsertItem(patchname, regNode, elem);
+        m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
         m_wndTree.DeleteItem(elem);
     }
 
-
     else {
-        m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
+        HTREEITEM insert = m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
+        m_wndTree.SetItemColor(insert, RGB(200, 0, 0));
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
     }
 
