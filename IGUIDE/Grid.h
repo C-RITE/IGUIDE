@@ -76,6 +76,7 @@ public:
 	void calcPOIsize(float zoom);							// calculate real POI size
 	Patch* doPatchJob(Element e);							// process patch queue
 	Patch getPatch(int index);								// get patch by index
+	int getCurrentPatchJobPos();							// get current position in patchjob
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);								// construct the grid

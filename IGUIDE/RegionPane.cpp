@@ -10,7 +10,7 @@
 
 IMPLEMENT_DYNAMIC(RegionPane, CDockablePane)
 
-RegionPane::RegionPane()
+RegionPane::RegionPane(): patchindex(-1)
 {
 }
 
@@ -56,7 +56,7 @@ void RegionPane::addPatch(Patch* p) {
     
     CString patchname;
 
-    // add upcoming patch job
+    // add upcoming patchjob
     if (p->index == -1)
         patchname.Format(L"P?: %.2f, %.2f, %s [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
     // add single patch
@@ -65,9 +65,9 @@ void RegionPane::addPatch(Patch* p) {
     
     int region = p->region;
 
-    // if patch not in region, insert into root of tree
+    // if single patch, insert into root of tree
+    TVINSERTSTRUCT tvInsert;
     if (region == 0) {
-        TVINSERTSTRUCT tvInsert;
         tvInsert.hParent = NULL;
         tvInsert.hInsertAfter = NULL;
         tvInsert.item.mask = TVIF_TEXT;
@@ -76,6 +76,16 @@ void RegionPane::addPatch(Patch* p) {
     }
     
     // else insert into corresponding branch of tree
+    else if (patchindex >= 0){
+        HTREEITEM regNode = regionNodes[region - 1];
+        HTREEITEM elem = m_wndTree.GetNextItem(regNode, TVGN_CHILD);
+        for (int i = 0; i < patchindex; i++)
+            elem = m_wndTree.GetNextItem(elem, TVGN_NEXT);
+        m_wndTree.InsertItem(patchname, regNode, elem);
+        m_wndTree.DeleteItem(elem);
+    }
+
+
     else {
         m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
@@ -119,23 +129,4 @@ void RegionPane::addRegion(int regCount)
 
     }
     */
-}
-
-void RegionPane::update(Patch* p) {
-
-    CString patchname;
-
-    HTREEITEM hRegion = regionNodes[p->region - 1];
-   
-
-
-
-
-    TVINSERTSTRUCT tvInsert;
-    tvInsert.hParent = NULL;
-    tvInsert.hInsertAfter = NULL;
-    tvInsert.item.mask = TVIF_TEXT;
-    tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
-    m_wndTree.InsertItem(&tvInsert);
-
 }

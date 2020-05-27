@@ -59,5 +59,5 @@ protected:
 	afx_msg LRESULT OnResetAosacaIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnResetIcandiIp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPatchToRegionPane(WPARAM /*patch*/, LPARAM /*region*/);
-	afx_msg LRESULT OnUpdateRegionPane(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUpdateRegionPane(WPARAM /*index*/, LPARAM lParam);
 };

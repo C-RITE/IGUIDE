@@ -288,12 +288,27 @@ Patch* Grid::doPatchJob(Element e) {
 
 		}
 
+		// send information where to put next patch in tree
+		AfxGetMainWnd()->SendMessage(
+			UPDATE_REGIONPANE,
+			(WPARAM)getCurrentPatchJobPos(),
+			NULL);
+
 	}
 
 
 	return p;
 
 }
+
+
+int Grid::getCurrentPatchJobPos() {
+
+	int index = std::distance(patchjob.begin(), currentPatch);
+	return index;
+
+}
+
 
 void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 

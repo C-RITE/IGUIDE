@@ -433,5 +433,8 @@ afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
 {
+	int index = (int)wParam;
+	m_RegionPane.patchindex = index;
+
 	return 0;
 }

@@ -38,6 +38,9 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	HTREEITEM selected = GetSelectedItem();
+    if (ItemHasChildren(selected))
+        return;
+
 	CString text = GetItemText(selected);
 	int index = 1;
 	PatchInfo patchinfo;
