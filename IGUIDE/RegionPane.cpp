@@ -10,7 +10,7 @@
 
 IMPLEMENT_DYNAMIC(RegionPane, CDockablePane)
 
-RegionPane::RegionPane(): patchindex(-1)
+RegionPane::RegionPane(): patchItem(-1)
 {
 }
 
@@ -76,14 +76,15 @@ void RegionPane::addPatch(Patch* p) {
         tvInsert.hInsertAfter = NULL;
         tvInsert.item.mask = TVIF_TEXT;
         tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
-        m_wndTree.InsertItem(&tvInsert);
+        HTREEITEM insert = m_wndTree.InsertItem(&tvInsert);
+        m_wndTree.SetItemColor(insert, RGB(255, 255, 255));
      }
     
     // else insert into corresponding branch of tree
-    else if (patchindex >= 0){
+    else if (patchItem >= 0){
         HTREEITEM regNode = regionNodes[region - 1];
         HTREEITEM elem = m_wndTree.GetNextItem(regNode, TVGN_CHILD);
-        for (int i = 0; i < patchindex; i++)
+        for (int i = 0; i < patchItem; i++)
             elem = m_wndTree.GetNextItem(elem, TVGN_NEXT);
         HTREEITEM insert = m_wndTree.InsertItem(patchname, regNode, elem);
         m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
@@ -97,6 +98,31 @@ void RegionPane::addPatch(Patch* p) {
     }
 
     m_wndTree.UpdateData(TRUE);
+
+}
+
+void RegionPane::remove(int region)
+{
+    if (patchItem == -1)
+        return;
+    
+    HTREEITEM regNode = regionNodes[region - 1];
+    HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
+
+    while (hItemChild != NULL)
+    {
+        HTREEITEM hItemNextChild = m_wndTree.GetNextSiblingItem(hItemChild);
+        CString patchname = m_wndTree.GetItemText(hItemChild);
+        COLORREF col = m_wndTree.GetItemColor(hItemChild);
+        COLORREF green = RGB(0, 200, 0);
+        if (col == green)
+            m_wndTree.InsertItem(patchname, TVI_ROOT, TVI_LAST);
+        hItemChild = hItemNextChild;
+    }
+
+    regionNodes.pop_back();
+    m_wndTree.DeleteItem(regNode);
+    patchItem = -1;
 
 }
 
@@ -116,6 +142,7 @@ void RegionPane::addRegion(int regCount)
     tvInsert.item.pszText = (LPTSTR)(LPCTSTR)strRegion;
 
     HTREEITEM regionNode = m_wndTree.InsertItem(&tvInsert);
+    m_wndTree.SetItemColor(regionNode, RGB(255, 255, 255));
     regionNodes.push_back(regionNode);
 
     /*

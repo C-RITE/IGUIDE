@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
 	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
+	ON_MESSAGE(CANCEL_PATCHJOB, &CMainFrame::OnCancelPatchjob)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -434,7 +435,15 @@ afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
 {
 	int index = (int)wParam;
-	m_RegionPane.patchindex = index;
+	m_RegionPane.patchItem = index;
 
+	return 0;
+}
+
+
+afx_msg LRESULT CMainFrame::OnCancelPatchjob(WPARAM wParam, LPARAM lParam)
+{
+	int region = (int)wParam;
+	m_RegionPane.remove(region);
 	return 0;
 }

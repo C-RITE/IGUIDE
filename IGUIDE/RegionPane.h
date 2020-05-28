@@ -18,7 +18,7 @@ protected:
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	int getRegionSize() { return regionNodes.size(); };
-	int patchindex;											// where to put patch during patchjob
+	int patchItem;											// where to put patch during patchjob
 
 private:
 
@@ -29,6 +29,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	void addRegion(int regCount);
 	void addPatch(Patch* p);
+	void remove(int region);
 
 };
 

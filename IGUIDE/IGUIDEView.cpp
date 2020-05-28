@@ -621,6 +621,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 
 			case VK_ESCAPE:
+				AfxGetMainWnd()->SendMessage(CANCEL_PATCHJOB, (WPARAM)pDoc->m_pGrid->regCount, NULL);
+				if(!pDoc->m_pGrid->patchjob.empty())
+					pDoc->m_pGrid->regCount--;
 				pDoc->m_pGrid->patchjob.clear();
 				break;
 			}
