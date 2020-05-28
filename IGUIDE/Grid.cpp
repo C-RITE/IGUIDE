@@ -113,7 +113,8 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 		makePOI(point);
 	else {
 		POI.clear();
-		patchlist.back().region = 0;
+		if (patchlist.size() > 0)
+			patchlist.back().region = 0;
 	}
 
 }
@@ -259,6 +260,8 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 Patch* Grid::doPatchJob(Element e) {
 
 	Patch* p = NULL;
+	if (patchjob.empty())
+		return p;
 
 	if (!patchjob.checkComplete()) {
 
@@ -375,11 +378,43 @@ void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
 
 		};
 
-
+		// make green border around patchjob area
 		pRenderTarget->DrawRectangle(
 			rect1,
 			m_pDarkGreenBrush,
 			.5f);
+
+		// show progress on right bottom
+
+		CIGUIDEView* pView = CIGUIDEView::GetView();
+		float zoom = pView->getZoomFactor();
+
+		CD2DRectF rect2;
+		CD2DPointF p{ rect1.right, rect1.bottom };
+		rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
+		pRenderTarget->DrawRectangle(
+			rect2,
+			m_pDarkGreenBrush,
+			.2f);
+
+		CString vidText;
+		CD2DSizeF sizeTarget = { rect2.right - rect2.left, rect2.bottom - rect2.top };
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+			_T("Consolas"),								// font family name
+			2.5f);										// font size
+
+		vidText.Format(L"%d/%d", patchjob.getProgress(), patchjob.size());
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			vidText,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(rect2.left, rect2.top),
+			&textLayout,
+			m_pWhiteBrush);
 
 	}
 

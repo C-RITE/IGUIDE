@@ -61,4 +61,5 @@ protected:
 	afx_msg LRESULT OnPatchToRegionPane(WPARAM /*patch*/, LPARAM /*region*/);
 	afx_msg LRESULT OnUpdateRegionPane(WPARAM /*index*/, LPARAM lParam);
 	afx_msg LRESULT OnCancelPatchjob(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFinishPatchjob(WPARAM wParam, LPARAM lParam);
 };

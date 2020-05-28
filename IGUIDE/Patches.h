@@ -36,6 +36,7 @@ public:
 	bool			isFinished() { return finished; };
 	bool			commit();
 	bool			checkComplete();
+	int				getProgress();
 	void			revertLast();
 	void			delPatch();
 	void			untouch();

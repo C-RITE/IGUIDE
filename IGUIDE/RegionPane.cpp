@@ -60,11 +60,11 @@ void RegionPane::addPatch(Patch* p) {
 
     // add upcoming patchjob
     if (p->index == -1) {
-        patchname.Format(L"P?: %.2f, %.2f, %s [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
+        patchname.Format(L"P?: %.2f, %.2f, %ws [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
     }
     // add single patch
     else
-        patchname.Format(L"P%d: %.2f, %.2f, %s [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
+        patchname.Format(L"P%d: %.2f, %.2f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
     
     int region = p->region;
 
@@ -109,19 +109,40 @@ void RegionPane::remove(int region)
     HTREEITEM regNode = regionNodes[region - 1];
     HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
 
+    // save all commited (i.e. green) patches in root before erasing region
     while (hItemChild != NULL)
     {
         HTREEITEM hItemNextChild = m_wndTree.GetNextSiblingItem(hItemChild);
         CString patchname = m_wndTree.GetItemText(hItemChild);
         COLORREF col = m_wndTree.GetItemColor(hItemChild);
         COLORREF green = RGB(0, 200, 0);
-        if (col == green)
+
+        if (col == green) {
             m_wndTree.InsertItem(patchname, TVI_ROOT, TVI_LAST);
+            m_wndTree.SetItemColor(hItemChild, RGB(255, 255, 255));
+        }
+
         hItemChild = hItemNextChild;
     }
 
+    // erase and rewind
     regionNodes.pop_back();
     m_wndTree.DeleteItem(regNode);
+    patchItem = -1;
+
+}
+
+void RegionPane::finish()
+{
+    HTREEITEM regNode = regionNodes.back();
+    HTREEITEM child = m_wndTree.GetChildItem(regNode);
+
+    while (child != NULL)
+    {
+        m_wndTree.SetItemColor(child, RGB(255, 255, 255));
+        child = m_wndTree.GetNextSiblingItem(child);
+    }
+
     patchItem = -1;
 
 }

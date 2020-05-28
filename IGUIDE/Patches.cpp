@@ -57,11 +57,24 @@ bool Patches::checkComplete() {
 			locked++;
 	}
 	
-	if (locked == this->size()) {
+	if (locked == this->size() && this->size() > 0) {
 		finished = true;
 	}
 
 	return finished;
+
+}
+
+int Patches::getProgress() {
+	
+	int progress = 0;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		if (it->locked == true)
+			progress++;
+	}
+
+	return progress;
 
 }
 

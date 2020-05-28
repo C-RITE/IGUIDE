@@ -622,9 +622,11 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			case VK_ESCAPE:
 				AfxGetMainWnd()->SendMessage(CANCEL_PATCHJOB, (WPARAM)pDoc->m_pGrid->regCount, NULL);
-				if(!pDoc->m_pGrid->patchjob.empty())
+				if (!pDoc->m_pGrid->patchjob.empty()) {
 					pDoc->m_pGrid->regCount--;
-				pDoc->m_pGrid->patchjob.clear();
+					pDoc->m_pGrid->patchlist.back().region = 0;
+					pDoc->m_pGrid->patchjob.clear();
+				}
 				break;
 			}
 
@@ -637,8 +639,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			switch (pMsg->wParam)
 			{
 			case VK_SPACE:
-				if (pDoc->m_pGrid->patchjob.checkComplete())
+				if (pDoc->m_pGrid->patchjob.checkComplete()) {
+					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, NULL, NULL);
 					pDoc->m_pGrid->patchjob.clear();
+				}
 			}
 
 		}

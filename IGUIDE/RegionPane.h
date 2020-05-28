@@ -30,6 +30,7 @@ public:
 	void addRegion(int regCount);
 	void addPatch(Patch* p);
 	void remove(int region);
+	void finish();
 
 };
 
