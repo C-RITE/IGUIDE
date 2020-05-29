@@ -175,8 +175,8 @@ void Monitors::selectDeviceFromListBoxItem(CString deviceName) {
 	for (auto& screen : m_Devices) {
 		CString number;
 		number.Format(L"%d", screen.number);
-		if (number == deviceName);
-		m_pSelectedDevice = &screen;
+		if (number == deviceName)
+			m_pSelectedDevice = &screen;
 	}
 
 }
