@@ -301,14 +301,132 @@ void CIGUIDEDoc::OnCloseDocument()
 
 void CIGUIDEDoc::Serialize(CArchive& ar)
 {
+
+	CImage fundus;
+
 	if (ar.IsStoring())
 	{
 		// TODO: add storing code here
+		if (!m_pFundus->filename.IsEmpty()) {
+			fundus.Load(m_pFundus->filename);
+			ImageArchive(&fundus, ar);
+		}
+		
+		if (m_pFundus->calibration) {
+			FundusCalibArchive(ar);
+		}
 	}
+
 	else
 	{
 		// TODO: add loading code here
+		ImageArchive(&m_pFundus->fundusIMG, ar);
+		FundusCalibArchive(ar);
 	}
+	
+	UpdateAllViews(NULL);
+
+}
+
+void CIGUIDEDoc::FundusCalibArchive(CArchive& ar) {
+
+	if (ar.IsStoring())
+	{
+		ar << m_pFundus->calibResult.p.x;
+		ar << m_pFundus->calibResult.p.y;
+		ar << m_pFundus->calibResult.q.x;
+		ar << m_pFundus->calibResult.q.y;
+		ar << m_pFundus->calibResult.length;
+		ar << m_pDlgCalibration->m_sFactor;
+	}
+
+	else 
+	{
+		ar >> m_pFundus->calibResult.p.x;
+		ar >> m_pFundus->calibResult.p.y;
+		ar >> m_pFundus->calibResult.q.x;
+		ar >> m_pFundus->calibResult.q.y;
+		ar >> m_pFundus->calibResult.length;
+		ar >> m_pDlgCalibration->m_sFactor;
+
+		m_pFundus->calibration = true;
+	}
+
+}
+
+void CIGUIDEDoc::ImageArchive(CImage* pImage, CArchive& ar)
+{
+	HRESULT hr;
+	if (ar.IsStoring())
+	{
+		// create a stream
+		IStream* pStream = SHCreateMemStream(NULL, 0);
+		ASSERT(pStream != NULL);
+		if (pStream == NULL)
+			return;
+
+		// write the image to a stream rather than file (the stream in this case is just a chunk of memory automatically allocated by the stream itself)
+		pImage->Save(pStream, Gdiplus::ImageFormatPNG); // Note: IStream will automatically grow up as necessary.
+
+// find the size of memory written (i.e. the image file size)
+		STATSTG statsg;
+		hr = pStream->Stat(&statsg, STATFLAG_NONAME);
+		ASSERT(hr == S_OK);
+		ASSERT(statsg.cbSize.QuadPart < ULONG_MAX);
+		ULONG nImgBytes = ULONG(statsg.cbSize.QuadPart);    // any image that can be displayed had better not have more than MAX_ULONG bytes
+
+// go to the start of the stream
+		LARGE_INTEGER seekPos;
+		seekPos.QuadPart = 0;
+		hr = pStream->Seek(seekPos, STREAM_SEEK_SET, NULL);
+		ASSERT(hr == S_OK);
+
+		// get data in stream into a standard byte array
+		char* bytes = new char[nImgBytes];
+		ULONG nRead;
+		hr = pStream->Read(bytes, nImgBytes, &nRead);   // read the data from the stream into normal memory.  nRead should be equal to statsg.cbSize.QuadPart.
+		ASSERT(hr == S_OK);
+		ASSERT(nImgBytes == nRead);
+
+		// write data to archive and finish
+		ar << nRead;    // need to save the amount of memory needed for the file, since we will need to read this amount later
+		ar.Write(bytes, nRead);     // write the data to the archive file from the stream memory
+		pStream->Release();
+		delete[] bytes;
+	}
+	else
+	{
+		// get the data from the archive
+		ULONG nBytes;
+		ar >> nBytes;
+		char* bytes = new char[nBytes]; // ordinary memory to hold data from archive file
+		UINT nBytesRead = ar.Read(bytes, nBytes);   // read the data from the archive file
+		ASSERT(nBytesRead == UINT(nBytes));
+
+		// make the stream
+		IStream* pStream = SHCreateMemStream(NULL, 0);
+		ASSERT(pStream != NULL);
+		if (pStream == NULL)
+			return;
+
+		// put the archive data into the stream
+		ULONG nBytesWritten;
+		pStream->Write(bytes, nBytes, &nBytesWritten);
+		ASSERT(nBytes == nBytesWritten);
+		if (nBytes != nBytesWritten)
+			return;
+
+		// go to the start of the stream
+		LARGE_INTEGER seekPos;
+		seekPos.QuadPart = 0;
+		hr = pStream->Seek(seekPos, STREAM_SEEK_SET, NULL);
+		ASSERT(hr == S_OK);
+
+		// load the stream into CImage and finish
+		pImage->Load(pStream);  // pass the archive data to CImage
+		pStream->Release();
+		delete[] bytes;
+}
 }
 
 #ifdef SHARED_HANDLERS

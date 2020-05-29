@@ -51,6 +51,7 @@ public:
 #endif
 
 public:
+
 	D2DStatic				m_D2DStatic;
 	RECT					m_WorkArea;
 	CRect					m_ClientRect;
