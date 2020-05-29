@@ -21,8 +21,6 @@
 #define IDC_STATIC_CAL                  1002
 #define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
-#define IDC_LIST1                       1010
-#define IDC_LISTMONITOR                 1010
 #define IDC_MONITORLIST                 1010
 #define IDC_FILENAME_EDIT               1011
 #define IDC_DIRECTORY_EDIT              1012
@@ -41,7 +39,6 @@
 #define IDC_Y_STATIC                    1024
 #define IDC_Z_STATIC                    1025
 #define IDC_DEFOCUS_STATIC              1025
-#define ID_FILE_IMPORT                  32772
 #define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775
 #define ID_FILE_TEST                    32778

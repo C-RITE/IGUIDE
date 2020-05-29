@@ -391,7 +391,8 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 		pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, pDoc->m_pFundus->fundus, 1);
 		pDoc->m_pFundus->fundusIMG.Destroy();
 	}
-	else {
+	else if (pDoc->m_pFundus->fundusIMG)
+	{
 		pDoc->m_pFundus->fundus = (HBITMAP)pDoc->m_pFundus->fundusIMG;
 		pDoc->m_pFundus->picture = new CD2DBitmap(pRenderTarget, pDoc->m_pFundus->fundus, 1);
 	}

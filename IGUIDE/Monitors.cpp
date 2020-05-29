@@ -96,7 +96,7 @@ BOOL MonitorSelectDialog::OnInitDialog() {
 
 	for (auto& screen : Devices) {
 		CString dev;
-		dev.Format(L"%d: %s (%ix%i)",screen.number, screen.name, screen.resolution.x, screen.resolution.y);
+		dev.Format(L"%d: %ws (%dx%d)",screen.number, screen.name, screen.resolution.x, screen.resolution.y);
 		monitorList.AddString(dev);
 	}
 

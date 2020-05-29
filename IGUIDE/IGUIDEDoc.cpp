@@ -722,6 +722,8 @@ void CIGUIDEDoc::ComputeDisplacementAngles() {
 CD2DRectF CIGUIDEDoc::ComputeTargetZone() {
 
 	CD2DPointF rasterMid = m_raster.mid;
+	if (!m_Monitors.m_pSelectedDevice)
+		return CD2DRectF{ 0,0,0,0 };
 	CD2DSizeF monRes = m_Monitors.m_pSelectedDevice->resolution;
 	
 	float edgeLength = m_raster.meanEdge;

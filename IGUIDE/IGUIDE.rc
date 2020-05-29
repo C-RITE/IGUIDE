@@ -299,7 +299,7 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Fundus...\tCtrl+I",          ID_FILE_IMPORT
+        MENUITEM "&Fundus...\tCtrl+I",          ID_FUNDUS_IMPORT
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -360,7 +360,7 @@ BEGIN
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    "I",            ID_FILE_IMPORT,         VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_FUNDUS_IMPORT,       VIRTKEY, CONTROL, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
@@ -377,8 +377,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,8,2
- PRODUCTVERSION 0,6,8,2
+ FILEVERSION 0,6,8,3
+ PRODUCTVERSION 0,6,8,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -395,12 +395,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.8.2"
+            VALUE "FileVersion", "0.6.8.3"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.8.2"
+            VALUE "ProductVersion", "0.6.8.3"
         END
     END
     BLOCK "VarFileInfo"
