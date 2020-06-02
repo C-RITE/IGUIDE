@@ -227,6 +227,8 @@ BOOL CIGUIDEDoc::OnNewDocument()
 			m_Monitors.m_pSelectedDevice = it._Ptr;
 		}
 	}
+	if (m_Monitors.m_pSelectedDevice == NULL)
+		m_Monitors.selectionDialog();
 
 	m_FlipVertical = AfxGetApp()->GetProfileString(L"Settings", L"FlipVertical", L"False");
 	m_FlipHorizontal = AfxGetApp()->GetProfileString(L"Settings", L"FlipHorizontal", L"False");

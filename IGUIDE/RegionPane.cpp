@@ -93,7 +93,7 @@ void RegionPane::addPatch(Patch* p) {
 
     else {
         HTREEITEM insert = m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
-        m_wndTree.SetItemColor(insert, RGB(200, 0, 0));
+        m_wndTree.SetItemColor(insert, RGB(255, 0, 0));
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
     }
 
