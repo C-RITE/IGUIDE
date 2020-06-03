@@ -153,18 +153,16 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{	
 		// create patchjob
-		if (pDoc->m_pGrid->patchjob.empty() && pDoc->m_pGrid->POI.size() > 0) {
+		if (pDoc->m_pGrid->POI.size() > 0) {
 			pDoc->m_pGrid->makePOI(mousePos);
 			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 
-			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT)) {
+			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT, pDoc->m_pGrid->jobIndex)) {
 				m_pDlgTarget->Pinpoint(*p);
 				pDoc->m_pGrid->patchlist.push_back(*p);
 				delete p;
 			}
 
-			if (pDoc->m_pGrid->patchjob.size() == 1)
-				pDoc->m_pGrid->patchjob.clear();
 		}
 
 		// add single patch
@@ -469,7 +467,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 
 		// draw patchjob
-		pDoc->m_pGrid->DrawPatchJob(pRenderTarget);
+		pDoc->m_pGrid->DrawPatchJobs(pRenderTarget);
 
 		// draw extras (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawExtras(pRenderTarget);
@@ -595,8 +593,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 					AfxGetMainWnd()->SendMessage(
 						PATCH_TO_REGIONPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
-						(LPARAM)pDoc->m_pGrid->regCount);
-					if (pDoc->m_pGrid->patchjob.empty()) {
+						(LPARAM)pDoc->m_pGrid->patchjobs.size());
+					if (!pDoc->m_pGrid->jobIndex._Ptr) {
 						Patch p = pDoc->m_pGrid->patchlist.back();
 						p.locked = false;
 						pDoc->m_pGrid->patchlist.push_back(p);
@@ -606,7 +604,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 
 			case 'N':
-				p = pDoc->m_pGrid->doPatchJob(NEXT);
+				p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->jobIndex);
 				if (p) {
 					if (p->locked)
 						p->visited = true;
@@ -617,7 +615,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 
 			case 'B':
-				p = pDoc->m_pGrid->doPatchJob(PREV);
+				p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->jobIndex);
 				if (p) {
 					if (p->locked)
 						p->visited = true;
@@ -627,14 +625,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				}
 				break;
 
-			case VK_ESCAPE:
-				AfxGetMainWnd()->SendMessage(CANCEL_PATCHJOB, (WPARAM)pDoc->m_pGrid->regCount, NULL);
-				if (!pDoc->m_pGrid->patchjob.empty()) {
-					pDoc->m_pGrid->regCount--;
-					pDoc->m_pGrid->patchlist.back().region = 0;
-					pDoc->m_pGrid->patchjob.clear();
-				}
-				break;
 			}
 
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
@@ -646,9 +636,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			switch (pMsg->wParam)
 			{
 			case VK_SPACE:
-				if (pDoc->m_pGrid->patchjob.checkComplete()) {
+				if (pDoc->m_pGrid->jobIndex._Ptr && pDoc->m_pGrid->jobIndex->checkComplete()) {
 					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, NULL, NULL);
-					pDoc->m_pGrid->patchjob.clear();
+					//pDoc->m_pGrid->jobIndex->clear();
 				}
 			}
 

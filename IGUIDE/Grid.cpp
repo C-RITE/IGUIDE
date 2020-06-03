@@ -14,7 +14,6 @@ Grid::Grid() : currentPatch(patchlist.end()) {
 	isPanning = false;
 	wheelNotch = { 1, 1 };
 	POISize = { 0 , 0 };
-	regCount = 0;
 }
 
 Grid::~Grid() {
@@ -170,7 +169,7 @@ void Grid::makePOI(CPoint loc) {
 				p.locked = false;
 				p.visited = false;
 				p.defocus = L"0";
-				p.region = regCount;
+				p.region = patchjobs.size();
 				POI.push_back(p);
 
 			}
@@ -213,7 +212,7 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 
 	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
 
-	if (patchjob.size() > 0)
+	if (patchjobs.size() > 0)
 		return;
 
 	CString vidText;
@@ -242,63 +241,65 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-
-	regCount++;
+	Patches patchjob;
 
 	for (auto it = POI.begin(); it != POI.end(); it++) {
-		it->region = regCount;
+		it->region = patchjobs.size() + 1;
 		it->index = -1;								// yet unknown at this point, thus -1
 		patchjob.push_back(*it);
+
 		AfxGetMainWnd()->SendMessage(
 			PATCH_TO_REGIONPANE,
-			(WPARAM)&pDoc->m_pGrid->patchjob.back(),
-			(LPARAM)pDoc->m_pGrid->regCount);
+			(WPARAM)&patchjob.back(),
+			(LPARAM)it->region);
 	}
+
+	patchjobs.push_back(patchjob);
+	jobIndex = std::prev(patchjobs.end());
 
 }
 
-Patch* Grid::doPatchJob(Element e) {
+Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator jobIndex) {
 
 	Patch* p = NULL;
-	if (patchjob.empty())
+	if (jobIndex->empty())
 		return p;
 
-	if (!patchjob.checkComplete()) {
+		if (!jobIndex->checkComplete()) {
 
-		switch (e) {
+			switch (e) {
 
-		case INIT:
-			currentPatch = patchjob.begin();
-			p = new Patch(*currentPatch);
-			break;
-
-		case NEXT:
-			if (currentPatch != patchjob.end()) {
-				currentPatch++;
-				if (currentPatch != patchjob.end())
-					p = new Patch(*currentPatch);
-				else
-					currentPatch--;
-			}
-			break;
-
-		case PREV:
-			if (currentPatch != patchjob.begin()) {
-				currentPatch--;
+			case INIT:
+				currentPatch = jobIndex->begin();
 				p = new Patch(*currentPatch);
+				break;
+
+			case NEXT:
+				if (currentPatch != jobIndex->end()) {
+					currentPatch++;
+					if (currentPatch != jobIndex->end())
+						p = new Patch(*currentPatch);
+					else
+						currentPatch--;
+				}
+				break;
+
+			case PREV:
+				if (currentPatch != jobIndex->begin()) {
+					currentPatch--;
+					p = new Patch(*currentPatch);
+				}
+				break;
+
 			}
-			break;
+
+			// send information where to put next patch in tree
+			AfxGetMainWnd()->SendMessage(
+				UPDATE_REGIONPANE,
+				(WPARAM)getCurrentPatchJobPos(),
+				NULL);
 
 		}
-
-		// send information where to put next patch in tree
-		AfxGetMainWnd()->SendMessage(
-			UPDATE_REGIONPANE,
-			(WPARAM)getCurrentPatchJobPos(),
-			NULL);
-
-	}
-
 
 	return p;
 
@@ -307,7 +308,15 @@ Patch* Grid::doPatchJob(Element e) {
 
 int Grid::getCurrentPatchJobPos() {
 
-	int index = std::distance(patchjob.begin(), currentPatch);
+	int index = 0;
+
+	for (auto it = patchjobs.begin(); it != patchjobs.end(); it++) {
+		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
+			if (it2._Ptr != currentPatch._Ptr)
+				index++;
+		}
+	}
+	
 	return index;
 
 }
@@ -362,59 +371,63 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawPatchJob(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawPatchJobs(CHwndRenderTarget* pRenderTarget) {
 
-	if (patchjob.size() > 1) {
+	if (patchjobs.size() > 0) {
 
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 		float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
-		CD2DRectF rect1 = {
+		for (auto it = patchjobs.begin(); it != patchjobs.end(); it++) {
 
-				(float)(patchjob.front().coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-				(float)(patchjob.front().coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-				(float)(patchjob.back().coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
-				(float)(patchjob.back().coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
+			CD2DRectF rect1 = {
 
-		};
+					(float)(it->front().coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+					(float)(it->front().coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+					(float)(it->back().coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
+					(float)(it->back().coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
 
-		// make green border around patchjob area
-		pRenderTarget->DrawRectangle(
-			rect1,
-			m_pDarkGreenBrush,
-			.5f);
+			};
 
-		// show progress on right bottom
+			// make green border around patchjob area
+			pRenderTarget->DrawRectangle(
+				rect1,
+				m_pDarkGreenBrush,
+				.5f);
 
-		CIGUIDEView* pView = CIGUIDEView::GetView();
-		float zoom = pView->getZoomFactor();
+			// show progress on right bottom
 
-		CD2DRectF rect2;
-		CD2DPointF p{ rect1.right, rect1.bottom };
-		rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
-		pRenderTarget->DrawRectangle(
-			rect2,
-			m_pDarkGreenBrush,
-			.2f);
+			CIGUIDEView* pView = CIGUIDEView::GetView();
+			float zoom = pView->getZoomFactor();
 
-		CString vidText;
-		CD2DSizeF sizeTarget = { rect2.right - rect2.left, rect2.bottom - rect2.top };
-		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+			CD2DRectF rect2;
+			CD2DPointF p{ rect1.right, rect1.bottom };
+			rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
+			pRenderTarget->DrawRectangle(
+				rect2,
+				m_pDarkGreenBrush,
+				.2f);
 
-		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-			_T("Consolas"),								// font family name
-			2.5f);										// font size
+			CString vidText;
+			CD2DSizeF sizeTarget = { rect2.right - rect2.left, rect2.bottom - rect2.top };
+			CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 
-		vidText.Format(L"%d/%d", patchjob.getProgress(), patchjob.size());
-		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-			vidText,									// text to be drawn
-			textFormat,									// text format
-			sizeTarget);								// size of the layout box
+			CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+				_T("Consolas"),								// font family name
+				2.5f);										// font size
 
-		pRenderTarget->DrawTextLayout(
-			CD2DPointF(rect2.left, rect2.top),
-			&textLayout,
-			m_pWhiteBrush);
+			vidText.Format(L"%d/%d", it->getProgress(), it->size());
+			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+				vidText,									// text to be drawn
+				textFormat,									// text format
+				sizeTarget);								// size of the layout box
+
+			pRenderTarget->DrawTextLayout(
+				CD2DPointF(rect2.left, rect2.top),
+				&textLayout,
+				m_pWhiteBrush);
+
+		}
 
 	}
 

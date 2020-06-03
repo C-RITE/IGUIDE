@@ -56,15 +56,15 @@ public:
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
-	Patches::iterator		currentPatch;					// current focus on patch
+	Patches::iterator		currentPatch;					// current patch
 	Patches					POI;							// storage matrix for patches spanning a POI
-	Patches					patchjob;						// storage queue for patch matrices
+	std::vector<Patches>	patchjobs;						// container for patch matrices
+	std::vector<Patches>::iterator	
+							jobIndex;						// job index
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
 	CD2DPathGeometry*		m_pPatchJobGeom;				// the patchjob geometry
-
-	int						regCount;						// count the regions
 	
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
 
@@ -74,7 +74,8 @@ public:
 	void makePOI(CPoint point);								// create a patchlist around mousepointer
 	void fillPatchJob(CHwndRenderTarget* pRenderTarget);	// fill patch queue to process a POI
 	void calcPOIsize(float zoom);							// calculate real POI size
-	Patch* doPatchJob(Element e);							// process patch queue
+	Patch* doPatchJob(Element e, std::vector<Patches>::iterator);
+															// process patch queue
 	Patch getPatch(int index);								// get patch by index
 	int getCurrentPatchJobPos();							// get current position in patchjob
 
@@ -84,7 +85,7 @@ public:
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);										// draw grid overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);										// draw circles around center
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);										// draw patches
-	void DrawPatchJob(CHwndRenderTarget* pRenderTarget);									// draw POI matrix
+	void DrawPatchJobs(CHwndRenderTarget* pRenderTarget);									// draw POI matrix
 	void DrawDebug(CHwndRenderTarget* pRenderTarget);										// draw debug info
 	void DrawLocation(CHwndRenderTarget* pRenderTarget);									// draw coordinates and defocus of cursor
 	void DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom);			// draw point of interest
