@@ -77,6 +77,7 @@ public:
 	Patch* doPatchJob(Element e, std::vector<Patches>::iterator);
 															// process patch queue
 	Patch getPatch(int index);								// get patch by index
+	void selectPatch(int region, int index);				// set current patch
 	int getCurrentPatchJobPos();							// get current position in patchjob
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with

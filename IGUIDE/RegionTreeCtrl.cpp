@@ -29,8 +29,8 @@ BEGIN_MESSAGE_MAP(RegionTreeCtrl, CTreeCtrl)
     ON_WM_ERASEBKGND()
     ON_WM_CTLCOLOR_REFLECT()
     ON_WM_PAINT()
+    ON_NOTIFY_REFLECT(TVN_SELCHANGED, &RegionTreeCtrl::OnTvnSelchanged)
 END_MESSAGE_MAP()
-
 
 void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
@@ -53,6 +53,40 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
     patchinfo.y = p.coordsDEG.y;
     patchinfo.timestamp = p.timestamp;
 	patchinfo.DoModal();
+
+}
+
+void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
+{
+    LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+    // TODO: Add your control notification handler code here
+    *pResult = 0;
+
+    HTREEITEM selected = GetSelectedItem();
+    if (ItemHasChildren(selected))
+        return;
+
+    int index = 1;
+    int region = 0;
+
+    HTREEITEM parent = GetParentItem(selected);
+    HTREEITEM child = GetChildItem(parent);
+
+    while (selected != child)
+    {
+        child = GetNextSiblingItem(child);
+        index++;
+
+    }
+
+    CString text = GetItemText(parent);
+    text = text.Mid(8);
+    region = _ttoi(text);
+
+    selItemIndex = index;
+    selItemRegion = region;
+
+    AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);
 
 }
 
@@ -245,5 +279,14 @@ void RegionTreeCtrl::OnPaint()
 
     dc.BitBlt(rcClip.left, rcClip.top, rcClip.Width(), rcClip.Height(), &memDC,
         rcClip.left, rcClip.top, SRCCOPY);
+
+}
+
+
+void RegionTreeCtrl::getCurrentSelection(int& region, int& index)
+{
+    // TODO: Add your implementation code here.
+    region = selItemRegion;
+    index = selItemIndex;
 
 }

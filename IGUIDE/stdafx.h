@@ -17,6 +17,7 @@
 #define	PATCH_TO_REGIONPANE (WM_USER + 110)
 #define UPDATE_REGIONPANE (WM_USER + 111)
 #define FINISH_PATCHJOB (WM_USER + 112)
+#define PATCH_SELECT (WM_USER + 113)
 
 #define NETMSG_RESPONSE_TIMEOUT 200
 #define SNAP_INTERVAL	0.1F							// Snap mouse cursor to grid in degree

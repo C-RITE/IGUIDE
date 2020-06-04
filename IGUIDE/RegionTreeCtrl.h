@@ -31,6 +31,9 @@ protected:
 	};
 	CMap< void*, void*, Color_Font, Color_Font& > m_mapColorFont;
 
+	int selItemIndex;				// item index of current selection
+	int selItemRegion;				// selected item's parent
+
 public:
 
 	void SetItemFont(HTREEITEM hItem, LOGFONT& logfont);
@@ -42,4 +45,6 @@ public:
 
 public:
 	afx_msg void OnPaint();
+	afx_msg void OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
+	void getCurrentSelection(int& region, int& index);
 };

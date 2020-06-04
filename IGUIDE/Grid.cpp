@@ -37,6 +37,28 @@ Patch Grid::getPatch(int index) {
 
 }
 
+void Grid::selectPatch(int region, int index) {
+
+	auto reg = patchjobs.begin();
+	for (int i = 1; i < region; i++) {
+		reg = std::next(reg);
+	}
+
+	auto patch = reg->begin();
+	for (int i = 1; i < index; i++) {
+		patch = std::next(patch);
+	}
+
+	currentPatch = patch;
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+	pView->m_pDlgTarget->Pinpoint(*currentPatch);
+	pDoc->m_pGrid->patchlist.push_back(*currentPatch);
+	pDoc->UpdateAllViews(NULL);
+}
+
+
 void Grid::addPatch(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -310,13 +332,8 @@ int Grid::getCurrentPatchJobPos() {
 
 	int index = 0;
 
-	for (auto it = patchjobs.begin(); it != patchjobs.end(); it++) {
-		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
-			if (it2._Ptr != currentPatch._Ptr)
-				index++;
-		}
-	}
-	
+	index = std::distance(jobIndex->begin(), currentPatch);
+
 	return index;
 
 }

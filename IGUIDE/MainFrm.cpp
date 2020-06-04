@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
 	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
 	ON_MESSAGE(FINISH_PATCHJOB, &CMainFrame::OnFinishPatchjob)
+	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -60,6 +61,7 @@ CMainFrame::~CMainFrame()
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)l;
+	m_pDoc = pDoc;
 
 	// insert all properties into list
 	m_PropertyPane.fillProperties();
@@ -446,4 +448,18 @@ afx_msg LRESULT CMainFrame::OnFinishPatchjob(WPARAM wParam, LPARAM lParam)
 {
 	m_RegionPane.finish();
 	return 0;
+}
+
+
+afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
+{
+	int region = (int)wParam;
+	int index = (int)lParam;
+
+	m_pDoc->m_pGrid->selectPatch(region, index);
+
+	m_RegionPane.patchItem = index - 1;
+
+	return 0;
+
 }
