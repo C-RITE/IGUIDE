@@ -637,7 +637,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			{
 			case VK_SPACE:
 				if (pDoc->m_pGrid->jobIndex._Ptr && pDoc->m_pGrid->jobIndex->checkComplete()) {
-					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, NULL, NULL);
+					int region = pDoc->m_pGrid->jobIndex->back().region;
+					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, region, NULL);
 					//pDoc->m_pGrid->jobIndex->clear();
 				}
 			}

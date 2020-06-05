@@ -83,12 +83,24 @@ void RegionPane::addPatch(Patch* p) {
     // else insert into corresponding branch of tree
     else if (patchItem >= 0){
         HTREEITEM regNode = regionNodes[region - 1];
-        HTREEITEM elem = m_wndTree.GetNextItem(regNode, TVGN_CHILD);
-        for (int i = 0; i < patchItem; i++)
-            elem = m_wndTree.GetNextItem(elem, TVGN_NEXT);
-        HTREEITEM insert = m_wndTree.InsertItem(patchname, regNode, elem);
+        HTREEITEM elem = m_wndTree.GetChildItem(regNode);
+        for (int i = 0; i < (patchItem + patchOffset[region - 1]); i++)
+            elem = m_wndTree.GetNextSiblingItem(elem);
+
+        // if the element was already comitted (i.e. green), make subtree
+        HTREEITEM insert;
+
+        if (m_wndTree.GetItemColor(elem) == RGB(255, 0, 0)) {
+            insert = m_wndTree.InsertItem(patchname, regNode, elem);
+            m_wndTree.DeleteItem(elem);
+        }
+        else {
+            insert = m_wndTree.InsertItem(patchname, regNode, elem);
+            patchOffset[region - 1]++;
+        }
+
         m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
-        m_wndTree.DeleteItem(elem);
+
     }
 
     else {
@@ -132,9 +144,9 @@ void RegionPane::remove(int region)
 
 }
 
-void RegionPane::finish()
+void RegionPane::finish(int region)
 {
-    HTREEITEM regNode = regionNodes.back();
+    HTREEITEM regNode = regionNodes[region - 1];
     HTREEITEM child = m_wndTree.GetChildItem(regNode);
 
     while (child != NULL)
@@ -144,6 +156,7 @@ void RegionPane::finish()
     }
 
     patchItem = -1;
+    patchOffset[region - 1] = 0;
 
 }
 
@@ -165,6 +178,8 @@ void RegionPane::addRegion(int regCount)
     HTREEITEM regionNode = m_wndTree.InsertItem(&tvInsert);
     m_wndTree.SetItemColor(regionNode, RGB(255, 255, 255));
     regionNodes.push_back(regionNode);
+
+    patchOffset.push_back(0);
 
     /*
     for (auto it = p->begin(); it != p->end(); it++) {  

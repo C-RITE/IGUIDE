@@ -446,7 +446,8 @@ afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CMainFrame::OnFinishPatchjob(WPARAM wParam, LPARAM lParam)
 {
-	m_RegionPane.finish();
+	int region = (int)wParam;
+	m_RegionPane.finish(region);
 	return 0;
 }
 

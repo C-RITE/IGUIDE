@@ -18,7 +18,11 @@ protected:
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	int getRegionSize() { return regionNodes.size(); };
+
 	int patchItem;											// where to put patch during patchjob
+
+	std::vector<int> patchOffset;							// item offset resulting in multiple commits
+															// of one patch in a particular region
 
 private:
 
@@ -30,7 +34,7 @@ public:
 	void addRegion(int regCount);
 	void addPatch(Patch* p);
 	void remove(int region);
-	void finish();
+	void finish(int region);
 
 };
 
