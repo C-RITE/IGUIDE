@@ -90,3 +90,50 @@ void CustomTrace(int dwCategory, int line, const wchar_t* format, ...);
 #define YELLOW	D2D1::ColorF::PaleGoldenrod
 #define BLACK	D2D1::ColorF::Black
 #define RED		D2D1::ColorF::Red
+
+
+// serialization of custom data types
+
+
+//  D2D1_COLOR_F write
+inline CArchive& AFXAPI operator << (CArchive& ar, const D2D1_COLOR_F& lf)
+{
+	ar << lf.a;
+	ar << lf.b;
+	ar << lf.g;
+	ar << lf.r;
+		
+	return ar;
+}
+
+//  D2D1_COLOR_F read
+inline CArchive& AFXAPI operator >> (CArchive& ar, D2D1_COLOR_F& lf)
+{
+	ar >> lf.a;
+	ar >> lf.b;
+	ar >> lf.g;
+	ar >> lf.r;
+
+	return ar;
+}
+
+
+//  CD2DPointF write
+inline CArchive& AFXAPI operator << (CArchive& ar, const CD2DPointF& lf)
+{
+	ar << lf.x;
+	ar << lf.y;
+
+	return ar;
+}
+
+
+// CD2DPointF read
+inline CArchive& AFXAPI operator >> (CArchive& ar, CD2DPointF& lf)
+{
+	
+	ar >> lf.x;
+	ar >> lf.y;
+	
+	return ar;
+}

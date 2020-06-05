@@ -304,29 +304,150 @@ void CIGUIDEDoc::OnCloseDocument()
 void CIGUIDEDoc::Serialize(CArchive& ar)
 {
 
-	CImage fundus;
-
 	if (ar.IsStoring())
 	{
 		// TODO: add storing code here
-		if (!m_pFundus->filename.IsEmpty()) {
-			fundus.Load(m_pFundus->filename);
-			ImageArchive(&fundus, ar);
+
+		SerializeHeader(ar);
+
+		if (header[0]) {
+			CImage image(m_pFundus->fundusIMG);
+			ImageArchive(&image, ar);
 		}
 		
-		if (m_pFundus->calibration) {
+		if (header[1]) {
 			FundusCalibArchive(ar);
 		}
+
+		if (header[2]) {
+			PatchArchive(ar, &m_pGrid->patchlist);
+		}
+
+		if (header[3]) {
+			ar << m_pGrid->patchjobs.size();
+			for each (Patches p in m_pGrid->patchjobs)
+				PatchArchive(ar, &p);
+		}
+
 	}
 
 	else
 	{
 		// TODO: add loading code here
-		ImageArchive(&m_pFundus->fundusIMG, ar);
-		FundusCalibArchive(ar);
+		
+		SerializeHeader(ar);
+		
+		if (header[0]) {
+			ImageArchive(&m_pFundus->fundusIMG, ar);
+		}
+		
+		if (header[1])
+			FundusCalibArchive(ar);
+		
+		if (header[2]) {
+			m_pGrid->patchlist.clear();
+			PatchArchive(ar, &m_pGrid->patchlist);
+		}
+
+		if (header[3]) {
+			m_pGrid->patchjobs.clear();
+			size_t size;
+			ar >> size;
+			for (int i = 0; i < size; i++) {
+				Patches p;
+				PatchArchive(ar, &p);
+				m_pGrid->patchjobs.push_back(p);
+			}
+		}
 	}
 	
 	UpdateAllViews(NULL);
+
+}
+
+void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
+
+	if (ar.IsStoring()) {
+		if (m_pFundus->fundus)
+			header[0] = true;
+		else
+			header[0] = false;
+
+		if (m_pFundus->calibration)
+			header[1] = true;
+		else
+			header[1] = false;
+
+		if (m_pGrid->patchlist.size() > 0)
+			header[2] = true;
+		else
+			header[2] = false;
+
+		if (m_pGrid->patchjobs.size() > 0)
+			header[3] = true;
+		else
+			header[3] = false;
+
+		for (int i = 0; i < sizeof(header); i++)
+			ar << header[i];
+	}
+
+	else{
+
+		for (int i = 0; i < sizeof(header); i++)
+			ar >> header[i];
+
+	}
+
+}
+
+void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
+
+	int listSize;
+
+	if (ar.IsStoring())
+	{
+		listSize = ps->size();
+		ar << listSize;
+
+		for (auto it = ps->begin(); it != ps->end(); it++) {
+			ar << it->color;
+			ar << it->coordsDEG;
+			ar << it->coordsPX;
+			ar << it->defocus;
+			ar << it->index;
+			ar << it->locked;
+			ar << it->rastersize;
+			ar << it->region;
+			ar << it->timestamp;
+			ar << it->vidfilename;
+			ar << it->visited;
+		}
+	}
+
+	else
+	{
+		ps->clear();
+		Patch p;
+		ar >> listSize;
+		
+		for (int i = 0; i < listSize; i++) {
+			ar >> p.color;
+			ar >> p.coordsDEG;
+			ar >> p.coordsPX;
+			ar >> p.defocus;
+			ar >> p.index;
+			ar >> p.locked;
+			ar >> p.rastersize;
+			ar >> p.region;
+			ar >> p.timestamp;
+			ar >> p.vidfilename;
+			ar >> p.visited;
+
+			ps->push_back(p);
+		}
+
+	}
 
 }
 
