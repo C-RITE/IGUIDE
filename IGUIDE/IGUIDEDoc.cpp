@@ -347,6 +347,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 		if (header[2]) {
 			m_pGrid->patchlist.clear();
 			PatchArchive(ar, &m_pGrid->patchlist);
+			m_pGrid->patchlist.resetIndex();
 		}
 
 		if (header[3]) {

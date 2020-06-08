@@ -41,6 +41,7 @@ public:
 	void			delPatch();
 	void			untouch();
 	void			setOverlap(float overlap, float rsDeg);	
+	void			resetIndex();
 
 private:
 	

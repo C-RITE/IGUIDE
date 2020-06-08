@@ -34,15 +34,20 @@ bool Patches::commit() {
 
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
-	this->back().index = index;
+	this->back().index = index++;
 	this->back().defocus = pDoc->getCurrentDefocus();
-	index++;
 
 	last = this->back();
 
 	cleanup();
 	
 	return true;
+
+}
+
+void Patches::resetIndex() {
+
+	index = this->size();
 
 }
 
