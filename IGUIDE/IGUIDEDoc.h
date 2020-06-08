@@ -80,6 +80,7 @@ public:
 	CString					getTraceInfo();								// for debug purposes only
 	vector<CString>			getQuickHelp();								// show remote control hotkeys
 	void					OnFundusImport();
+	void					LoadFundus();
 
 	// Overrides
 private:

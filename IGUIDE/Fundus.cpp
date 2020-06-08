@@ -6,6 +6,7 @@
 
 Fundus::Fundus() :
 	picture(NULL),
+	fundus(NULL),
 	calibration(FALSE)
 {
 }

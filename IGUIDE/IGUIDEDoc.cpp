@@ -339,6 +339,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 		
 		if (header[0]) {
 			ImageArchive(&m_pFundus->fundusIMG, ar);
+			LoadFundus();
 		}
 		
 		if (header[1])
@@ -359,11 +360,11 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 				PatchArchive(ar, &p);
 				m_pGrid->patchjobs.push_back(p);
 			}
+
 		}
+
 	}
 	
-	UpdateAllViews(NULL);
-
 }
 
 void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
@@ -870,6 +871,25 @@ CD2DRectF CIGUIDEDoc::ComputeTargetZone() {
 
 }
 
+void CIGUIDEDoc::LoadFundus() {
+
+	if (!m_pFundus->filename.IsEmpty()) {
+		m_pFundus->fundusIMG.Destroy();
+		m_pFundus->fundusIMG.Load(m_pFundus->filename);
+		m_pFundus->fundus = (HBITMAP)m_pFundus->fundusIMG;
+
+	}
+
+	else if (m_pFundus->fundusIMG) {
+		if (m_pFundus->picture)
+			return;
+		m_pFundus->fundus = (HBITMAP)m_pFundus->fundusIMG;
+	}
+
+	UpdateAllViews(NULL);
+
+}
+
 bool CIGUIDEDoc::CheckCalibrationValidity()
 {
 
@@ -900,8 +920,7 @@ void CIGUIDEDoc::OnFundusImport()
 	// TODO: Add your command handler code here
 
 	m_pFundus->calibration = FALSE;
-	m_pFundus->filename.SetString(L"");
-
+	
 	if (nullptr != m_pFundus->picture)
 	{
 		delete m_pFundus->picture;
@@ -910,7 +929,7 @@ void CIGUIDEDoc::OnFundusImport()
 
 	m_pFundus->_ShowWICFileOpenDialog(AfxGetMainWnd()->GetSafeHwnd());
 
-	UpdateAllViews(NULL);
+	LoadFundus();
 
 	if (m_pFundus->picture) m_pDlgCalibration->DoModal();
 	
