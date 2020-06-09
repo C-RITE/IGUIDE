@@ -325,8 +325,13 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 		if (header[3]) {
 			ar << m_pGrid->patchjobs.size();
+
 			for each (Patches p in m_pGrid->patchjobs)
 				PatchArchive(ar, &p);
+
+			ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->jobIndex);
+			ar << m_pGrid->getCurrentPatchJobPos();
+
 		}
 
 	}
@@ -353,13 +358,38 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 		if (header[3]) {
 			m_pGrid->patchjobs.clear();
-			size_t size;
-			ar >> size;
-			for (int i = 0; i < size; i++) {
+			
+			size_t jobsize;
+			ar >> jobsize;
+
+			for (int i = 0; i < jobsize; i++) {
 				Patches p;
 				PatchArchive(ar, &p);
 				m_pGrid->patchjobs.push_back(p);
 			}
+
+			int pos;
+			ar >> pos;
+			int i = 0;
+			auto jobIndex = m_pGrid->patchjobs.begin();
+
+			while (i < pos) {
+				jobIndex++;
+				i++;
+			}
+
+			m_pGrid->jobIndex = jobIndex;
+
+			i = 0;
+			ar >> pos;
+			auto patchIndex = jobIndex->begin();
+			
+			while (i < pos) {
+				patchIndex++;
+				i++;
+			}
+
+			m_pGrid->currentPatch = patchIndex;
 
 		}
 
