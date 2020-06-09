@@ -331,6 +331,15 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 			ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->jobIndex);
 			ar << m_pGrid->getCurrentPatchJobPos();
+			
+			CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+			auto i = pMain->getPatchOffset();
+			int value;
+			
+			ar << i.size();
+
+			for each (value in i)
+				ar << value;
 
 		}
 
@@ -382,7 +391,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 			i = 0;
 			ar >> pos;
-			auto patchIndex = jobIndex->begin();
+			auto patchIndex = m_pGrid->jobIndex->begin();
 			
 			while (i < pos) {
 				patchIndex++;
@@ -391,6 +400,21 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 			m_pGrid->currentPatch = patchIndex;
 			restoreRegionPane();
+
+			CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+
+			i = 0;
+			ar >> jobsize;
+			vector<int>offset;
+			int element;
+
+			while (i < jobsize) {
+				ar >> element;
+				offset.push_back(element);
+				i++;
+			}
+
+			pMain->setPatchOffset(offset);
 
 		}
 
@@ -413,7 +437,7 @@ void CIGUIDEDoc::restoreRegionPane() {
 		if (it->locked)
 			AfxGetMainWnd()->SendMessage(
 				UPDATE_REGIONPANE,
-				(WPARAM)std::distance(m_pGrid->patchlist.begin(), it) / it->region,
+				(WPARAM)std::distance(m_pGrid->patchlist.begin(), it) / (it->region + 1),
 				(LPARAM)NULL);
 
 		AfxGetMainWnd()->SendMessage(
@@ -483,6 +507,7 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
 			ar << it->vidfilename;
 			ar << it->visited;
 		}
+
 	}
 
 	else
@@ -505,6 +530,7 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
 			ar >> p.visited;
 
 			ps->push_back(p);
+
 		}
 
 	}
@@ -533,6 +559,7 @@ void CIGUIDEDoc::FundusCalibArchive(CArchive& ar) {
 		ar >> m_pDlgCalibration->m_sFactor;
 
 		m_pFundus->calibration = true;
+
 	}
 
 }

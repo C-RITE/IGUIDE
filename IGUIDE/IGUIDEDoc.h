@@ -29,14 +29,14 @@ public:
 
 	Monitors				m_Monitors;							// output device for target view
 	Controller				m_Controller;						// controller used for subject calibration
-	Grid* m_pGrid;							// grid class
-	Fundus* m_pFundus;							// fundus class
+	Grid* m_pGrid;												// grid class
+	Fundus*					m_pFundus;							// fundus class
 	Raster					m_raster;							// raster class
-	Calibration* m_pDlgCalibration;					// fundus calibration dialog class
+	Calibration*			m_pDlgCalibration;					// fundus calibration dialog class
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	CString					m_OutputDir_ICANDI;					// ICANDI output directory
-	CString* m_pCurrentOutputDir;				// pointer to current output directory
+	CString*				m_pCurrentOutputDir;				// pointer to current output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure
@@ -44,12 +44,13 @@ public:
 	CString					m_FlipHorizontal;					// flip target screen in y
 	int						m_Overlap;							// patch overlap value in percent
 	int						m_FixationTargetSize;				// fixation target size in percent
-	CPoint* m_pMousePos;						// current mouse position
+	CPoint*					m_pMousePos;						// current mouse position
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 	bool					calibrationComplete;				// true if calibration is valid
 
-	CString* m_pInputBuf;						// input buffer for incoming messages
-	HANDLE* m_hNetMsg;							// handle for netcom message events
+	CString* m_pInputBuf;										// input buffer for incoming messages
+	HANDLE* m_hNetMsg;											// handle for netcom message events
+
 private:
 
 	DWORD					overlaySettings;					// used as buffer for toggle options
@@ -79,8 +80,8 @@ public:
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
 
-	CString					getTraceInfo();								// for debug purposes only
-	vector<CString>			getQuickHelp();								// show remote control hotkeys
+	CString					getTraceInfo();						// for debug purposes only
+	vector<CString>			getQuickHelp();						// show remote control hotkeys
 	void					OnFundusImport();
 	void					LoadFundus();
 

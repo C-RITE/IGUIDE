@@ -40,11 +40,15 @@ Patch Grid::getPatch(int index) {
 void Grid::selectPatch(int region, int index) {
 
 	auto reg = patchjobs.begin();
+
 	for (int i = 1; i < region; i++) {
 		reg = std::next(reg);
 	}
 
-	auto patch = reg->begin();
+	jobIndex = reg;
+
+	auto patch = jobIndex->begin();
+
 	for (int i = 1; i < index; i++) {
 		patch = std::next(patch);
 	}
@@ -53,9 +57,12 @@ void Grid::selectPatch(int region, int index) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
+
 	pView->m_pDlgTarget->Pinpoint(*currentPatch);
 	pDoc->m_pGrid->patchlist.push_back(*currentPatch);
+
 	pDoc->UpdateAllViews(NULL);
+
 }
 
 

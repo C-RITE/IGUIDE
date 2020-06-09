@@ -16,6 +16,8 @@ protected:
 public:
 	virtual ~CMainFrame();
 	static	CIGUIDEDoc *			GetDoc();
+	std::vector<int>	getPatchOffset()						{ return m_RegionPane.patchOffset; }
+	void				setPatchOffset(vector<int> patchOffset) { m_RegionPane.patchOffset = patchOffset; };
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
