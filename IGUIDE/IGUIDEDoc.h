@@ -62,6 +62,8 @@ private:
 
 	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);
 
+	void					restoreRegionPane();				// repopulate regionpane after load .igd session file
+
 	// Operations
 public:
 	bool					CheckFOV();

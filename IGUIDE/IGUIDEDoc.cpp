@@ -390,11 +390,39 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 			}
 
 			m_pGrid->currentPatch = patchIndex;
+			restoreRegionPane();
 
 		}
 
 	}
 	
+}
+
+void CIGUIDEDoc::restoreRegionPane() {
+
+	for (auto it = m_pGrid->patchjobs.begin(); it != m_pGrid->patchjobs.end(); it++)
+		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
+			AfxGetMainWnd()->SendMessage(
+				PATCH_TO_REGIONPANE,
+				(WPARAM) & *it2,
+				(LPARAM)it2->region);
+		}
+
+	for (auto it = m_pGrid->patchlist.begin(); it != m_pGrid->patchlist.end(); it++) {
+
+		if (it->locked)
+			AfxGetMainWnd()->SendMessage(
+				UPDATE_REGIONPANE,
+				(WPARAM)std::distance(m_pGrid->patchlist.begin(), it) / it->region,
+				(LPARAM)NULL);
+
+		AfxGetMainWnd()->SendMessage(
+			PATCH_TO_REGIONPANE,
+			(WPARAM) & *it,
+			(LPARAM)it->region);
+
+	}
+
 }
 
 void CIGUIDEDoc::SerializeHeader(CArchive& ar) {

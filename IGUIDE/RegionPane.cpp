@@ -87,7 +87,7 @@ void RegionPane::addPatch(Patch* p) {
         for (int i = 0; i < (patchItem + patchOffset[region - 1]); i++)
             elem = m_wndTree.GetNextSiblingItem(elem);
 
-        // if the element was already comitted (i.e. green), make subtree
+        // if the element was already comitted (i.e. green), append
         HTREEITEM insert;
 
         if (m_wndTree.GetItemColor(elem) == RGB(255, 0, 0)) {
