@@ -483,17 +483,19 @@ void CIGUIDEDoc::restoreRegionPane() {
 
 	itp = m_pGrid->patchlist.begin();
 
-	while (itp != std::prev(m_pGrid->patchlist.end())) {
+	if (itp != m_pGrid->patchlist.end()) {
 
-		if (itp->region == 0 && itp->index > 0)
-			AfxGetMainWnd()->SendMessage(
-				PATCH_TO_REGIONPANE,
-				(WPARAM) & *itp,
-				(LPARAM)0);
+		while (itp != std::prev(m_pGrid->patchlist.end())) {
+
+			if (itp->region == 0 && itp->index > 0)
+				AfxGetMainWnd()->SendMessage(
+					PATCH_TO_REGIONPANE,
+					(WPARAM) & *itp,
+					(LPARAM)0);
 			itp++;
 
+		}
 	}
-
 }
 
 void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
