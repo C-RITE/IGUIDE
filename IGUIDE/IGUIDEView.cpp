@@ -168,6 +168,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		// add single patch
 		else {
 			pDoc->m_pGrid->addPatch(point);
+			if (pDoc->m_pGrid->jobIndex._Ptr != nullptr)
+				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->jobIndex->end();
  			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
 		}
 
@@ -392,8 +394,6 @@ void CIGUIDEView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHin
 	m_pDlgTarget->SetFixationTarget();
 	m_pDlgTarget->Invalidate();
 
-	SetFocus();
-
 	Invalidate();
 
 	delete FOV;
@@ -544,7 +544,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		Patch* p = NULL;
 
 		if (pMsg->message == WM_KEYDOWN && !pDoc->m_pGrid->patchlist.back().locked) {
-						
+					
 			switch (pMsg->wParam) {
 
 			case VK_UP:
@@ -586,36 +586,41 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 						PATCH_TO_REGIONPANE,
 						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
 						(LPARAM)pDoc->m_pGrid->patchjobs.size());
-					if (!pDoc->m_pGrid->jobIndex._Ptr) {
+					
 						Patch p = pDoc->m_pGrid->patchlist.back();
 						p.locked = false;
 						pDoc->m_pGrid->patchlist.push_back(p);
 						m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
-					}
+					
 				}
 				break;
 
 			case 'N':
-				p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->jobIndex);
-				if (p) {
-					if (p->locked)
-						p->visited = true;
-					m_pDlgTarget->Pinpoint(*p);
-					pDoc->m_pGrid->patchlist.push_back(*p);
-					delete p;
+
+				if (pDoc->m_pGrid->currentPatch->region > 0) {
+					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->jobIndex);
+					if (p) {
+						if (p->locked)
+							p->visited = true;
+						m_pDlgTarget->Pinpoint(*p);
+						pDoc->m_pGrid->patchlist.push_back(*p);
+						delete p;
+					}
 				}
 				break;
 
 			case 'B':
-				p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->jobIndex);
-				if (p) {
-					if (p->locked)
-						p->visited = true;
-					m_pDlgTarget->Pinpoint(*p);
-					pDoc->m_pGrid->patchlist.push_back(*p);
-					delete p;
+				if (pDoc->m_pGrid->currentPatch->region > 0) {
+					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->jobIndex);
+					if (p) {
+						if (p->locked)
+							p->visited = true;
+						m_pDlgTarget->Pinpoint(*p);
+						pDoc->m_pGrid->patchlist.push_back(*p);
+						delete p;
+					}
+					break;
 				}
-				break;
 
 			}
 
@@ -631,7 +636,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				if (pDoc->m_pGrid->jobIndex._Ptr && pDoc->m_pGrid->jobIndex->checkComplete()) {
 					int region = pDoc->m_pGrid->jobIndex->back().region;
 					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, region, NULL);
-					//pDoc->m_pGrid->jobIndex->clear();
 				}
 			}
 

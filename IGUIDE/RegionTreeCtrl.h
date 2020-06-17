@@ -47,4 +47,5 @@ public:
 	afx_msg void OnPaint();
 	afx_msg void OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
 	void getCurrentSelection(int& region, int& index);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

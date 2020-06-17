@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
 	ON_MESSAGE(FINISH_PATCHJOB, &CMainFrame::OnFinishPatchjob)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
+	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -461,8 +462,15 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 
 	m_pDoc->m_pGrid->selectPatch(region, index);
 
-	m_RegionPane.patchItem = index - 1;
+	m_RegionPane.patchItem = index;
 
 	return 0;
 
+}
+
+
+afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
+{
+	m_RegionPane.clear();
+	return 0;
 }

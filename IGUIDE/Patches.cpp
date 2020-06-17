@@ -150,7 +150,7 @@ bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,POSx(deg),POSy(deg),Defocus");
+	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,Index,POSx(deg),POSy(deg),Defocus");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 	{
@@ -167,6 +167,8 @@ bool Patches::SaveToFile(CString directory) {
 				<< "v" << strNumber.GetString()
 				<< ","
 				<< it->region
+				<< ","
+				<< it->index
 				<< ","
 				<< strDegX.GetString()
 				<< ","

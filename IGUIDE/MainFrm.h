@@ -16,8 +16,7 @@ protected:
 public:
 	virtual ~CMainFrame();
 	static	CIGUIDEDoc *			GetDoc();
-	std::vector<int>	getPatchOffset()						{ return m_RegionPane.patchOffset; }
-	void				setPatchOffset(vector<int> patchOffset) { m_RegionPane.patchOffset = patchOffset; };
+
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
@@ -27,11 +26,12 @@ public:
 	HANDLE			m_hSaveEvent;
 	CIGUIDEDoc*		m_pDoc;
 
+	RegionPane		m_RegionPane;
+
 protected:  // control bar embedded members
 	
 	CMFCStatusBar   m_wndStatusBar;
 	Properties		m_PropertyPane;
-	RegionPane		m_RegionPane;
 
 	BOOL			CreateDockingWindows();
 	
@@ -64,4 +64,5 @@ protected:
 	afx_msg LRESULT OnUpdateRegionPane(WPARAM /*index*/, LPARAM lParam);
 	afx_msg LRESULT OnFinishPatchjob(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPatchSelect(WPARAM wParam /*index*/, LPARAM lParam /*region*/);
+	afx_msg LRESULT OnClearRegionpane(WPARAM wParam, LPARAM lParam);
 };

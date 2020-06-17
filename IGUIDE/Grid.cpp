@@ -38,22 +38,46 @@ Patch Grid::getPatch(int index) {
 }
 
 void Grid::selectPatch(int region, int index) {
+	
+		Patches::iterator patch;
 
-	auto reg = patchjobs.begin();
+	if (region == 0) {
 
-	for (int i = 1; i < region; i++) {
-		reg = std::next(reg);
+
+		int i = 1;
+		patch = patchlist.begin();
+
+		while (i < index) {
+			patch = std::next(patch);
+			i++;
+		}
+
+		currentPatch = patch;
+
 	}
 
-	jobIndex = reg;
+	else
 
-	auto patch = jobIndex->begin();
+	{
+		auto reg = patchjobs.begin();
 
-	for (int i = 1; i < index; i++) {
-		patch = std::next(patch);
+		for (int i = 1; i < region; i++) {
+			reg = std::next(reg);
+		}
+
+		jobIndex = reg;
+
+		int i = 0;
+		patch = jobIndex->begin();
+
+		while (i < index) {
+			patch = std::next(patch);
+			i++;
+		}
+
+		currentPatch = patch;
+
 	}
-
-	currentPatch = patch;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -78,7 +102,8 @@ void Grid::addPatch(CPoint loc) {
 	p.coordsDEG.y = posDeg.y;
 	p.coordsPX.y = loc.y;
 	p.rastersize = pDoc->m_raster.size;
-	p.region = 0;
+    p.region = 0;
+	p.index = -1;
 	p.color = pDoc->m_raster.color;
 	p.locked = false;
 	p.visited = false;

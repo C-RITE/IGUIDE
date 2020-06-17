@@ -66,7 +66,7 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
     if (ItemHasChildren(selected))
         return;
 
-    int index = 1;
+    int index = 0;
     int region = 0;
 
     HTREEITEM parent = GetParentItem(selected);
@@ -75,7 +75,9 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
     while (selected != child)
     {
         child = GetNextSiblingItem(child);
-        index++;
+            index++;
+            if (ItemHasChildren(child))
+                break;
 
     }
 
@@ -288,5 +290,27 @@ void RegionTreeCtrl::getCurrentSelection(int& region, int& index)
     // TODO: Add your implementation code here.
     region = selItemRegion;
     index = selItemIndex;
+
+}
+
+
+BOOL RegionTreeCtrl::PreTranslateMessage(MSG* pMsg)
+{
+    // TODO: Add your specialized code here and/or call the base class
+    if (pMsg->message == WM_KEYDOWN) {
+
+        CIGUIDEView* pView = CIGUIDEView::GetView();
+
+        switch (pMsg->wParam) {
+
+        case VK_SPACE:
+            pView->PostMessage(WM_KEYDOWN, VK_SPACE, NULL);
+            break;
+
+        }
+    }
+
+    return CTreeCtrl::PreTranslateMessage(pMsg);
+
 
 }

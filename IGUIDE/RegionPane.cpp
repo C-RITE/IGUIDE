@@ -54,14 +54,25 @@ void RegionPane::OnSize(UINT nType, int cx, int cy)
 
 }
 
+void RegionPane::clear() {
+
+    m_wndTree.DeleteAllItems();
+    patchOffset.clear();
+    regionNodes.clear();
+    patchItem = -1;
+
+}
+
 void RegionPane::addPatch(Patch* p) {
     
     CString patchname;
 
     // add upcoming patchjob
+
     if (p->index == -1) {
         patchname.Format(L"P?: %.2f, %.2f, %ws [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
     }
+
     // add single patch
     else
         patchname.Format(L"P%d: %.2f, %.2f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
@@ -108,6 +119,8 @@ void RegionPane::addPatch(Patch* p) {
         m_wndTree.SetItemColor(insert, RGB(255, 0, 0));
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
     }
+
+    patchItem = -1;
 
     m_wndTree.UpdateData(TRUE);
 
