@@ -462,7 +462,7 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 
 	m_pDoc->m_pGrid->selectPatch(region, index);
 
-	m_RegionPane.patchItem = index;
+	m_RegionPane.patchItem = index - 1;
 
 	return 0;
 

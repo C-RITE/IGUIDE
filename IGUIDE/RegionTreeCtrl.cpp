@@ -58,37 +58,54 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-    // TODO: Add your control notification handler code here
-    *pResult = 0;
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
 
-    HTREEITEM selected = GetSelectedItem();
-    if (ItemHasChildren(selected))
-        return;
+	HTREEITEM selected = GetSelectedItem();
+	if (ItemHasChildren(selected))
+		return;
 
-    int index = 0;
-    int region = 0;
+	int index = 1;
+	int region = 0;
 
-    HTREEITEM parent = GetParentItem(selected);
-    HTREEITEM child = GetChildItem(parent);
+	HTREEITEM parent = GetParentItem(selected);
+	HTREEITEM child = GetChildItem(parent);
 
-    while (selected != child)
-    {
-        child = GetNextSiblingItem(child);
-            index++;
-            if (ItemHasChildren(child))
-                break;
+	if (parent == NULL) {
 
-    }
+		CString text = GetItemText(selected);
+		text = text.TrimLeft(L"P");
+		int divider = text.Find(L":", 0);
+		text = text.Left(divider);
+		region = 0;
+		index = _ttoi(text);
 
-    CString text = GetItemText(parent);
-    text = text.Mid(8);
-    region = _ttoi(text);
+	}
 
-    selItemIndex = index;
-    selItemRegion = region;
+	else while (selected != child)
 
-    AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);
+	{
+		while (ItemHasChildren(child)) {
+			child = GetNextSiblingItem(child);
+		}
+
+		if (GetNextSiblingItem(child)) {
+			child = GetNextSiblingItem(child);
+		}
+
+		index++;
+
+	}
+
+	CString text = GetItemText(parent);
+	text = text.Mid(8);
+	region = _ttoi(text);
+
+	selItemIndex = index;
+	selItemRegion = region;
+
+	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);
 
 }
 

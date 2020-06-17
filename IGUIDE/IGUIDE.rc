@@ -377,8 +377,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,9,4
- PRODUCTVERSION 0,6,9,4
+ FILEVERSION 0,6,9,5
+ PRODUCTVERSION 0,6,9,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -395,12 +395,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.6.9.4"
+            VALUE "FileVersion", "0.6.9.5"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.6.9.4"
+            VALUE "ProductVersion", "0.6.9.5"
         END
     END
     BLOCK "VarFileInfo"
@@ -417,7 +417,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "IGUIDE"
+    IDR_MAINFRAME           "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
     ID_INDICATOR_ICANDI     "ICANDI"
     IDR_IGUIDETYPE          "\nIGUIDE\nIGUIDE\nIGUIDE Files (*.IGD)\n.IGD\nIGUIDE.Document\nIGUIDE.Document"
     ID_INDICATOR_AOSACA     "AOSACA"

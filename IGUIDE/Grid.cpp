@@ -42,12 +42,11 @@ void Grid::selectPatch(int region, int index) {
 		Patches::iterator patch;
 
 	if (region == 0) {
-
-
+		
 		int i = 1;
 		patch = patchlist.begin();
 
-		while (i < index) {
+		while (patch->index != index) {
 			patch = std::next(patch);
 			i++;
 		}
@@ -67,7 +66,7 @@ void Grid::selectPatch(int region, int index) {
 
 		jobIndex = reg;
 
-		int i = 0;
+		int i = 1;
 		patch = jobIndex->begin();
 
 		while (i < index) {
@@ -167,7 +166,7 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 	else {
 		POI.clear();
 		if (patchlist.size() > 0)
-			patchlist.back().region = 0;
+			currentPatch = patchlist.end();
 	}
 
 }
