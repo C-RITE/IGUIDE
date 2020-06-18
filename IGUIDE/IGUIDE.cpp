@@ -89,6 +89,10 @@ BOOL CIGUIDEApp::InitInstance()
 
 	// Dispatch commands specified on the command line.  Will return FALSE if
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
+	
+	// some legacy registry values caused crash on startup
+	AmendLowerVersion();
+
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 
@@ -119,6 +123,21 @@ BOOL CIGUIDEApp::StoreWindowPlacement(const CRect& rectNormalPosition, int nFlag
 	return CWinAppEx::StoreWindowPlacement(rectNormalPosition, nFlags, nShowCmd);
 
 }
+
+void CIGUIDEApp::AmendLowerVersion() {
+
+	CRegKey key;
+
+	key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Workspace\\WindowPlacement"));
+	key.SetDWORDValue(_T("ShowCmd"), (DWORD)0);
+
+	key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Settings"));
+	key.SetValue(_T("False"), _T("FlipVertical"));
+
+	key.Close();
+
+}
+
 
 // CIGUIDEApp message handlers
 

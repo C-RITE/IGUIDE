@@ -27,6 +27,7 @@ public:
 	virtual BOOL StoreWindowPlacement(const CRect& rectNormalPosition,
 		int nFlags,
 		int nShowCmd);
+	void AmendLowerVersion();			// for backward compatibility
 
 // Implementation
 	afx_msg void OnAppAbout();
