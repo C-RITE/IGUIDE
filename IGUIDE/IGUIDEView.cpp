@@ -30,7 +30,7 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, &CIGUIDEView::OnDraw2d)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEView::OnFundusImport)
 	ON_WM_MOUSELEAVE()
+	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -108,7 +109,7 @@ void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 	// TODO: add cleanup after printing
 }
 
-void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
+void CIGUIDEView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -120,6 +121,22 @@ void CIGUIDEView::OnLButtonDown(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->showCoords = false;
 			pDoc->m_pGrid->showCursor = false;
 		}
+
+}
+
+void CIGUIDEView::OnRButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	// calculate mouse travel distance
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	mouseDist += mousePos - mouseStart;
+	pDoc->m_pGrid->showCoords = true;
+	pDoc->m_pGrid->showCursor = true;
+	pDoc->m_pGrid->isPanning = false;
+
+	CView::OnRButtonUp(nFlags, point);
 
 }
 
@@ -138,18 +155,6 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	pDoc->m_pGrid->showCursor = false;
 	
-	// calculate mouse travel distance
-	
-	if (nFlags & MK_CONTROL) 
-	{
-		mouseDist += mousePos - mouseStart;
-		pDoc->m_pGrid->showCoords = true;
-		pDoc->m_pGrid->showCursor = true;
-		pDoc->m_pGrid->isPanning = false;
-		Invalidate();
-		return;
-	}
-
 	if (pDoc->CheckFOV())
 	{	
 		// create patchjob
@@ -204,8 +209,8 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	//mousePos = Snap2Grid(point);
 	mousePos = point;
 
-	// pan if control key and left mouse button are pressed simultaneously
-	if (nFlags & MK_CONTROL && nFlags & MK_LBUTTON) {
+	// pan with right mouse button
+	if (nFlags & MK_RBUTTON) {
 
 		CD2DSizeF offset(mousePos - mouseStart + mouseDist);
 		offset.width *= (1 / zoom);
@@ -221,6 +226,19 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	RedrawWindow();
+
+}
+
+void CIGUIDEView::OnMouseLeave()
+{
+	// TODO: Add your message handler code here and/or call default
+	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
+
+	pDoc->m_pGrid->showCursor = false;
+	m_bMouseTracking = false;
+	Invalidate();
+
+	CView::OnMouseLeave();
 
 }
 
@@ -519,26 +537,26 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		// delete last patch with right mouse button
 
-		if (pMsg->wParam == VK_RBUTTON) {
+		//if (pMsg->wParam == VK_RBUTTON) {
 
-			if (pMsg->message == WM_MOUSEMOVE)
-				return CView::PreTranslateMessage(pMsg);
+		//	if (pMsg->message == WM_MOUSEMOVE)
+		//		return CView::PreTranslateMessage(pMsg);
 
-			if (pDoc->m_pGrid->patchlist.back().locked == false) {
-				pDoc->m_pGrid->patchlist.delPatch();
-			}
+		//	if (pDoc->m_pGrid->patchlist.back().locked == false) {
+		//		pDoc->m_pGrid->patchlist.delPatch();
+		//	}
 
-			if (pDoc->m_pGrid->patchlist.size() > 0) {
-				Patch p = pDoc->m_pGrid->patchlist.back();
-				m_pDlgTarget->Pinpoint(p);
-			}
-			else
-				m_pDlgTarget->m_POI = NULL;
+		//	if (pDoc->m_pGrid->patchlist.size() > 0) {
+		//		Patch p = pDoc->m_pGrid->patchlist.back();
+		//		m_pDlgTarget->Pinpoint(p);
+		//	}
+		//	else
+		//		m_pDlgTarget->m_POI = NULL;
 
-			m_pDlgTarget->Invalidate();
-			this->Invalidate();
+		//	m_pDlgTarget->Invalidate();
+		//	this->Invalidate();
 
-		}
+		//}
 
 		// move patch in any direction and lock with space key
 		Patch* p = NULL;
@@ -737,16 +755,3 @@ void CIGUIDEView::OnFundusImport()
 
 }
 
-
-void CIGUIDEView::OnMouseLeave()
-{
-	// TODO: Add your message handler code here and/or call default
-	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
-	
-	pDoc->m_pGrid->showCursor = false;
-	m_bMouseTracking = false;
-	Invalidate();
-
-	CView::OnMouseLeave();
-
-}

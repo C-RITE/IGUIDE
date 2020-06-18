@@ -126,15 +126,25 @@ BOOL CIGUIDEApp::StoreWindowPlacement(const CRect& rectNormalPosition, int nFlag
 
 void CIGUIDEApp::AmendLowerVersion() {
 
+	// to prevent older settings from crashing the app
 	CRegKey key;
+	DWORD dw;
 
-	key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Workspace\\WindowPlacement"));
-	key.SetDWORDValue(_T("ShowCmd"), (DWORD)0);
+	if (ERROR_SUCCESS == (key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Workspace\\WindowPlacement"))))
+		key.SetDWORDValue(_T("ShowCmd"), (DWORD)0);
 
-	key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Settings"));
-	key.SetValue(_T("False"), _T("FlipVertical"));
+	if (ERROR_SUCCESS == (key.Open(HKEY_CURRENT_USER, _T("Software\\AG Harmening\\IGUIDE\\Settings")))) {
+		if (key.QueryDWORDValue(_T("FlipVertical"), dw) == ERROR_SUCCESS) {
+			if (dw == 1)
+				key.SetValue(_T("True"), _T("FlipVertical"));
+			else
+				key.SetValue(_T("False"), _T("FlipVertical"));
 
-	key.Close();
+			// overwrite w/default overlays
+			key.SetDWORDValue(_T("Overlays"), (DWORD)7);
+		}
+
+	}
 
 }
 
