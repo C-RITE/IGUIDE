@@ -170,8 +170,6 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 		makePOI(point);
 	else {
 		POI.clear();
-		if (patchlist.size() > 0)
-			currentPatch = patchlist.end();
 	}
 
 }
@@ -769,6 +767,8 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom) {
 
 	// show cursor around the mouse pointer
+	if (!showCursor)
+		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
