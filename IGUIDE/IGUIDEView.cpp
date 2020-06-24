@@ -206,9 +206,8 @@ void CIGUIDEView::OnMouseMove(UINT nFlags, CPoint point)
 	if (!m_pDlgTarget->calibrating)
 		pDoc->m_pGrid->showCursor = true;
 
-	//mousePos = Snap2Grid(point);
 	mousePos = point;
-
+	
 	// pan with right mouse button
 	if (nFlags & MK_RBUTTON) {
 
@@ -242,17 +241,6 @@ void CIGUIDEView::OnMouseLeave()
 
 }
 
-CPoint CIGUIDEView::Snap2Grid(CPoint point) {
-
-	int x = point.x % (int)(1 / SNAP_INTERVAL * zoom / (PPD));
-	int y = point.y % (int)(1 / SNAP_INTERVAL * zoom / (PPD));
-
-	x = point.x - x;
-	y = point.y - y;
-
-	return CPoint{ x,y };
-
-}
 
 BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {

@@ -77,7 +77,6 @@ public:
 
 private:
 	void CIGUIDEView::SetFixationTarget();
-	CPoint CIGUIDEView::Snap2Grid(CPoint point);				// snap cursor to predefined interval
 
 protected:
 	

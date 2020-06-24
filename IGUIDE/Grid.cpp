@@ -125,12 +125,17 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 	transLoc.x = ((point.x - mouseDist.x) - CANVAS / 2) * DPP;
 	transLoc.y = ((point.y - mouseDist.y) - CANVAS / 2) * DPP;
 
+
 	transLoc.x *= zoom;
 	transLoc.y *= zoom;
+
+	transLoc.x = roundf(transLoc.x * 10) / 10;
+	transLoc.y = roundf(transLoc.y * 10) / 10;
 
 	return transLoc;
 
 }
+
 
 void Grid::controlPOI(int notch, int dim, CPoint point) {
 
@@ -768,20 +773,26 @@ void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, flo
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
+	loc = PixelToDegree(loc);
+
+	CD2DSizeF mouseDist = pView->getMouseDist();
+
 	if (pDoc->calibrationComplete) {
 
 		float rsdeg = (float)pDoc->m_raster.videodim / (float)pDoc->m_raster.size;
 
 		cursor = {
-			loc.x - (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.y - (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.x + (float)(zoom * (rsdeg / 2 / DPP)),
-			loc.y + (float)(zoom * (rsdeg / 2 / DPP))
+
+				(float)((mouseDist.width + (zoom * loc.x * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * loc.y * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.width + (zoom * loc.x * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * loc.y * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2)
+
 		};
 
 		pRenderTarget->DrawRectangle(cursor, m_pWhiteBrush, .5f, NULL);
 
-		DrawCoordinates(pRenderTarget, PixelToDegree(loc), cursor);
+		DrawCoordinates(pRenderTarget, loc, cursor);
 
 	}
 
