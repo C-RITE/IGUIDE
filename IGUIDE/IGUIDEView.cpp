@@ -615,7 +615,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			case 'N':
 
-				if (pDoc->m_pGrid->currentPatch._Ptr) {
+				if (pDoc->m_pGrid->patchjobs.size() > 0) {
 					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->jobIndex);
 					if (p) {
 						if (p->locked)
@@ -628,7 +628,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 
 			case 'B':
-				if (pDoc->m_pGrid->currentPatch._Ptr) {
+				if (pDoc->m_pGrid->patchjobs.size() > 0) {
 					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->jobIndex);
 					if (p) {
 						if (p->locked)
