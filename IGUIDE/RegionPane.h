@@ -38,6 +38,7 @@ public:
 	void addPatch(Patch* p);
 	void remove(int region);
 	void finish(int region);
+	void select(int region, int index);
 	void clear();
 
 };

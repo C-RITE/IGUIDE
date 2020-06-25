@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(FINISH_PATCHJOB, &CMainFrame::OnFinishPatchjob)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
+	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -473,4 +474,16 @@ afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
 {
 	m_RegionPane.clear();
 	return 0;
+}
+
+
+afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
+{
+	int region = (int)wParam;
+	int index = (int)lParam;
+
+	m_RegionPane.select(region, index);
+
+	return 0;
+
 }

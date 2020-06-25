@@ -258,6 +258,9 @@ void Grid::calcPOIsize(float zoom) {
 
 void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom) {
 
+	if (!showCursor)
+		return;
+
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 

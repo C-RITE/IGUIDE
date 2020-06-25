@@ -608,6 +608,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 							p->visited = true;
 						m_pDlgTarget->Pinpoint(*p);
 						pDoc->m_pGrid->patchlist.push_back(*p);
+						int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
+						AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
 						delete p;
 					}
 				}
@@ -621,6 +623,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 							p->visited = true;
 						m_pDlgTarget->Pinpoint(*p);
 						pDoc->m_pGrid->patchlist.push_back(*p);
+						int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
+						AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
 						delete p;
 					}
 					break;

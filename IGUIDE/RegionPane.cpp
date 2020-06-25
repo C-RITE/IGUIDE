@@ -2,6 +2,7 @@
 //
 #include "stdafx.h"
 #include "IGUIDE.h"
+#include "IGUIDEView.h"
 #include "RegionPane.h"
 #include "resource.h"
 
@@ -33,7 +34,7 @@ int RegionPane::OnCreate(LPCREATESTRUCT lpCreateStruct)
         return -1;
 
     DWORD style = TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT |
-        WS_CHILD | WS_VISIBLE | TVS_SHOWSELALWAYS | TVS_FULLROWSELECT;
+        WS_CHILD | WS_VISIBLE | TVS_FULLROWSELECT;
     CRect dump(0, 0, 0, 0);
     if (!m_wndTree.Create(style, dump, this, ID_REGION_TREE))
         return -1;
@@ -123,6 +124,22 @@ void RegionPane::addPatch(Patch* p) {
     patchItem = -1;
 
     m_wndTree.UpdateData(TRUE);
+
+}
+
+void RegionPane::select(int region, int index) {
+
+
+    HTREEITEM regNode = regionNodes[region - 1];
+    HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
+
+    // save all commited (i.e. green) patches in root before erasing region
+    for (int i = 0; i < index; i++)
+    {
+        hItemChild = m_wndTree.GetNextSiblingItem(hItemChild);
+    }
+
+    m_wndTree.SelectItem(hItemChild);
 
 }
 
