@@ -162,7 +162,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->makePOI(point);
 			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 
-			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT, pDoc->m_pGrid->jobIndex)) {
+			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT, pDoc->m_pGrid->currentPatchJob)) {
 				m_pDlgTarget->Pinpoint(*p);
 				pDoc->m_pGrid->patchlist.push_back(*p);
 				delete p;
@@ -173,8 +173,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		// add single patch
 		else {
 			pDoc->m_pGrid->addPatch(point);
-			if (pDoc->m_pGrid->jobIndex._Ptr != nullptr)
-				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->jobIndex->end();
+			if (pDoc->m_pGrid->currentPatchJob._Ptr != nullptr)
+				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->currentPatchJob->end();
  			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
 		}
 
@@ -604,7 +604,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			case 'N':
 
 				if (pDoc->m_pGrid->patchjobs.size() > 0) {
-					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->jobIndex);
+					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->currentPatchJob);
 					if (p) {
 						if (p->locked)
 							p->visited = true;
@@ -617,7 +617,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			case 'B':
 				if (pDoc->m_pGrid->patchjobs.size() > 0) {
-					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->jobIndex);
+					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->currentPatchJob);
 					if (p) {
 						if (p->locked)
 							p->visited = true;
@@ -639,8 +639,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			switch (pMsg->wParam)
 			{
 			case VK_SPACE:
-				if (pDoc->m_pGrid->jobIndex._Ptr && pDoc->m_pGrid->jobIndex->checkComplete()) {
-					int region = pDoc->m_pGrid->jobIndex->back().region;
+				if (pDoc->m_pGrid->currentPatchJob._Ptr && pDoc->m_pGrid->currentPatchJob->checkComplete()) {
+					int region = pDoc->m_pGrid->currentPatchJob->back().region;
 					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, region, NULL);
 				}
 			}

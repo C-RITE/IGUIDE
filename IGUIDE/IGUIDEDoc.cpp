@@ -338,7 +338,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 			// store current patchjob position
 
-			ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->jobIndex);
+			ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->currentPatchJob);
 			
 			// store current patch position inside patchjob
 
@@ -405,9 +405,9 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 			int pos;
 			ar >> pos;
-			auto jobIndex = m_pGrid->patchjobs.begin() + pos;
+			auto currentPatchJob = m_pGrid->patchjobs.begin() + pos;
 
-			m_pGrid->jobIndex = jobIndex;
+			m_pGrid->currentPatchJob = currentPatchJob;
 
 			// restore current patch 
 

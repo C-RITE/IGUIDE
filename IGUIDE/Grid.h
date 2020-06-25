@@ -60,7 +60,7 @@ public:
 	Patches					POI;							// storage matrix for patches spanning a POI
 	std::vector<Patches>	patchjobs;						// container for patch matrices
 	std::vector<Patches>::iterator	
-							jobIndex;						// job index
+							currentPatchJob;				// job index
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DPathGeometry*		m_pGridGeom;					// the grid

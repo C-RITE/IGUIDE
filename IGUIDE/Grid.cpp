@@ -64,10 +64,10 @@ void Grid::selectPatch(int region, int index) {
 			reg = std::next(reg);
 		}
 
-		jobIndex = reg;
+		currentPatchJob = reg;
 
 		int i = 1;
-		patch = jobIndex->begin();
+		patch = currentPatchJob->begin();
 
 		while (i < index) {
 			patch = std::next(patch);
@@ -317,29 +317,29 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 	}
 
 	patchjobs.push_back(patchjob);
-	jobIndex = std::prev(patchjobs.end());
+	currentPatchJob = std::prev(patchjobs.end());
 
 }
 
-Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator jobIndex) {
+Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator currentPatchJob) {
 
 	Patch* p = NULL;
-	if (jobIndex->empty())
+	if (currentPatchJob->empty())
 		return p;
 
-		if (!jobIndex->checkComplete()) {
+		if (!currentPatchJob->checkComplete()) {
 
 			switch (e) {
 
 			case INIT:
-				currentPatch = jobIndex->begin();
+				currentPatch = currentPatchJob->begin();
 				p = new Patch(*currentPatch);
 				break;
 
 			case NEXT:
-				if (currentPatch != jobIndex->end()) {
+				if (currentPatch != currentPatchJob->end()) {
 					currentPatch++;
-					if (currentPatch != jobIndex->end())
+					if (currentPatch != currentPatchJob->end())
 						p = new Patch(*currentPatch);
 					else
 						currentPatch--;
@@ -347,7 +347,7 @@ Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator jobIndex) {
 				break;
 
 			case PREV:
-				if (currentPatch != jobIndex->begin()) {
+				if (currentPatch != currentPatchJob->begin()) {
 					currentPatch--;
 					p = new Patch(*currentPatch);
 				}
@@ -372,7 +372,7 @@ int Grid::getCurrentPatchJobPos() {
 
 	int index = 0;
 
-	index = std::distance(jobIndex->begin(), currentPatch);
+	index = std::distance(currentPatchJob->begin(), currentPatch);
 
 	return index;
 
@@ -434,6 +434,7 @@ void Grid::DrawPatchJobs(CHwndRenderTarget* pRenderTarget) {
 
 		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 		float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+		CD2DBrush* pBrush = NULL;
 
 		for (auto it = patchjobs.begin(); it != patchjobs.end(); it++) {
 
@@ -446,11 +447,16 @@ void Grid::DrawPatchJobs(CHwndRenderTarget* pRenderTarget) {
 
 			};
 
+			if (it == currentPatchJob)
+				pBrush = m_pDarkGreenBrush;
+			else
+				pBrush = m_pWhiteBrush;
+
 			// make green border around patchjob area
 			pRenderTarget->DrawRectangle(
 				rect1,
-				m_pDarkGreenBrush,
-				.5f);
+				pBrush,
+				.2f);
 
 			// show progress on right bottom
 
@@ -462,7 +468,7 @@ void Grid::DrawPatchJobs(CHwndRenderTarget* pRenderTarget) {
 			rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
 			pRenderTarget->DrawRectangle(
 				rect2,
-				m_pDarkGreenBrush,
+				pBrush,
 				.2f);
 
 			CString vidText;
