@@ -116,12 +116,10 @@ void CIGUIDEView::OnRButtonDown(UINT nFlags, CPoint point)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 		mouseStart = point;
 
-		if (nFlags & MK_CONTROL) {
-			::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
-			pDoc->m_pGrid->showCoords = false;
-			pDoc->m_pGrid->showCursor = false;
-		}
-
+		::SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+		pDoc->m_pGrid->showCoords = false;
+		pDoc->m_pGrid->showCursor = false;
+		
 }
 
 void CIGUIDEView::OnRButtonUp(UINT nFlags, CPoint point)

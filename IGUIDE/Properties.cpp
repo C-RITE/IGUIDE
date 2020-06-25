@@ -85,6 +85,7 @@ void Properties::AdjustLayout()
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CMFCPropertyGridCtrl* gridctrl = (CMFCPropertyGridCtrl*)wParam;
 	CMFCPropertyGridProperty* prop = (CMFCPropertyGridProperty*)lParam;
@@ -98,6 +99,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	if (propName == L"Overlap") {
 		pDoc->m_Overlap = vt;
+		pDoc->m_pGrid->makePOI(pView->getMousePos());
 	}
 
 	if (propName == L"Scale") {
@@ -127,7 +129,6 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		for (auto it = pDoc->m_Monitors.m_Devices.begin(); it != pDoc->m_Monitors.m_Devices.end(); it++) {
 			if (it->name == ref) {
 				pDoc->m_Monitors.m_pSelectedDevice = it._Ptr;
-				CIGUIDEView* pView = CIGUIDEView::GetView();
 				pView->SendMessage(SCREEN_SELECTED);
 			}
 		}
