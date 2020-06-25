@@ -258,18 +258,24 @@ void Grid::calcPOIsize(float zoom) {
 
 void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom) {
 
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
 	calcPOIsize(zoom);
-	CD2DPointF pos(mousePos);
+
+	CD2DPointF loc = PixelToDegree(mousePos);
+	CD2DSizeF mouseDist = pView->getMouseDist();
+	
 
 	CD2DRectF rect{
-				pos.x - POISize.width / 2, pos.y - POISize.height / 2,
-				pos.x + POISize.width / 2, pos.y + POISize.height / 2
+				(float)(mouseDist.width + (zoom * loc.x * PPD - POISize.width / 2) + CANVAS / 2),
+				(float)(mouseDist.height + (zoom * loc.y * PPD - POISize.height / 2) + CANVAS / 2),
+				(float)(mouseDist.width + (zoom * loc.x * PPD + POISize.width / 2) + CANVAS / 2),
+				(float)(mouseDist.height + (zoom * loc.y * PPD + POISize.height / 2) + CANVAS / 2)
 	};
 
 	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
 
-	if (patchjobs.size() > 0)
-		return;
 
 	CString vidText;
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();

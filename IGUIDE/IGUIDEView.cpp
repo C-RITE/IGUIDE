@@ -159,7 +159,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	{	
 		// create patchjob
 		if (pDoc->m_pGrid->POI.size() > 0) {
-			pDoc->m_pGrid->makePOI(mousePos);
+			pDoc->m_pGrid->makePOI(point);
 			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
 
 			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT, pDoc->m_pGrid->jobIndex)) {
