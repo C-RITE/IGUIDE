@@ -576,64 +576,77 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		}
 
 		if (pMsg->message == WM_KEYDOWN) {
+			
+			Patch* p = NULL;
 
 			switch (pMsg->wParam) {
 
 			case VK_SPACE:
-				if (!pDoc->m_pGrid->patchlist.commit())
-					pDoc->m_pGrid->patchlist.revertLast();
-				else {
-					pDoc->m_pGrid->currentPatch._Ptr->_Myval.locked = true;
-					pDoc->m_pGrid->currentPatch._Ptr->_Myval.index = pDoc->m_pGrid->patchlist.back().index;
-					AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-					AfxGetMainWnd()->SendMessage(
-						PATCH_TO_REGIONPANE,
-						(WPARAM)&pDoc->m_pGrid->patchlist.back(),
-						(LPARAM)pDoc->m_pGrid->patchjobs.size());
+
+				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->patchlist.commit();
+
+				AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
+				AfxGetMainWnd()->SendMessage(
+					PATCH_TO_REGIONPANE,
+					(WPARAM)&pDoc->m_pGrid->patchlist.back(),
+					(LPARAM)pDoc->m_pGrid->patchjobs.size());
 					
-						Patch p = pDoc->m_pGrid->patchlist.back();
-						p.locked = false;
-						pDoc->m_pGrid->patchlist.push_back(p);
-						m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
-					
-				}
+				pDoc->m_pGrid->currentPatch->locked = false;
+				pDoc->m_pGrid->patchlist.push_back(*pDoc->m_pGrid->currentPatch);
+				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+
 				break;
 
 			case 'N':
 
-				if (pDoc->m_pGrid->patchjobs.size() > 0) {
+				if (pDoc->m_pGrid->currentPatch->region > 0) {
+					pDoc->m_pGrid->showCursor = false;
 					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->currentPatchJob);
 					if (p) {
 						if (p->locked)
 							p->visited = true;
 						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.push_back(*p);
-						int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
-						AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
-						delete p;
+						pDoc->m_pGrid->patchlist.pop_back();
+						if (pMsg->lParam != 1) {
+							int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
+							AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
+						}
+
 					}
+
+					delete p;
+
 				}
 				break;
 
 			case 'B':
-				if (pDoc->m_pGrid->patchjobs.size() > 0) {
+				
+				if (pDoc->m_pGrid->currentPatch->region > 0) {
+					pDoc->m_pGrid->showCursor = false;
 					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->currentPatchJob);
 					if (p) {
 						if (p->locked)
 							p->visited = true;
 						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.push_back(*p);
-						int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
-						AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
-						delete p;
+						pDoc->m_pGrid->patchlist.pop_back();
+						if (pMsg->lParam != 1) {
+							int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
+							AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
+						}
+
 					}
-					break;
+
+					delete p;
+
 				}
+
+				break;
 
 			}
 
 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
 			m_pDlgTarget->Invalidate();
+		
 		}
 
 		if (pMsg->message == WM_KEYUP) {
@@ -650,6 +663,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		}
 
 	}
+
 
 	// other keyboard controls
 

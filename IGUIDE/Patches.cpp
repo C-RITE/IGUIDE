@@ -23,25 +23,23 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
-bool Patches::commit() {
+Patches::iterator Patches::commit() {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString systime;
 	GetSysTime(systime);
-
-	if (this->back().locked == true)
-		return false;
 
 	this->back().locked = true;
 	this->back().timestamp = systime.GetString();
 	this->back().index = index++;
 	this->back().defocus = pDoc->getCurrentDefocus();
 
-	last = this->back();
-
 	cleanup();
+
+	this->push_back(this->back());
+	this->back().locked = false;
 	
-	return true;
+	return this->_Make_iter(std::prev(this->end()));
 
 }
 
@@ -83,21 +81,6 @@ int Patches::getProgress() {
 
 }
 
-void Patches::revertLast() {
-
-	this->push_back(last);
-	this->back().locked = false;
-
-}
-
-void Patches::delPatch() {
-
-	if (this->size() > 0) {
-		this->last = this->back();
-		this->pop_back();
-	}
-
-}
 
 void Patches::setOverlap(float overlap, float rsDeg) {
 

@@ -325,12 +325,12 @@ BOOL RegionTreeCtrl::PreTranslateMessage(MSG* pMsg)
             break;
 
         case 'N':
-            pView->PostMessage(WM_KEYDOWN, 'N', NULL);
+            pView->PostMessage(WM_KEYDOWN, 'N', 1);
             PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
             break;
 
         case 'B':
-            pView->PostMessage(WM_KEYDOWN, 'B', NULL);
+            pView->PostMessage(WM_KEYDOWN, 'B', 1);
             PostMessage(WM_KEYDOWN, VK_UP, NULL);
             break;
 

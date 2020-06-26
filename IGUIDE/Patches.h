@@ -31,23 +31,20 @@ public:
 	Patches();
 	CString			filename;
 	
-	bool			SaveToFile(CString directory);
-	bool			isFileTouched() { return fileTouched; };
-	bool			isFinished() { return finished; };
-	bool			commit();
-	bool			checkComplete();
-	int				getProgress();
-	void			revertLast();
-	void			delPatch();
-	void			untouch();
-	void			setOverlap(float overlap, float rsDeg);	
-	void			resetIndex();
+	bool				SaveToFile(CString directory);
+	bool				isFileTouched() { return fileTouched; };
+	bool				isFinished() { return finished; };
+	Patches::iterator	commit();
+	bool				checkComplete();
+	int					getProgress();
+	void				untouch();
+	void				setOverlap(float overlap, float rsDeg);	
+	void				resetIndex();
 
 private:
 	
 	CD2DSizeF		overlap;						
 	CString			timestamp;
-	Patch			last;
 	int				index;
 	bool			fileTouched;
 	bool			finished;

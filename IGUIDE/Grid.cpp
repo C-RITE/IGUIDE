@@ -327,6 +327,7 @@ void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
 Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator currentPatchJob) {
 
 	Patch* p = NULL;
+
 	if (currentPatchJob->empty())
 		return p;
 
@@ -372,6 +373,9 @@ Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator currentPatchJo
 
 
 int Grid::getCurrentPatchJobPos() {
+
+	if (currentPatch._Ptr == NULL );
+		return 0;
 
 	int index = 0;
 
