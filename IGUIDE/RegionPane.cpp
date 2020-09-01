@@ -129,7 +129,6 @@ void RegionPane::addPatch(Patch* p) {
 
 void RegionPane::select(int region, int index) {
 
-
     HTREEITEM regNode = regionNodes[region - 1];
     HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
 
@@ -174,21 +173,6 @@ void RegionPane::remove(int region)
 
 }
 
-void RegionPane::finish(int region)
-{
-    HTREEITEM regNode = regionNodes[region - 1];
-    HTREEITEM child = m_wndTree.GetChildItem(regNode);
-
-    while (child != NULL)
-    {
-        m_wndTree.SetItemColor(child, RGB(255, 255, 255));
-        child = m_wndTree.GetNextSiblingItem(child);
-    }
-
-    patchItem = -1;
-    patchOffset[region - 1] = 0;
-
-}
 
 void RegionPane::addRegion(int regCount)
 {

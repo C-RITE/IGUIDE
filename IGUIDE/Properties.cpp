@@ -57,8 +57,7 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create Properties Grid \n");
 		return -1;      // fail to create
 	}
-
-
+	
 	m_wndPropList.SetFont(&m_fntPropList);
 	InitPropList();
 	AdjustLayout();
@@ -99,7 +98,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	if (propName == L"Overlap") {
 		pDoc->m_Overlap = vt;
-		pDoc->m_pGrid->makePOI(pView->getMousePos());
+		pDoc->m_pGrid->makeRegion(pView->getMousePos());
 	}
 
 	if (propName == L"Scale") {
@@ -120,6 +119,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		CString folder = vt.bstrVal;
 		folder.Format(folder + "\\");
 		pDoc->m_OutputDir = folder;
+
 	}
 
 	if (propName == L"Screen") {

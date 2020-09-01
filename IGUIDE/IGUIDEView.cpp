@@ -156,30 +156,28 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{	
 		// create patchjob
-		if (pDoc->m_pGrid->POI.size() > 0) {
-			pDoc->m_pGrid->makePOI(point);
-			pDoc->m_pGrid->fillPatchJob(GetRenderTarget());
+		if (pDoc->m_pGrid->region.size() > 0) {
 
-			if (Patch* p = pDoc->m_pGrid->doPatchJob(INIT, pDoc->m_pGrid->currentPatchJob)) {
-				m_pDlgTarget->Pinpoint(*p);
-				pDoc->m_pGrid->patchlist.push_back(*p);
-				delete p;
-			}
-
+			pDoc->m_pGrid->makeRegion(point);
+			pDoc->m_pGrid->addRegion();
+			pDoc->m_pGrid->makeRegionRects();
+			pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->patchlist.begin();
+			
 		}
 
 		// add single patch
 		else {
 			pDoc->m_pGrid->addPatch(point);
-			if (pDoc->m_pGrid->currentPatchJob._Ptr != nullptr)
-				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->currentPatchJob->end();
- 			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+			pDoc->m_pGrid->currentPatch = std::prev(pDoc->m_pGrid->patchlist.end());
 		}
 
 	}
 
 	m_pDlgTarget->RedrawWindow();
 	RedrawWindow();
+
+	ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
 
 }
 
@@ -245,17 +243,15 @@ BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// TODO: Add your message handler code here and/or call default
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-
 	if (nFlags & MK_SHIFT) {
-		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 0, mousePos);
+		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 0, mousePos);
 	}
 	else if (GetKeyState('Y') & 0x8000) {
-		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 2, mousePos);
+		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 2, mousePos);
 	}
 	else if (GetKeyState('X') & 0x8000) {
-		pDoc->m_pGrid->controlPOI(zDelta / WHEEL_DELTA, 1, mousePos);
+		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 1, mousePos);
 	}
-
 	
 	else if ((zoom + zDelta / 100) >= 1) {
 
@@ -270,7 +266,6 @@ BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		translate = D2D1::Matrix3x2F::Translation(offset);
 
 	}
-
 
 	RedrawWindow();
 
@@ -463,7 +458,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pDoc->m_pGrid->DrawGrid(pRenderTarget);
 
 		// draw patchjob
-		pDoc->m_pGrid->DrawPatchJobs(pRenderTarget);
+		pDoc->m_pGrid->DrawRegions(pRenderTarget);
 
 		// draw extras (optic disc, crosshair, etc..)
 		pDoc->m_pGrid->DrawExtras(pRenderTarget);
@@ -478,11 +473,10 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
 		// draw cursor on mousepointer
-		if (pDoc->m_pGrid->POI.size() > 1)
-			pDoc->m_pGrid->DrawPOI(pRenderTarget, mousePos, zoom);
+		if (pDoc->m_pGrid->region.size() > 1)
+			pDoc->m_pGrid->DrawRegion(pRenderTarget, mousePos, zoom);
 		else
 			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mousePos, zoom);
-
 
 		// draw debug info
 #ifdef DEBUG
@@ -518,156 +512,36 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	// keyboard controls depending on drawn patches
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	if (pDoc->m_pGrid->patchlist.size() > 0)
-	{
+	if (pMsg->message == WM_KEYDOWN) {
 
-		// delete last patch with right mouse button
+		// move patch in any direction unless locked
+		if ((pDoc->m_pGrid->patchlist.size() > 0) && !pDoc->m_pGrid->currentPatch->locked) {
 
-		//if (pMsg->wParam == VK_RBUTTON) {
-
-		//	if (pMsg->message == WM_MOUSEMOVE)
-		//		return CView::PreTranslateMessage(pMsg);
-
-		//	if (pDoc->m_pGrid->patchlist.back().locked == false) {
-		//		pDoc->m_pGrid->patchlist.delPatch();
-		//	}
-
-		//	if (pDoc->m_pGrid->patchlist.size() > 0) {
-		//		Patch p = pDoc->m_pGrid->patchlist.back();
-		//		m_pDlgTarget->Pinpoint(p);
-		//	}
-		//	else
-		//		m_pDlgTarget->m_POI = NULL;
-
-		//	m_pDlgTarget->Invalidate();
-		//	this->Invalidate();
-
-		//}
-
-		// move patch in any direction and lock with space key
-		Patch* p = NULL;
-
-		if (pMsg->message == WM_KEYDOWN && !pDoc->m_pGrid->patchlist.back().locked) {
-					
 			switch (pMsg->wParam) {
 
 			case VK_UP:
-				pDoc->m_pGrid->patchlist.back().coordsDEG.y -= .1f;
-				pDoc->m_pGrid->patchlist.back().coordsPX.y -= .1f * PPD;
+				pDoc->m_pGrid->currentPatch->coordsDEG.y -= .1f;
+				pDoc->m_pGrid->currentPatch->coordsPX.y -= .1f * PPD;
 				break;
 
 			case VK_DOWN:
-				pDoc->m_pGrid->patchlist.back().coordsDEG.y += .1f;
-				pDoc->m_pGrid->patchlist.back().coordsPX.y += .1f * PPD;
+				pDoc->m_pGrid->currentPatch->coordsDEG.y += .1f;
+				pDoc->m_pGrid->currentPatch->coordsPX.y += .1f * PPD;
 				break;
 
 			case VK_LEFT:
-				pDoc->m_pGrid->patchlist.back().coordsDEG.x -= .1f;
-				pDoc->m_pGrid->patchlist.back().coordsPX.x -= .1f * PPD;
+				pDoc->m_pGrid->currentPatch->coordsDEG.x -= .1f;
+				pDoc->m_pGrid->currentPatch->coordsPX.x -= .1f * PPD;
 				break;
 
 			case VK_RIGHT:
-				pDoc->m_pGrid->patchlist.back().coordsDEG.x += .1f;
-				pDoc->m_pGrid->patchlist.back().coordsPX.x += .1f * PPD;
+				pDoc->m_pGrid->currentPatch->coordsDEG.x += .1f;
+				pDoc->m_pGrid->currentPatch->coordsPX.x += .1f * PPD;
 				break;
-
 			}
 
 		}
 
-		if (pMsg->message == WM_KEYDOWN) {
-			
-			Patch* p = NULL;
-
-			switch (pMsg->wParam) {
-
-			case VK_SPACE:
-
-				pDoc->m_pGrid->currentPatch = pDoc->m_pGrid->patchlist.commit();
-
-				AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-				AfxGetMainWnd()->SendMessage(
-					PATCH_TO_REGIONPANE,
-					(WPARAM)&pDoc->m_pGrid->patchlist.back(),
-					(LPARAM)pDoc->m_pGrid->patchjobs.size());
-					
-				pDoc->m_pGrid->currentPatch->locked = false;
-				pDoc->m_pGrid->patchlist.push_back(*pDoc->m_pGrid->currentPatch);
-				m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
-
-				break;
-
-			case 'N':
-
-				if (pDoc->m_pGrid->currentPatch->region > 0) {
-					pDoc->m_pGrid->showCursor = false;
-					p = pDoc->m_pGrid->doPatchJob(NEXT, pDoc->m_pGrid->currentPatchJob);
-					if (p) {
-						if (p->locked)
-							p->visited = true;
-						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.pop_back();
-						if (pMsg->lParam != 1) {
-							int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
-							AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
-						}
-
-					}
-
-					delete p;
-
-				}
-				break;
-
-			case 'B':
-				
-				if (pDoc->m_pGrid->currentPatch->region > 0) {
-					pDoc->m_pGrid->showCursor = false;
-					p = pDoc->m_pGrid->doPatchJob(PREV, pDoc->m_pGrid->currentPatchJob);
-					if (p) {
-						if (p->locked)
-							p->visited = true;
-						m_pDlgTarget->Pinpoint(*p);
-						pDoc->m_pGrid->patchlist.pop_back();
-						if (pMsg->lParam != 1) {
-							int index = std::distance(pDoc->m_pGrid->currentPatchJob->begin(), pDoc->m_pGrid->currentPatch);
-							AfxGetMainWnd()->SendMessage(BROWSE_PATCH, p->region, index);
-						}
-
-					}
-
-					delete p;
-
-				}
-
-				break;
-
-			}
-
-			m_pDlgTarget->Pinpoint(pDoc->m_pGrid->patchlist.back());
-			m_pDlgTarget->Invalidate();
-		
-		}
-
-		if (pMsg->message == WM_KEYUP) {
-
-			switch (pMsg->wParam)
-			{
-			case VK_SPACE:
-				if (pDoc->m_pGrid->currentPatchJob._Ptr && pDoc->m_pGrid->currentPatchJob->checkComplete()) {
-					int region = pDoc->m_pGrid->currentPatchJob->back().region;
-					AfxGetMainWnd()->SendMessage(FINISH_PATCHJOB, region, NULL);
-				}
-			}
-
-		}
-
-	}
-
-
-	// other keyboard controls
-
-	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
 
 		case VK_F1:
@@ -689,6 +563,47 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			}
 			break;
 
+		case VK_SPACE:
+
+			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
+
+			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
+			AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE,
+				(WPARAM)&pDoc->m_pGrid->patchlist.back(),
+				(LPARAM)pDoc->m_pGrid->currentPatch->region);
+
+			break;
+
+		case 'N':
+
+			pDoc->m_pGrid->showCursor = false;
+			pDoc->m_pGrid->browse(NEXT);
+
+			if (pMsg->lParam != 1) {					// prevent 'double-N' processing
+				AfxGetMainWnd()->SendMessage(BROWSE_PATCH,
+					pDoc->m_pGrid->currentPatch->region,
+					std::distance(pDoc->m_pGrid->patchlist.begin(), pDoc->m_pGrid->currentPatch));
+			}
+
+			break;
+
+		case 'B':
+
+			pDoc->m_pGrid->showCursor = false;
+			pDoc->m_pGrid->browse(PREV);
+
+			if (pMsg->lParam != 1) {					// prevent 'double-B' processing
+				AfxGetMainWnd()->SendMessage(BROWSE_PATCH,
+					pDoc->m_pGrid->currentPatch->region,
+					std::distance(pDoc->m_pGrid->patchlist.begin(), pDoc->m_pGrid->currentPatch));
+			}
+			
+			break;
+			
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+			m_pDlgTarget->Invalidate();
+
+			ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
 		}
 
 	}

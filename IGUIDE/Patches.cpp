@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Patches::Patches() : filename(L"IGUIDE.csv"), fileTouched(false), finished(false), index(1)
+Patches::Patches() : filename(L"IGUIDE.csv"), fileTouched(false), index(1)
 {
 }
 
@@ -23,58 +23,30 @@ void Patches::GetSysTime(CString &buf) {
 
 }
 
-Patches::iterator Patches::commit() {
+void Patches::commit(Patches::iterator &patch) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CString systime;
 	GetSysTime(systime);
 
-	this->back().locked = true;
-	this->back().timestamp = systime.GetString();
-	this->back().index = index++;
-	this->back().defocus = pDoc->getCurrentDefocus();
-
-	cleanup();
-
-	this->push_back(this->back());
-	this->back().locked = false;
+	Patch p = *patch;
+	p.locked = true;
+	p.timestamp = systime.GetString();
+	p.index = index++;
+	p.defocus = pDoc->getCurrentDefocus();
 	
-	return this->_Make_iter(std::prev(this->end()));
-
 }
 
-void Patches::resetIndex() {
-
-	index = this->size();
-
-}
-
-bool Patches::checkComplete() {
-
-	// Check if all patches are commited (i.e. locked)
-	finished = false;
-	int locked = 0;
-
-	for (auto it = this->begin(); it != this->end(); it++) {
-		if (it->locked == true)
-			locked++;
-	}
-	
-	if (locked == this->size() && this->size() > 0) {
-		finished = true;
-	}
-
-	return finished;
-
-}
-
-int Patches::getProgress() {
+int Patches::getProgress(int region, int &size) {
 	
 	int progress = 0;
-
+	
 	for (auto it = this->begin(); it != this->end(); it++) {
-		if (it->locked == true)
-			progress++;
+		if (it->region == region) {
+			if (it->locked == true)
+				progress++;
+			size++;
+		}
 	}
 
 	return progress;
@@ -84,7 +56,7 @@ int Patches::getProgress() {
 
 void Patches::setOverlap(float overlap, float rsDeg) {
 
-	CD2DPointF mid; // middle of POI matrix
+	CD2DPointF mid; // middle of region matrix
 
 	float dxf, dyf;
 
@@ -104,8 +76,8 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 	for (auto it = this->begin(); it != this->end(); it++) {
 		dxf = mid.x - it->coordsPX.x;
 		dyf = mid.y - it->coordsPX.y;
-		it._Ptr->_Myval.coordsPX.x += dxf * (overlap / 100);
-		it._Ptr->_Myval.coordsPX.y += dyf * (overlap / 100);
+		it._Ptr->coordsPX.x += dxf * (overlap / 100);
+		it._Ptr->coordsPX.y += dyf * (overlap / 100);
 	}
 
 }
@@ -118,16 +90,6 @@ void Patches::untouch() {
 
 }
 
-void Patches::cleanup() {
-
-	for (auto it = this->begin(); it != this->end();) {
-		if (!it->locked)	
-			it = erase(it);
-		else
-			it++;
-	}
-
-}
 
 bool Patches::SaveToFile(CString directory) {
 
@@ -140,9 +102,9 @@ bool Patches::SaveToFile(CString directory) {
 		if (it->locked) {
 
 			strNumber.Format(_T("%.3d"), it->index);
-			strDegX.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.x);
-			strDegY.Format(_T("%.2f"), it._Ptr->_Myval.coordsDEG.y);
-			strDefocus.Format(_T("%s"), it._Ptr->_Myval.defocus);
+			strDegX.Format(_T("%.2f"), it._Ptr->coordsDEG.x);
+			strDegY.Format(_T("%.2f"), it._Ptr->coordsDEG.y);
+			strDefocus.Format(_T("%s"), it._Ptr->defocus);
 
 			sstream
 				<< it->timestamp.GetString()

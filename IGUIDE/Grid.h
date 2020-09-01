@@ -40,6 +40,8 @@ private:
 	D2D1_LAYER_PARAMETERS	lpHi;
 	D2D1_LAYER_PARAMETERS	lpLo;
 
+	int regionCount;
+	
 public:
 
 	Grid();
@@ -51,34 +53,33 @@ public:
 
 public:
 
-	CD2DSizeF				POISize;						// actual POI dimensions with chosen patch overlap
+	CD2DSizeF				regionSize;						// actual region dimensions with chosen patch overlap
 	SIZE					wheelNotch;						// current wheel location in x and y axis
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
+	Patches					region;							// storage for patches spanning a region
+	std::vector<CD2DRectF>	regRects;
 	Patches::iterator		currentPatch;					// current patch
-	Patches					POI;							// storage matrix for patches spanning a POI
-	std::vector<Patches>	patchjobs;						// container for patch matrices
-	std::vector<Patches>::iterator	
-							currentPatchJob;				// job index
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
+	CD2DRectF				regionRect;						// current patchjob outline
 	CD2DPathGeometry*		m_pGridGeom;					// the grid
-	CD2DPathGeometry*		m_pPatchJobGeom;				// the patchjob geometry
+	CD2DPathGeometry*		m_pRegionGeom;					// the patchjob geometry
 	
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
 
 	void clearPatchlist();
 	void addPatch(CPoint point);							// store single patch in patchlist
-	void controlPOI(int notch, int dim, CPoint point);		// set POI dimensions
-	void makePOI(CPoint point);								// create a patchlist around mousepointer
-	void fillPatchJob(CHwndRenderTarget* pRenderTarget);	// fill patch queue to process a POI
-	void calcPOIsize(float zoom);							// calculate real POI size
-	Patch* doPatchJob(Element e, std::vector<Patches>::iterator);
+	void addRegion();										// add region to patchlist and pane
+	void controlRegion(int notch, int dim, CPoint point);	// set region dimensions
+	void makeRegion(CPoint point);							// create a patchlist around mousepointer
+	void makeRegionRects();									// set borders of region
+	void calcRegionSize(float zoom);						// calculate real region size
+	void browse(Element e);
 															// process patch queue
 	Patch getPatch(int index);								// get patch by index
-	void selectPatch(int region, int index);				// set current patch
-	int getCurrentPatchJobPos();							// get current position in patchjob
+	void selectPatch(int region, int index);				// select current patch from region pane
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);								// construct the grid
@@ -86,10 +87,10 @@ public:
 	void DrawGrid(CHwndRenderTarget* pRenderTarget);										// draw grid overlay
 	void DrawCircles(CHwndRenderTarget* pRenderTarget);										// draw circles around center
 	void DrawPatches(CHwndRenderTarget* pRenderTarget);										// draw patches
-	void DrawPatchJobs(CHwndRenderTarget* pRenderTarget);									// draw POI matrix
+	void DrawRegions(CHwndRenderTarget* pRenderTarget);										// draw region matrix
 	void DrawDebug(CHwndRenderTarget* pRenderTarget);										// draw debug info
 	void DrawLocation(CHwndRenderTarget* pRenderTarget);									// draw coordinates and defocus of cursor
-	void DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom);			// draw point of interest
+	void DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom);			// draw region
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);									// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);					// draw target
 	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom);		// draw patch outline around mouse pointer

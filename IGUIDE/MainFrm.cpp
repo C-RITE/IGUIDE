@@ -35,7 +35,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
 	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
-	ON_MESSAGE(FINISH_PATCHJOB, &CMainFrame::OnFinishPatchjob)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
@@ -422,21 +421,21 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-
 afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 {
 	int regCount = (int)lParam;
+
 	if (regCount > m_RegionPane.getRegionSize()) {
 		m_RegionPane.addRegion(regCount);
 		m_RegionPane.patchItem = -1;
 	}
+
 	Patch* p = (Patch*)wParam;
-	m_RegionPane.addPatch(p);
+ 	m_RegionPane.addPatch(p);
 	
 	return 0;
 
 }
-
 
 afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
 {
@@ -446,36 +445,26 @@ afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-afx_msg LRESULT CMainFrame::OnFinishPatchjob(WPARAM wParam, LPARAM lParam)
-{
-	int region = (int)wParam;
-	m_RegionPane.finish(region);
-
-	return 0;
-
-}
-
-
 afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 {
-	int region = (int)wParam;
 	int index = (int)lParam;
+	int region = (int)wParam;
 
 	m_pDoc->m_pGrid->selectPatch(region, index);
 
 	m_RegionPane.patchItem = index - 1;
 
+	ATLTRACE(_T("patchselect: index[%d]\n"), index);
+
 	return 0;
 
 }
-
 
 afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
 {
 	m_RegionPane.clear();
 	return 0;
 }
-
 
 afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
 {

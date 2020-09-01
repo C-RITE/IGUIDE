@@ -33,6 +33,7 @@ protected:
 
 	int selItemIndex;				// item index of current selection
 	int selItemRegion;				// selected item's parent
+	BOOL click;
 
 public:
 
@@ -48,4 +49,5 @@ public:
 	afx_msg void OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
 	void getCurrentSelection(int& region, int& index);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnNMClick(NMHDR *pNMHDR, LRESULT *pResult);
 };

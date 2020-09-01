@@ -1,5 +1,5 @@
 #pragma once
-#include <list>
+#include <vector>
 
 struct Patch {
 
@@ -15,31 +15,30 @@ struct Patch {
 	int				region;
 	CString			defocus;
 
+	bool operator==(Patch right) const {
+		return true;
+	}
 };
 
 enum Element
 {
-	INIT = 0,
 	NEXT = 1,
 	PREV = 2
 };
 
-class Patches : public std::list<Patch>
+class Patches : public std::vector<Patch>
 {
 
 public:
 	Patches();
-	CString			filename;
+	CString				filename;
 	
 	bool				SaveToFile(CString directory);
 	bool				isFileTouched() { return fileTouched; };
-	bool				isFinished() { return finished; };
-	Patches::iterator	commit();
-	bool				checkComplete();
-	int					getProgress();
+	void				commit(Patches::iterator &patch);
+	int					getProgress(int region, int &size);
 	void				untouch();
 	void				setOverlap(float overlap, float rsDeg);	
-	void				resetIndex();
 
 private:
 	
@@ -47,8 +46,6 @@ private:
 	CString			timestamp;
 	int				index;
 	bool			fileTouched;
-	bool			finished;
 	void			GetSysTime(CString &buf);
-	void			cleanup();
 
 };

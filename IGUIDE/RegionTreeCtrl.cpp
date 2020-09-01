@@ -16,6 +16,7 @@ RegionTreeCtrl::RegionTreeCtrl()
     crTextWhite = RGB(255, 255, 255);
     crBkgrnd = RGB(50, 50, 50);
     brBkGnd = CreateSolidBrush(RGB(50, 50, 50));
+	click = false;
 }
 
 RegionTreeCtrl::~RegionTreeCtrl()
@@ -30,6 +31,7 @@ BEGIN_MESSAGE_MAP(RegionTreeCtrl, CTreeCtrl)
     ON_WM_CTLCOLOR_REFLECT()
     ON_WM_PAINT()
     ON_NOTIFY_REFLECT(TVN_SELCHANGED, &RegionTreeCtrl::OnTvnSelchanged)
+	ON_NOTIFY_REFLECT(NM_CLICK, &RegionTreeCtrl::OnNMClick)
 END_MESSAGE_MAP()
 
 void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
@@ -58,6 +60,10 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 
 void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
+
+	if (!click)
+		return;
+
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
@@ -98,14 +104,27 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 
 	}
 
-	CString text = GetItemText(parent);
-	text = text.Mid(8);
-	region = _ttoi(text);
+	CString regionStr = GetItemText(parent);
+	regionStr = regionStr.Mid(8);
+	region = _ttoi(regionStr);
 
-	selItemIndex = index;
+
+	CString indexStr = GetItemText(selected);
+	indexStr = indexStr.TrimLeft(L"P");
+	int divider = indexStr.Find(L":", 0);
+	indexStr = indexStr.Left(divider);
+	int indexPatch = _ttoi(indexStr);
+
+	if (indexPatch == 0)
+		selItemIndex = index;
+	else
+		index = indexPatch;
+
 	selItemRegion = region;
 
 	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);
+
+	click = false;
 
 }
 
@@ -341,4 +360,12 @@ BOOL RegionTreeCtrl::PreTranslateMessage(MSG* pMsg)
     return CTreeCtrl::PreTranslateMessage(pMsg);
 
 
+}
+
+
+void RegionTreeCtrl::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+	click = TRUE;
 }

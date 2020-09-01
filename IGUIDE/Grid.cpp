@@ -13,7 +13,8 @@ Grid::Grid() : currentPatch(patchlist.end()) {
 
 	isPanning = false;
 	wheelNotch = { 1, 1 };
-	POISize = { 0 , 0 };
+	regionSize = { 0 , 0 };
+	regionCount = 1;
 }
 
 Grid::~Grid() {
@@ -39,51 +40,24 @@ Patch Grid::getPatch(int index) {
 
 void Grid::selectPatch(int region, int index) {
 	
-		Patches::iterator patch;
+	Patches::iterator patch;
 
-	if (region == 0) {
-		
-		int i = 1;
-		patch = patchlist.begin();
+	patch = patchlist.begin();
 
-		while (patch->index != index) {
-			patch = std::next(patch);
-			i++;
-		}
-
-		currentPatch = patch;
-
+	while (patch->region < region) {
+		patch = std::next(patch);
 	}
 
-	else
+	for (int i = 1; i < index; i++)
+		patch = std::next(patch);
 
-	{
-		auto reg = patchjobs.begin();
-
-		for (int i = 1; i < region; i++) {
-			reg = std::next(reg);
-		}
-
-		currentPatchJob = reg;
-
-		int i = 1;
-		patch = currentPatchJob->begin();
-
-		while (i < index) {
-			patch = std::next(patch);
-			i++;
-		}
-
-		currentPatch = patch;
-
-	}
+	currentPatch = patch;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	pView->m_pDlgTarget->Pinpoint(*currentPatch);
-	pDoc->m_pGrid->patchlist.push_back(*currentPatch);
-
+	
 	pDoc->UpdateAllViews(NULL);
 
 }
@@ -95,6 +69,7 @@ void Grid::addPatch(CPoint loc) {
 	CD2DPointF posDeg(PixelToDegree(loc));
 
 	// single location
+
 	Patch p;
 	p.coordsDEG.x = posDeg.x;
 	p.coordsPX.x = loc.x;
@@ -108,6 +83,8 @@ void Grid::addPatch(CPoint loc) {
 	p.visited = false;
 	p.defocus = L"0";
 	patchlist.push_back(p);
+
+	currentPatch = std::prev(patchlist.end());
 
 }
 
@@ -137,9 +114,9 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 }
 
 
-void Grid::controlPOI(int notch, int dim, CPoint point) {
+void Grid::controlRegion(int notch, int dim, CPoint point) {
 
-	// mousewheel interface for POI sizing
+	// mousewheel interface for region sizing
 
 	switch (dim){
 
@@ -167,23 +144,24 @@ void Grid::controlPOI(int notch, int dim, CPoint point) {
 
 
 	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
-		makePOI(point);
+		makeRegion(point);
 	else {
-		POI.clear();
+		region.clear();
 	}
 
 }
 
-void Grid::makePOI(CPoint loc) {
 
-	// create a POI and add overlap
+void Grid::makeRegion(CPoint loc) {
+
+	// create a region and add overlap
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CD2DPointF posDeg(PixelToDegree(loc));
 
-	POI.clear();
+	region.clear();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	float zoom = 1 / pView->getZoomFactor();
@@ -202,7 +180,7 @@ void Grid::makePOI(CPoint loc) {
 		p.locked = false;
 		p.visited = false;
 		p.defocus = L"0";
-		POI.push_back(p);
+		region.push_back(p);
 
 	}
 
@@ -225,38 +203,39 @@ void Grid::makePOI(CPoint loc) {
 				p.locked = false;
 				p.visited = false;
 				p.defocus = L"0";
-				p.region = patchjobs.size();
-				POI.push_back(p);
+				p.region = region.size();
+				region.push_back(p);
 
 			}
 
 		}
 
 		// add overlap
-		POI.setOverlap(pDoc->m_Overlap, rsDeg);
+		region.setOverlap(pDoc->m_Overlap, rsDeg);
+
 	}
 
 }
 
-void Grid::calcPOIsize(float zoom) {
+void Grid::calcRegionSize(float zoom) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	
-	// take last and first patch in list to define size of POI
-	POISize = {
-	(POI.back().coordsPX.x + rsDeg / 2 * PPD) - (POI.front().coordsPX.x - rsDeg / 2 * PPD),
-	(POI.back().coordsPX.y + rsDeg / 2 * PPD) - (POI.front().coordsPX.y - rsDeg / 2 * PPD)
+	// take last and first patch in list to define size of region
+	regionSize = {
+	(region.back().coordsPX.x + rsDeg / 2 * PPD) - (region.front().coordsPX.x - rsDeg / 2 * PPD),
+	(region.back().coordsPX.y + rsDeg / 2 * PPD) - (region.front().coordsPX.y - rsDeg / 2 * PPD)
 	};
 
 	// apply zoom
-	POISize.width *= zoom;
-	POISize.height *= zoom;
+	regionSize.width *= zoom;
+	regionSize.height *= zoom;
 
 }
 
-void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom) {
+void Grid::DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom) {
 
 	if (!showCursor)
 		return;
@@ -264,21 +243,20 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	calcPOIsize(zoom);
+	calcRegionSize(zoom);
 
 	CD2DPointF loc = PixelToDegree(mousePos);
 	CD2DSizeF mouseDist = pView->getMouseDist();
 	
 
 	CD2DRectF rect{
-				(float)(mouseDist.width + (zoom * loc.x * PPD - POISize.width / 2) + CANVAS / 2),
-				(float)(mouseDist.height + (zoom * loc.y * PPD - POISize.height / 2) + CANVAS / 2),
-				(float)(mouseDist.width + (zoom * loc.x * PPD + POISize.width / 2) + CANVAS / 2),
-				(float)(mouseDist.height + (zoom * loc.y * PPD + POISize.height / 2) + CANVAS / 2)
+				(float)(mouseDist.width + (zoom * loc.x * PPD - regionSize.width / 2) + CANVAS / 2),
+				(float)(mouseDist.height + (zoom * loc.y * PPD - regionSize.height / 2) + CANVAS / 2),
+				(float)(mouseDist.width + (zoom * loc.x * PPD + regionSize.width / 2) + CANVAS / 2),
+				(float)(mouseDist.height + (zoom * loc.y * PPD + regionSize.height / 2) + CANVAS / 2)
 	};
 
 	pRenderTarget->DrawRectangle(rect, m_pWhiteBrush);
-
 
 	CString vidText;
 	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
@@ -288,7 +266,7 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 		_T("Consolas"),								// font family name
 		sizeDpi.height / 9);						// font size
 
-	vidText.Format(L"%d", POI.size());
+	vidText.Format(L"%d", region.size());
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		vidText,									// text to be drawn
 		textFormat,									// text format
@@ -301,90 +279,100 @@ void Grid::DrawPOI(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom
 
 }
 
-void Grid::fillPatchJob(CHwndRenderTarget* pRenderTarget) {
+void Grid::addRegion() {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-	Patches patchjob;
 
-	for (auto it = POI.begin(); it != POI.end(); it++) {
-		it->region = patchjobs.size() + 1;
+	for (auto it = region.begin(); it != region.end(); it++) {
+		it->region = regionCount;
 		it->index = -1;								// yet unknown at this point, thus -1
-		patchjob.push_back(*it);
+		patchlist.push_back(*it);
 
 		AfxGetMainWnd()->SendMessage(
 			PATCH_TO_REGIONPANE,
-			(WPARAM)&patchjob.back(),
+			(WPARAM)&patchlist.back(),
 			(LPARAM)it->region);
 	}
 
-	patchjobs.push_back(patchjob);
-	currentPatchJob = std::prev(patchjobs.end());
+	regionCount++;
 
 }
 
-Patch* Grid::doPatchJob(Element e, std::vector<Patches>::iterator currentPatchJob) {
+void Grid::makeRegionRects() {
 
-	Patch* p = NULL;
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
-	if (currentPatchJob->empty())
-		return p;
+	Patches region;
+	vector<Patches> regions;
+	int reg;
 
-		if (!currentPatchJob->checkComplete()) {
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++ ) {
 
-			switch (e) {
+		reg = it->region;
+		region.push_back(*it);
 
-			case INIT:
-				currentPatch = currentPatchJob->begin();
-				p = new Patch(*currentPatch);
+		while (std::next(it)->region == reg) {
+			it++;
+			if (std::next(it) == patchlist.end())
 				break;
+		}
+		
+		region.push_back(*it);
 
-			case NEXT:
-				if (currentPatch != currentPatchJob->end()) {
-					currentPatch++;
-					if (currentPatch != currentPatchJob->end())
-						p = new Patch(*currentPatch);
-					else
-						currentPatch--;
-				}
-				break;
+		regions.push_back(region);
 
-			case PREV:
-				if (currentPatch != currentPatchJob->begin()) {
-					currentPatch--;
-					p = new Patch(*currentPatch);
-				}
-				break;
+		region.clear();
 
-			}
+	};
 
-			// send information where to put next patch in tree
-			AfxGetMainWnd()->SendMessage(
-				UPDATE_REGIONPANE,
-				(WPARAM)getCurrentPatchJobPos(),
-				NULL);
+	CD2DRectF rect;
 
+	for (auto it = regions.begin(); it != regions.end(); it++) {
+
+		rect = {
+
+				(float)(it->front().coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(it->front().coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(it->back().coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
+				(float)(it->back().coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
+
+		};
+
+		regRects.push_back(rect);
+
+	}
+
+}
+
+void Grid::browse(Element e) {
+
+	switch (e) {
+
+	case NEXT:
+		if (std::next(currentPatch) != patchlist.end()) {
+			currentPatch++;
 		}
 
-	return p;
+		break;
+
+	case PREV:
+		if (currentPatch != patchlist.begin()) {
+			currentPatch--;
+		}
+		break;
+
+	}
+
+	// send information where to put next patch in tree
+	AfxGetMainWnd()->SendMessage(
+		UPDATE_REGIONPANE,
+		(WPARAM)currentPatch->index,
+		NULL);
 
 }
-
-
-int Grid::getCurrentPatchJobPos() {
-
-	if (currentPatch._Ptr == NULL );
-		return 0;
-
-	int index = 0;
-
-	index = std::distance(currentPatchJob->begin(), currentPatch);
-
-	return index;
-
-}
-
 
 void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
@@ -404,7 +392,7 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 	m_pLayer1 = new CD2DLayer(pRenderTarget);	// opacity layer parameters
 	m_pGridGeom = NULL;
-	m_pPatchJobGeom = NULL;
+	m_pRegionGeom = NULL;
 
 	showCoords = true;
 	showCursor = true;
@@ -435,69 +423,59 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 }
 
-void Grid::DrawPatchJobs(CHwndRenderTarget* pRenderTarget) {
+void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 
-	if (patchjobs.size() > 0) {
 
-		CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-		float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-		CD2DBrush* pBrush = NULL;
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
-		for (auto it = patchjobs.begin(); it != patchjobs.end(); it++) {
+	CD2DBrush* pBrush = NULL;
+	pBrush = m_pWhiteBrush;
 
-			CD2DRectF rect1 = {
-
-					(float)(it->front().coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-					(float)(it->front().coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
-					(float)(it->back().coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
-					(float)(it->back().coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
-
-			};
-
-			if (it == currentPatchJob)
-				pBrush = m_pDarkGreenBrush;
-			else
-				pBrush = m_pWhiteBrush;
-
-			// make green border around patchjob area
-			pRenderTarget->DrawRectangle(
-				rect1,
+	for (auto it = regRects.begin(); it != regRects.end(); it++) {
+		if (it == std::prev(regRects.end()))
+			pBrush = m_pDarkGreenBrush;
+		
+		pRenderTarget->DrawRectangle(
+				*it,
 				pBrush,
 				.2f);
 
-			// show progress on right bottom
+		// show progress on right bottom
 
-			CIGUIDEView* pView = CIGUIDEView::GetView();
-			float zoom = pView->getZoomFactor();
+		CIGUIDEView* pView = CIGUIDEView::GetView();
+		float zoom = pView->getZoomFactor();
 
-			CD2DRectF rect2;
-			CD2DPointF p{ rect1.right, rect1.bottom };
-			rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
-			pRenderTarget->DrawRectangle(
-				rect2,
-				pBrush,
-				.2f);
+		CD2DRectF rect2;
+		CD2DPointF p{ it->right, it->bottom };
+		rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
+		pRenderTarget->DrawRectangle(
+			rect2,
+			pBrush,
+			.2f);
 
-			CString vidText;
-			CD2DSizeF sizeTarget = { rect2.right - rect2.left, rect2.bottom - rect2.top };
-			CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+		CString vidText;
+		CD2DSizeF sizeTarget = { rect2.right - rect2.left, rect2.bottom - rect2.top };
+		CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 
-			CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-				_T("Consolas"),								// font family name
-				2.5f);										// font size
+		CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+			_T("Consolas"),								// font family name
+			2.5f);										// font size
 
-			vidText.Format(L"%d/%d", it->getProgress(), it->size());
-			CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-				vidText,									// text to be drawn
-				textFormat,									// text format
-				sizeTarget);								// size of the layout box
+		int reg = std::distance(regRects.begin(), it);
+		int sze = 0;
 
-			pRenderTarget->DrawTextLayout(
-				CD2DPointF(rect2.left, rect2.top),
-				&textLayout,
-				m_pWhiteBrush);
+		vidText.Format(L"%d/%d", patchlist.getProgress(reg, sze), sze);
 
-		}
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			vidText,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
+
+		pRenderTarget->DrawTextLayout(
+			CD2DPointF(rect2.left, rect2.top),
+			&textLayout,
+			m_pWhiteBrush);
 
 	}
 
@@ -667,7 +645,7 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CD2DRectF rect1;
-	CD2DRectF lastPatch;
+	CD2DRectF curPatch;
 	CRect intersect;
 
 	float rsdeg; // raster size in degree visual angle
@@ -678,21 +656,21 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		if (it == patchlist.end())
 			break;
 
-		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->_Myval.rastersize;
+		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->rastersize;
 
 		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
 
 		rect1 = {
 
-			(float)(it._Ptr->_Myval.coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->_Myval.coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(it._Ptr->coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
-		m_pPatchBrush->SetColor(it._Ptr->_Myval.color);
-		if (it._Ptr->_Myval.locked && !it._Ptr->_Myval.visited)
+		m_pPatchBrush->SetColor(it._Ptr->color);
+		if (it._Ptr->locked && !it._Ptr->visited)
 			pRenderTarget->FillRectangle(rect1, m_pPatchBrush);
 		pRenderTarget->PopLayer();
 
@@ -700,22 +678,22 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 	if (patchlist.size() > 0) {
 
-		rsdeg = (float)pDoc->m_raster.videodim / patchlist.back().rastersize;
+		rsdeg = (float)pDoc->m_raster.videodim / currentPatch->rastersize;
 
 		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
 
-		lastPatch = {
+		curPatch = {
 
-			(float)(patchlist.back().coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(patchlist.back().coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(currentPatch->coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(currentPatch->coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(currentPatch->coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
+			(float)(currentPatch->coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
 
 		};
 
-		pRenderTarget->DrawRectangle(rect1, m_pDarkGreenBrush, .3f);
+		pRenderTarget->DrawRectangle(curPatch, m_pDarkGreenBrush, .3f);
 
-		CD2DEllipse center(&rect1);
+		CD2DEllipse center(&curPatch);
 		center.radiusX = center.radiusY = .5;
 
 		pRenderTarget->DrawEllipse(center, m_pWhiteBrush, .1f);
@@ -734,20 +712,20 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 			pRenderTarget->PushLayer(lpLo, *m_pLayer1);
 
-			lastPatch = {
+			curPatch = {
 
-				(float)((mouseDist.width + (zoom * patchlist.back().coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
-				(float)((mouseDist.height + (zoom * patchlist.back().coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
-				(float)((mouseDist.width + (zoom * patchlist.back().coordsDEG.x * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
-				(float)((mouseDist.height + (zoom * patchlist.back().coordsDEG.y * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2)
+				(float)((mouseDist.width + (zoom * currentPatch->coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * currentPatch->coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.width + (zoom * currentPatch->coordsDEG.x * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2),
+				(float)((mouseDist.height + (zoom * currentPatch->coordsDEG.y * PPD) + (zoom * rsdeg / 2 * PPD)) + CANVAS / 2)
 
 			};
 
-			if (patchlist.back().locked == false)
+			if (currentPatch->locked == false)
 				DrawCoordinates(
 					pRenderTarget,
-					patchlist.back().coordsDEG,
-					lastPatch);
+					currentPatch->coordsDEG,
+					curPatch);
 
 			pRenderTarget->PopLayer();
 
@@ -761,17 +739,17 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 
 				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
 
-					rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->_Myval.rastersize; // raster size in degree visual angle
+					rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->rastersize; // raster size in degree visual angle
 
-						if (it._Ptr->_Myval.locked == true) {
+						if (it._Ptr->locked == true) {
 
-							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->_Myval.coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
-							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->_Myval.coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
+							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
 
 							DrawVidIndex(
 								pRenderTarget,
 								pos,
-								it._Ptr->_Myval.index);
+								it._Ptr->index);
 
 						}
 

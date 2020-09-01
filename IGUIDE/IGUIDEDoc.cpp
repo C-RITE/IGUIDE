@@ -61,7 +61,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pGrid = new Grid();
 	m_pFundus = new Fundus();
 	m_pDlgCalibration = new Calibration();
-	m_pCurrentOutputDir = NULL;
+	m_pCurrentOutputDir = &m_OutputDir;
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
@@ -328,34 +328,34 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 		// store patchjobs
 
-		if (header[3]) {
-			ar << m_pGrid->patchjobs.size();
+		//if (header[3]) {
+		//	ar << m_pGrid->patchjobs.size();
 
-			// store list of patchjobs
+		//	// store list of patchjobs
 
-			for each (Patches p in m_pGrid->patchjobs)
-				PatchArchive(ar, &p);
+		//	for each (Patches p in m_pGrid->patchjobs)
+		//		PatchArchive(ar, &p);
 
-			// store current patchjob position
+		//	// store current patchjob position
 
-			ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->currentPatchJob);
-			
-			// store current patch position inside patchjob
+		//	ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->currentPatchJob);
+		//	
+		//	// store current patch position inside patchjob
 
-			ar << m_pGrid->getCurrentPatchJobPos();
-			
-			// store region pane insertion offset values for each job
+		//	ar << m_pGrid->getCurrentPatchJobPos();
+		//	
+		//	// store region pane insertion offset values for each job
 
-			CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
-			auto i = pMain->m_RegionPane.getPatchOffset();
-			int value;
-			
-			ar << i.size();
+		//	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+		//	auto i = pMain->m_RegionPane.getPatchOffset();
+		//	int value;
+		//	
+		//	ar << i.size();
 
-			for each (value in i)
-				ar << value;
+		//	for each (value in i)
+		//		ar << value;
 
-		}
+		//}
 
 	}
 
@@ -382,64 +382,63 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 		if (header[2]) {
 			m_pGrid->patchlist.clear();
 			PatchArchive(ar, &m_pGrid->patchlist);
-			m_pGrid->patchlist.resetIndex();
 		}
 
-		// restore patchjobs
+		//// restore patchjobs
 
-		if (header[3]) {
-			m_pGrid->patchjobs.clear();
-			
-			size_t jobsize;
-			ar >> jobsize;
+		//if (header[3]) {
+		//	m_pGrid->patchjobs.clear();
+		//	
+		//	size_t jobsize;
+		//	ar >> jobsize;
 
-			// restore list of patchjobs
+		//	// restore list of patchjobs
 
-			for (int i = 0; i < jobsize; i++) {
-				Patches p;
-				PatchArchive(ar, &p);
-				m_pGrid->patchjobs.push_back(p);
-			}
+		//	for (int i = 0; i < jobsize; i++) {
+		//		Patches p;
+		//		PatchArchive(ar, &p);
+		//		m_pGrid->patchjobs.push_back(p);
+		//	}
 
-			// restore current patchjob position
+		//	// restore current patchjob position
 
-			int pos;
-			ar >> pos;
-			auto currentPatchJob = m_pGrid->patchjobs.begin() + pos;
+		//	int pos;
+		//	ar >> pos;
+		//	auto currentPatchJob = m_pGrid->patchjobs.begin() + pos;
 
-			m_pGrid->currentPatchJob = currentPatchJob;
+		//	m_pGrid->currentPatchJob = currentPatchJob;
 
-			// restore current patch 
+		//	// restore current patch 
 
-			int i = 0;
-			ar >> pos;
-			Patches::iterator patchIndex = m_pGrid->patchjobs.begin()->begin();
-			
-			while (i < pos) {
-				patchIndex++;
-				i++;
-			}
+		//	int i = 0;
+		//	ar >> pos;
+		//	Patches::iterator patchIndex = m_pGrid->patchjobs.begin()->begin();
+		//	
+		//	while (i < pos) {
+		//		patchIndex++;
+		//		i++;
+		//	}
 
-			m_pGrid->currentPatch = patchIndex;
+		//	m_pGrid->currentPatch = patchIndex;
 
-			// restore region pane insertion offset values for each job
+		//	// restore region pane insertion offset values for each job
 
-			CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+		//	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
 
-			i = 0;
-			ar >> jobsize;
-			vector<int>offset;
-			int element;
+		//	i = 0;
+		//	ar >> jobsize;
+		//	vector<int>offset;
+		//	int element;
 
-			while (i < jobsize) {
-				ar >> element;
-				offset.push_back(element);
-				i++;
-			}
+		//	while (i < jobsize) {
+		//		ar >> element;
+		//		offset.push_back(element);
+		//		i++;
+		//	}
 
-			pMain->m_RegionPane.setPatchOffset(offset);
+		//	pMain->m_RegionPane.setPatchOffset(offset);
 
-		}
+		//}
 
 		restoreRegionPane();
 		UpdateAllViews(NULL);
@@ -454,7 +453,7 @@ void CIGUIDEDoc::restoreRegionPane() {
 	
 	auto itp = m_pGrid->patchlist.begin();
 
-	for (auto it = m_pGrid->patchjobs.begin(); it != m_pGrid->patchjobs.end(); it++)
+	/*for (auto it = m_pGrid->patchjobs.begin(); it != m_pGrid->patchjobs.end(); it++)
 		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
 
 			AfxGetMainWnd()->SendMessage(
@@ -481,7 +480,7 @@ void CIGUIDEDoc::restoreRegionPane() {
 
 		}
 
-	itp = m_pGrid->patchlist.begin();
+	itp = m_pGrid->patchlist.begin();*/
 
 	if (itp != m_pGrid->patchlist.end()) {
 
@@ -518,10 +517,10 @@ void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
 		else
 			header[2] = false;
 
-		if (m_pGrid->patchjobs.size() > 0)
-			header[3] = true;
-		else
-			header[3] = false;
+		//if (m_pGrid->patchjobs.size() > 0)
+		//	header[3] = true;
+		//else
+		//	header[3] = false;
 
 		for (int i = 0; i < sizeof(header); i++)
 			ar << header[i];
@@ -859,7 +858,7 @@ vector<CString> CIGUIDEDoc::getQuickHelp() {
 
 	CString helpArray[3];
 	helpArray[0].Format(L"ICANDI hotkeys\n===============================\nKEY:\t\tACTION:\n\n<R>\t\tReset Ref.-Frame\n<SPACE>\t\tSave Video");
-	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F12>\t(Re-)Calibrate Subject\n<SHIFT+MW> Grow/Shrink POI\n<X+MW> Grow/Shrink POI in X\n<Y+MW> Grow/Shrink POI in Y\n<N>\tnext patch\n<B>\tprevious patch");
+	helpArray[1].Format(L"IGUIDE hotkeys\n===============================\nKEY:\tACTION:\n\n<F1>\tToggle Quick Help\n<F2>\tToggle Overlays\n<F3>\tToggle Fixation Target\n<F12>\t(Re-)Calibrate Subject\n<SHIFT+MW> Grow/Shrink region\n<X+MW> Grow/Shrink region in X\n<Y+MW> Grow/Shrink region in Y\n<N>\tnext patch\n<B>\tprevious patch");
 	helpArray[2].Format(L"AOSACA hotkeys\n===============================\nNUM-KEY:\tACTION:\n\n<ENTER>\t\tFlatten Mirror\n<+>\t\tIncrease Defocus\n<->\t\tDecrease Defocus\n<0>\t\tZeroize Defocus");
 
 	vector<CString> help(helpArray, helpArray+3);
