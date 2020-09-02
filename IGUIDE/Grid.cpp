@@ -312,19 +312,24 @@ void Grid::makeRegionRects() {
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++ ) {
 
 		reg = it->region;
-		region.push_back(*it);
 
-		while (std::next(it)->region == reg) {
-			it++;
-			if (std::next(it) == patchlist.end())
-				break;
+		if (reg > 0) {
+
+			region.push_back(*it);
+
+			while (std::next(it)->region == reg) {
+				it++;
+				if (std::next(it) == patchlist.end())
+					break;
+			}
+
+			region.push_back(*it);
+
+			regions.push_back(region);
+
+			region.clear();
+
 		}
-		
-		region.push_back(*it);
-
-		regions.push_back(region);
-
-		region.clear();
 
 	};
 
@@ -342,6 +347,23 @@ void Grid::makeRegionRects() {
 		};
 
 		regRects.push_back(rect);
+
+	}
+
+}
+
+void Grid::setCurrentPatch(int region, int index) {
+
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++)
+	{
+
+		while (region != it->region)
+			it++;
+		for (int i = 1; i < index; i++)
+			it++;
+
+		currentPatch = it;
+		break;
 
 	}
 

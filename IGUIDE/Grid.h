@@ -77,6 +77,7 @@ public:
 	void makeRegionRects();									// set borders of region
 	void calcRegionSize(float zoom);						// calculate real region size
 	void browse(Element e);
+	void setCurrentPatch(int region, int index);			// set current patch
 															// process patch queue
 	Patch getPatch(int index);								// get patch by index
 	void selectPatch(int region, int index);				// select current patch from region pane

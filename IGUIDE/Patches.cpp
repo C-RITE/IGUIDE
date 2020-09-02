@@ -29,11 +29,10 @@ void Patches::commit(Patches::iterator &patch) {
 	CString systime;
 	GetSysTime(systime);
 
-	Patch p = *patch;
-	p.locked = true;
-	p.timestamp = systime.GetString();
-	p.index = index++;
-	p.defocus = pDoc->getCurrentDefocus();
+	patch->locked = true;
+	patch->timestamp = systime.GetString();
+	patch->index = index++;
+	patch->defocus = pDoc->getCurrentDefocus();
 	
 }
 

@@ -454,7 +454,7 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 
 	m_RegionPane.patchItem = index - 1;
 
-	ATLTRACE(_T("patchselect: index[%d]\n"), index);
+	ATLTRACE(_T("patchselect: index[%d], region[%d]\n"), index, region);
 
 	return 0;
 
