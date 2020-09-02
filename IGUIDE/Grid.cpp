@@ -300,20 +300,17 @@ void Grid::addRegion() {
 
 }
 
-void Grid::makeRegionRects() {
+void Grid::makeRegionRects(int reg) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
 	Patches region;
 	vector<Patches> regions;
-	int reg;
 
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++ ) {
 
-		reg = it->region;
-
-		if (reg > 0) {
+		if (it->region == reg) {
 
 			region.push_back(*it);
 

@@ -74,7 +74,7 @@ public:
 	void addRegion();										// add region to patchlist and pane
 	void controlRegion(int notch, int dim, CPoint point);	// set region dimensions
 	void makeRegion(CPoint point);							// create a patchlist around mousepointer
-	void makeRegionRects();									// set borders of region
+	void makeRegionRects(int region);						// set borders of region for operator view
 	void calcRegionSize(float zoom);						// calculate real region size
 	void browse(Element e);
 	void setCurrentPatch(int region, int index);			// set current patch

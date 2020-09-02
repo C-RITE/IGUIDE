@@ -160,7 +160,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 			pDoc->m_pGrid->makeRegion(point);
 			pDoc->m_pGrid->addRegion();
-			pDoc->m_pGrid->makeRegionRects();
+			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
 			pDoc->m_pGrid->setCurrentPatch(pDoc->m_pGrid->patchlist.back().region, 1);
 			
 		}
