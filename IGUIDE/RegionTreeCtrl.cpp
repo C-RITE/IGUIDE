@@ -320,38 +320,6 @@ void RegionTreeCtrl::OnPaint()
 
 }
 
-BOOL RegionTreeCtrl::PreTranslateMessage(MSG* pMsg)
-{
-    // TODO: Add your specialized code here and/or call the base class
-    if (pMsg->message == WM_KEYDOWN) {
-
-        CIGUIDEView* pView = CIGUIDEView::GetView();
-
-        switch (pMsg->wParam) {
-
-        case VK_SPACE:
-            pView->PostMessage(WM_KEYDOWN, VK_SPACE, NULL);
-            break;
-
-        case 'N':
-            pView->PostMessage(WM_KEYDOWN, 'N', 1);
-            PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
-            break;
-
-        case 'B':
-            pView->PostMessage(WM_KEYDOWN, 'B', 1);
-            PostMessage(WM_KEYDOWN, VK_UP, NULL);
-            break;
-
-        }
-
-    }
-
-    return CTreeCtrl::PreTranslateMessage(pMsg);
-
-
-}
-
 
 void RegionTreeCtrl::OnNMClick(NMHDR *pNMHDR, LRESULT *pResult)
 {

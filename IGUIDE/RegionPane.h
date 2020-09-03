@@ -42,6 +42,7 @@ public:
 	void browse(Element e);
 	void clear();
 
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 

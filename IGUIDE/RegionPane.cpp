@@ -141,12 +141,13 @@ void RegionPane::select(int region, int index) {
         hItemChild = m_wndTree.GetNextSiblingItem(hItemChild);
     }
 
-    m_wndTree.SelectItem(selected = hItemChild);
+    m_wndTree.SelectItem(hItemChild);
 	
 }
 
 void RegionPane::browse(Element e) {
 
+	selected = m_wndTree.GetSelectedItem();
 	HTREEITEM temp = selected;
 		
 	switch (e) {
@@ -237,4 +238,33 @@ void RegionPane::addRegion(int regCount)
 
     }
     */
+}
+
+
+BOOL RegionPane::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (pMsg->message == WM_KEYDOWN) {
+
+		CIGUIDEView* pView = CIGUIDEView::GetView();
+
+		switch (pMsg->wParam) {
+
+		case VK_SPACE:
+			pView->PostMessage(WM_KEYDOWN, VK_SPACE, NULL);
+			break;
+
+		case 'N':
+			pView->PostMessage(WM_KEYDOWN, 'N', NULL);
+			PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
+			break;
+
+		case 'B':
+			pView->PostMessage(WM_KEYDOWN, 'B', NULL);
+			PostMessage(WM_KEYDOWN, VK_UP, NULL);
+			break;
+		}
+
+	}
+	return CDockablePane::PreTranslateMessage(pMsg);
 }

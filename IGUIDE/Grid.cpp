@@ -372,16 +372,20 @@ void Grid::browse(Element e) {
 
 	case NEXT:
 		if (std::next(currentPatch) != patchlist.end()) {
-			currentPatch++;
-			AfxGetMainWnd()->SendMessage(BROWSE_PATCH, NULL, NEXT);
+			if (currentPatch->region == std::next(currentPatch)->region) {
+				currentPatch++;
+				AfxGetMainWnd()->SendMessage(BROWSE_PATCH, NULL, NEXT);
+			}
 		}
 
 		break;
 
 	case PREV:
 		if (currentPatch != patchlist.begin()) {
+			if (currentPatch->region == std::prev(currentPatch)->region) {
 			currentPatch--;
 			AfxGetMainWnd()->SendMessage(BROWSE_PATCH, NULL, PREV);
+			}
 		}
 		break;
 
