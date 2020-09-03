@@ -135,20 +135,24 @@ void RegionPane::update(Patch* p) {
 
 void RegionPane::select(int region, int index) {
 
+	HTREEITEM hItemChild;
+	HTREEITEM regNode;
+
 	if (region == 0)
-		region++;
+		hItemChild = m_wndTree.GetRootItem();
 
-    HTREEITEM regNode = regionNodes[region - 1];
-    HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
+	else {
+		regNode = regionNodes[region - 1];
+		hItemChild = m_wndTree.GetChildItem(regNode);
+	}
 
-    // save all commited (i.e. green) patches in root before erasing region
-    for (int i = 0; i < index; i++)
-    {
-        hItemChild = m_wndTree.GetNextSiblingItem(hItemChild);
-    }
+	for (int i = 0; i < index; i++)
+	{
+		hItemChild = m_wndTree.GetNextSiblingItem(hItemChild);
+	}
 
-    m_wndTree.SelectItem(hItemChild);
-	
+	m_wndTree.SelectItem(hItemChild);
+
 }
 
 void RegionPane::browse(Element e) {

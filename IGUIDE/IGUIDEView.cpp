@@ -574,8 +574,13 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
 
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-			if (pDoc->m_pGrid->currentPatch == std::prev(pDoc->m_pGrid->patchlist.end()))
+			if (pDoc->m_pGrid->currentPatch == std::prev(pDoc->m_pGrid->patchlist.end())) {
 				AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
+				AfxGetMainWnd()->SendMessage(SET_SELECTION,
+					(WPARAM)pDoc->m_pGrid->currentPatch->region,
+					(LPARAM)pDoc->m_pGrid->currentPatch->index);
+			}
+
 			else
 				AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
 
