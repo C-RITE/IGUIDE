@@ -371,6 +371,7 @@ void Grid::browse(Element e) {
 	switch (e) {
 
 	case NEXT:
+
 		if (std::next(currentPatch) != patchlist.end()) {
 			if (currentPatch->region == std::next(currentPatch)->region) {
 				currentPatch++;
@@ -381,23 +382,17 @@ void Grid::browse(Element e) {
 		break;
 
 	case PREV:
+
 		if (currentPatch != patchlist.begin()) {
 			if (currentPatch->region == std::prev(currentPatch)->region) {
-			currentPatch--;
-			AfxGetMainWnd()->SendMessage(BROWSE_PATCH, NULL, PREV);
+				currentPatch--;
+				AfxGetMainWnd()->SendMessage(BROWSE_PATCH, NULL, PREV);
 			}
 		}
+
 		break;
 
 	}
-
-	
-
-	// send information where to put next patch in tree
-	AfxGetMainWnd()->SendMessage(
-		UPDATE_REGIONPANE,
-		(WPARAM)currentPatch->index,
-		NULL);
 
 }
 

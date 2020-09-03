@@ -162,9 +162,12 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->addRegion();
 			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
 			pDoc->m_pGrid->setCurrentPatch(pDoc->m_pGrid->patchlist.back().region, 1);
-			AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, 
+
+			AfxGetMainWnd()->SendMessage(SET_SELECTION, 
 				(WPARAM)pDoc->m_pGrid->currentPatch->region,
 				(LPARAM)0);
+
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			
 		}
 
@@ -571,9 +574,10 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
 
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-			AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE,
-				(WPARAM)&pDoc->m_pGrid->patchlist.back(),
-				(LPARAM)pDoc->m_pGrid->currentPatch->region);
+			if (pDoc->m_pGrid->currentPatch == std::prev(pDoc->m_pGrid->patchlist.end()))
+				AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
+			else
+				AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
 
 			break;
 

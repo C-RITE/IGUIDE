@@ -34,11 +34,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(RESET_ICANDI_IP, &CMainFrame::OnResetIcandiIp)
 	ON_MESSAGE(SAVE_IGUIDE_CSV, &CMainFrame::OnSaveIguideCsv)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
-	ON_MESSAGE(UPDATE_REGIONPANE, &CMainFrame::OnUpdateRegionPane)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
 	ON_MESSAGE(UPDATE_SELECTION, &CMainFrame::OnUpdateSelection)
+	ON_MESSAGE(SET_SELECTION, &CMainFrame::OnSetSelection)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -424,26 +424,17 @@ afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 {
-	int regCount = (int)lParam;
-
-	if (regCount > m_RegionPane.getRegionSize()) {
-		m_RegionPane.addRegion(regCount);
-		m_RegionPane.patchItem = -1;
+	Patch* p = (Patch*)wParam;
+	
+	if (p->region > m_RegionPane.getRegionSize()) {
+		m_RegionPane.addRegion(p->region);
+		
 	}
 
-	Patch* p = (Patch*)wParam;
  	m_RegionPane.addPatch(p);
 	
 	return 0;
 
-}
-
-afx_msg LRESULT CMainFrame::OnUpdateRegionPane(WPARAM wParam, LPARAM lParam)
-{
-	int index = (int)wParam;
-	m_RegionPane.patchItem = index;
-
-	return 0;
 }
 
 afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
@@ -452,8 +443,6 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 	int region = (int)wParam;
 
 	m_pDoc->m_pGrid->selectPatch(region, index);
-
-	m_RegionPane.patchItem = index - 1;
 
 	return 0;
 
@@ -464,6 +453,7 @@ afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
 	m_RegionPane.clear();
 
 	return 0;
+
 }
 
 afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
@@ -477,12 +467,21 @@ afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
 
 }
 
-
-
 afx_msg LRESULT CMainFrame::OnUpdateSelection(WPARAM wParam, LPARAM lParam)
 {
-	int region = (int)wParam;
+	Patch* p = (Patch*)wParam;
+
+	m_RegionPane.update(p);
+
+	return 0;
+
+}
+
+
+afx_msg LRESULT CMainFrame::OnSetSelection(WPARAM wParam, LPARAM lParam)
+{
 	int index = (int)lParam;
+	int region = (int)wParam;
 
 	m_RegionPane.select(region, index);
 

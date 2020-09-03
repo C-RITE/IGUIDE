@@ -18,17 +18,11 @@ protected:
 public:
 
 	int					getRegionSize()							{ return regionNodes.size(); };
-	std::vector<int>	getPatchOffset()						{ return patchOffset; }
-	void				setPatchOffset(std::vector<int> offset)	{ patchOffset = offset; };
-
-	int patchItem;												// where to put patch during patchjob
-																// of one patch in a particular region
 
 private:
 
 	RegionTreeCtrl			m_wndTree;
 	std::vector<HTREEITEM>	regionNodes;
-	std::vector<int>		patchOffset;						// item offset resulting in multiple commits
 	HTREEITEM				selected;
 
 public:
@@ -37,12 +31,14 @@ public:
 
 	void addRegion(int regCount);
 	void addPatch(Patch* p);
+	void update(Patch* p);
 	void remove(int region);
 	void select(int region, int index);
 	void browse(Element e);
 	void clear();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 };
 
 
