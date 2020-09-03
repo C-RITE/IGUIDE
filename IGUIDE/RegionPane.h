@@ -28,7 +28,8 @@ private:
 
 	RegionTreeCtrl			m_wndTree;
 	std::vector<HTREEITEM>	regionNodes;
-	std::vector<int>		patchOffset;							// item offset resulting in multiple commits
+	std::vector<int>		patchOffset;						// item offset resulting in multiple commits
+	HTREEITEM				selected;
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -38,6 +39,7 @@ public:
 	void addPatch(Patch* p);
 	void remove(int region);
 	void select(int region, int index);
+	void browse(Element e);
 	void clear();
 
 };

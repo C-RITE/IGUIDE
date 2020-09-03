@@ -162,6 +162,9 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->addRegion();
 			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
 			pDoc->m_pGrid->setCurrentPatch(pDoc->m_pGrid->patchlist.back().region, 1);
+			AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, 
+				(WPARAM)pDoc->m_pGrid->currentPatch->region,
+				(LPARAM)0);
 			
 		}
 
@@ -579,11 +582,8 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			pDoc->m_pGrid->showCursor = false;
 			pDoc->m_pGrid->browse(NEXT);
 
-			if (pMsg->lParam != 1) {					// prevent 'double-N' processing
-				AfxGetMainWnd()->SendMessage(BROWSE_PATCH,
-					pDoc->m_pGrid->currentPatch->region,
-					std::distance(pDoc->m_pGrid->patchlist.begin(), pDoc->m_pGrid->currentPatch));
-			}
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+			m_pDlgTarget->Invalidate();
 
 			break;
 
@@ -591,19 +591,11 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			pDoc->m_pGrid->showCursor = false;
 			pDoc->m_pGrid->browse(PREV);
-
-			if (pMsg->lParam != 1) {					// prevent 'double-B' processing
-				AfxGetMainWnd()->SendMessage(BROWSE_PATCH,
-					pDoc->m_pGrid->currentPatch->region,
-					std::distance(pDoc->m_pGrid->patchlist.begin(), pDoc->m_pGrid->currentPatch));
-			}
-			
-			break;
 			
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			m_pDlgTarget->Invalidate();
 
-			ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
+			//ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
 		}
 
 	}

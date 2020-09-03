@@ -67,6 +67,7 @@ void RegionPane::clear() {
 void RegionPane::addPatch(Patch* p) {
     
     CString patchname;
+	HTREEITEM insert;
 
     // add upcoming patchjob
 
@@ -88,7 +89,7 @@ void RegionPane::addPatch(Patch* p) {
         tvInsert.hInsertAfter = NULL;
         tvInsert.item.mask = TVIF_TEXT;
         tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
-        HTREEITEM insert = m_wndTree.InsertItem(&tvInsert);
+        insert = m_wndTree.InsertItem(&tvInsert);
         m_wndTree.SetItemColor(insert, RGB(255, 255, 255));
      }
     
@@ -100,7 +101,6 @@ void RegionPane::addPatch(Patch* p) {
             elem = m_wndTree.GetNextSiblingItem(elem);
 
         // if the element was already comitted (i.e. green), append
-        HTREEITEM insert;
 
         if (m_wndTree.GetItemColor(elem) == RGB(255, 0, 0)) {
             insert = m_wndTree.InsertItem(patchname, regNode, elem);
@@ -116,7 +116,7 @@ void RegionPane::addPatch(Patch* p) {
     }
 
     else {
-        HTREEITEM insert = m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
+		insert = m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
         m_wndTree.SetItemColor(insert, RGB(255, 0, 0));
         m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
     }
@@ -129,6 +129,9 @@ void RegionPane::addPatch(Patch* p) {
 
 void RegionPane::select(int region, int index) {
 
+	if (region == 0)
+		region++;
+
     HTREEITEM regNode = regionNodes[region - 1];
     HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
 
@@ -138,7 +141,30 @@ void RegionPane::select(int region, int index) {
         hItemChild = m_wndTree.GetNextSiblingItem(hItemChild);
     }
 
-    m_wndTree.SelectItem(hItemChild);
+    m_wndTree.SelectItem(selected = hItemChild);
+	
+}
+
+void RegionPane::browse(Element e) {
+
+	HTREEITEM temp = selected;
+		
+	switch (e) {
+
+		case NEXT:
+			selected = m_wndTree.GetNextSiblingItem(selected);
+			break;
+
+		case PREV:
+			selected = m_wndTree.GetPrevSiblingItem(selected);
+			break;
+
+	}
+
+	if (selected != NULL)
+		m_wndTree.SelectItem(selected);
+	else
+		selected = temp;
 
 }
 

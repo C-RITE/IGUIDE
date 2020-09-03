@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
+	ON_MESSAGE(UPDATE_SELECTION, &CMainFrame::OnUpdateSelection)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -454,8 +455,6 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 
 	m_RegionPane.patchItem = index - 1;
 
-	ATLTRACE(_T("patchselect: index[%d], region[%d]\n"), index, region);
-
 	return 0;
 
 }
@@ -463,10 +462,24 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
 {
 	m_RegionPane.clear();
+
 	return 0;
 }
 
 afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
+{
+
+	Element elem = (Element)lParam;
+
+	m_RegionPane.browse(elem);
+	
+	return 0;
+
+}
+
+
+
+afx_msg LRESULT CMainFrame::OnUpdateSelection(WPARAM wParam, LPARAM lParam)
 {
 	int region = (int)wParam;
 	int index = (int)lParam;
@@ -474,5 +487,4 @@ afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
 	m_RegionPane.select(region, index);
 
 	return 0;
-
 }

@@ -320,16 +320,6 @@ void RegionTreeCtrl::OnPaint()
 
 }
 
-
-void RegionTreeCtrl::getCurrentSelection(int& region, int& index)
-{
-    // TODO: Add your implementation code here.
-    region = selItemRegion;
-    index = selItemIndex;
-
-}
-
-
 BOOL RegionTreeCtrl::PreTranslateMessage(MSG* pMsg)
 {
     // TODO: Add your specialized code here and/or call the base class
