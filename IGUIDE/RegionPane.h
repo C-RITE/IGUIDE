@@ -5,7 +5,6 @@
 
 class RegionPane : public CDockablePane
 {
-
 	DECLARE_DYNAMIC(RegionPane)
 
 public:
@@ -21,9 +20,14 @@ public:
 
 private:
 
+	struct mapIndex {
+		HTREEITEM h;
+		int index;
+	};
+
 	RegionTreeCtrl			m_wndTree;
 	std::vector<HTREEITEM>	regionNodes;
-	HTREEITEM				selected;
+	std::vector<mapIndex>	indexmap;
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -33,7 +37,7 @@ public:
 	void addPatch(Patch* p);
 	void update(Patch* p);
 	void remove(int region);
-	void select(int region, int index);
+	void select(int index);
 	void browse(Element e);
 	void clear();
 

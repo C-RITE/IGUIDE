@@ -40,7 +40,7 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	HTREEITEM selected = GetSelectedItem();
+	 selected = GetSelectedItem();
     if (ItemHasChildren(selected))
         return;
 
@@ -68,7 +68,7 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
 
-	HTREEITEM selected = GetSelectedItem();
+	selected = GetSelectedItem();
 	if (ItemHasChildren(selected))
 		return;
 
@@ -108,18 +108,7 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	regionStr = regionStr.Mid(8);
 	region = _ttoi(regionStr);
 
-
-	CString indexStr = GetItemText(selected);
-	indexStr = indexStr.TrimLeft(L"P");
-	int divider = indexStr.Find(L":", 0);
-	indexStr = indexStr.Left(divider);
-	int indexPatch = _ttoi(indexStr);
-
-	if (indexPatch == 0)
-		selItemIndex = index;
-	else
-		index = indexPatch;
-
+	selItemIndex = index;
 	selItemRegion = region;
 
 	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);

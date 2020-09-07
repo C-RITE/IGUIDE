@@ -44,7 +44,7 @@ void Grid::selectPatch(int region, int index) {
 
 	patch = patchlist.begin();
 
-	while (patch->region < region) {
+	while (patch->region != region) {
 		patch = std::next(patch);
 	}
 

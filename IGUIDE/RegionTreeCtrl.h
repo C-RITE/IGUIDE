@@ -35,6 +35,7 @@ protected:
 	int selItemRegion;				// selected item's parent
 	BOOL click;
 
+
 public:
 
 	void SetItemFont(HTREEITEM hItem, LOGFONT& logfont);
@@ -43,6 +44,8 @@ public:
 	BOOL GetItemFont(HTREEITEM hItem, LOGFONT* plogfont);
 	BOOL GetItemBold(HTREEITEM hItem);
 	COLORREF GetItemColor(HTREEITEM hItem);
+
+	HTREEITEM						selected;
 
 public:
 	afx_msg void OnPaint();

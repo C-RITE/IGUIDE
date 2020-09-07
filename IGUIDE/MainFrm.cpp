@@ -38,7 +38,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
 	ON_MESSAGE(UPDATE_SELECTION, &CMainFrame::OnUpdateSelection)
-	ON_MESSAGE(SET_SELECTION, &CMainFrame::OnSetSelection)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -475,15 +474,4 @@ afx_msg LRESULT CMainFrame::OnUpdateSelection(WPARAM wParam, LPARAM lParam)
 
 	return 0;
 
-}
-
-
-afx_msg LRESULT CMainFrame::OnSetSelection(WPARAM wParam, LPARAM lParam)
-{
-	int index = (int)lParam;
-	int region = (int)wParam;
-
-	m_RegionPane.select(region, index);
-
-	return 0;
 }

@@ -65,5 +65,4 @@ protected:
 	afx_msg LRESULT OnClearRegionpane(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnBrowsePatch(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUpdateSelection(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnSetSelection(WPARAM wParam, LPARAM lParam);
 };
