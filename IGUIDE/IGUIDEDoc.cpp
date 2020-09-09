@@ -95,7 +95,6 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[2]);
 
 	CloseHandle(m_hWaitDigest[0]);
-	CloseHandle(m_hWaitDigest[1]);
 
 	CloseHandle(m_hSaveEvent);
 
@@ -112,9 +111,8 @@ void CIGUIDEDoc::createNetComThread() {
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
 	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
 	
-	m_hWaitDigest = new HANDLE[2];
-	m_hWaitDigest[0] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOFOLDER_DIGESTED");
-	m_hWaitDigest[1] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOINFO_DIGESTED");
+	m_hWaitDigest = new HANDLE[1];
+	m_hWaitDigest[0] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOINFO_DIGESTED");
 
 	m_hSaveEvent = CreateEvent(NULL, FALSE, FALSE, L"SAVE_TRIGGER");
 
@@ -159,7 +157,6 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 			message.value = input.Mid(split + 1, input.GetLength());
 			parent->digest(message);
 			input.Empty();
-			ATLTRACE(_T("message received: %s\n"), message.value);
 			break;
 
 		case WAIT_OBJECT_0 + 2:
@@ -779,13 +776,6 @@ void CIGUIDEDoc::Dump(CDumpContext& dc) const
 
 void CIGUIDEDoc::digest(NetMsg msg) {
 	
-	if (msg.property == L"ICANDI_VIDEOFOLDER") {
-		m_OutputDir_ICANDI = msg.value;
-
-		// signal that netcom message digestion happened
-		SetEvent(m_hWaitDigest[0]);
-	}
-
 	if (msg.property == L"ICANDI_VIDEOINFO") {
 				
 		videoinfo = msg.value;
@@ -817,11 +807,17 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 		videoinfo = videoinfo.Mid(++split);
 		wavelength = token;
 
+		// extract path
+		split = videoinfo.Find(L",", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid(++split);
+		m_OutputDir_ICANDI = token;
+
 		// extract videonumber
-		vidnumber = videoinfo.Mid(1);
+		vidnumber = videoinfo;
 		
 		// signal that netcom message digestion happened
-		SetEvent(m_hWaitDigest[1]);
+		SetEvent(m_hWaitDigest[0]);
 	}
 
 	if (msg.property == L"AOSACA_DEFOCUS") {

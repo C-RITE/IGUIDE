@@ -125,6 +125,7 @@ void CSockClient::OnRecieve(int nError)
 	
 		chBuff[nRead] = '\0';
 		inpBuf->Format(L"%S",chBuff);
+		ATLTRACE(_T("message received: %s\n"), *inpBuf);
 		SetEvent(*netEvent);
 
 	}

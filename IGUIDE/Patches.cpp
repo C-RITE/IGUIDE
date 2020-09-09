@@ -15,9 +15,10 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 {
 	CIGUIDEDoc *pDoc = (CIGUIDEDoc *)lpParameter;
 
-	WaitForMultipleObjects(2, pDoc->m_hWaitDigest, TRUE, INFINITE);
+	WaitForMultipleObjects(1, pDoc->m_hWaitDigest, TRUE, INFINITE);
 	pDoc->m_pGrid->currentPatch->timestamp = pDoc->timestamp;
 	pDoc->m_pGrid->currentPatch->index = _ttoi(pDoc->vidnumber);
+	pDoc->m_pGrid->currentPatch->wavelength = pDoc->wavelength;
 
 	// now we're ready to save
 	SetEvent(pDoc->m_hSaveEvent);
@@ -55,6 +56,7 @@ void Patches::commit(Patches::iterator &patch) {
 		GetSysTime(systime);
 		patch->timestamp = systime.GetString();
 		patch->index = index++;
+		patch->wavelength = L"N/A";
 	}
 	
 	patch->locked = true;
@@ -119,17 +121,20 @@ void Patches::untouch() {
 bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
-	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus)");
+	CString strNumber, strDegX, strDegY, strDefocus, strWaveLength;
+	CString header("timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 	{
 		if (it->locked) {
 
 			strNumber.Format(_T("%.3d"), it->index);
-			strDegX.Format(_T("%.2f"), it._Ptr->coordsDEG.x);
-			strDegY.Format(_T("%.2f"), it._Ptr->coordsDEG.y);
+			strDegX.Format(_T("%.2f"), it->coordsDEG.x);
+			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
 			strDefocus.Format(_T("%s"), it._Ptr->defocus);
+			strWaveLength.Format(_T("%s"), it._Ptr->wavelength);
+
+
 
 			sstream
 				<< it->timestamp.GetString()
@@ -143,6 +148,8 @@ bool Patches::SaveToFile(CString directory) {
 				<< strDegY.GetString()
 				<< ","
 				<< strDefocus.GetString()
+				<< ","
+				<< strWaveLength.GetString()
 				<< std::endl;
 
 		}

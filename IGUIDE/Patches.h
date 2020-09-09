@@ -14,6 +14,7 @@ struct Patch {
 	int				index;
 	int				region;
 	CString			defocus;
+	CString			wavelength;
 
 	bool operator==(Patch right) const {
 		return true;
