@@ -54,9 +54,9 @@ void Remote::setIPAdress(Connection c) {
 
 void Remote::connect()
 {
-	
-	// by default, connect to what is selected in properties
 
+	// by default, connect to what is selected in properties
+	
 	if (mode == L"AOSACA" | mode == L"FULL")
 		Connect2AOSACA();
 	if (mode == L"ICANDI" | mode == L"FULL")
@@ -79,7 +79,7 @@ void Remote::connect(Connection c)
 
 }
 
-bool Remote::Connect2AOSACA()
+void Remote::Connect2AOSACA()
 {
 	// TODO: Add your implementation code here.
 
@@ -95,15 +95,12 @@ bool Remote::Connect2AOSACA()
 		delete m_pSock_AOSACA;
 		m_pSock_AOSACA = NULL;
 		Connect2AOSACA();
-		return false;
 	}
-
-	return true;
 
 }
 
 
-bool Remote::Connect2ICANDI()
+void Remote::Connect2ICANDI()
 {
 	// TODO: Add your implementation code here.
 
@@ -119,10 +116,7 @@ bool Remote::Connect2ICANDI()
 		delete m_pSock_ICANDI;
 		m_pSock_ICANDI = NULL;
 		Connect2ICANDI();
-		return false;
 	}
-
-	return true;
 
 }
 

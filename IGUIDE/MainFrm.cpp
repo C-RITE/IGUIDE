@@ -51,13 +51,33 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-	m_hSaveEvent = CreateEvent(NULL, FALSE, FALSE, L"SAVE_FROM_IGUIDE_VIDEOFOLDER");
 }
 
 CMainFrame::~CMainFrame()
 {
-	
 }
+
+DWORD WINAPI SaveWaitThread(LPVOID pParam) {
+
+	CMainFrame* parent = (CMainFrame*)pParam;
+	Connection active = parent->RemoteControl.getActiveConnections();
+
+	if (active == ICANDI || active == BOTH) {
+
+		WaitForSingleObject(parent->m_pDoc->m_hSaveEvent, INFINITE);
+		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir_ICANDI;
+		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
+
+	}
+	else {
+		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
+		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
+	}
+
+	return 0;
+
+}
+
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	
@@ -72,6 +92,8 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
 	RemoteControl.init(&m_PropertyPane, pDoc->m_pInputBuf, pDoc->m_hNetMsg);
 	RemoteControl.connect();
+
+	m_pDoc->m_pActiveConnections = &active;
 
 	return 0L;
 
@@ -236,8 +258,8 @@ void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
 	// connection status of ICANDI/AOSACA
 	// 'traffic lights' paradigm
 
-	Connection active = RemoteControl.getActiveConnections();
-	Connection pending = RemoteControl.getPendingConnections();
+	active = RemoteControl.getActiveConnections();
+	pending = RemoteControl.getPendingConnections();
 
 	switch (pCmdUI->m_nID) {
 
@@ -378,7 +400,6 @@ return 0;
 
 afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
 {
-
 	Connection pending = RemoteControl.getPendingConnections();
 	Connection active = RemoteControl.getActiveConnections();
 
@@ -397,27 +418,10 @@ return 0;
 
 }
 
-DWORD WINAPI SaveThread(LPVOID pParam) {
-
-	CMainFrame* parent = (CMainFrame*)pParam;
-	Connection active = parent->RemoteControl.getActiveConnections();
-	
-	if (active == ICANDI || active == BOTH) {
-		WaitForSingleObject(parent->m_hSaveEvent, INFINITE);
-		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir_ICANDI;
-		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
-	}
-	else {
-		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
-		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
-	}
-	return 0;
-}
-
 afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 {
 	m_pDoc = GetDoc();
-	m_hSaveThread = ::CreateThread(NULL, 0, SaveThread, this, 0, &m_thdID);
+	m_hSaveWaitThread = ::CreateThread(NULL, 0, SaveWaitThread, this, 0, &m_thdID);
 	return 0;
 }
 

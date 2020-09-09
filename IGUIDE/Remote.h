@@ -3,13 +3,6 @@
 #include "Properties.h"
 #include "IGUIDEDoc.h"
 
-enum Connection {
-	NONE = 0,
-	AOSACA = 1,
-	ICANDI = 2,
-	BOTH = 3
-};
-
 class Remote : public CWnd
 {
 public:
@@ -39,8 +32,8 @@ private:
 	CSockClient* m_pSock_AOSACA;
 	CSockClient* m_pSock_ICANDI;
 
-	bool Connect2AOSACA();
-	bool Connect2ICANDI();
+	void Connect2AOSACA();
+	void Connect2ICANDI();
 
 protected:
 	DECLARE_MESSAGE_MAP()

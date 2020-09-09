@@ -48,4 +48,6 @@ private:
 	bool			fileTouched;
 	void			GetSysTime(CString &buf);
 
+	static	DWORD WINAPI	ThreadWaitDigest(LPVOID pParam);	// if connected to ICANDI, wait for digested response
+
 };

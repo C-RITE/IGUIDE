@@ -23,10 +23,12 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 	Remote			RemoteControl;	// for communication with host apps (ICANDI / AOSACA)
-	HANDLE			m_hSaveEvent;
+
 	CIGUIDEDoc*		m_pDoc;
 
 	RegionPane		m_RegionPane;
+	Connection		active;
+	Connection		pending;
 
 protected:  // control bar embedded members
 	
@@ -35,7 +37,7 @@ protected:  // control bar embedded members
 
 	BOOL			CreateDockingWindows();
 	
-	HANDLE			m_hSaveThread;
+	HANDLE			m_hSaveWaitThread;
 	DWORD			m_thdID;
 	
 

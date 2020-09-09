@@ -68,6 +68,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_Overlap = 50;
 	overlaySettings = 0;
 	defocus = L"0";
+	m_pActiveConnections = NULL;
 
 	overlayVisible = true;
 	calibrationComplete = false;
@@ -92,7 +93,14 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
 	CloseHandle(m_hNetMsg[2]);
+
+	CloseHandle(m_hWaitDigest[0]);
+	CloseHandle(m_hWaitDigest[1]);
+
+	CloseHandle(m_hSaveEvent);
+
 	delete[] m_hNetMsg;
+	delete[] m_hWaitDigest;
 	CloseHandle(m_hNetComThread);
 
 }
@@ -103,11 +111,19 @@ void CIGUIDEDoc::createNetComThread() {
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
 	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
+	
+	m_hWaitDigest = new HANDLE[2];
+	m_hWaitDigest[0] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOFOLDER_DIGESTED");
+	m_hWaitDigest[1] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOINFO_DIGESTED");
+
+	m_hSaveEvent = CreateEvent(NULL, FALSE, FALSE, L"SAVE_TRIGGER");
+
 	m_pInputBuf = new CString[2];
 	m_hNetComThread = ::CreateThread(NULL, 0, ThreadNetMsgProc, this, 0, &m_thdID);
 
 }
 
+	
 
 DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 {
@@ -143,11 +159,13 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 			message.value = input.Mid(split + 1, input.GetLength());
 			parent->digest(message);
 			input.Empty();
+			ATLTRACE(_T("message received: %s\n"), message.value);
 			break;
 
 		case WAIT_OBJECT_0 + 2:
 			exit = true;
 			break;
+
 		}
 
 	}
@@ -270,7 +288,6 @@ BOOL CIGUIDEDoc::OnNewDocument()
 	return TRUE;
 
 }
-
 
 void CIGUIDEDoc::OnCloseDocument()
 {
@@ -764,8 +781,47 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 	
 	if (msg.property == L"ICANDI_VIDEOFOLDER") {
 		m_OutputDir_ICANDI = msg.value;
-		CMainFrame* main = (CMainFrame*)AfxGetApp()->m_pMainWnd;
-		SetEvent(main->m_hSaveEvent);
+
+		// signal that netcom message digestion happened
+		SetEvent(m_hWaitDigest[0]);
+	}
+
+	if (msg.property == L"ICANDI_VIDEOINFO") {
+				
+		videoinfo = msg.value;
+
+		CString token;
+		int split;
+		
+		// extract subject id
+		split = videoinfo.Find(L",", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid(++split);
+		subject = token;
+
+		// extract timestamp
+		split = videoinfo.Find(L"_,", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid((split+2));
+		timestamp = token;
+
+		// extract system ID
+		split = videoinfo.Find(L",", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid(++split);
+		system = token;
+		
+		// extract wavelength
+		split = videoinfo.Find(L",", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid(++split);
+		wavelength = token;
+
+		// extract videonumber
+		vidnumber = videoinfo.Mid(1);
+		
+		// signal that netcom message digestion happened
+		SetEvent(m_hWaitDigest[1]);
 	}
 
 	if (msg.property == L"AOSACA_DEFOCUS") {

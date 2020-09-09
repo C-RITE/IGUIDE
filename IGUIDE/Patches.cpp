@@ -11,6 +11,21 @@ Patches::Patches() : filename(L"IGUIDE.csv"), fileTouched(false), index(1)
 {
 }
 
+DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
+{
+	CIGUIDEDoc *pDoc = (CIGUIDEDoc *)lpParameter;
+
+	WaitForMultipleObjects(2, pDoc->m_hWaitDigest, TRUE, INFINITE);
+	pDoc->m_pGrid->currentPatch->timestamp = pDoc->timestamp;
+	pDoc->m_pGrid->currentPatch->index = _ttoi(pDoc->vidnumber);
+
+	// now we're ready to save
+	SetEvent(pDoc->m_hSaveEvent);
+
+	return 0L;
+
+}
+
 void Patches::GetSysTime(CString &buf) {
 
 	time_t rawtime;
@@ -26,12 +41,23 @@ void Patches::GetSysTime(CString &buf) {
 void Patches::commit(Patches::iterator &patch) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CString systime;
-	GetSysTime(systime);
 
+	// if connected to ICANDI, use same timestamp and vidnumber for index
+	if (*pDoc->m_pActiveConnections == ICANDI || *pDoc->m_pActiveConnections == BOTH) {
+		DWORD thdID;
+		// wait until all messages from ICANDI are digested
+		::CreateThread(NULL, 0, ThreadWaitDigest, pDoc, 0, &thdID);
+	}
+	
+	else // use internal values
+	{
+		CString systime;
+		GetSysTime(systime);
+		patch->timestamp = systime.GetString();
+		patch->index = index++;
+	}
+	
 	patch->locked = true;
-	patch->timestamp = systime.GetString();
-	patch->index = index++;
 	patch->defocus = pDoc->getCurrentDefocus();
 	
 }
@@ -94,7 +120,7 @@ bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("YEAR_MONTH_DAY_HRS_MIN_SEC,#VIDEO,Region,Index,POSx(deg),POSy(deg),Defocus");
+	CString header("timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus)");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 	{
@@ -111,8 +137,6 @@ bool Patches::SaveToFile(CString directory) {
 				<< "v" << strNumber.GetString()
 				<< ","
 				<< it->region
-				<< ","
-				<< it->index
 				<< ","
 				<< strDegX.GetString()
 				<< ","

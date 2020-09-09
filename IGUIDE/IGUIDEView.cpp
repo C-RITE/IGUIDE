@@ -567,6 +567,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_SPACE:
 
+			if (pDoc->m_pGrid->currentPatch._Ptr == NULL)
+				break;
+
 			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
 
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);

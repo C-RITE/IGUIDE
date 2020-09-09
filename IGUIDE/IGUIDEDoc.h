@@ -17,6 +17,14 @@ struct NetMsg {
 
 };
 
+enum Connection {
+	NONE = 0,
+	AOSACA = 1,
+	ICANDI = 2,
+	BOTH = 3
+};
+
+
 class CIGUIDEDoc : public CDocument
 {
 protected: // create from serialization only
@@ -29,14 +37,16 @@ public:
 
 	Monitors				m_Monitors;							// output device for target view
 	Controller				m_Controller;						// controller used for subject calibration
-	Grid* m_pGrid;												// grid class
+	Grid*					m_pGrid;							// grid class
 	Fundus*					m_pFundus;							// fundus class
 	Raster					m_raster;							// raster class
 	Calibration*			m_pDlgCalibration;					// fundus calibration dialog class
+	Connection*				m_pActiveConnections;				// active netcomm connections
 	CString					m_FixationTarget;					// fixation target filename
 	CString					m_OutputDir;						// .csv output directory
 	CString					m_OutputDir_ICANDI;					// ICANDI output directory
 	CString*				m_pCurrentOutputDir;				// pointer to current output directory
+	CString					m_VideoFileName;					// name of ICANDI videofile being recorded
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure
@@ -48,18 +58,29 @@ public:
 	CString					m_RemoteCtrl;						// remote control subsystem settings
 	bool					calibrationComplete;				// true if calibration is valid
 
-	CString* m_pInputBuf;										// input buffer for incoming messages
-	HANDLE* m_hNetMsg;											// handle for netcom message events
+	CString*				m_pInputBuf;						// input buffer for incoming messages
+	HANDLE*					m_hNetMsg;							// handle for netcom message events
+	HANDLE					m_hSaveEvent;						// trigger when all digested
+	HANDLE*					m_hWaitDigest;						// digestion events
+
+	// received netcom information
+	CString					defocus;							// AOSACA defocus
+	CString					videoinfo;							// ICANDI netmsg for videorecording
+	CString					timestamp;							// ICANDI timestamp as in videoinfo
+	CString					wavelength;							// ICANDI wavelength as in videoinfo
+	CString					subject;							// ICANDI subject ID as in videoinfo
+	CString					system;								// ICANDI system ID as in videoinfo
+	CString					vidnumber;							// ICANDI current videonumber as in videoinfo
 
 private:
 
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
-	CString					defocus;							// AOSACA defocus
 
 	void					createNetComThread();				// for processing incoming remote messages
+	
 	HANDLE					m_hNetComThread;					// handle for incoming message thread
-	DWORD					m_thdID;
+	DWORD					m_thdID;							// corresponding thread ID
 
 	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);
 
@@ -75,7 +96,8 @@ public:
 	double					ComputeOrientationAngle(Edge k);
 	CD2DRectF				ComputeTargetZone();
 	bool					CheckCalibrationValidity();
-	void					digest(NetMsg msg);
+
+	void					digest(NetMsg msg);					// process information coming from AOSACA or ICANDI
 
 	CString					getCurrentDefocus() { return defocus; };
 	void					setDefocus(CString def) { defocus = def; };
