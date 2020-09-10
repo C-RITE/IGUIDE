@@ -39,6 +39,13 @@
 #define IDC_Y_STATIC                    1024
 #define IDC_Z_STATIC                    1025
 #define IDC_DEFOCUS_STATIC              1025
+#define IDC_SYSTEM_STATIC2              1026
+#define IDC_SYSTEM_EDIT                 1027
+#define IDC_WAVELENGTH_STATIC           1028
+#define IDC_WAVELENGTH_EDIT             1029
+#define IDC_FILENAME_EDIT3              1030
+#define IDC_SUBJECT_EDIT                1030
+#define IDC_SUBJECT_STATIC              1031
 #define ID_FUNDUS_IMPORT                32772
 #define ID_EDIT_PROPERTIES              32775
 #define ID_FILE_TEST                    32778
@@ -64,7 +71,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        351
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1026
+#define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           314
 #endif
 #endif

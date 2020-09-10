@@ -21,11 +21,15 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	CString windowTitle;
+
 	CString filename;
 	CString directory;
 	CString defocus;
 	CString timestamp;
-	int vidlength;
+	CString wavelength;
+	CString videolength;
 	float x;
 	float y;
+	virtual BOOL OnInitDialog();
 };

@@ -15,14 +15,15 @@ protected:
 // Implementation
 public:
 	virtual ~CMainFrame();
-	static	CIGUIDEDoc *			GetDoc();
+	static	CIGUIDEDoc *GetDoc();
 
+	void			sendToRegionPane();				// send patch information to region pane
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
-	Remote			RemoteControl;	// for communication with host apps (ICANDI / AOSACA)
+	Remote			RemoteControl;					// for communication with ICANDI and AOSACA
 
 	CIGUIDEDoc*		m_pDoc;
 

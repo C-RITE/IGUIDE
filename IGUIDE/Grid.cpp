@@ -62,7 +62,6 @@ void Grid::selectPatch(int region, int index) {
 
 }
 
-
 void Grid::addPatch(CPoint loc) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();

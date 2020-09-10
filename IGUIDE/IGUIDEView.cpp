@@ -577,15 +577,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
 
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-			if (pDoc->m_pGrid->currentPatch->region == 0) {
-				AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
-				//AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
-			}
-
-			else {
-				AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, (WPARAM)&*pDoc->m_pGrid->currentPatch, NULL);
-			}
-
+			
 			break;
 
 		case 'N':

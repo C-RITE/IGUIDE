@@ -812,10 +812,16 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 		split = videoinfo.Find(L",", 0);
 		token = videoinfo.Left(split);
 		videoinfo = videoinfo.Mid(++split);
-		m_OutputDir_ICANDI = token;
+		vidfolder = token;
 
 		// extract videonumber
-		vidnumber = videoinfo;
+		split = videoinfo.Find(L",", 0);
+		token = videoinfo.Left(split);
+		videoinfo = videoinfo.Mid(++split);
+		vidnumber = token;
+
+		// extract videolength
+		vidlength = videoinfo;
 		
 		// signal that netcom message digestion happened
 		SetEvent(m_hWaitDigest[0]);

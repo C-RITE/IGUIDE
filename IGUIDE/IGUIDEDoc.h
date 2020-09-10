@@ -43,10 +43,8 @@ public:
 	Calibration*			m_pDlgCalibration;					// fundus calibration dialog class
 	Connection*				m_pActiveConnections;				// active netcomm connections
 	CString					m_FixationTarget;					// fixation target filename
-	CString					m_OutputDir;						// .csv output directory
-	CString					m_OutputDir_ICANDI;					// ICANDI output directory
-	CString*				m_pCurrentOutputDir;				// pointer to current output directory
-	CString					m_VideoFileName;					// name of ICANDI videofile being recorded
+	CString					m_OutputDir;						// .csv-file output directory
+	CString*				m_pCurrentOutputDir;				// current output directory
 	CString					m_AOSACA_IP;						// AOSACA IP Address
 	CString					m_ICANDI_IP;						// ICANDI IP Address
 	CString					m_InputController;					// for subject calibration procedure
@@ -63,14 +61,18 @@ public:
 	HANDLE					m_hSaveEvent;						// trigger when all digested
 	HANDLE*					m_hWaitDigest;						// digestion events
 
-	// received netcom information
+	// received remote information
 	CString					defocus;							// AOSACA defocus
+
+	CString					vidfolder;							// ICANDI output directory
+	CString					vidfilename;						// ICANDI videofile being recorded
 	CString					videoinfo;							// ICANDI netmsg for videorecording
 	CString					timestamp;							// ICANDI timestamp as in videoinfo
 	CString					wavelength;							// ICANDI wavelength as in videoinfo
 	CString					prefix;								// ICANDI prefix as in videoinfo
 	CString					system;								// ICANDI system ID as in videoinfo
-	CString					vidnumber;							// ICANDI current videonumber as in videoinfo
+	CString					vidnumber;							// ICANDI current videonumber (VXXX)
+	CString					vidlength;							// ICANDI video length
 
 private:
 
@@ -99,8 +101,11 @@ public:
 
 	void					digest(NetMsg msg);					// process information coming from AOSACA or ICANDI
 
-	CString					getCurrentDefocus() { return defocus; };
-	void					setDefocus(CString def) { defocus = def; };
+	CString					getCurrentDefocus() 
+								{ return defocus; };
+
+	void					setDefocus(CString def) 
+								{ defocus = def; };
 
 	CString					getTraceInfo();						// for debug purposes only
 	vector<CString>			getQuickHelp();						// show remote control hotkeys

@@ -13,8 +13,9 @@ struct Patch {
 	bool			visited;
 	int				index;
 	int				region;
-	CString			defocus;
 	CString			wavelength;
+	CString			vidlength;
+	CString			defocus;
 
 	bool operator==(Patch right) const {
 		return true;
@@ -49,7 +50,7 @@ private:
 	CD2DSizeF		overlap;
 	CString			subject;
 	CString			timestamp;
-	int				index;
+	int				index;	
 	bool			fileTouched;
 	void			GetSysTime(CString &buf);
 

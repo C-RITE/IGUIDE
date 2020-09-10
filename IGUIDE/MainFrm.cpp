@@ -65,18 +65,33 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 	if (active == ICANDI || active == BOTH) {
 
 		WaitForSingleObject(parent->m_pDoc->m_hSaveEvent, INFINITE);
-		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir_ICANDI;
+		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->vidfolder;
 		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
-
 	}
 	else {
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
 		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
 	}
 
+	parent->sendToRegionPane();
+
 	return 0;
 
 }
+
+
+void CMainFrame::sendToRegionPane() {
+
+	if (m_pDoc->m_pGrid->currentPatch->region == 0) {
+		SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
+	}
+
+	else {
+		SendMessage(UPDATE_SELECTION, (WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
+	}
+
+}
+
 
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {

@@ -23,7 +23,6 @@ RegionTreeCtrl::~RegionTreeCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(RegionTreeCtrl, CTreeCtrl)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, &RegionTreeCtrl::OnNMDblclk)
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, &RegionTreeCtrl::OnNMCstDrw)
@@ -40,20 +39,29 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	 selected = GetSelectedItem();
     if (ItemHasChildren(selected))
         return;
 
+	CString WindowText;
 	CString text = GetItemText(selected);
-	int index = 1;
+
 	PatchInfo patchinfo;
-	Patch p = pDoc->m_pGrid->getPatch(index);
+	Patch p = *pDoc->m_pGrid->currentPatch;
+
+	if (p.index == -1)
+		return;
+
 	patchinfo.directory = *pDoc->m_pCurrentOutputDir;
     patchinfo.filename = p.vidfilename;
     patchinfo.defocus = p.defocus;
     patchinfo.x = p.coordsDEG.x;
     patchinfo.y = p.coordsDEG.y;
     patchinfo.timestamp = p.timestamp;
+	patchinfo.wavelength = p.wavelength;
+	patchinfo.videolength = p.vidlength;
+	
+	WindowText.Format(L"Details about Patch %d", p.index);
+	patchinfo.windowTitle = WindowText;
 	patchinfo.DoModal();
 
 }

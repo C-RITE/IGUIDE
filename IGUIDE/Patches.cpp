@@ -19,6 +19,8 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 	pDoc->m_pGrid->currentPatch->timestamp = pDoc->timestamp;
 	pDoc->m_pGrid->currentPatch->index = _ttoi(pDoc->vidnumber);
 	pDoc->m_pGrid->currentPatch->wavelength = pDoc->wavelength;
+	pDoc->m_pGrid->currentPatch->vidfilename = pDoc->vidfilename;
+	pDoc->m_pGrid->currentPatch->vidlength = pDoc->vidlength;
 
 	// now we're ready to save
 	SetEvent(pDoc->m_hSaveEvent);
@@ -54,9 +56,13 @@ void Patches::commit(Patches::iterator &patch) {
 	{
 		CString systime;
 		GetSysTime(systime);
+
 		patch->timestamp = systime.GetString();
 		patch->index = index++;
 		patch->wavelength = L"N/A";
+		patch->vidfilename = L"N/A";
+		patch->vidlength = L"N/A";
+
 	}
 	
 	patch->locked = true;
@@ -79,7 +85,6 @@ int Patches::getProgress(int region, int &size) {
 	return progress;
 
 }
-
 
 void Patches::setOverlap(float overlap, float rsDeg) {
 
