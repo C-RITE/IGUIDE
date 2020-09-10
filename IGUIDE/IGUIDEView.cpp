@@ -517,26 +517,30 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message == WM_KEYDOWN) {
 
 		// move patch in any direction unless locked
-		if ((pDoc->m_pGrid->patchlist.size() > 0) && !pDoc->m_pGrid->currentPatch->locked) {
+		if ((pDoc->m_pGrid->patchlist.size() > 0)) {
 
 			switch (pMsg->wParam) {
 
 			case VK_UP:
+				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
 				pDoc->m_pGrid->currentPatch->coordsDEG.y -= .1f;
 				pDoc->m_pGrid->currentPatch->coordsPX.y -= .1f * PPD;
 				break;
 
 			case VK_DOWN:
+				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
 				pDoc->m_pGrid->currentPatch->coordsDEG.y += .1f;
 				pDoc->m_pGrid->currentPatch->coordsPX.y += .1f * PPD;
 				break;
 
 			case VK_LEFT:
+				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
 				pDoc->m_pGrid->currentPatch->coordsDEG.x -= .1f;
 				pDoc->m_pGrid->currentPatch->coordsPX.x -= .1f * PPD;
 				break;
 
 			case VK_RIGHT:
+				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
 				pDoc->m_pGrid->currentPatch->coordsDEG.x += .1f;
 				pDoc->m_pGrid->currentPatch->coordsPX.x += .1f * PPD;
 				break;
@@ -602,7 +606,6 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			m_pDlgTarget->Invalidate();
 
-			//ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
 		}
 
 	}

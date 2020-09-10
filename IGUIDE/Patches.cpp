@@ -109,6 +109,13 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 
 }
 
+void Patches::duplicate(Patches::iterator &current)
+{
+	current = this->insert(current, *current);
+	current->locked = false;
+	ATLTRACE(_T("patchlist: size[%d]\n"), this->size());
+}
+
 void Patches::untouch() {
 
 	fileTouched = false;
@@ -168,7 +175,7 @@ bool Patches::SaveToFile(CString directory) {
 
 	if (!fileTouched) {
 		GetSysTime(timestamp);
-		filename = timestamp + "_" + filename;
+		filename = subject + "_" + timestamp + "_" + filename;
 	}
 
 	try {

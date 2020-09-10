@@ -41,6 +41,7 @@ public:
 	void				untouch();
 	void				setOverlap(float overlap, float rsDeg);	
 	void				setSubject(CString prefix) { subject = prefix; };
+	void				duplicate(Patches::iterator &current);
 
 
 private:
