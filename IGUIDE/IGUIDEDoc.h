@@ -68,7 +68,7 @@ public:
 	CString					videoinfo;							// ICANDI netmsg for videorecording
 	CString					timestamp;							// ICANDI timestamp as in videoinfo
 	CString					wavelength;							// ICANDI wavelength as in videoinfo
-	CString					subject;							// ICANDI subject ID as in videoinfo
+	CString					prefix;								// ICANDI prefix as in videoinfo
 	CString					system;								// ICANDI system ID as in videoinfo
 	CString					vidnumber;							// ICANDI current videonumber as in videoinfo
 

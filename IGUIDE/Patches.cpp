@@ -109,7 +109,6 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 
 }
 
-
 void Patches::untouch() {
 
 	fileTouched = false;
@@ -121,22 +120,23 @@ void Patches::untouch() {
 bool Patches::SaveToFile(CString directory) {
 
 	wstringstream sstream;
-	CString strNumber, strDegX, strDegY, strDefocus, strWaveLength;
-	CString header("timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
+	CString strPrefix, strNumber, strDegX, strDegY, strDefocus, strWaveLength;
+	CString header("subject(prefix),timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
 
 	for (auto it = this->begin(); it != this->end(); ++it)
 	{
 		if (it->locked) {
 
+			strPrefix.Format(_T("%s"), subject);
 			strNumber.Format(_T("%.3d"), it->index);
 			strDegX.Format(_T("%.2f"), it->coordsDEG.x);
 			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
 			strDefocus.Format(_T("%s"), it._Ptr->defocus);
 			strWaveLength.Format(_T("%s"), it._Ptr->wavelength);
-
-
-
+					   
 			sstream
+				<< subject.GetString()
+				<< ","
 				<< it->timestamp.GetString()
 				<< ","
 				<< "v" << strNumber.GetString()

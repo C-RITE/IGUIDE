@@ -40,10 +40,13 @@ public:
 	int					getProgress(int region, int &size);
 	void				untouch();
 	void				setOverlap(float overlap, float rsDeg);	
+	void				setSubject(CString prefix) { subject = prefix; };
+
 
 private:
 	
-	CD2DSizeF		overlap;						
+	CD2DSizeF		overlap;
+	CString			subject;
 	CString			timestamp;
 	int				index;
 	bool			fileTouched;

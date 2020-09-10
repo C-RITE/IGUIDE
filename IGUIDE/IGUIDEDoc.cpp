@@ -787,7 +787,8 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 		split = videoinfo.Find(L",", 0);
 		token = videoinfo.Left(split);
 		videoinfo = videoinfo.Mid(++split);
-		subject = token;
+		prefix = token;
+		m_pGrid->patchlist.setSubject(prefix);
 
 		// extract timestamp
 		split = videoinfo.Find(L"_,", 0);
