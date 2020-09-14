@@ -12,7 +12,6 @@ using namespace D2D1;
 Grid::Grid() : currentPatch(patchlist.end()) {
 
 	isPanning = false;
-	wheelNotch = { 1, 1 };
 	regionSize = { 0 , 0 };
 	regionCount = 1;
 }
@@ -38,52 +37,21 @@ Patch Grid::getPatch(int index) {
 
 }
 
-void Grid::selectPatch(int region, int index) {
+void Grid::selectPatch(int uID) {
 	
-	Patches::iterator patch;
-
-	patch = patchlist.begin();
-
-	while (patch->region != region) {
-		patch = std::next(patch);
-	}
-
-	for (int i = 1; i < index; i++)
-		patch = std::next(patch);
-
-	currentPatch = patch;
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
-
-	pView->m_pDlgTarget->Pinpoint(*currentPatch);
-	
-	pDoc->UpdateAllViews(NULL);
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++)
+		if (it->uID == uID)
+			currentPatch = it;
 
 }
 
-void Grid::addPatch(CPoint loc) {
+void Grid::addPatch(CPoint pos) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CD2DPointF posDeg(PixelToDegree(loc));
+	CD2DPointF posDeg(PixelToDegree(pos));
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
-	// single location
-
-	Patch p;
-	p.coordsDEG.x = posDeg.x;
-	p.coordsPX.x = loc.x;
-	p.coordsDEG.y = posDeg.y;
-	p.coordsPX.y = loc.y;
-	p.rastersize = pDoc->m_raster.size;
-    p.region = 0;
-	p.index = -1;
-	p.color = pDoc->m_raster.color;
-	p.locked = false;
-	p.visited = false;
-	p.defocus = L"0";
-	patchlist.push_back(p);
-
-	currentPatch = std::prev(patchlist.end());
+	patchlist.addPatch(pos, posDeg, rsDeg);
 
 }
 
@@ -112,109 +80,27 @@ CD2DPointF Grid::PixelToDegree(CPoint point) {
 
 }
 
-
-void Grid::controlRegion(int notch, int dim, CPoint point) {
-
-	// mousewheel interface for region sizing
-
-	switch (dim){
-
-		case 0:
-			wheelNotch.cx += notch;
-			wheelNotch.cy += notch;
-			break;
-
-		case 1:
-			wheelNotch.cx += notch;
-			break;
-
-		case 2:
-			wheelNotch.cy += notch;
-			break;
-	}
-
-	if (wheelNotch.cx <=1) {
-		wheelNotch.cx = 1;
-	}
-
-	if (wheelNotch.cy <= 1) {
-		wheelNotch.cy = 1;
-	}
-
-
-	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
-		makeRegion(point);
-	else {
-		region.clear();
-	}
-
-}
-
-
-void Grid::makeRegion(CPoint loc) {
+void Grid::makeRegion(CPoint point, SIZE wheel) {
 
 	// create a region and add overlap
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
-	CD2DPointF posDeg(PixelToDegree(loc));
+	CD2DPointF posDeg(PixelToDegree(point));
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
 	region.clear();
 
-	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-	float zoom = 1 / pView->getZoomFactor();
+	// make region
+	region.makePatchMatrix(wheel, point, posDeg, rsDeg);
 
-	if (wheelNotch.cx == 1 && wheelNotch.cy == 1) {
-
-		// single location
-		Patch p;
-		p.coordsDEG.x = posDeg.x;
-		p.coordsPX.x = loc.x;
-		p.coordsDEG.y = posDeg.y;
-		p.coordsPX.y = loc.y;
-		p.rastersize = pDoc->m_raster.size;
-		p.color = pDoc->m_raster.color;
-		p.region = 0;
-		p.locked = false;
-		p.visited = false;
-		p.defocus = L"0";
-		region.push_back(p);
-
-	}
-
-	else {
-
-		// make m-by-n matrix of patches controlled by mousewheel
-
-		for (float i = -(float)wheelNotch.cx / 2; i < (float)wheelNotch.cx / 2; i++) {
-
-			Patch p;
-			p.coordsDEG.x = posDeg.x + rsDeg * i + rsDeg / 2;
-			p.coordsPX.x = (loc.x + rsDeg * PPD * i) + rsDeg * PPD / 2;
-
-			for (float j = -(float)wheelNotch.cy / 2; j < (float)wheelNotch.cy / 2; j++) {
-
-				p.coordsDEG.y = posDeg.y + rsDeg * j + rsDeg / 2;
-				p.coordsPX.y = (loc.y + rsDeg * PPD * j ) + rsDeg * PPD / 2;
-				p.rastersize = pDoc->m_raster.size;
-				p.color = pDoc->m_raster.color;
-				p.locked = false;
-				p.visited = false;
-				p.defocus = L"0";
-				p.region = region.size();
-				region.push_back(p);
-
-			}
-
-		}
-
-		// add overlap
-		region.setOverlap(pDoc->m_Overlap, rsDeg);
-
-	}
+	// add overlap
+	region.setOverlap(pDoc->m_Overlap, rsDeg);
 
 }
+
+
 
 void Grid::calcRegionSize(float zoom) {
 
@@ -287,7 +173,7 @@ void Grid::addRegion() {
 	for (auto it = region.begin(); it != region.end(); it++) {
 		it->region = regionCount;
 		it->index = -1;								// yet unknown at this point, thus -1
-		patchlist.push_back(*it);
+		patchlist.add(*it);
 
 		AfxGetMainWnd()->SendMessage(
 			PATCH_TO_REGIONPANE,
@@ -446,7 +332,6 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 
-
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
@@ -501,7 +386,6 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 	}
 
 }
-
 
 void Grid::CreateGridGeometry(CHwndRenderTarget* pRenderTarget) {
 

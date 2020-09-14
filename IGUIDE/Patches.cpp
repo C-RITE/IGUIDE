@@ -2,12 +2,10 @@
 #include "Patches.h"
 #include "IGUIDEDoc.h"
 #include "MainFrm.h"
-#include <sstream>
 
 using namespace std;
 
-
-Patches::Patches() : filename(L"IGUIDE.csv"), fileTouched(false), index(1)
+Patches::Patches() : index(1), uID(1)
 {
 }
 
@@ -15,9 +13,9 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 {
 	CIGUIDEDoc *pDoc = (CIGUIDEDoc *)lpParameter;
 
-	WaitForMultipleObjects(1, pDoc->m_hWaitDigest, TRUE, INFINITE);
+	WaitForSingleObject(pDoc->m_hWaitDigest, INFINITE);
 	pDoc->m_pGrid->currentPatch->timestamp = pDoc->timestamp;
-	pDoc->m_pGrid->currentPatch->index = _ttoi(pDoc->vidnumber);
+	pDoc->m_pGrid->currentPatch->vidnumber = pDoc->vidnumber;
 	pDoc->m_pGrid->currentPatch->wavelength = pDoc->wavelength;
 	pDoc->m_pGrid->currentPatch->vidfilename = pDoc->vidfilename;
 	pDoc->m_pGrid->currentPatch->vidlength = pDoc->vidlength;
@@ -29,23 +27,11 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 
 }
 
-void Patches::GetSysTime(CString &buf) {
-
-	time_t rawtime;
-	struct tm * timeinfo;
-	char buffer[80];
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-	strftime(buffer, 80, "%Y_%m_%d_%H_%M_%S", timeinfo);
-	buf = buffer;
-
-}
-
 void Patches::commit(Patches::iterator &patch) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 
-	// if connected to ICANDI, use same timestamp and vidnumber for index
+	// if connected to ICANDI, use same timestamp and vidnumber
 	if (*pDoc->m_pActiveConnections == ICANDI || *pDoc->m_pActiveConnections == BOTH) {
 		DWORD thdID;
 		// wait until all messages from ICANDI are digested
@@ -55,19 +41,85 @@ void Patches::commit(Patches::iterator &patch) {
 	else // use internal values
 	{
 		CString systime;
-		GetSysTime(systime);
+		CMainFrame::GetSysTime(systime);
 
 		patch->timestamp = systime.GetString();
-		patch->index = index++;
 		patch->wavelength = L"N/A";
 		patch->vidfilename = L"N/A";
 		patch->vidlength = L"N/A";
 
 	}
 	
+	patch->index = index++;
+	patch->uID = uID++;
 	patch->locked = true;
 	patch->defocus = pDoc->getCurrentDefocus();
 	
+}
+
+void Patches::addPatch(CPoint pos, CD2DPointF posDeg, float rsDeg) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	D2D1_COLOR_F color = pDoc->m_raster.color;
+	int rsize = pDoc->m_raster.size;
+
+	Patch p;
+
+	p.uID = uID++;
+	p.coordsDEG.x = posDeg.x;
+	p.coordsPX.x = pos.x;
+	p.coordsDEG.y = posDeg.y;
+	p.coordsPX.y = pos.y;
+	p.rastersize = rsize;
+	p.region = 0;
+	p.index = -1;
+	p.color = color;
+	p.locked = false;
+	p.visited = false;
+	p.defocus = L"0";
+
+	this->push_back(p);
+
+}
+
+void Patches::makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float rsDeg) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	D2D1_COLOR_F color = pDoc->m_raster.color;
+	int rsize = pDoc->m_raster.size;
+
+
+	// make m-by-n matrix of patches controlled by mousewheel
+
+	for (float i = -(float)wheel.cx / 2; i < (float)wheel.cx / 2; i++) {
+
+		Patch p;
+
+		p.coordsDEG.x = posDeg.x + rsDeg * i + rsDeg / 2;
+		p.coordsPX.x = (pos.x + rsDeg * PPD * i) + rsDeg * PPD / 2;
+
+		for (float j = -(float)wheel.cy / 2; j < (float)wheel.cy / 2; j++) {
+
+			p.coordsDEG.y = posDeg.y + rsDeg * j + rsDeg / 2;
+			p.coordsPX.y = (pos.y + rsDeg * PPD * j) + rsDeg * PPD / 2;
+			p.rastersize = rsize;
+			p.color = color;
+			p.locked = false;
+			p.visited = false;
+			p.defocus = L"0";
+			p.region = -1;
+			this->push_back(p);
+
+		}
+
+	}
+
+}
+
+void Patches::add(Patch val)
+{
+	val.uID = uID++;
+ 	this->push_back(val);
 }
 
 int Patches::getProgress(int region, int &size) {
@@ -117,99 +169,7 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 void Patches::duplicate(Patches::iterator &current)
 {
 	current = this->insert(current, *current);
+	current->uID = ++uID;
 	current->locked = false;
 	ATLTRACE(_T("patchlist: size[%d]\n"), this->size());
-}
-
-void Patches::untouch() {
-
-	fileTouched = false;
-	filename = "IGUIDE.csv";
-
-}
-
-
-bool Patches::SaveToFile(CString directory) {
-
-	wstringstream sstream;
-	CString strPrefix, strNumber, strDegX, strDegY, strDefocus, strWaveLength;
-	CString header("subject(prefix),timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
-
-	for (auto it = this->begin(); it != this->end(); ++it)
-	{
-		if (it->locked) {
-
-			strPrefix.Format(_T("%s"), subject);
-			strNumber.Format(_T("%.3d"), it->index);
-			strDegX.Format(_T("%.2f"), it->coordsDEG.x);
-			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
-			strDefocus.Format(_T("%s"), it._Ptr->defocus);
-			strWaveLength.Format(_T("%s"), it._Ptr->wavelength);
-					   
-			sstream
-				<< subject.GetString()
-				<< ","
-				<< it->timestamp.GetString()
-				<< ","
-				<< "v" << strNumber.GetString()
-				<< ","
-				<< it->region
-				<< ","
-				<< strDegX.GetString()
-				<< ","
-				<< strDegY.GetString()
-				<< ","
-				<< strDefocus.GetString()
-				<< ","
-				<< strWaveLength.GetString()
-				<< std::endl;
-
-		}
-
-	}
-	//CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
-
-	/*if (FileDlg.DoModal() == IDOK) {
-		CString pathName = FileDlg.GetPathName();
-		CStdioFile outputFile(pathName, CFile::modeWrite | CFile::modeCreate | CFile::typeUnicode);
-		outputFile.WriteString((sstream.str().c_str()));
-		outputFile.Close();
-		return TRUE;
-	}*/
-
-
-	if (!fileTouched) {
-		GetSysTime(timestamp);
-		filename = subject + "_" + timestamp + "_" + filename;
-	}
-
-	try {
-		CStdioFile outputFile(directory + filename, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
-    		outputFile.WriteString(header + "\n" + sstream.str().c_str());
-		outputFile.Close();
-		fileTouched = true;
-	}
-
-	catch (CFileException* pe)
-	{
-
-		TCHAR szCause[255];
-		CString strFormatted;
-		pe->GetErrorMessage(szCause, 255);
-
-		strFormatted = _T("The data file could not be saved because of this error: \n");
-		strFormatted += szCause;
-		AfxMessageBox(strFormatted);
-
-		fileTouched = FALSE;
-		filename = "IGUIDE.csv";
-
-		pe->Delete();
-
-		return FALSE;
-
-	}
-
-	return TRUE;
-
 }

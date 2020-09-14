@@ -1,6 +1,11 @@
 #pragma once
-
+#include <vector>
 // RegionTreeCtrl
+
+struct index {
+	HTREEITEM h;
+	int uID;
+};
 
 class RegionTreeCtrl : public CTreeCtrl
 {
@@ -16,6 +21,7 @@ protected:
 
 protected:
 	DECLARE_MESSAGE_MAP()
+
 public:
 	afx_msg void OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCstDrw(NMHDR* pNMHDR, LRESULT* pResult);
@@ -29,12 +35,9 @@ protected:
 		COLORREF color;
 		LOGFONT  logfont;
 	};
+
 	CMap< void*, void*, Color_Font, Color_Font& > m_mapColorFont;
-
-	int selItemIndex;				// item index of current selection
-	int selItemRegion;				// selected item's parent
 	BOOL click;
-
 
 public:
 
@@ -45,10 +48,14 @@ public:
 	BOOL GetItemBold(HTREEITEM hItem);
 	COLORREF GetItemColor(HTREEITEM hItem);
 
+	std::vector<HTREEITEM>			regionNodes;
+	std::vector<index>				indexTable;
 	HTREEITEM						selected;
 
 public:
+
 	afx_msg void OnPaint();
 	afx_msg void OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMClick(NMHDR *pNMHDR, LRESULT *pResult);
+
 };

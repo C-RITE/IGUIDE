@@ -29,6 +29,9 @@ public:
 	CString timestamp;
 	CString wavelength;
 	CString videolength;
+	CString subject;
+	CString system;
+
 	float x;
 	float y;
 	virtual BOOL OnInitDialog();

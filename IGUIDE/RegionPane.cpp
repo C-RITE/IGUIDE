@@ -58,7 +58,7 @@ void RegionPane::OnSize(UINT nType, int cx, int cy)
 void RegionPane::clear() {
 
     m_wndTree.DeleteAllItems();
-    regionNodes.clear();
+    m_wndTree.regionNodes.clear();
 
 }
 
@@ -90,22 +90,22 @@ void RegionPane::addPatch(Patch* p) {
         tvInsert.item.pszText = (LPTSTR)(LPCTSTR)patchname;
         insert = m_wndTree.InsertItem(&tvInsert);
         m_wndTree.SetItemColor(insert, RGB(255, 255, 255));
-		indexmap.push_back(mapIndex{ insert, p->index });
+		m_wndTree.indexTable.push_back(index{ insert, p->uID });
      }
 
 	else {
 
 		// else insert into subtree
 
-		HTREEITEM regNode = regionNodes[region - 1];
+		HTREEITEM regNode = m_wndTree.regionNodes[region - 1];
 		HTREEITEM elem = m_wndTree.GetChildItem(regNode);
 		//for (int i = 0; i < (patchOffset[region - 1]); i++)
 		//	elem = m_wndTree.GetNextSiblingItem(elem);
 
-		insert = m_wndTree.InsertItem(patchname, regionNodes[region - 1], TVI_LAST);
+		insert = m_wndTree.InsertItem(patchname, m_wndTree.regionNodes[region - 1], TVI_LAST);
 		m_wndTree.SetItemColor(insert, RGB(255, 0, 0));
-		m_wndTree.Expand(regionNodes[region - 1], TVE_EXPAND);
-		indexmap.push_back(mapIndex{ insert, p->index });
+		m_wndTree.Expand(m_wndTree.regionNodes[region - 1], TVE_EXPAND);
+		m_wndTree.indexTable.push_back(index{ insert, p->uID });
 
 		// also select first element in subtree
 		if (insert == m_wndTree.GetChildItem(regNode)) {
@@ -139,10 +139,10 @@ void RegionPane::update(Patch* p) {
 
 }
 
-void RegionPane::select(int index) {
+void RegionPane::select(int uID) {
 
-	for (auto it = indexmap.begin(); it != indexmap.end(); it++)
-		if (it->index == index)
+	for (auto it = m_wndTree.indexTable.begin(); it != m_wndTree.indexTable.end(); it++)
+		if (it->uID == uID)
 			m_wndTree.selected = it->h;
 
 	m_wndTree.SelectItem(m_wndTree.selected);
@@ -175,7 +175,7 @@ void RegionPane::browse(Element e) {
 void RegionPane::remove(int region)
 {
     
-    HTREEITEM regNode = regionNodes[region - 1];
+    HTREEITEM regNode = m_wndTree.regionNodes[region - 1];
     HTREEITEM hItemChild = m_wndTree.GetChildItem(regNode);
 
     // save all commited (i.e. green) patches in root before erasing region
@@ -195,7 +195,7 @@ void RegionPane::remove(int region)
     }
 
     // erase and rewind
-    regionNodes.pop_back();
+    m_wndTree.regionNodes.pop_back();
     m_wndTree.DeleteItem(regNode);
 
 }
@@ -218,7 +218,7 @@ void RegionPane::addRegion(int regCount)
 
     HTREEITEM regionNode = m_wndTree.InsertItem(&tvInsert);
     m_wndTree.SetItemColor(regionNode, RGB(255, 255, 255));
-    regionNodes.push_back(regionNode);
+    m_wndTree.regionNodes.push_back(regionNode);
 
 }
 

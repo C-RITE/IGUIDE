@@ -13,13 +13,6 @@ IMPLEMENT_DYNAMIC(PatchInfo, CDialogEx)
 
 PatchInfo::PatchInfo(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_PATCHINFO, pParent)
-	, filename(_T(""))
-	, directory(_T(""))
-	, defocus(_T(""))
-	, timestamp(_T(""))
-	, videolength(_T(""))
-	, x()
-	, y()
 {
 
 }
@@ -37,6 +30,8 @@ void PatchInfo::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_TIMESTAMP_EDIT, timestamp);
 	DDX_Text(pDX, IDC_VIDLENGTH_EDIT, videolength);
 	DDX_Text(pDX, IDC_WAVELENGTH_EDIT, wavelength);
+	DDX_Text(pDX, IDC_SYSTEM_EDIT, system);
+	DDX_Text(pDX, IDC_SUBJECT_EDIT, subject);
 	DDX_Text(pDX, IDC_X_COORDINATE_EDIT, x);
 	DDX_Text(pDX, IDC_Y_COORDINATE_EDIT, y);
 }

@@ -1,4 +1,3 @@
-
 // IGUIDEView.cpp : implementation of the CIGUIDEView class
 //
 
@@ -54,6 +53,7 @@ CIGUIDEView::CIGUIDEView()
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
 	m_bMouseTracking = false;
 	m_lButtonIsDown = false;
+	wheelNotch = { 1, 1 };
 
 }
 
@@ -156,9 +156,9 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{	
 		// create patchjob
-		if (pDoc->m_pGrid->region.size() > 0) {
+		if (wheelNotch.cx != 1 && wheelNotch.cy != 1) {
 
-			pDoc->m_pGrid->makeRegion(point);
+			pDoc->m_pGrid->makeRegion(point, wheelNotch);
 			pDoc->m_pGrid->addRegion();
 			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
 			pDoc->m_pGrid->setCurrentPatch(pDoc->m_pGrid->patchlist.back().region, 1);
@@ -170,8 +170,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		// add single patch
 		else {
 			pDoc->m_pGrid->addPatch(point);
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			pDoc->m_pGrid->currentPatch = std::prev(pDoc->m_pGrid->patchlist.end());
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 		}
 
 	}
@@ -246,13 +246,13 @@ BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
 	if (nFlags & MK_SHIFT) {
-		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 0, mousePos);
+		controlWheel(zDelta / WHEEL_DELTA, 0, mousePos);
 	}
 	else if (GetKeyState('Y') & 0x8000) {
-		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 2, mousePos);
+		controlWheel(zDelta / WHEEL_DELTA, 2, mousePos);
 	}
 	else if (GetKeyState('X') & 0x8000) {
-		pDoc->m_pGrid->controlRegion(zDelta / WHEEL_DELTA, 1, mousePos);
+		controlWheel(zDelta / WHEEL_DELTA, 1, mousePos);
 	}
 	
 	else if ((zoom + zDelta / 100) >= 1) {
@@ -506,6 +506,45 @@ void CIGUIDEView::OnDraw(CDC* /*pDC*/)
 	// all the drawing happens in OnDraw2D
 
 }
+
+void CIGUIDEView::controlWheel(int notch, int dim, CPoint point) {
+
+	// mousewheel interface for region sizing
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
+	switch (dim) {
+
+	case 0:
+		wheelNotch.cx += notch;
+		wheelNotch.cy += notch;
+		break;
+
+	case 1:
+		wheelNotch.cx += notch;
+		break;
+
+	case 2:
+		wheelNotch.cy += notch;
+		break;
+	}
+
+	if (wheelNotch.cx <= 1) {
+		wheelNotch.cx = 1;
+	}
+
+	if (wheelNotch.cy <= 1) {
+		wheelNotch.cy = 1;
+	}
+
+
+	if (wheelNotch.cx > 1 || wheelNotch.cy > 1)
+		pDoc->m_pGrid->makeRegion(point, wheelNotch);
+	else {
+		pDoc->m_pGrid->region.clear();
+	}
+
+}
+
 
 BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {

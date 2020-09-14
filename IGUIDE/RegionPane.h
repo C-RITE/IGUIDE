@@ -1,6 +1,5 @@
 #pragma once
 #include "Patches.h"
-#include <vector>
 #include "RegionTreeCtrl.h"
 
 class RegionPane : public CDockablePane
@@ -16,19 +15,12 @@ protected:
 
 public:
 
-	int					getRegionSize()							{ return regionNodes.size(); };
+	int					getRegionSize()	{ return m_wndTree.regionNodes.size(); };
 
 private:
 
-	struct mapIndex {
-		HTREEITEM h;
-		int index;
-	};
-
-	RegionTreeCtrl			m_wndTree;
-	std::vector<HTREEITEM>	regionNodes;
-	std::vector<mapIndex>	indexmap;
-
+	RegionTreeCtrl		m_wndTree;
+	
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

@@ -39,6 +39,10 @@ public:
 		return mouseStart;
 	}
 
+	SIZE getWheel() {
+		return wheelNotch;
+	}
+
 	float getZoomFactor() {
 		return 1 / zoom;
 	}
@@ -59,6 +63,7 @@ private:
 	D2D1_MATRIX_3X2_F		scale;
 	D2D1_MATRIX_3X2_F		translate;
 	CPoint					mousePos;							// current mouse location
+	SIZE					wheelNotch;							// current wheel location in x and y axis
 	CPoint					mouseStart;							// starting point
 	CPoint					mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
@@ -74,6 +79,7 @@ public:
 	bool					m_lButtonIsDown;					// workaround for not accidently clicking 
 	void					ResetTransformationMatrices();
 	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
+	void					controlWheel(int notch, int dim, CPoint point);
 
 private:
 	void CIGUIDEView::SetFixationTarget();

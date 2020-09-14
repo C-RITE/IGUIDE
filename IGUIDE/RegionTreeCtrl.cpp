@@ -59,6 +59,8 @@ void RegionTreeCtrl::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
     patchinfo.timestamp = p.timestamp;
 	patchinfo.wavelength = p.wavelength;
 	patchinfo.videolength = p.vidlength;
+	patchinfo.subject = pDoc->prefix;
+	patchinfo.system = pDoc->system;
 	
 	WindowText.Format(L"Details about Patch %d", p.index);
 	patchinfo.windowTitle = WindowText;
@@ -80,46 +82,15 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	if (ItemHasChildren(selected))
 		return;
 
-	int index = 1;
-	int region = 0;
+	int uID;
 
-	HTREEITEM parent = GetParentItem(selected);
-	HTREEITEM child = GetChildItem(parent);
-
-	if (parent == NULL) {
-
-		CString text = GetItemText(selected);
-		text = text.TrimLeft(L"P");
-		int divider = text.Find(L":", 0);
-		text = text.Left(divider);
-		region = 0;
-		index = _ttoi(text);
-
+	for (auto it = indexTable.begin(); it != indexTable.end(); it++) {
+		if (selected == it->h)
+			uID = it->uID;
 	}
+		
 
-	else while (selected != child)
-
-	{
-		while (ItemHasChildren(child)) {
-			child = GetNextSiblingItem(child);
-		}
-
-		if (GetNextSiblingItem(child)) {
-			child = GetNextSiblingItem(child);
-		}
-
-		index++;
-
-	}
-
-	CString regionStr = GetItemText(parent);
-	regionStr = regionStr.Mid(8);
-	region = _ttoi(regionStr);
-
-	selItemIndex = index;
-	selItemRegion = region;
-
-	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)region, (LPARAM)index);
+	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)uID);
 
 	click = false;
 

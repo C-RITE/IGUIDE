@@ -9,6 +9,7 @@
 #include "Properties.h"
 #include "Monitors.h"
 #include "Controller.h"
+#include <sstream>
 
 struct NetMsg {
 
@@ -59,7 +60,7 @@ public:
 	CString*				m_pInputBuf;						// input buffer for incoming messages
 	HANDLE*					m_hNetMsg;							// handle for netcom message events
 	HANDLE					m_hSaveEvent;						// trigger when all digested
-	HANDLE*					m_hWaitDigest;						// digestion events
+	HANDLE					m_hWaitDigest;						// digestion events
 
 	// received remote information
 	CString					defocus;							// AOSACA defocus
@@ -78,18 +79,20 @@ private:
 
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
-
+	bool					fileTouched;						// indicate first save of .csv file
+	CString					csvFileName;						// filename for .csv output file
 	void					createNetComThread();				// for processing incoming remote messages
 	
 	HANDLE					m_hNetComThread;					// handle for incoming message thread
 	DWORD					m_thdID;							// corresponding thread ID
 
 	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);
-
+	
 	void					restoreRegionPane();				// repopulate regionpane after load .igd session file
 
 	// Operations
 public:
+
 	bool					CheckFOV();
 	float					CalcEdgeLength(Edge k);
 	CD2DPointF				compute2DPolygonCentroid(const CD2DPointF* vertices, int vertexCount);
@@ -111,6 +114,8 @@ public:
 	vector<CString>			getQuickHelp();						// show remote control hotkeys
 	void					OnFundusImport();
 	void					LoadFundus();
+
+	bool					SaveToFile();						// save .csv file
 
 	// Overrides
 private:

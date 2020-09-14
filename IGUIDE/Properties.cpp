@@ -98,7 +98,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 
 	if (propName == L"Overlap") {
 		pDoc->m_Overlap = vt;
-		pDoc->m_pGrid->makeRegion(pView->getMousePos());
+		pDoc->m_pGrid->makeRegion(pView->getMousePos(), pView->getWheel());
 	}
 
 	if (propName == L"Scale") {

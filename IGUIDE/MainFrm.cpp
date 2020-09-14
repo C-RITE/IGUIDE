@@ -66,28 +66,40 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 
 		WaitForSingleObject(parent->m_pDoc->m_hSaveEvent, INFINITE);
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->vidfolder;
-		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
 	}
 	else {
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
-		parent->m_pDoc->m_pGrid->patchlist.SaveToFile(*parent->m_pDoc->m_pCurrentOutputDir);
 	}
 
+	parent->m_pDoc->SaveToFile();
 	parent->sendToRegionPane();
 
 	return 0;
 
 }
 
+void CMainFrame::GetSysTime(CString &buf) {
+
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "%Y_%m_%d_%H_%M_%S", timeinfo);
+	buf = buffer;
+
+}
+
+
 
 void CMainFrame::sendToRegionPane() {
 
 	if (m_pDoc->m_pGrid->currentPatch->region == 0) {
-		SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
+		SendMessage(PATCH_TO_REGIONPANE,(WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
 	}
 
 	else {
-		SendMessage(UPDATE_SELECTION, (WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
+		SendMessage(UPDATE_SELECTION,(WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
 	}
 
 }
@@ -457,10 +469,16 @@ afx_msg LRESULT CMainFrame::OnPatchToRegionPane(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 {
-	int index = (int)lParam;
-	int region = (int)wParam;
+	int uID = (int)wParam;
 
-	m_pDoc->m_pGrid->selectPatch(region, index);
+	m_pDoc->m_pGrid->selectPatch(uID);
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	pView->m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+
+	pDoc->UpdateAllViews(NULL);
 
 	return 0;
 

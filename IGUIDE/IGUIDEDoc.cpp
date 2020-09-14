@@ -62,13 +62,16 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_pFundus = new Fundus();
 	m_pDlgCalibration = new Calibration();
 	m_pCurrentOutputDir = &m_OutputDir;
+	m_pActiveConnections = NULL;
 	m_raster.meanAlpha = 0;
 	m_RemoteCtrl = L"NONE";
 	m_InputController = L"Mouse";
 	m_Overlap = 50;
+
 	overlaySettings = 0;
 	defocus = L"0";
-	m_pActiveConnections = NULL;
+	fileTouched = false;
+	csvFileName = L"IGUIDE.csv";
 
 	overlayVisible = true;
 	calibrationComplete = false;
@@ -93,13 +96,10 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
 	CloseHandle(m_hNetMsg[2]);
-
-	CloseHandle(m_hWaitDigest[0]);
-
 	CloseHandle(m_hSaveEvent);
 
 	delete[] m_hNetMsg;
-	delete[] m_hWaitDigest;
+
 	CloseHandle(m_hNetComThread);
 
 }
@@ -110,18 +110,14 @@ void CIGUIDEDoc::createNetComThread() {
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
 	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
-	
-	m_hWaitDigest = new HANDLE[1];
-	m_hWaitDigest[0] = CreateEvent(NULL, FALSE, FALSE, L"VIDEOINFO_DIGESTED");
 
+	m_hWaitDigest = CreateEvent(NULL, FALSE, FALSE, L"VIDEOINFO_DIGESTED");
 	m_hSaveEvent = CreateEvent(NULL, FALSE, FALSE, L"SAVE_TRIGGER");
 
 	m_pInputBuf = new CString[2];
 	m_hNetComThread = ::CreateThread(NULL, 0, ThreadNetMsgProc, this, 0, &m_thdID);
 
 }
-
-	
 
 DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 {
@@ -461,6 +457,91 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 	
 }
 
+
+bool CIGUIDEDoc::SaveToFile() {
+
+	wstringstream sstream;
+
+	CString strNumber, strDegX, strDegY, strDefocus;
+	CString header("subject(prefix),timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
+
+	for (auto it = m_pGrid->patchlist.begin(); it != m_pGrid->patchlist.end(); ++it)
+	{
+
+		if (it->locked) {
+
+			strNumber.Format(_T("%.3d"), it->index);
+			strDegX.Format(_T("%.2f"), it->coordsDEG.x);
+			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
+
+			sstream
+				<< prefix.GetString()
+				<< ","
+				<< it->timestamp.GetString()
+				<< ","
+				<< "v" << strNumber.GetString()
+				<< ","
+				<< it->region
+				<< ","
+				<< strDegX.GetString()
+				<< ","
+				<< strDegY.GetString()
+				<< ","
+				<< it->defocus.GetString()
+				<< ","
+				<< it->wavelength.GetString()
+				<< std::endl;
+
+		}
+
+	}
+	//CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
+
+	/*if (FileDlg.DoModal() == IDOK) {
+		CString pathName = FileDlg.GetPathName();
+		CStdioFile outputFile(pathName, CFile::modeWrite | CFile::modeCreate | CFile::typeUnicode);
+		outputFile.WriteString((sstream.str().c_str()));
+		outputFile.Close();
+		return TRUE;
+	}*/
+
+
+	if (!fileTouched) {
+		CMainFrame::GetSysTime(timestamp);
+		csvFileName = prefix + "_" + timestamp + "_" + csvFileName;
+	}
+
+	try {
+		CStdioFile outputFile(*m_pCurrentOutputDir + csvFileName, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
+		outputFile.WriteString(header + "\n" + sstream.str().c_str());
+		outputFile.Close();
+		fileTouched = true;
+	}
+
+	catch (CFileException* pe)
+	{
+
+		TCHAR szCause[255];
+		CString strFormatted;
+		pe->GetErrorMessage(szCause, 255);
+
+		strFormatted = _T("The data file could not be saved because of this error: \n");
+		strFormatted += szCause;
+		AfxMessageBox(strFormatted);
+
+		fileTouched = FALSE;
+		csvFileName = "IGUIDE.csv";
+
+		pe->Delete();
+
+		return FALSE;
+
+	}
+
+	return TRUE;
+
+}
+
 void CIGUIDEDoc::restoreRegionPane() {
 
 	AfxGetMainWnd()->SendMessage(CLEAR_REGIONPANE, NULL, NULL);
@@ -788,7 +869,6 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 		token = videoinfo.Left(split);
 		videoinfo = videoinfo.Mid(++split);
 		prefix = token;
-		m_pGrid->patchlist.setSubject(prefix);
 
 		// extract timestamp
 		split = videoinfo.Find(L"_,", 0);
@@ -822,9 +902,12 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 
 		// extract videolength
 		vidlength = videoinfo;
+
+		vidfilename = prefix + L"_" + timestamp + L"_" + system + L"_" + wavelength + L"_V" + vidnumber + L".avi";
 		
-		// signal that netcom message digestion happened
-		SetEvent(m_hWaitDigest[0]);
+		// signal that digestion happened
+		SetEvent(m_hWaitDigest);
+
 	}
 
 	if (msg.property == L"AOSACA_DEFOCUS") {

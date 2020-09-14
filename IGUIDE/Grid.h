@@ -53,8 +53,7 @@ public:
 
 public:
 
-	CD2DSizeF				regionSize;						// actual region dimensions with chosen patch overlap
-	SIZE					wheelNotch;						// current wheel location in x and y axis
+	CD2DSizeF				regionSize;						// region dimensions w/patch overlap
 	CD2DPointF				currentPos;						// current cursor position
 	DWORD					overlay;						// for different overlays
 	Patches					patchlist;						// storage for all patches
@@ -72,15 +71,14 @@ public:
 	void clearPatchlist();
 	void addPatch(CPoint point);							// store single patch in patchlist
 	void addRegion();										// add region to patchlist and pane
-	void controlRegion(int notch, int dim, CPoint point);	// set region dimensions
-	void makeRegion(CPoint point);							// create a patchlist around mousepointer
+	void makeRegion(CPoint point, SIZE wheel);				// make a region with given size
 	void makeRegionRects(int region);						// set borders of region for operator view
-	void calcRegionSize(float zoom);						// calculate real region size
+	void calcRegionSize(float zoom);						// calculate region size depending on zoom
 	void browse(Element e);
 	void setCurrentPatch(int region, int index);			// set current patch
 															// process patch queue
 	Patch getPatch(int index);								// get patch by index
-	void selectPatch(int region, int index);				// select current patch from region pane
+	void selectPatch(int uID);								// select current patch from region pane
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with
 	void CreateGridGeometry(CHwndRenderTarget* pRenderTarget);								// construct the grid

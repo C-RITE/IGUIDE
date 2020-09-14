@@ -18,6 +18,7 @@ public:
 	static	CIGUIDEDoc *GetDoc();
 
 	void			sendToRegionPane();				// send patch information to region pane
+	static void		GetSysTime(CString &buf);
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;
