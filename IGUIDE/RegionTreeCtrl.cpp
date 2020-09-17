@@ -82,13 +82,14 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	if (ItemHasChildren(selected))
 		return;
 
-	int uID;
+	UINT uID = -1;
 
 	for (auto it = indexTable.begin(); it != indexTable.end(); it++) {
 		if (selected == it->h)
 			uID = it->uID;
 	}
 		
+	ATLTRACE(_T("uid: [%d] found for treeitem: [%d]\n"), uID, selected);
 
 	AfxGetMainWnd()->SendMessage(PATCH_SELECT, (WPARAM)uID);
 

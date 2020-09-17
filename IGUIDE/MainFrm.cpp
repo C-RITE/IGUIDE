@@ -36,7 +36,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(PATCH_TO_REGIONPANE, &CMainFrame::OnPatchToRegionPane)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
-	ON_MESSAGE(BROWSE_PATCH, &CMainFrame::OnBrowsePatch)
 	ON_MESSAGE(UPDATE_SELECTION, &CMainFrame::OnUpdateSelection)
 END_MESSAGE_MAP()
 
@@ -71,8 +70,8 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
 	}
 
-	parent->m_pDoc->SaveToFile();
 	parent->sendToRegionPane();
+	parent->m_pDoc->SaveToFile();
 
 	return 0;
 
@@ -471,7 +470,9 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 {
 	int uID = (int)wParam;
 
+	m_pDoc->m_pGrid->updateCursorPatch();
 	m_pDoc->m_pGrid->selectPatch(uID);
+	m_RegionPane.select(uID);
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
@@ -488,17 +489,6 @@ afx_msg LRESULT CMainFrame::OnClearRegionpane(WPARAM wParam, LPARAM lParam)
 {
 	m_RegionPane.clear();
 
-	return 0;
-
-}
-
-afx_msg LRESULT CMainFrame::OnBrowsePatch(WPARAM wParam, LPARAM lParam)
-{
-
-	Element elem = (Element)lParam;
-
-	m_RegionPane.browse(elem);
-	
 	return 0;
 
 }

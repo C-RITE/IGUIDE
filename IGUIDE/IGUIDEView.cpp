@@ -161,7 +161,6 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->makeRegion(point, wheelNotch);
 			pDoc->m_pGrid->addRegion();
 			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
-			pDoc->m_pGrid->setCurrentPatch(pDoc->m_pGrid->patchlist.back().region, 1);
 
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			
@@ -169,17 +168,16 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 		// add single patch
 		else {
+
 			pDoc->m_pGrid->addPatch(point);
-			pDoc->m_pGrid->currentPatch = std::prev(pDoc->m_pGrid->patchlist.end());
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->cursorPatch);
+
 		}
 
 	}
 
 	m_pDlgTarget->RedrawWindow();
 	RedrawWindow();
-
-	ATLTRACE(_T("patchlist: size[%d]\n"), pDoc->m_pGrid->patchlist.size());
 
 }
 
@@ -474,11 +472,15 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// disable transforms
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
+		// draw patch cursor
+		if (!pDoc->m_pGrid->isPanning)
+			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, zoom);
+
 		// draw cursor on mousepointer
 		if (pDoc->m_pGrid->region.size() > 1)
 			pDoc->m_pGrid->DrawRegion(pRenderTarget, mousePos, zoom);
 		else
-			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, mousePos, zoom);
+			pDoc->m_pGrid->DrawMouseCursor(pRenderTarget, mousePos, zoom);
 
 		// draw debug info
 #ifdef DEBUG
@@ -555,35 +557,38 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 	if (pMsg->message == WM_KEYDOWN) {
 
-		// move patch in any direction unless locked
-		if ((pDoc->m_pGrid->patchlist.size() > 0)) {
+		// move cursor patch in any direction
+		if (pDoc->m_pGrid->cursorPatch) {
 
 			switch (pMsg->wParam) {
 
 			case VK_UP:
-				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
-				pDoc->m_pGrid->currentPatch->coordsDEG.y -= .1f;
-				pDoc->m_pGrid->currentPatch->coordsPX.y -= .1f * PPD;
+		
+				pDoc->m_pGrid->cursorPatch->coordsDEG.y -= .1f;
+				pDoc->m_pGrid->cursorPatch->coordsPX.y -= .1f * PPD;
 				break;
 
 			case VK_DOWN:
-				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
-				pDoc->m_pGrid->currentPatch->coordsDEG.y += .1f;
-				pDoc->m_pGrid->currentPatch->coordsPX.y += .1f * PPD;
+				
+				pDoc->m_pGrid->cursorPatch->coordsDEG.y += .1f;
+				pDoc->m_pGrid->cursorPatch->coordsPX.y += .1f * PPD;
 				break;
 
 			case VK_LEFT:
-				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
-				pDoc->m_pGrid->currentPatch->coordsDEG.x -= .1f;
-				pDoc->m_pGrid->currentPatch->coordsPX.x -= .1f * PPD;
+
+				pDoc->m_pGrid->cursorPatch->coordsDEG.x -= .1f;
+				pDoc->m_pGrid->cursorPatch->coordsPX.x -= .1f * PPD;
 				break;
 
 			case VK_RIGHT:
-				pDoc->m_pGrid->currentPatch->locked ? pDoc->m_pGrid->patchlist.duplicate(pDoc->m_pGrid->currentPatch) : 0;
-				pDoc->m_pGrid->currentPatch->coordsDEG.x += .1f;
-				pDoc->m_pGrid->currentPatch->coordsPX.x += .1f * PPD;
+
+				pDoc->m_pGrid->cursorPatch->coordsDEG.x += .1f;
+				pDoc->m_pGrid->cursorPatch->coordsPX.x += .1f * PPD;
 				break;
 			}
+
+			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->cursorPatch);
+			m_pDlgTarget->Invalidate();
 
 		}
 
@@ -608,17 +613,15 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			}
 			break;
 
+		// commit the currently selected patch
 		case VK_SPACE:
-
-			if (pDoc->m_pGrid->currentPatch._Ptr == NULL)
-				break;
-
-			pDoc->m_pGrid->patchlist.commit(pDoc->m_pGrid->currentPatch);
-
+		
+			pDoc->m_pGrid->commitPatch();			
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
 			
 			break;
 
+		// next patch in region
 		case 'N':
 
 			pDoc->m_pGrid->showCursor = false;
@@ -629,6 +632,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 			break;
 
+		// previous patch in region
 		case 'B':
 
 			pDoc->m_pGrid->showCursor = false;
@@ -642,7 +646,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 	}
 
 	this->Invalidate();
-
+	
 	return CView::PreTranslateMessage(pMsg);
 
 }

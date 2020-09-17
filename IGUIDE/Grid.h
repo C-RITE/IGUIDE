@@ -47,9 +47,9 @@ public:
 	Grid();
 	~Grid();
 
-	bool					showCursor;						// toggle cursor visibility
+	bool					showCursor;						// toggle mouse cursor visibility
 	bool					showCoords;						// toggle coords visibility
-	bool					isPanning;						// toggle vidnumber visibility
+	bool					isPanning;						// toggle vidnumber/coords visibility
 
 public:
 
@@ -59,7 +59,8 @@ public:
 	Patches					patchlist;						// storage for all patches
 	Patches					region;							// storage for patches spanning a region
 	std::vector<CD2DRectF>	regRects;
-	Patches::iterator		currentPatch;					// current patch
+	Patches::iterator		currentPatch;					// current patchlist element
+	Patch*					cursorPatch;					// the cursor patch
 	CD2DRectF				nerve;							// optic disc
 	CD2DRectF				cursor;							// current cursor
 	CD2DRectF				regionRect;						// current patchjob outline
@@ -67,6 +68,9 @@ public:
 	CD2DPathGeometry*		m_pRegionGeom;					// the patchjob geometry
 	
 	CD2DPointF				PixelToDegree(CPoint point);	// calculate to degrees from fovea from pixel coordinates
+	CD2DPointF				calcMargin(	CD2DPointF &marginX,// calculate margin for displaying coordinates around patch
+										CD2DPointF &marginY,// or position
+										CD2DPointF pos);
 
 	void clearPatchlist();
 	void addPatch(CPoint point);							// store single patch in patchlist
@@ -76,8 +80,8 @@ public:
 	void calcRegionSize(float zoom);						// calculate region size depending on zoom
 	void browse(Element e);
 	void setCurrentPatch(int region, int index);			// set current patch
-															// process patch queue
-	Patch getPatch(int index);								// get patch by index
+	void commitPatch();										// commit current patch
+	void updateCursorPatch();								// update cursor patch
 	void selectPatch(int uID);								// select current patch from region pane
 
 	void CreateD2DResources(CHwndRenderTarget* pRenderTarget);								// something to paint with
@@ -92,9 +96,10 @@ public:
 	void DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom);			// draw region
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);									// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);					// draw target
-	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom);		// draw patch outline around mouse pointer
+	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, float zoom);						// draw patch outline of last click
+	void DrawMouseCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom);		// draw patch outline around mouse pointer
 	void DrawTargetZone(CHwndRenderTarget* pRenderTarget);									// show borders of target visibility
-	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates of cursor and last patch
+	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates around mouse cursor
 	void DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
 
 };

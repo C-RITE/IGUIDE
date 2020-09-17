@@ -457,7 +457,6 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 	
 }
 
-
 bool CIGUIDEDoc::SaveToFile() {
 
 	wstringstream sstream;
@@ -650,7 +649,7 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
 			ar << it->region;
 			ar << it->timestamp;
 			ar << it->vidfilename;
-			ar << it->visited;
+
 		}
 
 	}
@@ -672,7 +671,6 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
 			ar >> p.region;
 			ar >> p.timestamp;
 			ar >> p.vidfilename;
-			ar >> p.visited;
 
 			ps->push_back(p);
 

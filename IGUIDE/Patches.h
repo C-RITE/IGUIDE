@@ -10,8 +10,7 @@ struct Patch {
 	CString				vidfilename;
 	double				rastersize;
 	bool				locked;
-	bool				visited;
-	int					uID;
+	UINT				uID;
 	int					index;
 	int					region;
 	CString				wavelength;
@@ -38,15 +37,12 @@ public:
 
 	Patches();
 
-	void				commit(Patches::iterator &patch);
+	void				commit(Patches::iterator patch);
 	int					getProgress(int region, int &size);
 	void				setOverlap(float overlap, float rsDeg);	
-	void				duplicate(Patches::iterator &current);
-
-	void				addPatch(CPoint pos, CD2DPointF posDeg, float rsDeg);
 	void				makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float rsDeg);
+	Patches::iterator	add(Patch p);
 
-	void				add(Patch val);
 private:
 	
 	CD2DSizeF			overlap;

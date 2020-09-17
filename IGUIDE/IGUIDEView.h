@@ -67,7 +67,7 @@ private:
 	CPoint					mouseStart;							// starting point
 	CPoint					mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
-																// into operator view after openfiledialog
+																
 	bool					m_bMouseTracking;					// track mouse movements outside operator view
 
 // Generated message map functions
@@ -100,10 +100,8 @@ protected:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	virtual void OnInitialUpdate();
 
-
 public:
 	afx_msg void OnFundusImport();
 	afx_msg void OnMouseLeave();
-
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };

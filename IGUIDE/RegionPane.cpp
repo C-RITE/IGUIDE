@@ -122,53 +122,36 @@ void RegionPane::addPatch(Patch* p) {
 void RegionPane::update(Patch* p) {
 	
 	CString patchname;
-	HTREEITEM insert;
-	
+		
 	patchname.Format(L"P%d: %.1f, %.1f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
 	
 	// if the element wasn't yet comitted, update info and paint it green
 
 	if (m_wndTree.GetItemColor(m_wndTree.selected) == RGB(255, 0, 0)) {
-		insert = m_wndTree.InsertItem(patchname, m_wndTree.GetParentItem(m_wndTree.selected), m_wndTree.selected);
-		m_wndTree.DeleteItem(m_wndTree.selected);
-		m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
-		m_wndTree.selected = insert;
+		m_wndTree.SetItemText(m_wndTree.selected, patchname);
+		m_wndTree.SetItemColor(m_wndTree.selected, RGB(0, 200, 0));
 	}
 
 	// if the element was already comitted (i.e. green), append
+
+	else {
+		HTREEITEM insert = m_wndTree.InsertItem(patchname, m_wndTree.GetParentItem(m_wndTree.selected), m_wndTree.selected);
+		m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
+		m_wndTree.indexTable.push_back(index{ insert, p->uID });
+		select(p->uID);
+		
+	}
 
 }
 
 void RegionPane::select(int uID) {
 
 	for (auto it = m_wndTree.indexTable.begin(); it != m_wndTree.indexTable.end(); it++)
-		if (it->uID == uID)
+		if (it->uID == uID) {
 			m_wndTree.selected = it->h;
+		}
 
 	m_wndTree.SelectItem(m_wndTree.selected);
-
-}
-
-void RegionPane::browse(Element e) {
-
-	HTREEITEM temp = m_wndTree.selected;
-		
-	switch (e) {
-
-		case NEXT:
-			m_wndTree.selected = m_wndTree.GetNextSiblingItem(m_wndTree.selected);
-			break;
-
-		case PREV:
-			m_wndTree.selected = m_wndTree.GetPrevSiblingItem(m_wndTree.selected);
-			break;
-
-	}
-
-	if (m_wndTree.selected != NULL)
-		m_wndTree.SelectItem(m_wndTree.selected);
-	else
-		m_wndTree.selected = temp;
 
 }
 

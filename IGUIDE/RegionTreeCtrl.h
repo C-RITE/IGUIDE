@@ -4,7 +4,7 @@
 
 struct index {
 	HTREEITEM h;
-	int uID;
+	UINT uID;
 };
 
 class RegionTreeCtrl : public CTreeCtrl

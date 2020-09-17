@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Patches::Patches() : index(1), uID(1)
+Patches::Patches() : index(1), uID(0)
 {
 }
 
@@ -27,10 +27,10 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 
 }
 
-void Patches::commit(Patches::iterator &patch) {
+void Patches::commit(Patches::iterator patch) {
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-
+	
 	// if connected to ICANDI, use same timestamp and vidnumber
 	if (*pDoc->m_pActiveConnections == ICANDI || *pDoc->m_pActiveConnections == BOTH) {
 		DWORD thdID;
@@ -51,35 +51,11 @@ void Patches::commit(Patches::iterator &patch) {
 	}
 	
 	patch->index = index++;
-	patch->uID = uID++;
 	patch->locked = true;
 	patch->defocus = pDoc->getCurrentDefocus();
+
+	ATLTRACE(_T("current patch: uid[%d] index[%d] region[%d]\n"), patch->uID, patch->index, patch->region);
 	
-}
-
-void Patches::addPatch(CPoint pos, CD2DPointF posDeg, float rsDeg) {
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	D2D1_COLOR_F color = pDoc->m_raster.color;
-	int rsize = pDoc->m_raster.size;
-
-	Patch p;
-
-	p.uID = uID++;
-	p.coordsDEG.x = posDeg.x;
-	p.coordsPX.x = pos.x;
-	p.coordsDEG.y = posDeg.y;
-	p.coordsPX.y = pos.y;
-	p.rastersize = rsize;
-	p.region = 0;
-	p.index = -1;
-	p.color = color;
-	p.locked = false;
-	p.visited = false;
-	p.defocus = L"0";
-
-	this->push_back(p);
-
 }
 
 void Patches::makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float rsDeg) {
@@ -87,7 +63,6 @@ void Patches::makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float r
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	D2D1_COLOR_F color = pDoc->m_raster.color;
 	int rsize = pDoc->m_raster.size;
-
 
 	// make m-by-n matrix of patches controlled by mousewheel
 
@@ -105,9 +80,9 @@ void Patches::makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float r
 			p.rastersize = rsize;
 			p.color = color;
 			p.locked = false;
-			p.visited = false;
 			p.defocus = L"0";
 			p.region = -1;
+
 			this->push_back(p);
 
 		}
@@ -116,10 +91,13 @@ void Patches::makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float r
 
 }
 
-void Patches::add(Patch val)
+Patches::iterator Patches::add(Patch p)
 {
-	val.uID = uID++;
- 	this->push_back(val);
+	p.uID = uID++;
+ 	this->push_back(p);
+
+	return std::prev(this->end());
+
 }
 
 int Patches::getProgress(int region, int &size) {
@@ -164,12 +142,4 @@ void Patches::setOverlap(float overlap, float rsDeg) {
 		it._Ptr->coordsPX.y += dyf * (overlap / 100);
 	}
 
-}
-
-void Patches::duplicate(Patches::iterator &current)
-{
-	current = this->insert(current, *current);
-	current->uID = ++uID;
-	current->locked = false;
-	ATLTRACE(_T("patchlist: size[%d]\n"), this->size());
 }

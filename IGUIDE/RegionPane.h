@@ -29,8 +29,7 @@ public:
 	void addPatch(Patch* p);
 	void update(Patch* p);
 	void remove(int region);
-	void select(int index);
-	void browse(Element e);
+	void select(int uID);
 	void clear();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
