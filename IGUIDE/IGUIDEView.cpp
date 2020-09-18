@@ -570,25 +570,31 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 		
 				pDoc->m_pGrid->cursorPatch->coordsDEG.y -= .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.y -= .1f * PPD;
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 
 			case VK_DOWN:
 				
 				pDoc->m_pGrid->cursorPatch->coordsDEG.y += .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.y += .1f * PPD;
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 
 			case VK_LEFT:
 
 				pDoc->m_pGrid->cursorPatch->coordsDEG.x -= .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.x -= .1f * PPD;
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 
 			case VK_RIGHT:
 
 				pDoc->m_pGrid->cursorPatch->coordsDEG.x += .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.x += .1f * PPD;
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
+
+
 			}
 
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->cursorPatch);
@@ -618,12 +624,15 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			break;
 
 		// commit the currently selected patch
+
 		case VK_SPACE:
 
 			if (onHold) {
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 			}
+			else
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE2), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
 			pDoc->m_pGrid->commitPatch();			
 
@@ -632,6 +641,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			break;
 
 		// next patch in region
+
 		case 'N':
 
 			pDoc->m_pGrid->showCursor = false;
@@ -640,9 +650,12 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			m_pDlgTarget->Invalidate();
 
+			PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+
 			break;
 
 		// previous patch in region
+
 		case 'B':
 
 			pDoc->m_pGrid->showCursor = false;
@@ -651,6 +664,9 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			m_pDlgTarget->Invalidate();
 
+			PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+			
+			break;
 		}
 
 	}

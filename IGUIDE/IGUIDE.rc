@@ -382,8 +382,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,7,2,2
- PRODUCTVERSION 0,7,2,2
+ FILEVERSION 0,7,2,3
+ PRODUCTVERSION 0,7,2,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -400,12 +400,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AG Harmening"
             VALUE "FileDescription", "IGUIDE"
-            VALUE "FileVersion", "0.7.2.2"
+            VALUE "FileVersion", "0.7.2.3"
             VALUE "InternalName", "IGUIDE.exe"
             VALUE "LegalCopyright", "(C)2020 AG Harmening.  All rights reserved."
             VALUE "OriginalFilename", "IGUIDE.exe"
             VALUE "ProductName", "IGUIDE"
-            VALUE "ProductVersion", "0.7.2.2"
+            VALUE "ProductVersion", "0.7.2.3"
         END
     END
     BLOCK "VarFileInfo"
@@ -421,6 +421,12 @@ END
 //
 
 IDR_WAVE1               WAVE                    "res\\wave1.bin"
+
+IDR_WAVE2               WAVE                    "res\\wave2.bin"
+
+IDR_WAVE3               WAVE                    "res\\wave3.bin"
+
+IDR_WAVE4               WAVE                    "res\\wave4.bin"
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -172,6 +172,9 @@
     <None Include="res\wave1.bin">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\wave2.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IGUIDE.rc">
@@ -194,5 +197,16 @@
     <Image Include="res\toolbar1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MSELECT1.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MROLLOV1.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MROLLOV2.WAV">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

@@ -19,6 +19,9 @@
 #define IDI_CROSSHAIR                   333
 #define IDD_PATCHINFO                   349
 #define IDR_WAVE1                       357
+#define IDR_WAVE2                       363
+#define IDR_WAVE3                       364
+#define IDR_WAVE4                       365
 #define IDC_STATIC_CAL                  1002
 #define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
@@ -69,7 +72,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        360
+#define _APS_NEXT_RESOURCE_VALUE        366
 #define _APS_NEXT_COMMAND_VALUE         32807
 #define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           314

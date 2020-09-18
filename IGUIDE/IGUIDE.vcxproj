@@ -285,6 +285,7 @@
     <None Include="packages.config" />
     <None Include="res\IGUIDE.rc2" />
     <None Include="res\wave1.bin" />
+    <None Include="res\wave2.bin" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IGUIDE.rc" />
@@ -295,6 +296,11 @@
     <Image Include="res\IGUIDEDoc.ico" />
     <Image Include="res\IGUIDE.ico" />
     <Image Include="res\toolbar1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MROLLOV1.WAV" />
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MROLLOV2.WAV" />
+    <Media Include="..\..\..\Users\TSLO\Documents\New folder\MSELECT1.WAV" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
