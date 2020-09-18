@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_MESSAGE(PATCH_SELECT, &CMainFrame::OnPatchSelect)
 	ON_MESSAGE(CLEAR_REGIONPANE, &CMainFrame::OnClearRegionpane)
 	ON_MESSAGE(UPDATE_SELECTION, &CMainFrame::OnUpdateSelection)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -50,6 +51,9 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
+
+	countDown = 0;
+
 }
 
 CMainFrame::~CMainFrame()
@@ -65,7 +69,9 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 
 		WaitForSingleObject(parent->m_pDoc->m_hSaveEvent, INFINITE);
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->vidfolder;
+		parent->StartCountDown();
 	}
+
 	else {
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
 	}
@@ -89,7 +95,20 @@ void CMainFrame::GetSysTime(CString &buf) {
 
 }
 
+void CMainFrame::StartCountDown() {
+	
+	CIGUIDEView* pView = (CIGUIDEView*)GetActiveView();
 
+	RemoteControl.onHold = true;
+	countDown = (_ttoi(m_pDoc->m_pGrid->currentPatch->vidlength) * 1000);
+	pView->SendMessage(INITIATE_COUNTDOWN, (WPARAM)&countDown, NULL);
+
+	::SetTimer(this->m_hWnd,
+		IDT_TIMER,
+		countDown,
+		NULL);
+
+}
 
 void CMainFrame::sendToRegionPane() {
 
@@ -102,8 +121,6 @@ void CMainFrame::sendToRegionPane() {
 	}
 
 }
-
-
 
 LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 	
@@ -151,7 +168,6 @@ LRESULT CMainFrame::OnGamePadUpdate(WPARAM w, LPARAM l) {
 	return 0;
 
 }
-
 
 LRESULT CMainFrame::OnMouseFallback(WPARAM w, LPARAM l) {
 	
@@ -250,7 +266,6 @@ BOOL CMainFrame::CreateDockingWindows()
 	return TRUE;
 
 }
-
 
 void CMainFrame::OnViewProperties()
 {
@@ -381,7 +396,6 @@ void CMainFrame::OnParentNotify(UINT message, LPARAM lParam)
 
 }
 
-
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	if (RemoteControl.getActiveConnections() > 0) {
@@ -400,7 +414,6 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 	return CFrameWndEx::PreTranslateMessage(pMsg);
 
 }
-
 
 afx_msg LRESULT CMainFrame::OnResetAosacaIp(WPARAM wParam, LPARAM lParam)
 {
@@ -422,7 +435,6 @@ afx_msg LRESULT CMainFrame::OnResetAosacaIp(WPARAM wParam, LPARAM lParam)
 return 0;
 
 }
-
 
 afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
 {
@@ -447,7 +459,10 @@ return 0;
 afx_msg LRESULT CMainFrame::OnSaveIguideCsv(WPARAM wParam, LPARAM lParam)
 {
 	m_pDoc = GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
 	m_hSaveWaitThread = ::CreateThread(NULL, 0, SaveWaitThread, this, 0, &m_thdID);
+
 	return 0;
 }
 
@@ -501,4 +516,23 @@ afx_msg LRESULT CMainFrame::OnUpdateSelection(WPARAM wParam, LPARAM lParam)
 
 	return 0;
 
+}
+
+
+void CMainFrame::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	switch (nIDEvent) {
+
+	case IDT_TIMER:
+
+		pView->SendMessage(RESET_COUNTDOWN, NULL, NULL);
+		RemoteControl.onHold = false;
+		break;
+
+	}
+
+	CFrameWndEx::OnTimer(nIDEvent);
 }

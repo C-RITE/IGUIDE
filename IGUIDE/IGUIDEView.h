@@ -69,6 +69,8 @@ private:
 	float					zoom;								// zoom factor
 																
 	bool					m_bMouseTracking;					// track mouse movements outside operator view
+	int						countdown;							// countdown video length
+	bool					onHold;								// true as long as ICANDI is recording videos
 
 // Generated message map functions
 
@@ -78,11 +80,11 @@ public:
 
 	bool					m_lButtonIsDown;					// workaround for not accidently clicking 
 	void					ResetTransformationMatrices();
-	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
 	void					controlWheel(int notch, int dim, CPoint point);
+	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
 
 private:
-	void CIGUIDEView::SetFixationTarget();
+	void SetFixationTarget();
 
 protected:
 	
@@ -104,4 +106,8 @@ public:
 	afx_msg void OnFundusImport();
 	afx_msg void OnMouseLeave();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+
+protected:
+	afx_msg LRESULT OnInitiateCountdown(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnResetCountdown(WPARAM wParam, LPARAM lParam);
 };

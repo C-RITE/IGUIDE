@@ -169,6 +169,7 @@ protected:
 public:
 	afx_msg void OnStnClickedAo();
 	virtual BOOL OnInitDialog();
+
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -245,3 +246,4 @@ BOOL CAboutDlg::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
+

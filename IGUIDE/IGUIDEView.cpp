@@ -10,6 +10,7 @@
 #include "MainFrm.h"
 #include "IGUIDEView.h"
 #include "IGUIDEDoc.h"
+#include "mmsystem.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,6 +42,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEView, CView)
 	ON_COMMAND(ID_FUNDUS_IMPORT, &CIGUIDEView::OnFundusImport)
 	ON_WM_MOUSELEAVE()
 	ON_WM_RBUTTONUP()
+	ON_MESSAGE(INITIATE_COUNTDOWN, &CIGUIDEView::OnInitiateCountdown)
+	ON_MESSAGE(RESET_COUNTDOWN, &CIGUIDEView::OnResetCountdown)
 END_MESSAGE_MAP()
 
 // CIGUIDEView construction/destruction
@@ -53,6 +56,7 @@ CIGUIDEView::CIGUIDEView()
 	m_pWhiteBrush = new CD2DSolidColorBrush(NULL, ColorF(ColorF::LightGray));
 	m_bMouseTracking = false;
 	m_lButtonIsDown = false;
+	onHold = false;
 	wheelNotch = { 1, 1 };
 
 }
@@ -615,8 +619,14 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		// commit the currently selected patch
 		case VK_SPACE:
-		
+
+			if (onHold) {
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+				break;
+			}
+
 			pDoc->m_pGrid->commitPatch();			
+
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
 			
 			break;
@@ -700,7 +710,6 @@ void CIGUIDEView::OnSize(UINT nType, int cx, int cy)
 
 }
 
-
 void CIGUIDEView::OnFundusImport()
 {
 	// TODO: Add your command handler code here
@@ -711,3 +720,15 @@ void CIGUIDEView::OnFundusImport()
 
 }
 
+afx_msg LRESULT CIGUIDEView::OnInitiateCountdown(WPARAM wParam, LPARAM lParam)
+{
+	onHold = true;
+	return 0;
+}
+
+
+afx_msg LRESULT CIGUIDEView::OnResetCountdown(WPARAM wParam, LPARAM lParam)
+{
+	onHold = false;
+	return 0;
+}

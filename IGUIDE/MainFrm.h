@@ -32,6 +32,9 @@ public:
 	Connection		active;
 	Connection		pending;
 
+	void			StartCountDown();
+	int				countDown;
+
 protected:  // control bar embedded members
 	
 	CMFCStatusBar   m_wndStatusBar;
@@ -68,4 +71,7 @@ protected:
 	afx_msg LRESULT OnPatchSelect(WPARAM wParam /*index*/, LPARAM lParam /*region*/);
 	afx_msg LRESULT OnClearRegionpane(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUpdateSelection(WPARAM wParam, LPARAM lParam);
+
+public:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

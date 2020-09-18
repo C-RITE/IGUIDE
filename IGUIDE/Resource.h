@@ -18,6 +18,7 @@
 #define IDI_ICON2                       333
 #define IDI_CROSSHAIR                   333
 #define IDD_PATCHINFO                   349
+#define IDR_WAVE1                       357
 #define IDC_STATIC_CAL                  1002
 #define IDC_PROPERTIES                  1003
 #define IDC_VERSION                     1004
@@ -43,7 +44,6 @@
 #define IDC_SYSTEM_EDIT                 1027
 #define IDC_WAVELENGTH_STATIC           1028
 #define IDC_WAVELENGTH_EDIT             1029
-#define IDC_FILENAME_EDIT3              1030
 #define IDC_SUBJECT_EDIT                1030
 #define IDC_SUBJECT_STATIC              1031
 #define ID_FUNDUS_IMPORT                32772
@@ -69,7 +69,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        351
+#define _APS_NEXT_RESOURCE_VALUE        360
 #define _APS_NEXT_COMMAND_VALUE         32807
 #define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           314

@@ -17,6 +17,8 @@ public:
 	Connection getPendingConnections();
 	Connection getActiveConnections();
 
+	int onHold;						// true if ICANDI is still recording
+
 private:
 	CString mode;
 	CString AOSACA_IP;

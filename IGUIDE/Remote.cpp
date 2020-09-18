@@ -16,6 +16,8 @@ Remote::Remote()
 	ICANDI_inpBuf = NULL;
 	ICANDI_netEvt = NULL;
 	OnCreate(NULL);
+	onHold = false;
+
 }
 
 Remote::~Remote()
@@ -232,6 +234,7 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 	// TODO: Add your specialized code here and/or call the base class
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
 	int ret;
 
 	if (pMsg->message == WM_KEYDOWN && m_pSock_ICANDI) {
@@ -245,6 +248,8 @@ BOOL Remote::PreTranslateMessage(MSG* pMsg)
 			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
 			break;
 		case VK_SPACE:
+			if (onHold)
+				break;
 			msg = 'V';
 			ret = m_pSock_ICANDI->Send(&msg, 1, 0);
 			break;
