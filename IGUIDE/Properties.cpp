@@ -225,8 +225,8 @@ void Properties::InitPropList()
 	m_wndPropList.AddProperty(Patch);
 	Patch->AddSubItem(Color);
 	Patch->AddSubItem(Overlap);
-	m_wndPropList.AddProperty(ICANDI);
-	ICANDI->AddSubItem(OutputFolder);
+	m_wndPropList.AddProperty(DataLog);
+	DataLog->AddSubItem(OutputFolder);
 	m_wndPropList.AddProperty(TargetView);
 	TargetView->AddSubItem(FixationTargetScreen);
 	TargetView->AddSubItem(FlipVertical);

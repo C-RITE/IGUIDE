@@ -452,7 +452,7 @@ afx_msg LRESULT CMainFrame::OnResetIcandiIp(WPARAM wParam, LPARAM lParam)
 	else
 		RemoteControl.setIPAdress(ICANDI);
 
-return 0;
+	return 0;
 
 }
 

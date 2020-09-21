@@ -561,20 +561,20 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 	if (pMsg->message == WM_KEYDOWN) {
 
-		// move cursor patch in any direction
-		if (pDoc->m_pGrid->cursorPatch) {
+		// move cursor patch in any direction except when recording
+		if (pDoc->m_pGrid->cursorPatch && !onHold) {
 
 			switch (pMsg->wParam) {
 
 			case VK_UP:
-		
+
 				pDoc->m_pGrid->cursorPatch->coordsDEG.y -= .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.y -= .1f * PPD;
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 
 			case VK_DOWN:
-				
+
 				pDoc->m_pGrid->cursorPatch->coordsDEG.y += .1f;
 				pDoc->m_pGrid->cursorPatch->coordsPX.y += .1f * PPD;
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE3), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
@@ -623,57 +623,67 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			}
 			break;
 
-		// commit the currently selected patch
+			// commit the currently selected patch
 
 		case VK_SPACE:
 
-			if (onHold) {
-				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
-				break;
-			}
+			if (!onHold) {
 
-			else
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE2), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
-			pDoc->m_pGrid->commitPatch();			
+				pDoc->m_pGrid->commitPatch();
 
-			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
+				AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
+
+			}
 
 			break;
 
-		// next patch in region
+			// next patch in region
 
 		case 'N':
 
-			pDoc->m_pGrid->showCursor = false;
-			pDoc->m_pGrid->browse(NEXT);
+			if (!onHold) {
+				pDoc->m_pGrid->showCursor = false;
+				pDoc->m_pGrid->browse(NEXT);
 
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
-			m_pDlgTarget->Invalidate();
+				m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+				m_pDlgTarget->Invalidate();
 
-			PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
-			break;
+				break;
+			}
 
-		// previous patch in region
+			// previous patch in region
 
 		case 'B':
 
-			pDoc->m_pGrid->showCursor = false;
-			pDoc->m_pGrid->browse(PREV);
-			
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
-			m_pDlgTarget->Invalidate();
+			if (!onHold) {
+				pDoc->m_pGrid->showCursor = false;
+				pDoc->m_pGrid->browse(PREV);
 
-			PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
-			
-			break;
+				m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+				m_pDlgTarget->Invalidate();
+
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+
+				break;
+
+			}
+
 
 		}
 
-	}
+		if (onHold) {
+			PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
+		
+		}
 
-	this->Invalidate();
+		else
+			this->Invalidate();
+
+	}
 	
 	return CView::PreTranslateMessage(pMsg);
 
