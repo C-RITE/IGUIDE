@@ -218,7 +218,7 @@ CStringW CIGUIDEApp::GetFileVersion() {
 
 	CStringW str;
 
-	str.Format(L"%d.%d.%d.%d\n", dwLeftMost, dwSecondLeft,
+	str.Format(L"%d.%d.%d.%d", dwLeftMost, dwSecondLeft,
 		dwSecondRight, dwRightMost);
 
 	return str;
@@ -246,4 +246,3 @@ BOOL CAboutDlg::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
-

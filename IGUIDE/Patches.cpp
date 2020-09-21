@@ -48,6 +48,8 @@ void Patches::commit(Patches::iterator patch) {
 		patch->wavelength = L"N/A";
 		patch->vidfilename = L"N/A";
 		patch->vidlength = L"N/A";
+		patch->vidnumber = L"N/A";
+		patch->vidlength = L"N/A";
 		patch->index = index++;
 
 	}

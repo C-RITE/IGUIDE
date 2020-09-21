@@ -63,24 +63,27 @@ public:
 	HANDLE					m_hWaitDigest;						// digestion events
 
 	// received remote information
+	
+	// AOSACA
 	CString					defocus;							// AOSACA defocus
-
-	CString					vidfolder;							// ICANDI output directory
-	CString					vidfilename;						// ICANDI videofile being recorded
-	CString					videoinfo;							// ICANDI netmsg for videorecording
-	CString					timestamp;							// ICANDI timestamp as in videoinfo
-	CString					wavelength;							// ICANDI wavelength as in videoinfo
-	CString					prefix;								// ICANDI prefix as in videoinfo
-	CString					system;								// ICANDI system ID as in videoinfo
-	CString					vidnumber;							// ICANDI current videonumber (VXXX)
-	CString					vidlength;							// ICANDI video length
+	
+	// ICANDI
+	CString					vidfolder;							// output directory
+	CString					vidfilename;						// videofile being recorded
+	CString					videoinfo;							// netmsg for videorecording
+	CString					timestamp;							// timestamp as in videoinfo
+	CString					wavelength;							// wavelength as in videoinfo
+	CString					prefix;								// prefix as in videoinfo
+	CString					system;								// system ID as in videoinfo
+	CString					vidnumber;							// current videonumber (VXXX)
+	CString					vidlength;							// video length
 
 private:
 
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
-	bool					fileTouched;						// indicate first save of .csv file
-	CString					csvFileName;						// filename for .csv output file
+	bool					fileTouched;						// indicate first save log file
+	CString					logFileName;						// filename for data log file
 	void					createNetComThread();				// for processing incoming remote messages
 	
 	HANDLE					m_hNetComThread;					// handle for incoming message thread
@@ -115,7 +118,7 @@ public:
 	void					OnFundusImport();
 	void					LoadFundus();
 
-	bool					SaveToFile();						// save .csv file
+	bool					SaveLogFile();						// save log-data in .csv file
 
 	// Overrides
 private:

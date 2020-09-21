@@ -65,6 +65,7 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 	CMainFrame* parent = (CMainFrame*)pParam;
 	Connection active = parent->RemoteControl.getActiveConnections();
 
+	// delay writing information to logfile and send to region pane until netcom message receive event
 	if (active == ICANDI || active == BOTH) {
 
 		WaitForSingleObject(parent->m_pDoc->m_hSaveEvent, INFINITE);
@@ -72,12 +73,13 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 		parent->StartCountDown();
 	}
 
+	// go ahead without further delay
 	else {
 		parent->m_pDoc->m_pCurrentOutputDir = &parent->m_pDoc->m_OutputDir;
 	}
 
 	parent->sendToRegionPane();
-	parent->m_pDoc->SaveToFile();
+	parent->m_pDoc->SaveLogFile();
 
 	return 0;
 

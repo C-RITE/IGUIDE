@@ -68,10 +68,12 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_InputController = L"Mouse";
 	m_Overlap = 50;
 
+	system = L"N/A";
+	prefix = L"N/A";
 	overlaySettings = 0;
 	defocus = L"0";
 	fileTouched = false;
-	csvFileName = L"IGUIDE.csv";
+	logFileName = L"IGUIDE.csv";
 
 	overlayVisible = true;
 	calibrationComplete = false;
@@ -79,7 +81,6 @@ CIGUIDEDoc::CIGUIDEDoc()
 	createNetComThread();
 		
 }
-
 
 CIGUIDEDoc::~CIGUIDEDoc()
 {
@@ -336,36 +337,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 			PatchArchive(ar, &m_pGrid->patchlist);
 		}
 
-		// store patchjobs
-
-		//if (header[3]) {
-		//	ar << m_pGrid->patchjobs.size();
-
-		//	// store list of patchjobs
-
-		//	for each (Patches p in m_pGrid->patchjobs)
-		//		PatchArchive(ar, &p);
-
-		//	// store current patchjob position
-
-		//	ar << std::distance(m_pGrid->patchjobs.begin(), m_pGrid->currentPatchJob);
-		//	
-		//	// store current patch position inside patchjob
-
-		//	ar << m_pGrid->getCurrentPatchJobPos();
-		//	
-		//	// store region pane insertion offset values for each job
-
-		//	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
-		//	auto i = pMain->m_RegionPane.getPatchOffset();
-		//	int value;
-		//	
-		//	ar << i.size();
-
-		//	for each (value in i)
-		//		ar << value;
-
-		//}
+		// store additional
 
 	}
 
@@ -457,12 +429,30 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 	
 }
 
-bool CIGUIDEDoc::SaveToFile() {
+bool CIGUIDEDoc::SaveLogFile() {
 
 	wstringstream sstream;
 
+	if (!fileTouched) {
+		CMainFrame::GetSysTime(timestamp);
+		if (prefix != L"N/A")
+			logFileName = prefix + "_" + timestamp + "_" + logFileName;
+		else
+			logFileName = timestamp + "_" + logFileName;
+	}
+		
+	CString version = CIGUIDEApp::GetFileVersion();
 	CString strNumber, strDegX, strDegY, strDefocus;
-	CString header("subject(prefix),timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video#,region,x-pos(deg),y-pos(deg),z-pos(defocus),wavelength(nm)");
+	CString header1[6];
+
+	header1[0].Format(L"**********************************************************\n");
+	header1[1].Format(L"**********\t\tIGUIDE v%s Data Log\t**********\n", version);
+	header1[2].Format(L"**********************************************************\n\n");
+	header1[3].Format(L"System Type: %s\n", system);
+	header1[4].Format(L"Subject: %s\n", prefix);
+	header1[5].Format(L"Origin: %s%s\n\n", *m_pCurrentOutputDir, logFileName);
+
+	CString header2(L"timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video(INDEX),region,x-pos(DEG),y-pos(DEG),z-pos(DEFOCUS),wavelength(NM)\n");
 
 	for (auto it = m_pGrid->patchlist.begin(); it != m_pGrid->patchlist.end(); ++it)
 	{
@@ -474,8 +464,7 @@ bool CIGUIDEDoc::SaveToFile() {
 			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
 
 			sstream
-				<< prefix.GetString()
-				<< ","
+
 				<< it->timestamp.GetString()
 				<< ","
 				<< "v" << strNumber.GetString()
@@ -494,25 +483,12 @@ bool CIGUIDEDoc::SaveToFile() {
 		}
 
 	}
-	//CFileDialog FileDlg(FALSE, L"csv", L"targets", OFN_OVERWRITEPROMPT, NULL, NULL, NULL, 1);
-
-	/*if (FileDlg.DoModal() == IDOK) {
-		CString pathName = FileDlg.GetPathName();
-		CStdioFile outputFile(pathName, CFile::modeWrite | CFile::modeCreate | CFile::typeUnicode);
-		outputFile.WriteString((sstream.str().c_str()));
-		outputFile.Close();
-		return TRUE;
-	}*/
-
-
-	if (!fileTouched) {
-		CMainFrame::GetSysTime(timestamp);
-		csvFileName = prefix + "_" + timestamp + "_" + csvFileName;
-	}
 
 	try {
-		CStdioFile outputFile(*m_pCurrentOutputDir + csvFileName, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
-		outputFile.WriteString(header + "\n" + sstream.str().c_str());
+		CStdioFile outputFile(*m_pCurrentOutputDir + logFileName, CFile::typeText | CFile::modeWrite | CFile::modeCreate);
+		outputFile.WriteString(header1[0] + header1[1] + header1[2] + header1[3] + header1[4] + header1[5]);
+		outputFile.WriteString(header2);
+		outputFile.WriteString(sstream.str().c_str());
 		outputFile.Close();
 		fileTouched = true;
 	}
@@ -529,7 +505,7 @@ bool CIGUIDEDoc::SaveToFile() {
 		AfxMessageBox(strFormatted);
 
 		fileTouched = FALSE;
-		csvFileName = "IGUIDE.csv";
+		logFileName = "IGUIDE.csv";
 
 		pe->Delete();
 
