@@ -218,6 +218,22 @@ BOOL RegionPane::PreTranslateMessage(MSG* pMsg)
 			pView->PostMessage(WM_KEYDOWN, VK_SPACE, NULL);
 			break;
 
+		case VK_UP:
+			pView->PostMessage(WM_KEYDOWN, VK_UP, NULL);
+			break;
+
+		case VK_DOWN:
+			pView->PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
+			break;
+
+		case VK_LEFT:
+			pView->PostMessage(WM_KEYDOWN, VK_LEFT, NULL);
+			break;
+
+		case VK_RIGHT:
+			pView->PostMessage(WM_KEYDOWN, VK_RIGHT, NULL);
+			break;
+
 		case 'N':
 			pView->PostMessage(WM_KEYDOWN, 'N', NULL);
 			PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
@@ -228,6 +244,8 @@ BOOL RegionPane::PreTranslateMessage(MSG* pMsg)
 			PostMessage(WM_KEYDOWN, VK_UP, NULL);
 			break;
 		}
+
+		return true;
 
 	}
 
