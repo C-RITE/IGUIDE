@@ -80,9 +80,9 @@ public:
 	CMFCPropertyGridProperty*		FixationTargetSize;
 	CMFCPropertyGridProperty*		FixationTargetScreen;
 	CMFCPropertyGridColorProperty*	Color;
-	CMFCPropertyGridProperty*		ICANDI;
+	CMFCPropertyGridProperty*		DataLog;
 	CMFCPropertyGridProperty*		TargetView;
-	CMFCPropertyGridFileProperty*	VideoFolder;
+	CMFCPropertyGridFileProperty*	OutputFolder;
 	MyCMFCPropertyGridFileProperty*	FixationFile;
 	CMFCPropertyGridProperty*		SubjectCalibration;
 	CMFCPropertyGridProperty*		InputController;

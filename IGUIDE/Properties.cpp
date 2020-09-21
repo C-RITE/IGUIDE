@@ -115,7 +115,7 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		pDoc->m_FixationTarget = ftfile;
 	}
 
-	if (propName == L"Video Folder") {
+	if (propName == L"Output Folder") {
 		CString folder = vt.bstrVal;
 		folder.Format(folder + "\\");
 		pDoc->m_OutputDir = folder;
@@ -195,7 +195,7 @@ void Properties::InitPropList()
 	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.MarkModifiedProperties();
 
-	VideoFolder = new CMFCPropertyGridFileProperty(L"Video Folder", L"", NULL, _T("Choose output directory of captured video files"));
+	OutputFolder = new CMFCPropertyGridFileProperty(L"Output Folder", L"", NULL, _T("Choose output directory of data log (.csv-file)"));
 	FixationFile = new MyCMFCPropertyGridFileProperty(L"File", true, NULL, NULL, NULL, NULL, _T("Choose your custom fixation target from file"));
 	Patch = new CMFCPropertyGridProperty(L"Patch");
 	RasterSize = new CMFCPropertyGridProperty(L"Raster Size", RasterSizeValue, _T("Set the raster size in degrees"), NULL, NULL, NULL);
@@ -203,7 +203,7 @@ void Properties::InitPropList()
 	COLORREF col = D2D1::ColorF::DarkGreen;
 	Color = new CMFCPropertyGridColorProperty(_T("Color"), col, NULL, _T("Choose the desired raster color"));
 	Color->EnableOtherButton(L"Other..");
-	ICANDI = new CMFCPropertyGridProperty(L"ICANDI");
+	DataLog = new CMFCPropertyGridProperty(L"Data Log");
 	TargetView = new CMFCPropertyGridProperty(L"Target View");
 	PhysParam = new CMFCPropertyGridProperty(L"Physical Parameters");
 	FixationTargetScreen = new CMFCPropertyGridProperty(L"Screen", ScreenValue, _T("Pick the display for fixation target presentation. If empty, setup and connect another monitor to your computer."), NULL, NULL, NULL);
@@ -226,7 +226,7 @@ void Properties::InitPropList()
 	Patch->AddSubItem(Color);
 	Patch->AddSubItem(Overlap);
 	m_wndPropList.AddProperty(ICANDI);
-	ICANDI->AddSubItem(VideoFolder);
+	ICANDI->AddSubItem(OutputFolder);
 	m_wndPropList.AddProperty(TargetView);
 	TargetView->AddSubItem(FixationTargetScreen);
 	TargetView->AddSubItem(FlipVertical);
@@ -258,7 +258,7 @@ void Properties::fillProperties() {
 	_variant_t rem(pDoc->m_RemoteCtrl);
 	_variant_t inpcon(pDoc->m_InputController);
 	
-	VideoFolder->SetValue(od);
+	OutputFolder->SetValue(od);
 	RasterSize->SetValue(rs);
 	Overlap->SetValue(ol);
 	FixationTargetSize->SetValue(fts);
