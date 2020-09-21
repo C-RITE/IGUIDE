@@ -41,7 +41,9 @@ public:
 	int					getProgress(int region, int &size);
 	void				setOverlap(float overlap, float rsDeg);	
 	void				makePatchMatrix(SIZE wheel, CPoint pos, CD2DPointF posDeg, float rsDeg);
+	
 	Patches::iterator	add(Patch p);
+	Patches::iterator	implant(Patches::iterator it, Patch p);
 
 private:
 	

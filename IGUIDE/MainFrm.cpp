@@ -112,13 +112,11 @@ void CMainFrame::StartCountDown() {
 
 void CMainFrame::sendToRegionPane() {
 
-	if (m_pDoc->m_pGrid->currentPatch->region == 0) {
+	if (m_pDoc->m_pGrid->currentPatch->region == 0) 
 		SendMessage(PATCH_TO_REGIONPANE,(WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
-	}
-
-	else {
+	
+	else
 		SendMessage(UPDATE_SELECTION,(WPARAM)&*m_pDoc->m_pGrid->currentPatch, NULL);
-	}
 
 }
 

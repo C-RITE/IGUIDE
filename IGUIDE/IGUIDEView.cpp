@@ -631,13 +631,14 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 				break;
 			}
+
 			else
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE2), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
 			pDoc->m_pGrid->commitPatch();			
 
 			AfxGetMainWnd()->SendMessage(SAVE_IGUIDE_CSV, NULL, NULL);
-			
+
 			break;
 
 		// next patch in region
@@ -667,6 +668,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 			PlaySound(MAKEINTRESOURCE(IDR_WAVE4), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 			
 			break;
+
 		}
 
 	}

@@ -77,6 +77,9 @@ void Grid::commitPatch() {
 
 	if (cursorPatch->region == 0)
 		currentPatch = patchlist.add(*cursorPatch);
+	
+	if (currentPatch->locked) 
+		currentPatch = patchlist.implant(currentPatch, *cursorPatch);
 
 	patchlist.commit(currentPatch);
 
@@ -286,7 +289,10 @@ void Grid::browse(Element e) {
 
 		if (std::next(currentPatch) != patchlist.end())
 			if (currentPatch->region == std::next(currentPatch)->region)
-					currentPatch++;
+				currentPatch++;
+		while (currentPatch->locked && std::next(currentPatch) != patchlist.end())
+			currentPatch++;
+
 		break;
 
 	case PREV:
@@ -294,6 +300,9 @@ void Grid::browse(Element e) {
 		if (currentPatch != patchlist.begin()) 
 			if (currentPatch->region == std::prev(currentPatch)->region)
 					currentPatch--;
+		while (currentPatch->locked && currentPatch != patchlist.begin())
+			currentPatch--;
+
 		break;
 
 	}

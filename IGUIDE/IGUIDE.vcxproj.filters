@@ -175,6 +175,12 @@
     <None Include="res\wave2.bin">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\wave3.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\wave4.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IGUIDE.rc">

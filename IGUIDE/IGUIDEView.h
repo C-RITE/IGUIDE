@@ -70,7 +70,7 @@ private:
 																
 	bool					m_bMouseTracking;					// track mouse movements outside operator view
 	int						countdown;							// countdown video length
-	bool					onHold;								// true as long as ICANDI is recording videos
+	bool					onHold;								// true as long as ICANDI is busy recording videos
 
 // Generated message map functions
 

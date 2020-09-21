@@ -16,6 +16,7 @@ DWORD WINAPI Patches::ThreadWaitDigest(LPVOID lpParameter)
 	WaitForSingleObject(pDoc->m_hWaitDigest, INFINITE);
 	pDoc->m_pGrid->currentPatch->timestamp = pDoc->timestamp;
 	pDoc->m_pGrid->currentPatch->vidnumber = pDoc->vidnumber;
+	pDoc->m_pGrid->currentPatch->index = _ttoi(pDoc->vidnumber);
 	pDoc->m_pGrid->currentPatch->wavelength = pDoc->wavelength;
 	pDoc->m_pGrid->currentPatch->vidfilename = pDoc->vidfilename;
 	pDoc->m_pGrid->currentPatch->vidlength = pDoc->vidlength;
@@ -47,10 +48,10 @@ void Patches::commit(Patches::iterator patch) {
 		patch->wavelength = L"N/A";
 		patch->vidfilename = L"N/A";
 		patch->vidlength = L"N/A";
+		patch->index = index++;
 
 	}
 	
-	patch->index = index++;
 	patch->locked = true;
 	patch->defocus = pDoc->getCurrentDefocus();
 
@@ -97,6 +98,13 @@ Patches::iterator Patches::add(Patch p)
  	this->push_back(p);
 
 	return std::prev(this->end());
+
+}
+
+Patches::iterator Patches::implant(Patches::iterator it, Patch p)
+{
+	p.uID = uID++;
+	return this->insert(it, p);
 
 }
 

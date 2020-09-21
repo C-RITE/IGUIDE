@@ -139,7 +139,6 @@ void RegionPane::update(Patch* p) {
 		m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
 		m_wndTree.indexTable.push_back(index{ insert, p->uID });
 		select(p->uID);
-		
 	}
 
 }
