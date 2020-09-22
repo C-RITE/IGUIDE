@@ -81,6 +81,8 @@ void Properties::AdjustLayout()
 
 }
 
+
+
 LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -170,7 +172,6 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 	return S_OK;
 
 }
-
 
 void Properties::OnSize(UINT nType, int cx, int cy)
 {

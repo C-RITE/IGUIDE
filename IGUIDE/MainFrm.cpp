@@ -311,6 +311,8 @@ void CMainFrame::OnUpdateLinkIndicators(CCmdUI *pCmdUI)
 			pCmdUI->Enable();
 			m_wndStatusBar.SetPaneTextColor(pCmdUI->m_nIndex, RGB(255, 255, 255), 1);
 			m_wndStatusBar.SetPaneBackgroundColor(pCmdUI->m_nIndex, RGB(0, 200, 0), 1);
+			m_PropertyPane.OutputFolder->AllowEdit(false);
+			m_PropertyPane.OutputFolder->SetValue(*m_pDoc->m_pCurrentOutputDir);
 			return;
 		}
 

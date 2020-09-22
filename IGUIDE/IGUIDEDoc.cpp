@@ -287,14 +287,18 @@ void CIGUIDEDoc::OnCloseDocument()
 {
 	// TODO: Add your specialized code here and/or call the base class
 	// TODO: Add your message handler code here
-
+	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
+	Connection c = pMain->RemoteControl.getActiveConnections();
+	
+	
 	AfxGetApp()->WriteProfileInt(L"Settings", L"Overlays", (int)(m_pGrid->overlay));
 	if (m_Monitors.m_pSelectedDevice)
 		AfxGetApp()->WriteProfileInt(L"Settings", L"Display", m_Monitors.m_pSelectedDevice->number);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"RasterSize", m_raster.size);
 	AfxGetApp()->WriteProfileInt(L"Settings", L"FixationTargetSize", m_FixationTargetSize);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FixationTarget", m_FixationTarget);
-	AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
+	if (c == NONE || c == AOSACA) 
+		AfxGetApp()->WriteProfileString(L"Settings", L"OutputDir", m_OutputDir);
 	AfxGetApp()->WriteProfileString(L"Settings", L"FundusFolder", m_pFundus->mru_folder);
 	AfxGetApp()->WriteProfileString(L"Settings", L"AOSACA IP", m_AOSACA_IP);
 	AfxGetApp()->WriteProfileString(L"Settings", L"ICANDI IP", m_ICANDI_IP);
