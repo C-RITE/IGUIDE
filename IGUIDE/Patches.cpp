@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Patches::Patches() : index(1), uID(0)
+Patches::Patches() : index(1), uID(0), regCount(0)
 {
 }
 
@@ -106,6 +106,7 @@ Patches::iterator Patches::add(Patch p)
 Patches::iterator Patches::implant(Patches::iterator it, Patch p)
 {
 	p.uID = uID++;
+
 	return this->insert(it, p);
 
 }
@@ -123,6 +124,48 @@ int Patches::getProgress(int region, int &size) {
 	}
 
 	return progress;
+
+}
+
+void Patches::addRegion(Patches &region) {
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
+	
+	regCount++;
+
+	for (auto it = region.begin(); it != region.end(); it++) {
+
+		it->region = regCount;
+		it->index = -1;								// yet unknown at this point, thus -1
+		this->add(*it);
+
+		AfxGetMainWnd()->SendMessage(
+			PATCH_TO_REGIONPANE,
+			(WPARAM)&this->back(),
+			(LPARAM)it->region);
+	}
+
+
+}
+
+void Patches::reset() {
+
+	uID = this->size();
+	
+	int index = 0;
+	int regCount = 1;
+
+	for (auto it = this->begin(); it != this->end(); it++) {
+		if (it->index > index)
+			index = it->index;
+		if (it->region > regCount)
+			regCount++;
+	}
+	
+	this->index = ++index;
+	this->regCount = regCount;
 
 }
 

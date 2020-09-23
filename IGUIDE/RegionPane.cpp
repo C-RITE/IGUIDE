@@ -126,8 +126,9 @@ void RegionPane::update(Patch* p) {
 	patchname.Format(L"P%d: %.1f, %.1f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
 	
 	// if the element wasn't yet comitted, update info and paint it green
+	m_wndTree.select(p->uID);
 
-	if (m_wndTree.GetItemColor(m_wndTree.selected) == RGB(255, 0, 0)) {
+	if (p->locked) {
 		m_wndTree.SetItemText(m_wndTree.selected, patchname);
 		m_wndTree.SetItemColor(m_wndTree.selected, RGB(0, 200, 0));
 	}
@@ -236,12 +237,10 @@ BOOL RegionPane::PreTranslateMessage(MSG* pMsg)
 
 		case 'N':
 			pView->PostMessage(WM_KEYDOWN, 'N', NULL);
-			PostMessage(WM_KEYDOWN, VK_DOWN, NULL);
 			break;
 
 		case 'B':
 			pView->PostMessage(WM_KEYDOWN, 'B', NULL);
-			PostMessage(WM_KEYDOWN, VK_UP, NULL);
 			break;
 		}
 

@@ -13,8 +13,8 @@ Grid::Grid() : currentPatch(patchlist.end()) {
 
 	isPanning = false;
 	regionSize = { 0 , 0 };
-	regionCount = 1;
 	cursorPatch = NULL;
+	currentPatch._Ptr = NULL;
 
 }
 
@@ -35,15 +35,13 @@ void Grid::selectPatch(int uID) {
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++)
 		if (it->uID == uID)
 			currentPatch = it;
-	
-	updateCursorPatch();
 
 }
 
 void Grid::updateCursorPatch() {
 
 	delete cursorPatch;
-		cursorPatch = new Patch(*currentPatch);
+	cursorPatch = new Patch(*currentPatch);
 
 }
 
@@ -54,8 +52,8 @@ void Grid::addPatch(CPoint pos) {
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	
 	CD2DPointF posDeg(PixelToDegree(pos));
-	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	D2D1_COLOR_F color = pDoc->m_raster.color;
+	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 	int rsize = pDoc->m_raster.size;
 
 	cursorPatch = new Patch();
@@ -178,6 +176,7 @@ void Grid::DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float z
 		sizeDpi.height / 9);						// font size
 
 	vidText.Format(L"%d", region.size());
+
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		vidText,									// text to be drawn
 		textFormat,									// text format
@@ -192,28 +191,15 @@ void Grid::DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float z
 
 void Grid::addRegion() {
 
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-
-	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
-
-	for (auto it = region.begin(); it != region.end(); it++) {
-
-		it->region = regionCount;
-		it->index = -1;								// yet unknown at this point, thus -1
-		patchlist.add(*it);
-
-		AfxGetMainWnd()->SendMessage(
-			PATCH_TO_REGIONPANE,
-			(WPARAM)&patchlist.back(),
-			(LPARAM)it->region);
-	}
+	patchlist.addRegion(region);
 
 	delete cursorPatch;
-	setCurrentPatch(regionCount, 1);
+
+	setCurrentPatch(patchlist.getRegion(), 1);
 	cursorPatch = new Patch(*currentPatch);
-	regionCount++;
 
 }
+
 
 void Grid::makeRegionRects(int reg) {
 

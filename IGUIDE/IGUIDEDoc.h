@@ -129,7 +129,7 @@ private:
 	bool header[10];
 	void ImageArchive(CImage* pImage, CArchive& ar);
 	void FundusCalibArchive(CArchive& ar);
-	void PatchArchive(CArchive& ar, Patches* ps);
+	void PatchArchive(CArchive& ar, Patches* ps, Patches::iterator current);
 
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();

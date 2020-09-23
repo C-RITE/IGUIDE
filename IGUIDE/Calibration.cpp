@@ -54,12 +54,13 @@ afx_msg LRESULT D2DStatic::OnDraw2d(WPARAM wParam, LPARAM lParam) {
 		CD2DSizeF size = fundus->GetSize();
 		CRect rect;
 		GetWindowRect(&rect);
-		//float r = (float)rect.Height() / (float)rect.Width();
 
 		pRenderTarget->DrawBitmap(fundus, CD2DRectF(0, 0, (float)rect.Width(), (float)rect.Height()));
 
 		switch (m_clicked){
+
 			case 2:
+
 				pRenderTarget->DrawLine(
 					k.p,
 					CD2DPointF(m_curMousePos.x, m_curMousePos.y),
@@ -67,6 +68,7 @@ afx_msg LRESULT D2DStatic::OnDraw2d(WPARAM wParam, LPARAM lParam) {
 					1,
 					NULL);
 				break;
+
 			case 3:
 				pRenderTarget->DrawLine(
 					k.p,

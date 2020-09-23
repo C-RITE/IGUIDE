@@ -45,12 +45,18 @@ public:
 	Patches::iterator	add(Patch p);
 	Patches::iterator	implant(Patches::iterator it, Patch p);
 
+	void				addRegion(Patches &region);
+	int					getRegion(){ return regCount; };
+
+	void				reset();
+
 private:
 	
 	CD2DSizeF			overlap;
 	CString				timestamp;
 	int					index;
 	int					uID;
+	int					regCount;
 
 	static	DWORD WINAPI	ThreadWaitDigest(LPVOID pParam);	// if connected to ICANDI, wait for digested response
 

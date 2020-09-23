@@ -338,7 +338,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 		// store patchlist
 		if (header[2]) {
-			PatchArchive(ar, &m_pGrid->patchlist);
+			PatchArchive(ar, &m_pGrid->patchlist, m_pGrid->currentPatch);
 		}
 
 		// store additional
@@ -367,65 +367,9 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 		if (header[2]) {
 			m_pGrid->patchlist.clear();
-			PatchArchive(ar, &m_pGrid->patchlist);
+			PatchArchive(ar, &m_pGrid->patchlist, m_pGrid->currentPatch);
 		}
-
-		//// restore patchjobs
-
-		//if (header[3]) {
-		//	m_pGrid->patchjobs.clear();
-		//	
-		//	size_t jobsize;
-		//	ar >> jobsize;
-
-		//	// restore list of patchjobs
-
-		//	for (int i = 0; i < jobsize; i++) {
-		//		Patches p;
-		//		PatchArchive(ar, &p);
-		//		m_pGrid->patchjobs.push_back(p);
-		//	}
-
-		//	// restore current patchjob position
-
-		//	int pos;
-		//	ar >> pos;
-		//	auto currentPatchJob = m_pGrid->patchjobs.begin() + pos;
-
-		//	m_pGrid->currentPatchJob = currentPatchJob;
-
-		//	// restore current patch 
-
-		//	int i = 0;
-		//	ar >> pos;
-		//	Patches::iterator patchIndex = m_pGrid->patchjobs.begin()->begin();
-		//	
-		//	while (i < pos) {
-		//		patchIndex++;
-		//		i++;
-		//	}
-
-		//	m_pGrid->currentPatch = patchIndex;
-
-		//	// restore region pane insertion offset values for each job
-
-		//	CMainFrame* pMain = (CMainFrame*)AfxGetMainWnd();
-
-		//	i = 0;
-		//	ar >> jobsize;
-		//	vector<int>offset;
-		//	int element;
-
-		//	while (i < jobsize) {
-		//		ar >> element;
-		//		offset.push_back(element);
-		//		i++;
-		//	}
-
-		//	pMain->m_RegionPane.setPatchOffset(offset);
-
-		//}
-
+		
 		restoreRegionPane();
 		UpdateAllViews(NULL);
 
@@ -526,56 +470,30 @@ void CIGUIDEDoc::restoreRegionPane() {
 	AfxGetMainWnd()->SendMessage(CLEAR_REGIONPANE, NULL, NULL);
 	
 	auto itp = m_pGrid->patchlist.begin();
+	int regCount = 0;
 
-	/*for (auto it = m_pGrid->patchjobs.begin(); it != m_pGrid->patchjobs.end(); it++)
-		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
+		while (itp != m_pGrid->patchlist.end()) {
 
-			AfxGetMainWnd()->SendMessage(
-				PATCH_TO_REGIONPANE,
-				(WPARAM) & *it2,
-				(LPARAM)it2->region);
-
-			if ((itp->region == it2->region) && (it2->index > 0)) {
-
-				AfxGetMainWnd()->SendMessage(
-					UPDATE_REGIONPANE,
-					(WPARAM)std::distance(it->begin(), it2),
-					(LPARAM)NULL);
-
-				AfxGetMainWnd()->SendMessage(
-					PATCH_TO_REGIONPANE,
-					(WPARAM) & *it2,
-					(LPARAM)it2->region);
-
+			AfxGetMainWnd()->SendMessage(PATCH_TO_REGIONPANE, (WPARAM)&*itp, NULL);
+			if (itp->locked)
+				AfxGetMainWnd()->SendMessage(UPDATE_SELECTION, (WPARAM)&*itp, NULL);
+			if (regCount < itp->region) {
+				regCount++;
+				m_pGrid->makeRegionRects(regCount);
 			}
 
-			if (itp != std::prev(m_pGrid->patchlist.end()))
-				itp++;
-
-		}
-
-	itp = m_pGrid->patchlist.begin();*/
-
-	if (itp != m_pGrid->patchlist.end()) {
-
-		while (itp != std::prev(m_pGrid->patchlist.end())) {
-
-			if (itp->region == 0 && itp->index > 0)
-				AfxGetMainWnd()->SendMessage(
-					PATCH_TO_REGIONPANE,
-					(WPARAM) & *itp,
-					(LPARAM)0);
 			itp++;
 
 		}
 
-	}
+	m_pGrid->patchlist.reset();
 
 }
 
 void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
 
 	if (ar.IsStoring()) {
+
 		if (m_pFundus->fundus)
 			header[0] = true;
 		else
@@ -591,13 +509,9 @@ void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
 		else
 			header[2] = false;
 
-		//if (m_pGrid->patchjobs.size() > 0)
-		//	header[3] = true;
-		//else
-		//	header[3] = false;
-
 		for (int i = 0; i < sizeof(header); i++)
 			ar << header[i];
+
 	}
 
 	else{
@@ -609,26 +523,30 @@ void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
 
 }
 
-void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
+void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps, Patches::iterator current){
 
 	int listSize;
 
-	if (ar.IsStoring())
-	{
+	if (ar.IsStoring())	{
+
 		listSize = ps->size();
 		ar << listSize;
 
 		for (auto it = ps->begin(); it != ps->end(); it++) {
-			ar << it->color;
+
 			ar << it->coordsDEG;
 			ar << it->coordsPX;
-			ar << it->defocus;
-			ar << it->index;
-			ar << it->locked;
-			ar << it->rastersize;
-			ar << it->region;
+			ar << it->color;
 			ar << it->timestamp;
 			ar << it->vidfilename;
+			ar << it->rastersize;
+			ar << it->locked;
+			ar << it->uID;
+			ar << it->index;
+			ar << it->region;
+			ar << it->wavelength;
+			ar << it->vidnumber;
+			ar << it->defocus;
 
 		}
 
@@ -641,21 +559,25 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps){
 		ar >> listSize;
 		
 		for (int i = 0; i < listSize; i++) {
-			ar >> p.color;
+
 			ar >> p.coordsDEG;
 			ar >> p.coordsPX;
-			ar >> p.defocus;
-			ar >> p.index;
-			ar >> p.locked;
-			ar >> p.rastersize;
-			ar >> p.region;
+			ar >> p.color;
 			ar >> p.timestamp;
 			ar >> p.vidfilename;
+			ar >> p.rastersize;
+			ar >> p.locked;
+			ar >> p.uID;
+			ar >> p.index;
+			ar >> p.region;
+			ar >> p.wavelength;
+			ar >> p.vidnumber;
+			ar >> p.defocus;
 
 			ps->push_back(p);
 
 		}
-
+		
 	}
 
 }
@@ -1019,7 +941,6 @@ CD2DPointF CIGUIDEDoc::compute2DPolygonCentroid(const CD2DPointF* vertices, int 
 
 }
 
-
 double CIGUIDEDoc::ComputeDisplacementAngle(Edge k) {
 
 	double a, b;
@@ -1079,8 +1000,6 @@ double CIGUIDEDoc::ComputeOrientationAngle(Edge k) {
 	return alpha;
 
 }
-
-
 
 void CIGUIDEDoc::ComputeDisplacementAngles() {
 
@@ -1380,7 +1299,6 @@ void CIGUIDEDoc::OnOverlayLocation()
 
 }
 
-
 void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
@@ -1389,7 +1307,6 @@ void CIGUIDEDoc::OnUpdateOverlayQuickhelp(CCmdUI *pCmdUI)
 	UpdateAllViews(NULL);
 
 }
-
 
 void CIGUIDEDoc::OnOverlayTargetzone()
 {
@@ -1402,7 +1319,6 @@ void CIGUIDEDoc::OnOverlayTargetzone()
 	UpdateAllViews(NULL);
 
 }
-
 
 void CIGUIDEDoc::OnUpdateOverlayTargetzone(CCmdUI* pCmdUI)
 {

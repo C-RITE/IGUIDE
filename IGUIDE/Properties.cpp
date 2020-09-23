@@ -69,12 +69,11 @@ int Properties::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void Properties::AdjustLayout()
 {
-	if (GetSafeHwnd() == NULL)
-	{
+	if (GetSafeHwnd() == NULL) 
 		return;
-	}
 
 	CRect rectClient, rectCombo;
+
 	GetClientRect(rectClient);
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), rectClient.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
 	m_wndPropList.SetFont(&m_fntPropList);
@@ -121,7 +120,6 @@ LRESULT Properties::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
 		CString folder = vt.bstrVal;
 		folder.Format(folder + "\\");
 		pDoc->m_OutputDir = folder;
-
 	}
 
 	if (propName == L"Screen") {
@@ -179,7 +177,6 @@ void Properties::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 
 }
-
 
 void Properties::InitPropList()
 {

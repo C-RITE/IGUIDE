@@ -97,6 +97,15 @@ void RegionTreeCtrl::OnTvnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 
 }
 
+void RegionTreeCtrl::select(UINT uID) {
+
+	for (auto it = indexTable.begin(); it != indexTable.end(); it++) {
+		if (uID == it->uID)
+			selected = it->h;
+	}
+
+}
+
 void RegionTreeCtrl::OnNMCstDrw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 

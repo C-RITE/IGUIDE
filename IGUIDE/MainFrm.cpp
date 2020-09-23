@@ -144,6 +144,7 @@ LRESULT CMainFrame::OnDocumentReady(WPARAM w, LPARAM l) {
 
 CIGUIDEDoc* CMainFrame::GetDoc()
 {
+
 	// Get Doc, made for other classes that need access to attributes
 	// NOTE: EXCEPTIONS thrown here are most likely caused by initialization failures in OnNewDocument()
 
@@ -487,8 +488,8 @@ afx_msg LRESULT CMainFrame::OnPatchSelect(WPARAM wParam, LPARAM lParam)
 {
 	int uID = (int)wParam;
 
-	m_pDoc->m_pGrid->updateCursorPatch();
 	m_pDoc->m_pGrid->selectPatch(uID);
+	m_pDoc->m_pGrid->updateCursorPatch();
 	m_RegionPane.select(uID);
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();

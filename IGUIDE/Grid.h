@@ -39,8 +39,6 @@ private:
 	CD2DLayer*				m_pLayer1;
 	D2D1_LAYER_PARAMETERS	lpHi;
 	D2D1_LAYER_PARAMETERS	lpLo;
-
-	int regionCount;
 	
 public:
 

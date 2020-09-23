@@ -101,12 +101,10 @@ BOOL CIGUIDEView::OnPreparePrinting(CPrintInfo* pInfo)
 	return DoPreparePrinting(pInfo);
 }
 
-
 void CIGUIDEView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add extra initialization before printing
 }
-
 
 void CIGUIDEView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
@@ -140,8 +138,9 @@ void CIGUIDEView::OnRButtonUp(UINT nFlags, CPoint point)
 
 	CView::OnRButtonUp(nFlags, point);
 
-}
+	this->Invalidate();
 
+}
 
 void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 {
@@ -160,7 +159,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (pDoc->CheckFOV())
 	{	
 		// create patchjob
-		if (wheelNotch.cx != 1 && wheelNotch.cy != 1) {
+		if (wheelNotch.cx + wheelNotch.cy > 2) {
 
 			pDoc->m_pGrid->makeRegion(point, wheelNotch);
 			pDoc->m_pGrid->addRegion();
@@ -240,7 +239,6 @@ void CIGUIDEView::OnMouseLeave()
 	CView::OnMouseLeave();
 
 }
-
 
 BOOL CIGUIDEView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
@@ -551,7 +549,6 @@ void CIGUIDEView::controlWheel(int notch, int dim, CPoint point) {
 
 }
 
-
 BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
@@ -627,7 +624,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case VK_SPACE:
 
-			if (!onHold) {
+			if (!onHold && pDoc->m_pGrid->cursorPatch) {
 
 				PlaySound(MAKEINTRESOURCE(IDR_WAVE2), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
@@ -643,7 +640,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case 'N':
 
-			if (!onHold) {
+			if (!onHold && pDoc->m_pGrid->currentPatch._Ptr != NULL) {
 				pDoc->m_pGrid->showCursor = false;
 				pDoc->m_pGrid->browse(NEXT);
 
@@ -659,7 +656,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case 'B':
 
-			if (!onHold) {
+			if (!onHold && pDoc->m_pGrid->currentPatch._Ptr != NULL) {
 				pDoc->m_pGrid->showCursor = false;
 				pDoc->m_pGrid->browse(PREV);
 
@@ -671,17 +668,15 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 				break;
 
 			}
-
-
+			
 		}
 
-		if (onHold) {
-			PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
-		
-		}
+		// play error sound if onHold or empty currentPatch
+		if (pMsg->wParam == (VK_SPACE || 66 || 78))
+			if (onHold || pDoc->m_pGrid->currentPatch._Ptr == NULL)
+				PlaySound(MAKEINTRESOURCE(IDR_WAVE1), AfxGetInstanceHandle(), SND_RESOURCE | SND_ASYNC);
 
-		else
-			this->Invalidate();
+	this->Invalidate();
 
 	}
 	

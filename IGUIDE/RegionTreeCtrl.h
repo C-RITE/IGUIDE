@@ -28,6 +28,8 @@ public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 
+	void select(UINT uID);
+
 protected:
 
 	struct Color_Font
