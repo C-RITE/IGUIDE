@@ -51,7 +51,6 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TARGETZONE, &CIGUIDEDoc::OnUpdateOverlayTargetzone)
 END_MESSAGE_MAP()
 
-
 // CIGUIDEDoc construction/destruction
 
 CIGUIDEDoc::CIGUIDEDoc()
@@ -166,6 +165,24 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 
 	return 0L;
 
+}
+
+
+DWORD WINAPI CIGUIDEDoc::ThreadSorting(LPVOID pParam) {
+
+	CIGUIDEDoc *parent = (CIGUIDEDoc*)pParam;
+	
+	parent->sortedPatchList = parent->m_pGrid->patchlist;
+	std::sort(parent->sortedPatchList.begin(), parent->sortedPatchList.end(), parent->sortingFunction);
+
+	return 0;
+
+}
+
+bool CIGUIDEDoc::sortingFunction(Patch i, Patch j) {
+	 
+	return (i.timestamp < j.timestamp);
+	
 }
 
 BOOL CIGUIDEDoc::OnNewDocument()
@@ -379,6 +396,8 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 
 bool CIGUIDEDoc::SaveLogFile() {
 
+	::CreateThread(NULL, 0, ThreadSorting, this, 0, &m_thdID);
+
 	wstringstream sstream;
 
 	if (!fileTouched) {
@@ -402,7 +421,7 @@ bool CIGUIDEDoc::SaveLogFile() {
 
 	CString header2(L"timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video(INDEX),region,x-pos(DEG),y-pos(DEG),z-pos(DEFOCUS),wavelength(NM)\n");
 
-	for (auto it = m_pGrid->patchlist.begin(); it != m_pGrid->patchlist.end(); ++it)
+	for (auto it = sortedPatchList.begin(); it != sortedPatchList.end(); ++it)
 	{
 
 		if (it->locked) {

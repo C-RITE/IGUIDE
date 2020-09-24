@@ -146,8 +146,7 @@ void Patches::addRegion(Patches &region) {
 			(WPARAM)&this->back(),
 			(LPARAM)it->region);
 	}
-
-
+	
 }
 
 void Patches::reset() {

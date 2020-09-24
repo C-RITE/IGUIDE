@@ -28,9 +28,18 @@ enum Connection {
 
 class CIGUIDEDoc : public CDocument
 {
+public:
+
 protected: // create from serialization only
 	CIGUIDEDoc();
+	virtual ~CIGUIDEDoc();
+	
 	DECLARE_DYNCREATE(CIGUIDEDoc)
+
+#ifdef _DEBUG
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
 
 	// Attributes
 
@@ -89,11 +98,15 @@ private:
 	HANDLE					m_hNetComThread;					// handle for incoming message thread
 	DWORD					m_thdID;							// corresponding thread ID
 
-	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);
+	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);	// process netcom messages
+	static  DWORD WINAPI	ThreadSorting(LPVOID pParam);		// sort patchlist before save
 	
 	void					restoreRegionPane();				// repopulate regionpane after load .igd session file
+	static bool				sortingFunction(Patch i, Patch j);	// sorts by timestamp in ascending order
+	Patches					sortedPatchList;
 
 	// Operations
+
 public:
 
 	bool					CheckFOV();
@@ -113,6 +126,7 @@ public:
 	void					setDefocus(CString def) 
 								{ defocus = def; };
 
+	void					ToggleOverlay();					// flip between visible and invisible overlay state
 	CString					getTraceInfo();						// for debug purposes only
 	vector<CString>			getQuickHelp();						// show remote control hotkeys
 	void					OnFundusImport();
@@ -136,15 +150,6 @@ private:
 	virtual void OnDrawThumbnail(CDC& dc, LPRECT lprcBounds);
 #endif // SHARED_HANDLERS
 
-	// Implementation
-public:
-	virtual ~CIGUIDEDoc();
-
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
-
 protected:
 	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
@@ -156,7 +161,6 @@ protected:
 
 public:
 
-	void ToggleOverlay();
 	afx_msg void OnOverlayGrid();
 	afx_msg void OnUpdateOverlayGrid(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayPatches();
@@ -175,5 +179,6 @@ public:
 	afx_msg void OnUpdateOverlayLocation(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayTargetzone();
 	afx_msg void OnUpdateOverlayTargetzone(CCmdUI* pCmdUI);
+
 
 };

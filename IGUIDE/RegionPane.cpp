@@ -69,17 +69,15 @@ void RegionPane::addPatch(Patch* p) {
 
     // add upcoming patchjob
 
-    if (p->index == -1) {
+    if (p->index == -1)
         patchname.Format(L"P?: %.1f, %.1f, %ws [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
-    }
-
+    
     // add single patch
     else
-        patchname.Format(L"P%d: %.1f, %.1f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
+        patchname.Format(L"P%d: %.1f, %.1f, %ws %ws", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->vidnumber);
     
     int region = p->region;
-
-	
+		
     // if single patch, insert into root of tree
     TVINSERTSTRUCT tvInsert;
 
