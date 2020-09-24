@@ -35,5 +35,3 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 };
-
-

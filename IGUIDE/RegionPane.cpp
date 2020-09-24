@@ -126,7 +126,7 @@ void RegionPane::update(Patch* p) {
 	// if the element wasn't yet comitted, update info and paint it green
 	m_wndTree.select(p->uID);
 
-	if (p->locked) {
+	if (m_wndTree.GetItemColor(m_wndTree.selected) == RGB(255, 0, 0)) {
 		m_wndTree.SetItemText(m_wndTree.selected, patchname);
 		m_wndTree.SetItemColor(m_wndTree.selected, RGB(0, 200, 0));
 	}

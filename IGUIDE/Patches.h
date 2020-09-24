@@ -18,8 +18,8 @@ struct Patch {
 	CString				vidnumber;
 	CString				defocus;
 
-	bool operator==(Patch right) const {
-		return true;
+	inline bool operator==(Patch right) const {
+		return (right.coordsDEG.x == coordsDEG.x && right.coordsDEG.y == coordsDEG.y);
 	}
 
 };

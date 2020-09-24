@@ -483,7 +483,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		if (!pDoc->m_pGrid->isPanning)
 			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, zoom, mouseDist);
 
-		// draw cursor on mousepointer
+		// draw cursor around mousepointer
 		if (pDoc->m_pGrid->region.size() > 1)
 			pDoc->m_pGrid->DrawRegion(pRenderTarget, mousePos, zoom);
 		else
