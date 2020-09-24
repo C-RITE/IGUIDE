@@ -179,6 +179,5 @@ public:
 	afx_msg void OnUpdateOverlayLocation(CCmdUI *pCmdUI);
 	afx_msg void OnOverlayTargetzone();
 	afx_msg void OnUpdateOverlayTargetzone(CCmdUI* pCmdUI);
-
-
+	
 };

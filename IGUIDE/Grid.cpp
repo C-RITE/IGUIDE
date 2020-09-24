@@ -565,30 +565,25 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
 
 	CD2DRectF rect1;
 	CD2DRectF curPatch;
 	CRect intersect;
 
-	float rsdeg; // raster size in degree visual angle
-	float zoom = pView->getZoomFactor();
+	float rsDeg; // raster size in degree visual angle
 
 	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
 
-		if (it == patchlist.end())
-			break;
-
-		rsdeg = (float)pDoc->m_raster.videodim / it._Ptr->rastersize;
+		rsDeg = (float)pDoc->m_raster.videodim / (float)it._Ptr->rastersize;
 
 		pRenderTarget->PushLayer(lpHi, *m_pLayer1);
 
 		rect1 = {
 
-			(float)(it._Ptr->coordsDEG.x * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->coordsDEG.y * PPD - rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->coordsDEG.x * PPD + rsdeg / 2 * PPD) + CANVAS / 2,
-			(float)(it._Ptr->coordsDEG.y * PPD + rsdeg / 2 * PPD) + CANVAS / 2
+			(float)(it._Ptr->coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.x * PPD + rsDeg / 2 * PPD) + CANVAS / 2,
+			(float)(it._Ptr->coordsDEG.y * PPD + rsDeg / 2 * PPD) + CANVAS / 2
 
 		};
 
@@ -598,49 +593,103 @@ void Grid::DrawPatches(CHwndRenderTarget* pRenderTarget) {
 		pRenderTarget->PopLayer();
 
 	}
+	
+}
 
-	if (patchlist.size() > 0) {
+void Grid::DrawVidIndex(CHwndRenderTarget* pRenderTarget, float zoom, CD2DSizeF mouseDist) {
 
-		// show vid number in real pixelspace
-		CD2DSizeF mouseDist = pView->getMouseDist();
+	// Draw video number into top left corner of locked patch
 
-		if (!isPanning) {
+	if (isPanning)
+		return;
 
-				CD2DPointF pos;
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
 
-				for (auto it = pDoc->m_pGrid->patchlist.begin(); it != pDoc->m_pGrid->patchlist.end(); it++) {
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 9);						// font size
 
-					rsdeg = (double)pDoc->m_raster.videodim / (double)it._Ptr->rastersize; // raster size in degree visual angle
+	CString vidText;
+	
+	float rsDeg; // raster size in degree visual angle
+	
+	for (auto it = patchlist.begin(); it != patchlist.end(); it++) {
+		
+		if (!it->locked) continue;
 
-						if (it._Ptr->locked == true) {
+		rsDeg = (float)pDoc->m_raster.videodim / (float)it->rastersize;
 
-							pos.x = (float)(mouseDist.width + (zoom * it._Ptr->coordsDEG.x * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
-							pos.y = (float)(mouseDist.height + (zoom * it._Ptr->coordsDEG.y * PPD) - (zoom * rsdeg / 2 * PPD) + CANVAS / 2);
+		vidText.Format(L"%d", it->index);
+		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+			vidText,									// text to be drawn
+			textFormat,									// text format
+			sizeTarget);								// size of the layout box
 
-							DrawVidIndex(
-								pRenderTarget,
-								pos,
-								it._Ptr->index);
+		CD2DPointF pos = {	mouseDist.width + zoom * (it->coordsDEG.x * PPD - rsDeg / 2 * PPD) + CANVAS / 2,
+							mouseDist.height + zoom * (it->coordsDEG.y * PPD - rsDeg / 2 * PPD) + CANVAS / 2 };
 
-						}
-
-				}
-
-		}
+		pRenderTarget->DrawTextLayout(
+			pos,
+			&textLayout,
+			m_pWhiteBrush);
 
 	}
 
+
+
 }
 
-void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, float zoom) {
+void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
+
+	// draw coordinates around mouse cursor
+
+	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+	CIGUIDEView* pView = CIGUIDEView::GetView();
+
+	CString xCoords, yCoords;
+	CD2DPointF marginX, marginY;
+
+	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
+	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
+
+	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
+		_T("Consolas"),								// font family name
+		sizeDpi.height / 7);						// font size
+
+	CD2DPointF rnd = calcMargin(marginX, marginY, pos);
+
+	xCoords.Format(L"%.1f", rnd.x);
+	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
+		xCoords,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(loc.right - marginX.x, loc.bottom - marginX.y),
+		&textLayout,
+		m_pWhiteBrush);
+
+	yCoords.Format(L"%.1f", rnd.y);
+	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
+		yCoords,									// text to be drawn
+		textFormat,									// text format
+		sizeTarget);								// size of the layout box
+
+	pRenderTarget->DrawTextLayout(
+		CD2DPointF(loc.left - marginY.x, loc.top - marginY.y),
+		&textLayout2,
+		m_pWhiteBrush);
+
+}
+
+void Grid::DrawPatchCursor(CHwndRenderTarget* pRenderTarget, float zoom, CD2DSizeF mouseDist) {
 
 	if (!cursorPatch)
 		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
-
-	CD2DSizeF mouseDist = pView->getMouseDist();
 	
 	float rsdeg = (float)pDoc->m_raster.videodim / cursorPatch->rastersize;
 
@@ -695,33 +744,6 @@ void Grid::DrawMouseCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, flo
 		DrawCoordinates(pRenderTarget, loc, cursor);
 
 	}
-
-}
-
-void Grid::DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number) {
-	
-	// Draw video number into top left corner of locked patch
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CString vidText;
-
-	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-
-	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-		_T("Consolas"),								// font family name
-		sizeDpi.height / 9);						// font size
-
-	vidText.Format(L"%d", number);
-	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-		vidText,									// text to be drawn
-		textFormat,									// text format
-		sizeTarget);								// size of the layout box
-
-	pRenderTarget->DrawTextLayout(
-		pos,
-		&textLayout,
-		m_pWhiteBrush);
 
 }
 
@@ -943,50 +965,6 @@ void Grid::DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* pFixationTar
 			&brush);
 
 	}
-
-}
-
-void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc) {
-
-	// draw coordinates around mouse cursor
-
-	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
-	CIGUIDEView* pView = CIGUIDEView::GetView();
-
-	currentPos = pos;
-	CString xCoords, yCoords;
-	CD2DPointF marginX, marginY;
-
-	CD2DSizeF sizeTarget = pRenderTarget->GetSize();
-	CD2DSizeF sizeDpi = pRenderTarget->GetDpi();
-
-	CD2DTextFormat textFormat(pRenderTarget,		// pointer to the render target
-		_T("Consolas"),								// font family name
-		sizeDpi.height / 7);						// font size
-
-	CD2DPointF rnd = calcMargin(marginX, marginY, pos);
-
-	xCoords.Format(L"%.1f", rnd.x);
-	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
-		xCoords,									// text to be drawn
-		textFormat,									// text format
-		sizeTarget);								// size of the layout box
-
-	pRenderTarget->DrawTextLayout(
-		CD2DPointF(loc.right - marginX.x, loc.bottom - marginX.y),
-		&textLayout,
-		m_pWhiteBrush);
-
-	yCoords.Format(L"%.1f", rnd.y);
-	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
-		yCoords,									// text to be drawn
-		textFormat,									// text format
-		sizeTarget);								// size of the layout box
-
-	pRenderTarget->DrawTextLayout(
-		CD2DPointF(loc.left - marginY.x, loc.top - marginY.y),
-		&textLayout2,
-		m_pWhiteBrush);
 
 }
 

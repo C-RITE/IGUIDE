@@ -28,7 +28,7 @@ public:
 	}
 
 	CPoint getGridCenter(){
-		return CPoint (mouseDist.x + CANVAS / 2, mouseDist.y + CANVAS / 2);
+		return CPoint (mouseDist.width + CANVAS / 2, mouseDist.height + CANVAS / 2);
 	}
 
 	CPoint getMouseDist() {
@@ -47,13 +47,13 @@ public:
 		return 1 / zoom;
 	}
 
-	virtual				~CIGUIDEView();
-	void				ToggleFixationTarget();
+	virtual					~CIGUIDEView();
+	void					ToggleFixationTarget();
 
-	CD2DSolidColorBrush* m_pWhiteBrush;
+	CD2DSolidColorBrush*	m_pWhiteBrush;
 
-	static CIGUIDEView* GetView();
-	Target*				m_pDlgTarget;							// target dialog
+	static CIGUIDEView*		GetView();
+	Target*					m_pDlgTarget;							// target dialog
 
 
 // Attributes
@@ -65,7 +65,7 @@ private:
 	CPoint					mousePos;							// current mouse location
 	SIZE					wheelNotch;							// current wheel location in x and y axis
 	CPoint					mouseStart;							// starting point
-	CPoint					mouseDist;							// distance travelled
+	CD2DSizeF				mouseDist;							// distance travelled
 	float					zoom;								// zoom factor
 																
 	bool					m_bMouseTracking;					// track mouse movements outside operator view

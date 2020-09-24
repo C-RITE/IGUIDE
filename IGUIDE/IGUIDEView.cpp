@@ -131,7 +131,9 @@ void CIGUIDEView::OnRButtonUp(UINT nFlags, CPoint point)
 	// calculate mouse travel distance
 	CIGUIDEDoc* pDoc = (CIGUIDEDoc*)GetDocument();
 
-	mouseDist += mousePos - mouseStart;
+	mouseDist.width += mousePos.x - mouseStart.x;
+	mouseDist.height += mousePos.y - mouseStart.y;
+
 	pDoc->m_pGrid->showCoords = true;
 	pDoc->m_pGrid->showCursor = true;
 	pDoc->m_pGrid->isPanning = false;
@@ -302,8 +304,8 @@ void CIGUIDEView::ResetTransformationMatrices() {
 	scale = D2D1::Matrix3x2F::Scale(D2D1::Size(zoom, zoom), CD2DPointF(CANVAS / 2, CANVAS / 2));
 	translate = D2D1::Matrix3x2F::Translation(size.width * (1 / zoom), size.height * (1 / zoom));
 	
-	mouseDist.x = size.width;
-	mouseDist.y = size.height;
+	mouseDist.width += size.width;
+	mouseDist.height += size.height;
 
 }
 
@@ -450,7 +452,7 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// clear background
 		pRenderTarget->Clear(ColorF(ColorF::Black));
 
-		// combine transforms
+		// enable transforms for zoom capability
 		pRenderTarget->SetTransform(translate * scale);
 
 		// draw fundus
@@ -471,12 +473,15 @@ LRESULT CIGUIDEView::OnDraw2d(WPARAM wParam, LPARAM lParam)
 		// draw patches
 		pDoc->m_pGrid->DrawPatches(pRenderTarget);
 
-		// disable transforms
+		// disable transforms because we need some zoom-independent objects on screen
 		pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+
+		// draw video index
+		pDoc->m_pGrid->DrawVidIndex(pRenderTarget, zoom, mouseDist);
 
 		// draw patch cursor
 		if (!pDoc->m_pGrid->isPanning)
-			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, zoom);
+			pDoc->m_pGrid->DrawPatchCursor(pRenderTarget, zoom, mouseDist);
 
 		// draw cursor on mousepointer
 		if (pDoc->m_pGrid->region.size() > 1)

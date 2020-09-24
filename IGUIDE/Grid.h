@@ -94,10 +94,10 @@ public:
 	void DrawRegion(CHwndRenderTarget* pRenderTarget, CPoint mousePos, float zoom);			// draw region
 	void DrawQuickHelp(CHwndRenderTarget* pRenderTarget);									// draw quick help
 	void DrawTarget(CHwndRenderTarget* pRenderTarget, CD2DBitmap* fTarget);					// draw target
-	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, float zoom);						// draw patch outline of last click
+	void DrawPatchCursor(CHwndRenderTarget* pRenderTarget, float zoom, CD2DSizeF mouseDist);// draw patch outline of last click
+	void DrawVidIndex(CHwndRenderTarget* pRenderTarget, float zoom, CD2DSizeF mouseDist);	// draw index in patch
 	void DrawMouseCursor(CHwndRenderTarget* pRenderTarget, CD2DPointF loc, float zoom);		// draw patch outline around mouse pointer
 	void DrawTargetZone(CHwndRenderTarget* pRenderTarget);									// show borders of target visibility
 	void DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2DRectF loc);	// show coordinates around mouse cursor
-	void DrawVidIndex(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, int number);
 
 };
