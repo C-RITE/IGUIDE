@@ -387,9 +387,10 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 			2.5f);										// font size
 
 		int reg = std::distance(regRects.begin(), it);
-		int sze = 0;
+		int size = 0;
+		int progress = patchlist.getProgress(++reg, size);
 
-		vidText.Format(L"%d/%d", patchlist.getProgress(reg, sze), sze);
+		vidText.Format(L"%i/%i", progress, size);
 
 		CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 			vidText,									// text to be drawn

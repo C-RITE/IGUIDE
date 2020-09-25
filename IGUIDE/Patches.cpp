@@ -51,7 +51,6 @@ void Patches::commit(Patches::iterator patch) {
 		patch->vidnumber = L"N/A";
 		patch->vidlength = L"N/A";
 		patch->index = index++;
-
 	}
 	
 	patch->locked = true;
