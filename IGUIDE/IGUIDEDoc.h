@@ -69,6 +69,7 @@ public:
 	CString*				m_pInputBuf;						// input buffer for incoming messages
 	HANDLE*					m_hNetMsg;							// handle for netcom message events
 	HANDLE					m_hSaveEvent;						// trigger when all digested
+	
 	HANDLE					m_hWaitDigest;						// digestion events
 
 	// received remote information
@@ -93,8 +94,8 @@ private:
 	bool					overlayVisible;						// visibility status of overlays
 	bool					fileTouched;						// indicate first save log file
 	CString					logFileName;						// filename for data log file
-	void					createNetComThread();				// for processing incoming remote messages
 	
+	void					createNetComThread();				// for processing incoming remote messages
 	HANDLE					m_hNetComThread;					// handle for incoming message thread
 	DWORD					m_thdID;							// corresponding thread ID
 
@@ -103,6 +104,7 @@ private:
 	
 	void					restoreRegionPane();				// repopulate regionpane after load .igd session file
 	static bool				sortingFunction(Patch i, Patch j);	// sorts by timestamp in ascending order
+	
 	Patches					sortedPatchList;
 
 	// Operations
@@ -132,6 +134,7 @@ public:
 	void					OnFundusImport();
 	void					LoadFundus();
 
+	void					sortPatchList();
 	bool					SaveLogFile();						// save log-data in .csv file
 
 	// Overrides

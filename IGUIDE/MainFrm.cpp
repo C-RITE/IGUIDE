@@ -79,6 +79,9 @@ DWORD WINAPI SaveWaitThread(LPVOID pParam) {
 	}
 
 	parent->sendToRegionPane();
+
+	parent->m_pDoc->sortPatchList();
+	
 	parent->m_pDoc->SaveLogFile();
 
 	return 0;

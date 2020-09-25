@@ -73,7 +73,6 @@ CIGUIDEDoc::CIGUIDEDoc()
 	defocus = L"0";
 	fileTouched = false;
 	logFileName = L"IGUIDE.csv";
-
 	overlayVisible = true;
 	calibrationComplete = false;
 
@@ -96,6 +95,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 	CloseHandle(m_hNetMsg[0]);
 	CloseHandle(m_hNetMsg[1]);
 	CloseHandle(m_hNetMsg[2]);
+
 	CloseHandle(m_hSaveEvent);
 
 	delete[] m_hNetMsg;
@@ -107,6 +107,7 @@ CIGUIDEDoc::~CIGUIDEDoc()
 void CIGUIDEDoc::createNetComThread() {
 
 	m_hNetMsg = new HANDLE[3];
+
 	m_hNetMsg[0] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_AOSACA_EVENT");
 	m_hNetMsg[1] = CreateEvent(NULL, FALSE, FALSE, L"IGUIDE_GUI_NETCOMM_ICANDI_EVENT");
 	m_hNetMsg[2] = CreateEvent(NULL, FALSE, FALSE, L"THREAD_EXIT");
@@ -168,15 +169,11 @@ DWORD WINAPI CIGUIDEDoc::ThreadNetMsgProc(LPVOID lpParameter)
 }
 
 
-DWORD WINAPI CIGUIDEDoc::ThreadSorting(LPVOID pParam) {
+void CIGUIDEDoc::sortPatchList() {
 
-	CIGUIDEDoc *parent = (CIGUIDEDoc*)pParam;
-	
-	parent->sortedPatchList = parent->m_pGrid->patchlist;
-	std::sort(parent->sortedPatchList.begin(), parent->sortedPatchList.end(), parent->sortingFunction);
-
-	return 0;
-
+	sortedPatchList = m_pGrid->patchlist;
+	std::sort(sortedPatchList.begin(), sortedPatchList.end(), sortingFunction);
+	   
 }
 
 bool CIGUIDEDoc::sortingFunction(Patch i, Patch j) {
@@ -395,8 +392,6 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 }
 
 bool CIGUIDEDoc::SaveLogFile() {
-
-	::CreateThread(NULL, 0, ThreadSorting, this, 0, &m_thdID);
 
 	wstringstream sstream;
 
