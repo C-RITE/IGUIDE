@@ -182,4 +182,6 @@ public:
 	afx_msg void OnOverlayTargetzone();
 	afx_msg void OnUpdateOverlayTargetzone(CCmdUI* pCmdUI);
 	
+	afx_msg void OnOverlayRegions();
+	afx_msg void OnUpdateOverlayRegions(CCmdUI *pCmdUI);
 };

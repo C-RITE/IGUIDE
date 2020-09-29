@@ -13,7 +13,7 @@ enum Overlay
 	TRACEINFO = 64,
 	FUNDUS = 128,
 	QUICKHELP = 256,
-	RESERVED2 = 512
+	REGIONS = 512
 };
 	
 

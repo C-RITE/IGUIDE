@@ -49,6 +49,8 @@ BEGIN_MESSAGE_MAP(CIGUIDEDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_LOCATION, &CIGUIDEDoc::OnUpdateOverlayLocation)
 	ON_COMMAND(ID_OVERLAY_TARGETZONE, &CIGUIDEDoc::OnOverlayTargetzone)
 	ON_UPDATE_COMMAND_UI(ID_OVERLAY_TARGETZONE, &CIGUIDEDoc::OnUpdateOverlayTargetzone)
+	ON_COMMAND(ID_OVERLAY_REGIONS, &CIGUIDEDoc::OnOverlayRegions)
+	ON_UPDATE_COMMAND_UI(ID_OVERLAY_REGIONS, &CIGUIDEDoc::OnUpdateOverlayRegions)
 END_MESSAGE_MAP()
 
 // CIGUIDEDoc construction/destruction
@@ -242,7 +244,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 
 	m_pGrid->overlay = AfxGetApp()->GetProfileInt(L"Settings", L"Overlays", -1);
 	if (m_pGrid->overlay == -1) {
-		m_pGrid->overlay = 7;
+		m_pGrid->overlay = 519;
 	}
 
 	m_FixationTargetSize = AfxGetApp()->GetProfileInt(L"Settings", L"FixationTargetSize", 100);
@@ -253,6 +255,7 @@ BOOL CIGUIDEDoc::OnNewDocument()
 			m_Monitors.m_pSelectedDevice = it._Ptr;
 		}
 	}
+
 	if (m_Monitors.m_pSelectedDevice == NULL)
 		m_Monitors.selectionDialog();
 
@@ -1338,4 +1341,29 @@ void CIGUIDEDoc::OnUpdateOverlayTargetzone(CCmdUI* pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
 	pCmdUI->SetCheck(m_pGrid->overlay & TARGETZONE);
+
+}
+
+void CIGUIDEDoc::OnOverlayRegions()
+{
+	// TODO: Add your command handler code here
+	if (m_pGrid->overlay & REGIONS) {
+		m_pGrid->overlay = m_pGrid->overlay & (~REGIONS);
+		overlaySettings = overlaySettings & (~REGIONS);
+	}
+
+	else {
+		m_pGrid->overlay = m_pGrid->overlay | REGIONS;
+		overlaySettings = overlaySettings | REGIONS;
+	}
+
+	UpdateAllViews(NULL);
+
+}
+
+
+void CIGUIDEDoc::OnUpdateOverlayRegions(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_pGrid->overlay & REGIONS);
 }

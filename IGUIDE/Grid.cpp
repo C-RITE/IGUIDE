@@ -350,7 +350,11 @@ void Grid::CreateD2DResources(CHwndRenderTarget* pRenderTarget) {
 
 void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 
+	if (!(overlay & REGIONS))
+		return;
+
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
+
 	float rsDeg = (float)pDoc->m_raster.videodim / pDoc->m_raster.size;
 
 	CD2DBrush* pBrush = NULL;
@@ -376,7 +380,7 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 
 		CD2DRectF rect2;
 		CD2DPointF p{ it->right, it->bottom };
-		rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
+		rect2 = { p.x - 10, p.y, p.x, p.y + 3 };
 		pRenderTarget->DrawRectangle(
 			rect2,
 			m_pWhiteBrush,
@@ -605,7 +609,7 @@ void Grid::DrawVidIndex(CHwndRenderTarget* pRenderTarget, float zoom, CD2DSizeF 
 
 	// Draw video number into top left corner of locked patch
 
-	if (isPanning)
+	if (!(overlay & PATCHES) | isPanning)
 		return;
 
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
@@ -653,6 +657,8 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 	CIGUIDEDoc* pDoc = CMainFrame::GetDoc();
 	CIGUIDEView* pView = CIGUIDEView::GetView();
 
+	currentPos = pos;
+
 	CString xCoords, yCoords;
 	CD2DPointF marginX, marginY;
 
@@ -666,6 +672,7 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 	CD2DPointF rnd = calcMargin(marginX, marginY, pos);
 
 	xCoords.Format(L"%.1f", rnd.x);
+
 	CD2DTextLayout textLayout(pRenderTarget,		// pointer to the render target 
 		xCoords,									// text to be drawn
 		textFormat,									// text format
@@ -677,6 +684,7 @@ void Grid::DrawCoordinates(CHwndRenderTarget* pRenderTarget, CD2DPointF pos, CD2
 		m_pWhiteBrush);
 
 	yCoords.Format(L"%.1f", rnd.y);
+
 	CD2DTextLayout textLayout2(pRenderTarget,		// pointer to the render target 
 		yCoords,									// text to be drawn
 		textFormat,									// text format

@@ -65,6 +65,7 @@
 #define ID_OVERLAY_TARGETZONE           32798
 #define ID_VIEW_PROPERTIES              32800
 #define ID_VIEW_REGIONS                 32801
+#define ID_OVERLAY_REGIONS              32807
 #define IDS_PROPERTIES_WND              57346
 #define IDS_REGIONS_WND                 57347
 
@@ -73,7 +74,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        366
-#define _APS_NEXT_COMMAND_VALUE         32807
+#define _APS_NEXT_COMMAND_VALUE         32808
 #define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           314
 #endif
