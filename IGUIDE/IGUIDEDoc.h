@@ -100,8 +100,7 @@ private:
 	DWORD					m_thdID;							// corresponding thread ID
 
 	static	DWORD WINAPI	ThreadNetMsgProc(LPVOID pParam);	// process netcom messages
-	static  DWORD WINAPI	ThreadSorting(LPVOID pParam);		// sort patchlist before save
-	
+		
 	void					restoreRegionPane();				// repopulate regionpane after load .igd session file
 	static bool				sortingFunction(Patch i, Patch j);	// sorts by timestamp in ascending order
 	

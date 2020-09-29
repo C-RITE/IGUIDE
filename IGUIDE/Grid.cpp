@@ -357,8 +357,12 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 	pBrush = m_pWhiteBrush;
 
 	for (auto it = regRects.begin(); it != regRects.end(); it++) {
-		if (it == std::prev(regRects.end()))
-			pBrush = m_pDarkGreenBrush;
+
+		if (currentPatch._Ptr)
+			if (currentPatch->region -1 == std::distance(regRects.begin(), it))
+				pBrush = m_pMagentaBrush;
+			else
+				pBrush = m_pWhiteBrush;
 		
 		pRenderTarget->DrawRectangle(
 				*it,
@@ -375,7 +379,7 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 		rect2 = { p.x - 7, p.y, p.x, p.y + 3 };
 		pRenderTarget->DrawRectangle(
 			rect2,
-			pBrush,
+			m_pWhiteBrush,
 			.2f);
 
 		CString vidText;
