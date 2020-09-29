@@ -138,14 +138,16 @@ public:
 
 	// Overrides
 private:
+
 	virtual BOOL OnNewDocument();
 	virtual void OnCloseDocument();
 	virtual void Serialize(CArchive& ar);
+
 	void SerializeHeader(CArchive& ar);
 	bool header[10];
 	void ImageArchive(CImage* pImage, CArchive& ar);
 	void FundusCalibArchive(CArchive& ar);
-	void PatchArchive(CArchive& ar, Patches* ps, Patches::iterator current);
+	void PatchArchive(CArchive& ar, Patches* ps, Patches::iterator &current);
 
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();

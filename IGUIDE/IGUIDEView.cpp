@@ -297,7 +297,7 @@ void CIGUIDEView::ResetTransformationMatrices() {
 	CRect clientWindow;
 	GetClientRect(&clientWindow);
 
-	zoom = 2;
+	zoom = 3;
 
 	CD2DSizeF size(D2D1::SizeF((clientWindow.Width() / 2) - CANVAS / 2, (clientWindow.Height() / 2) - CANVAS / 2));
 
@@ -645,7 +645,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case 'N':
 
-			if (!onHold && pDoc->m_pGrid->currentPatch._Ptr != NULL) {
+			if (!onHold && pDoc->m_pGrid->currentPatch != pDoc->m_pGrid->patchlist.end()) {
 				pDoc->m_pGrid->showCursor = false;
 				pDoc->m_pGrid->browse(NEXT);
 
@@ -661,7 +661,7 @@ BOOL CIGUIDEView::PreTranslateMessage(MSG* pMsg)
 
 		case 'B':
 
-			if (!onHold && pDoc->m_pGrid->currentPatch._Ptr != NULL) {
+			if (!onHold && pDoc->m_pGrid->currentPatch != pDoc->m_pGrid->patchlist.end()) {
 				pDoc->m_pGrid->showCursor = false;
 				pDoc->m_pGrid->browse(PREV);
 

@@ -540,7 +540,7 @@ void CIGUIDEDoc::SerializeHeader(CArchive& ar) {
 
 }
 
-void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps, Patches::iterator current){
+void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps, Patches::iterator &current){
 
 	int listSize;
 
@@ -595,6 +595,8 @@ void CIGUIDEDoc::PatchArchive(CArchive& ar, Patches* ps, Patches::iterator curre
 
 		}
 		
+		current = ps->end();
+
 	}
 
 }

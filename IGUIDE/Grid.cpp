@@ -14,7 +14,6 @@ Grid::Grid() : currentPatch(patchlist.end()) {
 	isPanning = false;
 	regionSize = { 0 , 0 };
 	cursorPatch = NULL;
-	currentPatch._Ptr = NULL;
 
 }
 
@@ -362,7 +361,7 @@ void Grid::DrawRegions(CHwndRenderTarget* pRenderTarget) {
 
 	for (auto it = regRects.begin(); it != regRects.end(); it++) {
 
-		if (currentPatch._Ptr)
+		if (currentPatch != patchlist.end())
 			if (currentPatch->region -1 == std::distance(regRects.begin(), it))
 				pBrush = m_pMagentaBrush;
 			else
