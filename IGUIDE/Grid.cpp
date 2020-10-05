@@ -75,7 +75,7 @@ void Grid::commitPatch() {
 	if (cursorPatch->region == 0)
 		currentPatch = patchlist.add(*cursorPatch);
 	
-	if (currentPatch->locked) 
+	if (currentPatch->locked)
 		currentPatch = patchlist.implant(currentPatch, *cursorPatch);
 
 	patchlist.commit(currentPatch);
