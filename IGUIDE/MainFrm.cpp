@@ -206,8 +206,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
+
 	// enable Visual Studio 2005 style docking window auto-hide behavior
-	EnableAutoHidePanes(CBRS_ALIGN_LEFT);
+
+	EnableDocking(CBRS_ALIGN_LEFT | CBRS_ALIGN_RIGHT);
 
 	// create docking windows
 	if (!CreateDockingWindows())
@@ -245,7 +247,7 @@ BOOL CMainFrame::CreateDockingWindows()
 	// Create properties window
 	bNameValid = strDockablePane.LoadString(IDS_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_PropertyPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_PROPERTIES_WND, WS_CHILD | CBRS_LEFT | CBRS_FLOAT_MULTI))
+	if (!m_PropertyPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_PROPERTIES_WND, WS_CHILD| WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CBRS_LEFT | CBRS_FLOAT_MULTI ))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
@@ -254,7 +256,7 @@ BOOL CMainFrame::CreateDockingWindows()
 	bNameValid = strDockablePane.LoadString(IDS_REGIONS_WND);
 	ASSERT(bNameValid);
 
-	if (!m_RegionPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_REGIONS_WND, WS_CHILD | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	if (!m_RegionPane.Create(strDockablePane, this, CRect(0, 0, 250, 250), TRUE, ID_VIEW_REGIONS_WND, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CBRS_RIGHT | CBRS_FLOAT_MULTI ))
 	{
 		TRACE0("Failed to create Properties window\n");
 		return FALSE; // failed to create
@@ -277,8 +279,10 @@ void CMainFrame::OnViewProperties()
 		m_PropertyPane.ShowPane(FALSE, FALSE, TRUE);
 		SetFocus();
 	}
+
 	else
 		m_PropertyPane.ShowPane(TRUE, FALSE, TRUE);
+
 }
 
 void CMainFrame::OnViewRegions() {
@@ -287,8 +291,10 @@ void CMainFrame::OnViewRegions() {
 		m_RegionPane.ShowPane(FALSE, FALSE, TRUE);
 		SetFocus();
 	}
+
 	else
 		m_RegionPane.ShowPane(TRUE, FALSE, TRUE);
+
 }
 
 void CMainFrame::OnViewStatusBar()
