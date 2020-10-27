@@ -404,17 +404,17 @@ bool CIGUIDEDoc::SaveLogFile() {
 	}
 		
 	CString version = CIGUIDEApp::GetFileVersion();
-	CString strNumber, strDegX, strDegY, strDefocus;
+	CString strNumber, strDegX, strDegY, strRaster;
 	CString header1[6];
 
 	header1[0].Format(L"**********************************************************\n");
-	header1[1].Format(L"**********\t\tIGUIDE v%s Data Log\t**********\n", version);
+	header1[1].Format(L"**********\t\tIGUIDE v%s Data Log**********\n", version);
 	header1[2].Format(L"**********************************************************\n\n");
 	header1[3].Format(L"System Type: %s\n", system);
 	header1[4].Format(L"Subject: %s\n", prefix);
 	header1[5].Format(L"Origin: %s%s\n\n", *m_pCurrentOutputDir, logFileName);
 
-	CString header2(L"timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video(INDEX),region,x-pos(DEG),y-pos(DEG),z-pos(DEFOCUS),wavelength(NM)\n");
+	CString header2(L"timestamp(YEAR_MONTH_DAY_HRS_MIN_SEC),video(INDEX),region,x-pos(DEG),y-pos(DEG),z-pos(DEFOCUS),rastersize,wavelength(NM)\n");
 
 	for (auto it = sortedPatchList.begin(); it != sortedPatchList.end(); ++it)
 	{
@@ -424,6 +424,7 @@ bool CIGUIDEDoc::SaveLogFile() {
 			strNumber.Format(_T("%.3d"), it->index);
 			strDegX.Format(_T("%.2f"), it->coordsDEG.x);
 			strDegY.Format(_T("%.2f"), it->coordsDEG.y);
+			strRaster.Format(_T("%d"), (int)it->rastersize);
 
 			sstream
 
@@ -438,6 +439,8 @@ bool CIGUIDEDoc::SaveLogFile() {
 				<< strDegY.GetString()
 				<< ","
 				<< it->defocus.GetString()
+				<< ","
+				<< strRaster.GetString()
 				<< ","
 				<< it->wavelength.GetString()
 				<< std::endl;
