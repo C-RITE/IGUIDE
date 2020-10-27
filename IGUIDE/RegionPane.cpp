@@ -121,7 +121,7 @@ void RegionPane::update(Patch* p) {
 	
 	CString patchname;
 		
-	patchname.Format(L"P%d: %.1f, %.1f, %ws [v%.3d]", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->index);
+	patchname.Format(L"P%d: %.1f, %.1f, %ws %ws", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->vidnumber);
 	
 	// if the element wasn't yet comitted, update info and paint it green
 	m_wndTree.select(p->uID);

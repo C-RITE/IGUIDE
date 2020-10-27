@@ -58,6 +58,7 @@ public:
 	afx_msg void OnViewStatusBar();
 	afx_msg void OnUpdateLinkIndicators(CCmdUI *pCmdUI);
 	afx_msg void OnParentNotify(UINT message, LPARAM lParam);
+
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
