@@ -411,7 +411,7 @@ bool CIGUIDEDoc::SaveLogFile() {
 	CString header1[6];
 
 	header1[0].Format(L"**********************************************************\n");
-	header1[1].Format(L"**********\t\tIGUIDE v%s Data Log**********\n", version);
+	header1[1].Format(L"**********\tIGUIDE v%s Data Log        **********\n", version);
 	header1[2].Format(L"**********************************************************\n\n");
 	header1[3].Format(L"System Type: %s\n", system);
 	header1[4].Format(L"Subject: %s\n", prefix);
