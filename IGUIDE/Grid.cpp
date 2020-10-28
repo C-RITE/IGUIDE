@@ -517,7 +517,7 @@ void Grid::DrawTargetZone(CHwndRenderTarget* pRenderTarget) {
 
 		r = { a.x, a.y, b.x, b.y };
 
-		pRenderTarget->DrawRectangle(r, m_pWhiteBrush, .1f);
+		pRenderTarget->DrawRectangle(r, m_pWhiteBrush, .5f);
 
 	}
 

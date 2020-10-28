@@ -69,6 +69,7 @@ CIGUIDEDoc::CIGUIDEDoc()
 	m_InputController = L"Mouse";
 	m_Overlap = 50;
 
+	askOnce = true;
 	system = L"N/A";
 	prefix = L"N/A";
 	overlaySettings = 0;
@@ -843,7 +844,7 @@ void CIGUIDEDoc::digest(NetMsg msg) {
 bool CIGUIDEDoc::CheckFOV()
 {
 
-	if (m_raster.corner.size() < 4) {
+	if (m_raster.corner.size() < 4 && askOnce) {
 
 		int answer = AfxGetMainWnd()->MessageBox(L"No subject calibration data.\nCalibrate now?", L"Attention", MB_ICONHAND | MB_YESNO);
 
@@ -856,7 +857,11 @@ bool CIGUIDEDoc::CheckFOV()
 			}
 		}
 
+		if (answer == IDNO)
+			askOnce = false;
+
 		ShowCursor(TRUE);
+
 		return FALSE;
 
 	}
@@ -1179,6 +1184,7 @@ void CIGUIDEDoc::OnOverlayGrid()
 		m_pGrid->overlay = m_pGrid->overlay | GRID;
 
 	UpdateAllViews(NULL);
+
 }
 
 
@@ -1197,6 +1203,7 @@ void CIGUIDEDoc::OnOverlayPatches()
 		m_pGrid->overlay = m_pGrid->overlay | PATCHES;
 
 	UpdateAllViews(NULL);
+
 }
 
 void CIGUIDEDoc::OnUpdateOverlayPatches(CCmdUI *pCmdUI)
@@ -1215,6 +1222,7 @@ void CIGUIDEDoc::OnOverlayOpticdisc()
 		m_pGrid->overlay = m_pGrid->overlay | OPTICDISC;
 
 	UpdateAllViews(NULL);
+
 }
 
 

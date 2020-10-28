@@ -93,6 +93,7 @@ private:
 	DWORD					overlaySettings;					// used as buffer for toggle options
 	bool					overlayVisible;						// visibility status of overlays
 	bool					fileTouched;						// indicate first save log file
+	bool					askOnce;							// show user prompt for calibration on left clicking again or not
 	CString					logFileName;						// filename for data log file
 	
 	void					createNetComThread();				// for processing incoming remote messages

@@ -29,7 +29,7 @@ static BOOL CALLBACK MonitorEnum(HMONITOR hMon, HDC hdc, LPRECT lprcMonitor, LPA
 	pThis->screen.number = pThis->devIndex + 1;
 	pThis->m_Devices.push_back(pThis->screen);
 	pThis->devIndex++;
-
+	
 	return TRUE;
 
 }

@@ -158,8 +158,7 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	pDoc->m_pGrid->showCursor = false;
 	
-	if (pDoc->CheckFOV())
-	{	
+	
 		// create patchjob
 		if (wheelNotch.cx + wheelNotch.cy > 2) {
 
@@ -167,7 +166,8 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 			pDoc->m_pGrid->addRegion();
 			pDoc->m_pGrid->makeRegionRects(pDoc->m_pGrid->patchlist.back().region);
 
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
+			if (pDoc->CheckFOV())
+				m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->currentPatch);
 			
 		}
 
@@ -175,11 +175,12 @@ void CIGUIDEView::OnLButtonUp(UINT nFlags, CPoint point)
 		else {
 
 			pDoc->m_pGrid->addPatch(point);
-			m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->cursorPatch);
+			if (pDoc->CheckFOV())
+				m_pDlgTarget->Pinpoint(*pDoc->m_pGrid->cursorPatch);
 
 		}
 
-	}
+
 
 	m_pDlgTarget->RedrawWindow();
 	RedrawWindow();
