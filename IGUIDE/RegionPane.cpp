@@ -68,12 +68,11 @@ void RegionPane::addPatch(Patch* p) {
 	HTREEITEM insert;
 
     // add upcoming patchjob
-
-    if (p->index == -1)
+   if (p->index == -1)
         patchname.Format(L"P?: %.1f, %.1f, %ws [v?]", p->coordsDEG.x, p->coordsDEG.y, p->defocus);
     
-    // add single patch
-    else
+   // add single patch
+   else
         patchname.Format(L"P%d: %.1f, %.1f, %ws %ws", p->index, p->coordsDEG.x, p->coordsDEG.y, p->defocus, p->vidnumber);
     
     int region = p->region;
@@ -134,6 +133,9 @@ void RegionPane::update(Patch* p) {
 	// if the element was already comitted (i.e. green), append
 
 	else {
+		// exception: if region is 0, leave without a trace
+		if (p->region == 0)	return;
+
 		HTREEITEM insert = m_wndTree.InsertItem(patchname, m_wndTree.GetParentItem(m_wndTree.selected), m_wndTree.selected);
 		m_wndTree.SetItemColor(insert, RGB(0, 200, 0));
 		m_wndTree.indexTable.push_back(index{ insert, p->uID });

@@ -354,6 +354,7 @@ void CIGUIDEDoc::Serialize(CArchive& ar)
 		}
 
 		// store patchlist
+
 		if (header[2]) {
 			PatchArchive(ar, &m_pGrid->patchlist, m_pGrid->currentPatch);
 		}
