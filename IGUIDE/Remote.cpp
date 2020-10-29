@@ -59,9 +59,9 @@ void Remote::connect()
 
 	// by default, connect to what is selected in properties
 	
-	if (mode == L"AOSACA" | mode == L"FULL")
+	if (mode == L"AOSACA" | mode == L"BOTH")
 		Connect2AOSACA();
-	if (mode == L"ICANDI" | mode == L"FULL")
+	if (mode == L"ICANDI" | mode == L"BOTH")
 		Connect2ICANDI();
 
 }
